@@ -51,8 +51,8 @@ public:
     void hide();
     auto is_visible() const -> bool;
 
-    virtual auto geometry(pass const& pass) -> geometry_data = 0;
-    virtual auto aabb() const -> rect_f                      = 0;
+    virtual auto geometry(isize pass) -> geometry_data = 0;
+    virtual auto aabb() const -> rect_f                = 0;
 
     virtual auto intersect(ray const& ray) const -> std::vector<ray::result> = 0;
 
@@ -83,7 +83,7 @@ public:
     prop<rect_f>  Bounds;
     prop<point_f> TextureScroll;
 
-    auto geometry(pass const& pass) -> geometry_data override;
+    auto geometry(isize pass) -> geometry_data override;
     auto aabb() const -> rect_f override;
 
     auto intersect(ray const& ray) const -> std::vector<ray::result> override;
@@ -99,8 +99,8 @@ private:
     void update_geometry();
     void update_aabb();
 
-    std::unordered_map<pass const*, quad> _quad {};
-    rect_f                                _aabb {rect_f::Zero};
+    std::unordered_map<isize, quad> _quads {};
+    rect_f                          _aabb {rect_f::Zero};
 };
 
 ////////////////////////////////////////////////////////////
@@ -113,7 +113,7 @@ public:
     prop<f32>     Radius;
     prop<i32>     Segments {90};
 
-    auto geometry(pass const& pass) -> geometry_data override;
+    auto geometry(isize pass) -> geometry_data override;
     auto aabb() const -> rect_f override;
 
     auto intersect(ray const& ray) const -> std::vector<ray::result> override;
@@ -127,8 +127,7 @@ private:
     void create();
     void update_geometry();
 
-    std::unordered_map<pass const*, std::vector<u32>>    _inds;
-    std::unordered_map<pass const*, std::vector<vertex>> _verts;
+    geometry_store _store;
 };
 
 ////////////////////////////////////////////////////////////
@@ -139,7 +138,7 @@ public:
 
     prop<std::vector<polygon>> Polygons;
 
-    auto geometry(pass const& pass) -> geometry_data override;
+    auto geometry(isize pass) -> geometry_data override;
     auto aabb() const -> rect_f override;
 
     auto intersect(ray const& ray) const -> std::vector<ray::result> override;
@@ -158,8 +157,7 @@ private:
     void update_geometry();
     void update_aabb();
 
-    std::unordered_map<pass const*, std::vector<u32>>    _inds;
-    std::unordered_map<pass const*, std::vector<vertex>> _verts;
+    geometry_store _store;
 
     rect_f  _boundingBox {rect_f::Zero};
     point_f _centroid {point_f::Zero};

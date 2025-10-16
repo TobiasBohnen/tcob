@@ -7,6 +7,7 @@
 
 #include <span>
 #include <utility>
+#include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
@@ -14,6 +15,47 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/Transform.hpp"
+
+namespace tcob::gfx {
+
+void geometry_store::clear()
+{
+    _inds.clear();
+    _verts.clear();
+}
+
+[[nodiscard]] auto geometry_store::empty() const -> bool
+{
+    return _inds.empty() && _verts.empty();
+}
+
+auto geometry_store::get_indices(isize id) const -> std::span<u32 const>
+{
+    if (auto it {_inds.find(id)}; it != _inds.end()) {
+        return it->second;
+    }
+    return {};
+}
+
+auto geometry_store::get_vertices(isize id) const -> std::span<vertex const>
+{
+    if (auto it {_verts.find(id)}; it != _verts.end()) {
+        return it->second;
+    }
+    return {};
+}
+
+void geometry_store::set_indices(isize id, std::vector<u32> const& values)
+{
+    _inds[id] = values;
+}
+
+void geometry_store::set_vertices(isize id, std::vector<vertex> const& values)
+{
+    _verts[id] = values;
+}
+
+}
 
 namespace tcob::gfx::geometry {
 

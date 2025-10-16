@@ -8,6 +8,8 @@
 
 #include <array>
 #include <span>
+#include <unordered_map>
+#include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
@@ -30,11 +32,37 @@ public:
 using triangle = std::array<vertex, 3>;
 using quad     = std::array<vertex, 4>;
 
+////////////////////////////////////////////////////////////
+
 struct geometry_data {
     std::span<vertex const> Vertices;
     std::span<u32 const>    Indices;
     primitive_type          Type {};
 };
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API geometry_store {
+public:
+    using index_map  = std::unordered_map<isize, std::vector<u32>>;
+    using vertex_map = std::unordered_map<isize, std::vector<vertex>>;
+
+    auto get_indices(isize id) const -> std::span<u32 const>;
+    auto get_vertices(isize id) const -> std::span<vertex const>;
+
+    void set_indices(isize id, std::vector<u32> const& values);
+    void set_vertices(isize id, std::vector<vertex> const& values);
+
+    void clear();
+
+    [[nodiscard]] auto empty() const -> bool;
+
+private:
+    index_map  _inds;
+    vertex_map _verts;
+};
+
+////////////////////////////////////////////////////////////
 
 namespace geometry {
     TCOB_API void set_position(quad& q, rect_f const& rect);

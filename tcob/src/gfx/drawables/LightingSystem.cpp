@@ -130,8 +130,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
 {
     if (!_isDirty) { return; }
 
-    _verts.clear();
-    _inds.clear();
+    _store.clear();
 
     // collect collision points
     if (_quadTree) {
@@ -250,12 +249,15 @@ void lighting_system::cast_ray(light_source& light, f32 lightRange)
 
 void lighting_system::build_geometry(light_source& light, f32 lightRange, u32& indOffset)
 {
+    std::vector<vertex> verts;
+    std::vector<u32>    inds;
+
     u32 const n {static_cast<u32>(light._collisionResult.size())};
     if (n <= 1) { return; }
 
-    _verts.push_back({.Position  = light.Position,
-                      .Color     = light.Color,
-                      .TexCoords = {.U = 0, .V = 0, .Level = 0}});
+    verts.push_back({.Position  = light.Position,
+                     .Color     = light.Color,
+                     .TexCoords = {.U = 0, .V = 0, .Level = 0}});
 
     bool const limitRange {light.is_range_limited()};
 
@@ -270,22 +272,25 @@ void lighting_system::build_geometry(light_source& light, f32 lightRange, u32& i
             col.A = static_cast<u8>(col.A * falloff);
         }
 
-        _verts.push_back({.Position  = p.Point,
-                          .Color     = col,
-                          .TexCoords = {.U = 0, .V = 0, .Level = 0}});
+        verts.push_back({.Position  = p.Point,
+                         .Color     = col,
+                         .TexCoords = {.U = 0, .V = 0, .Level = 0}});
     }
 
     for (u32 i {2}; i <= n; ++i) {
-        _inds.push_back(0 + indOffset);
-        _inds.push_back(i + indOffset);
-        _inds.push_back(i - 1 + indOffset);
+        inds.push_back(0 + indOffset);
+        inds.push_back(i + indOffset);
+        inds.push_back(i - 1 + indOffset);
     }
     if (!light.is_angle_limited()) {
-        _inds.push_back(0 + indOffset);
-        _inds.push_back(n + indOffset);
-        _inds.push_back(1 + indOffset);
+        inds.push_back(0 + indOffset);
+        inds.push_back(n + indOffset);
+        inds.push_back(1 + indOffset);
     }
     indOffset += n + 1;
+
+    _store.set_vertices(0, verts);
+    _store.set_indices(0, inds);
 }
 
 auto lighting_system::collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>
@@ -355,14 +360,14 @@ void lighting_system::mark_lights_dirty()
 
 auto lighting_system::can_draw() const -> bool
 {
-    return !_inds.empty();
+    return !_store.empty();
 }
 
 void lighting_system::on_draw_to(render_target& target)
 {
     if (_updateGeometry) {
-        geometry_data const data {.Vertices = _verts,
-                                  .Indices  = _inds,
+        geometry_data const data {.Vertices = _store.get_vertices(0),
+                                  .Indices  = _store.get_indices(0),
                                   .Type     = primitive_type::Triangles};
         _renderer.set_geometry(data, &_material->first_pass());
         _updateGeometry = false;

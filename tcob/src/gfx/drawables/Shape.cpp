@@ -80,9 +80,9 @@ auto shape_batch::intersect(ray const& ray, u32 mask) const -> std::unordered_ma
     std::unordered_map<shape*, std::vector<ray::result>> retValue;
     for (auto const& child : _children) {
         if (child->IntersectMask & mask) {
-            auto const points {child->intersect(ray)};
+            auto points {child->intersect(ray)};
             if (points.empty()) { continue; }
-            retValue[child.get()] = points;
+            retValue.emplace(child.get(), std::move(points));
         }
     }
     return retValue;
@@ -130,11 +130,11 @@ void shape_batch::on_draw_to(render_target& target)
 
         for (auto& shape : _children) {
             if (shape->is_visible()) {
-                for (isize i {0}; i < maxPasses; ++i) {
-                    if (i >= shape->Material->pass_count()) { continue; }
+                for (isize p {0}; p < maxPasses; ++p) {
+                    if (p >= shape->Material->pass_count()) { continue; }
 
-                    auto const& pass {shape->Material->get_pass(i)};
-                    _renderer.add_geometry(shape->geometry(pass), &pass);
+                    auto const& pass {shape->Material->get_pass(p)};
+                    _renderer.add_geometry(shape->geometry(p), &pass);
                 }
             }
         }
@@ -215,12 +215,12 @@ rect_shape::rect_shape()
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
-auto rect_shape::geometry(pass const& pass) -> geometry_data
+auto rect_shape::geometry(isize pass) -> geometry_data
 {
     static constexpr std::array<u32, 6> Inds {3, 1, 0, 3, 2, 1};
 
     return {
-        .Vertices = _quad.at(&pass),
+        .Vertices = _quads.at(pass),
         .Indices  = Inds,
         .Type     = primitive_type::Triangles};
 }
@@ -264,7 +264,7 @@ void rect_shape::on_update(milliseconds deltaTime)
     }
 
     if (TextureScroll != point_f::Zero) {
-        for (auto& kvp : _quad) {
+        for (auto& kvp : _quads) {
             geometry::scroll_texcoords(kvp.second, *TextureScroll * (deltaTime.count() / 1000.0f));
         }
     }
@@ -272,13 +272,16 @@ void rect_shape::on_update(milliseconds deltaTime)
 
 void rect_shape::update_geometry()
 {
-    for (isize i {0}; i < Material->pass_count(); ++i) {
-        auto const& pass {Material->get_pass(i)};
+    _quads.clear();
 
-        auto& quad {_quad[&pass]};
+    auto const& xform {transform()};
+    for (isize p {0}; p < Material->pass_count(); ++p) {
+        auto const& pass {Material->get_pass(p)};
+
+        auto& quad {_quads[p]};
         geometry::set_color(quad, Color);
         geometry::set_texcoords(quad, get_texture_region(pass));
-        geometry::set_position(quad, *Bounds, transform());
+        geometry::set_position(quad, *Bounds, xform);
     }
 
     update_aabb();
@@ -298,11 +301,11 @@ circle_shape::circle_shape()
     Segments.Changed.connect([this](auto const&) { mark_dirty(); });
 }
 
-auto circle_shape::geometry(pass const& pass) -> geometry_data
+auto circle_shape::geometry(isize pass) -> geometry_data
 {
     return {
-        .Vertices = _verts[&pass],
-        .Indices  = _inds[&pass],
+        .Vertices = _store.get_vertices(pass),
+        .Indices  = _store.get_indices(pass),
         .Type     = primitive_type::Triangles};
 }
 
@@ -334,21 +337,22 @@ void circle_shape::update_geometry()
 
 void circle_shape::create()
 {
-    _verts.clear();
-    _inds.clear();
+    _store.clear();
+    auto const& xform {transform()};
 
     if (Segments < 3 || Radius < 1.0f) { return; }
 
     for (isize p {0}; p < Material->pass_count(); ++p) {
         auto const& pass {Material->get_pass(p)};
 
-        auto& verts {_verts[&pass]};
-        auto& inds {_inds[&pass]};
+        std::vector<vertex> verts {};
+        verts.reserve(Segments + 1);
+        std::vector<u32> inds {};
+        inds.reserve(Segments * 3);
 
         // vertices
-        auto const& xform {transform()};
-        f32 const   angleStep {TAU_F / Segments};
-        f32 const   radius {Radius};
+        f32 const angleStep {TAU_F / Segments};
+        f32 const radius {Radius};
 
         texture_region const texReg {get_texture_region(pass)};
 
@@ -385,6 +389,9 @@ void circle_shape::create()
         inds.push_back(0);
         inds.push_back(1);
         inds.push_back(*Segments);
+
+        _store.set_vertices(p, verts);
+        _store.set_indices(p, inds);
     }
 }
 
@@ -400,11 +407,11 @@ poly_shape::poly_shape()
     Polygons.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
-auto poly_shape::geometry(pass const& pass) -> geometry_data
+auto poly_shape::geometry(isize pass) -> geometry_data
 {
     return {
-        .Vertices = _verts[&pass],
-        .Indices  = _inds[&pass],
+        .Vertices = _store.get_vertices(pass),
+        .Indices  = _store.get_indices(pass),
         .Type     = primitive_type::Triangles};
 }
 
@@ -435,13 +442,15 @@ void poly_shape::update_aabb()
 
 auto poly_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
+    auto const& xform {transform()};
+
     std::vector<ray::result> retValue;
     for (auto const& polygon : *Polygons) {
-        auto points {ray.intersect_polyline(polygon.Outline, transform())};
+        auto points {ray.intersect_polyline(polygon.Outline, xform)};
         retValue.insert(retValue.end(), points.begin(), points.end());
 
         for (auto const& hole : polygon.Holes) {
-            auto holePoints {ray.intersect_polyline(hole, transform())};
+            auto holePoints {ray.intersect_polyline(hole, xform)};
             retValue.insert(retValue.end(), holePoints.begin(), holePoints.end());
         }
     }
@@ -485,18 +494,17 @@ auto poly_shape::center() const -> point_f
 
 void poly_shape::create()
 {
-    _verts.clear();
-    _inds.clear();
+    _store.clear();
+    auto const& xform {transform()};
 
     for (isize p {0}; p < Material->pass_count(); ++p) {
         u32 indOffset {0};
 
-        auto const& pass {Material->get_pass(p)};
-        auto&       verts {_verts[&pass]};
-        auto&       inds {_inds[&pass]};
+        auto const&         pass {Material->get_pass(p)};
+        std::vector<vertex> verts {};
+        std::vector<u32>    inds {};
 
         // create verts
-        auto const&          xform {transform()};
         texture_region const texReg {get_texture_region(pass)};
 
         f32 const   texLevel {static_cast<f32>(texReg.Level)};
@@ -533,6 +541,9 @@ void poly_shape::create()
                 indOffset += static_cast<u32>(hole.size());
             }
         }
+
+        _store.set_vertices(p, verts);
+        _store.set_indices(p, inds);
     }
 }
 
