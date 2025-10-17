@@ -91,7 +91,7 @@ private:
 
 inline auto image::data(this auto&& self) -> decltype(auto)
 {
-    return std::span {self._buffer.data(), self._buffer.size()};
+    return std::span {self._buffer};
 }
 
 inline auto image::ptr(this auto&& self) -> decltype(auto)
