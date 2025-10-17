@@ -19,7 +19,9 @@ function(tcob_add_obj_library module sources headers)
         $<$<CXX_COMPILER_ID:Clang>: -Wall -Wextra -Wconversion -Wpedantic
         -Wno-sign-conversion
         >
-        $<$<CXX_COMPILER_ID:GNU>: -Wall -Wextra -pedantic>
+        $<$<CXX_COMPILER_ID:GNU>: -Wall -Wextra -pedantic
+        -Wno-missing-field-initializers
+        >
     )
 
     if(EMSCRIPTEN)
