@@ -8,12 +8,14 @@
 
 #include <any>
 #include <memory>
+#include <tuple>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Serialization.hpp"
 #include "tcob/physics/B2DShape.hpp"
 #include "tcob/physics/Physics.hpp"
 
@@ -101,6 +103,8 @@ public:
         /// This allows this body to bypass rotational speed limits. Should only be used
         ///	for circular objects, like wheels.
         bool AllowFastRotation {false};
+
+        static auto constexpr Members();
     };
 
     ~body();
@@ -187,6 +191,25 @@ template <typename T>
 inline auto body::create_shape(T::settings const& settings) -> T&
 {
     return static_cast<T&>(*_shapes.emplace_back(std::unique_ptr<T> {new T {*this, _impl.get(), settings, settings.Shape}}));
+}
+
+auto constexpr body::settings::Members()
+{
+    return std::tuple {
+        member<&body::settings::Type> {"type"},
+        member<&body::settings::LinearVelocity> {"linear_velocity"},
+        member<&body::settings::AngularVelocity> {"angular_velocity"},
+        member<&body::settings::LinearDamping> {"linear_damping"},
+        member<&body::settings::AngularDamping> {"angular_damping"},
+        member<&body::settings::EnableSleep> {"enable_sleep"},
+        member<&body::settings::IsAwake> {"is_awake"},
+        member<&body::settings::IsFixedRotation> {"is_fixed_rotation"},
+        member<&body::settings::IsBullet> {"is_bullet"},
+        member<&body::settings::IsEnabled> {"is_enabled"},
+        member<&body::settings::GravityScale> {"gravity_scale"},
+        member<&body::settings::SleepThreshold> {"sleep_threshold"},
+        member<&body::settings::AllowFastRotation> {"allow_fast_rotation"},
+    };
 }
 
 }

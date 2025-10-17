@@ -7,11 +7,13 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <tuple>
 #include <vector>
 
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
+#include "tcob/core/Serialization.hpp"
 #include "tcob/physics/B2DBody.hpp"
 #include "tcob/physics/B2DDebugDraw.hpp"
 #include "tcob/physics/B2DJoint.hpp"
@@ -125,6 +127,8 @@ public:
 
         /// Enable continuous collision
         bool EnableContinuous {true};
+
+        auto constexpr Members();
     };
 
     world();
@@ -176,6 +180,21 @@ template <typename T>
 inline auto world::create_joint(auto&& jointSettings) -> T&
 {
     return static_cast<T&>(*_joints.emplace_back(std::unique_ptr<T> {new T {*this, _impl.get(), jointSettings}}));
+}
+
+auto constexpr world::settings::Members()
+{
+    return std::tuple {
+        member<&world::settings::Gravity> {"gravity"},
+        member<&world::settings::RestitutionThreshold> {"restitution_threshold"},
+        member<&world::settings::HitEventThreshold> {"hit_event_threshold"},
+        member<&world::settings::ContactHertz> {"contact_hertz"},
+        member<&world::settings::ContactDampingRatio> {"contact_damping_ratio"},
+        member<&world::settings::MaxContactPushSpeed> {"max_contact_push_speed"},
+        member<&world::settings::MaximumLinearSpeed> {"maximum_linear_speed"},
+        member<&world::settings::EnableSleeping> {"enable_sleeping"},
+        member<&world::settings::EnableContinuous> {"enable_continuous"},
+    };
 }
 
 }
