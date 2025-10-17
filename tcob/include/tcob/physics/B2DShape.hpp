@@ -71,7 +71,7 @@ public:
     auto is_sensor() const -> bool;
     auto sensor_overlaps() const -> std::vector<shape*>;
 
-    auto aabb() const -> AABB;
+    auto aabb() const -> rect_f;
     auto mass_data() const -> mass_data;
 
     auto test_point(point_f point) const -> bool;

@@ -403,7 +403,7 @@ public:
 
     auto test_point(point_f point) const -> bool;
 
-    auto get_aabb() const -> AABB;
+    auto get_aabb() const -> rect_f;
 
     auto get_closest_point(point_f target) const -> point_f;
 

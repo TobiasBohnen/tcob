@@ -167,7 +167,7 @@ auto b2d_world::get_body_events() const -> body_events
     for (auto& event : move) {
         body_move_event ev;
         ev.Body       = get_body(event.bodyId);
-        ev.Transform  = {{event.transform.p.x, event.transform.p.y}, radian_f {b2Rot_GetAngle(event.transform.q)}};
+        ev.Transform  = {.Center = {event.transform.p.x, event.transform.p.y}, .Angle = radian_f {b2Rot_GetAngle(event.transform.q)}};
         ev.FellAsleep = event.fellAsleep;
         retValue.Move.push_back(ev);
     }
@@ -1460,10 +1460,10 @@ auto b2d_shape::test_point(point_f point) const -> bool
     return b2Shape_TestPoint(ID, to_b2Vec2(point));
 }
 
-auto b2d_shape::get_aabb() const -> AABB
+auto b2d_shape::get_aabb() const -> rect_f
 {
     auto const val {b2Shape_GetAABB(ID)};
-    return {{val.lowerBound.x, val.lowerBound.y}, {val.upperBound.x, val.upperBound.y}};
+    return rect_f::FromLTRB(val.lowerBound.x, val.lowerBound.y, val.upperBound.x, val.upperBound.y);
 }
 
 auto b2d_shape::get_closest_point(point_f target) const -> point_f
@@ -1690,7 +1690,7 @@ b2d_debug_draw::b2d_debug_draw(debug_draw* impl)
 void b2d_debug_draw::apply_settings(debug_draw::settings const& settings)
 {
     if (settings.DrawingBounds) {
-        ID.drawingBounds    = {to_b2Vec2(settings.DrawingBounds->LowerBounds), to_b2Vec2(settings.DrawingBounds->UpperBounds)};
+        ID.drawingBounds    = {.lowerBound = to_b2Vec2(settings.DrawingBounds->top_left()), .upperBound = to_b2Vec2(settings.DrawingBounds->bottom_right())};
         ID.useDrawingBounds = true;
     }
 

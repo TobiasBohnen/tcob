@@ -13,7 +13,7 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
-
+#include "tcob/core/Rect.hpp"
 #include "tcob/physics/B2DBody.hpp"
 #include "tcob/physics/Physics.hpp"
 
@@ -26,7 +26,7 @@ class TCOB_API debug_draw : public non_copyable {
 public:
     struct settings {
         /// Bounds to use if restricting drawing to a rectangular region
-        std::optional<AABB> DrawingBounds {};
+        std::optional<rect_f> DrawingBounds {};
 
         /// Option to draw shapes
         bool DrawShapes {true};

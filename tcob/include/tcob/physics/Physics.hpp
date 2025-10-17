@@ -19,11 +19,6 @@ enum class body_type : u8 {
     Dynamic
 };
 
-struct AABB {
-    point_f LowerBounds;
-    point_f UpperBounds;
-};
-
 struct circle {
     /// The local center
     point_f Center;

@@ -12,6 +12,7 @@
 #include "B2D.hpp"
 
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/physics/B2DBody.hpp"
 #include "tcob/physics/Physics.hpp"
 
@@ -46,7 +47,7 @@ auto shape::parent() -> body&
     return _body;
 }
 
-auto shape::aabb() const -> AABB
+auto shape::aabb() const -> rect_f
 {
     return _impl->get_aabb();
 }
