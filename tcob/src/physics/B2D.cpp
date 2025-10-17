@@ -501,7 +501,7 @@ void b2d_body::enable_hit_events(bool value) const
 auto b2d_body::compute_aabb() const -> rect_f
 {
     auto const val {b2Body_ComputeAABB(ID)};
-    return {{val.lowerBound.x, val.lowerBound.y}, {val.upperBound.x, val.upperBound.y}};
+    return rect_f::FromLTRB(val.lowerBound.x, val.lowerBound.y, val.upperBound.x, val.upperBound.y);
 }
 
 auto b2d_body::get_position() const -> point_f
