@@ -113,10 +113,10 @@ void drop_down_list::on_draw(widget_painter& painter)
 
     if (_isExtended) {
         f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
-        painter.add_overlay([this, itemHeight](widget_painter& painter) -> void {
+        painter.add_overlay([this, itemHeight](widget_painter& that) -> void {
             gfx::transform xform;
             xform.translate(form_offset());
-            painter.begin(Alpha, xform);
+            that.begin(Alpha, xform);
 
             rect_f listRect {Bounds};
             listRect.Position.Y += listRect.height();
@@ -129,7 +129,7 @@ void drop_down_list::on_draw(widget_painter& painter)
             _vScrollbar.Visible = get_items().size() > static_cast<usize>(_style.MaxVisibleItems);
 
             // list background
-            listRect      = painter.draw_background_and_border(_style, listRect, false);
+            listRect      = that.draw_background_and_border(_style, listRect, false);
             _visibleItems = static_cast<isize>(listRect.height() / itemHeight);
 
             // scrollbar
@@ -138,10 +138,10 @@ void drop_down_list::on_draw(widget_painter& painter)
             auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {.Disabled = !is_enabled()} : flags()};
             thumb_style thumbStyle;
             prepare_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, thumbFlags);
-            _vScrollbar.draw(painter, _style.VScrollBar, thumbStyle.Thumb, listRect);
+            _vScrollbar.draw(that, _style.VScrollBar, thumbStyle.Thumb, listRect);
 
             // items
-            scoped_scissor const guard {painter, this};
+            scoped_scissor const guard {that, this};
             auto const&          items {get_items()};
             auto const           paintItem {[&](isize i) {
                 rect_f itemRect {listRect};
@@ -152,7 +152,7 @@ void drop_down_list::on_draw(widget_painter& painter)
                     item_style itemStyle {};
                     prepare_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
 
-                    painter.draw_item(itemStyle.Item, itemRect, items[i]);
+                    that.draw_item(itemStyle.Item, itemRect, items[i]);
                     _itemRectCache[i] = itemRect;
                 } else {
                     reset_sub_style(i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
@@ -172,7 +172,7 @@ void drop_down_list::on_draw(widget_painter& painter)
                 paintItem(HoveredItemIndex);
             }
 
-            painter.end();
+            that.end();
         });
     } else {
         _visibleItems = 0;

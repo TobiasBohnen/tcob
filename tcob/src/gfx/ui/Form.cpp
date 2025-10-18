@@ -105,8 +105,8 @@ auto form_base::all_widgets() const -> std::vector<widget*>
     auto const collectWidgets {[&retValue](this auto&& self, widget_container const& container) -> void {
         for (auto const& widget : container.widgets()) {
             retValue.push_back(widget.get());
-            if (auto* container {dynamic_cast<widget_container*>(widget.get())}) {
-                self(*container);
+            if (auto* c {dynamic_cast<widget_container*>(widget.get())}) {
+                self(*c);
             }
         }
     }};

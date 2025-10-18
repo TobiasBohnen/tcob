@@ -78,8 +78,8 @@ void parallax_background::on_draw_to(render_target& target)
     _quads.resize(_layers.size());
     auto const targetSize {size_f {*target.Size}};
 
-    for (isize i {0}; i < Material->pass_count(); ++i) {
-        auto const& pass {Material->get_pass(i)};
+    for (isize p {0}; p < Material->pass_count(); ++p) {
+        auto const& pass {Material->get_pass(p)};
 
         auto const texSize {size_f {pass.Texture->info().Size} * TextureScale};
 

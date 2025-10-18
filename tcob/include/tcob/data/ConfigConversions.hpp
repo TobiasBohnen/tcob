@@ -658,10 +658,10 @@ public:
             array const& arr {std::get<array>(config)};
             if (arr.size() != std::tuple_size_v<decltype(Members)>) { return false; }
 
-            auto const assign {[]<usize... I>(auto& members, auto const& arr, auto& object, std::index_sequence<I...>) {
-                return ((std::get<I>(members).set(arr[I], object)) && ...);
+            auto const assign {[&]<usize... I>(std::index_sequence<I...>) {
+                return ((std::get<I>(Members).set(arr[I], value)) && ...);
             }};
-            return assign(Members, arr, value, std::make_index_sequence<std::tuple_size_v<decltype(Members)>> {});
+            return assign(std::make_index_sequence<std::tuple_size_v<decltype(Members)>> {});
         }
         return false;
     }

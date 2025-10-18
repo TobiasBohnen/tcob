@@ -103,16 +103,16 @@ void image_box::on_draw(widget_painter& painter)
     canvas.draw_image(tex.ptr(), Image->TextureRegion, targetRect);
 
     if (_dragPosition) {
-        painter.add_overlay([this, targetRect](widget_painter& painter) -> void {
-            auto& canvas {painter.canvas()};
+        painter.add_overlay([this, targetRect](widget_painter& that) -> void {
+            auto& myCanvas {that.canvas()};
 
             gfx::transform xform;
             xform.translate(form_offset());
-            painter.begin(Alpha, xform);
+            that.begin(Alpha, xform);
 
-            canvas.set_global_alpha(_style.DragAlpha);
-            canvas.draw_image(Image->Texture.ptr(), Image->TextureRegion,
-                              {*_dragPosition - _dragStart + targetRect.Position, targetRect.Size});
+            myCanvas.set_global_alpha(_style.DragAlpha);
+            myCanvas.draw_image(Image->Texture.ptr(), Image->TextureRegion,
+                                {*_dragPosition - _dragStart + targetRect.Position, targetRect.Size});
         });
     }
 }

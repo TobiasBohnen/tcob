@@ -192,7 +192,7 @@ void shape::mark_clean()
 
 auto shape::get_texture_region(pass const& pass) const -> texture_region
 {
-    if (pass.Texture && pass.Texture->regions().contains(TextureRegion)) { // TODO texRegion pass
+    if (pass.Texture && pass.Texture->regions().contains(TextureRegion)) {
         return pass.Texture->regions()[TextureRegion];
     }
 
@@ -522,7 +522,7 @@ void poly_shape::create()
         for (auto const& polygon : *Polygons) {
             // outline
             // push verts
-            for (auto const& p : polygon.Outline) { pushVert(p); }
+            for (auto const& point : polygon.Outline) { pushVert(point); }
 
             // create inds
             auto const indices {polygon.earcut()};
@@ -536,7 +536,7 @@ void poly_shape::create()
             // holes
             for (auto const& hole : polygon.Holes) {
                 // push verts
-                for (auto const p : hole) { pushVert(p); }
+                for (auto const point : hole) { pushVert(point); }
 
                 indOffset += static_cast<u32>(hole.size());
             }

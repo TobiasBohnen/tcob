@@ -46,13 +46,13 @@ inline auto ordering<Order>::str() const -> utf8_string
     case order::Descending: order = "DESC"; break;
     }
 
-    utf8_string const column {
+    utf8_string const columnStr {
         std::visit(overloaded {
                        [](string const& name) { return quote_identifier(name); },
                        [](i32 column) { return std::to_string(column); }},
                    Column)};
 
-    return std::format("{} {}", column, order);
+    return std::format("{} {}", columnStr, order);
 }
 
 ////////////////////////////////////////////////////////////
