@@ -90,13 +90,13 @@ protected:
 private:
     void notify_layer_changed(tilemap_layer* layer);
 
-    virtual void setup_quad(quad& q, point_i coord, tile_index_t idx) const = 0;
+    virtual void setup_quad(pass const& pass, quad& q, point_i coord, tile_index_t idx) const = 0;
 
     std::vector<std::unique_ptr<tilemap_layer>> _layers {};
 
-    quad_renderer     _renderer;
-    std::vector<quad> _quads {};
-    bool              _isDirty {true};
+    quad_renderer                                _renderer;
+    std::unordered_map<isize, std::vector<quad>> _quads {};
+    bool                                         _isDirty {true};
 };
 
 ////////////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ public:
     prop<set>       Tileset;
 
 private:
-    void setup_quad(quad& q, point_i coord, tile_index_t idx) const override;
+    void setup_quad(pass const& pass, quad& q, point_i coord, tile_index_t idx) const override;
 };
 
 ////////////////////////////////////////////////////////////

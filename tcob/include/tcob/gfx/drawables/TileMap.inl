@@ -12,6 +12,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Serialization.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Material.hpp"
 
 namespace tcob::gfx {
 
@@ -23,21 +24,18 @@ inline tilemap<G>::tilemap()
 }
 
 template <typename G>
-inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) const
+inline void tilemap<G>::setup_quad(pass const& pass, quad& q, point_i coord, tile_index_t idx) const
 {
-    if (!*Material) { return; }
-    auto const& pass {Material->first_pass()}; // TODO texRegion pass
-
     auto const& tile {idx != 0 ? Tileset->at(idx) : tile_type {}};
 
     rect_f rect {Grid->layout_tile(tile, coord)};
     rect.move_by(*Position);
 
     geometry::set_position(q, rect);
-    geometry::set_color(q, tile.Color);
     if (idx == 0) {
         geometry::set_color(q, colors::Transparent);
     } else {
+        geometry::set_color(q, tile.Color);
         geometry::set_texcoords(q, pass, tile.TextureRegion);
     }
 }

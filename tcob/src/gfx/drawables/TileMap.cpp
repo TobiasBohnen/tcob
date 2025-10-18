@@ -112,7 +112,9 @@ void tilemap_base::on_update(milliseconds /* deltaTime */)
         auto const& tiles {*layer->Tiles};
         for (i32 i {0}; i < tiles.width() * tiles.height(); ++i) {
             auto const tilePos {IndexToPosition(i, layer->RenderDirection, tiles.size())};
-            setup_quad(_quads.emplace_back(), tilePos + *layer->Offset, tiles[tilePos]);
+            for (isize p {0}; p < Material->pass_count(); ++p) {
+                setup_quad(Material->get_pass(p), _quads[p].emplace_back(), tilePos + *layer->Offset, tiles[tilePos]);
+            }
         }
     }
 }
@@ -124,10 +126,10 @@ auto tilemap_base::can_draw() const -> bool
 
 void tilemap_base::on_draw_to(render_target& target)
 {
-    for (isize i {0}; i < Material->pass_count(); ++i) {
-        auto const& pass {Material->get_pass(i)};
+    for (isize p {0}; p < Material->pass_count(); ++p) {
+        auto const& pass {Material->get_pass(p)};
 
-        _renderer.set_geometry(_quads, &pass);
+        _renderer.set_geometry(_quads[p], &pass);
         _renderer.render_to_target(target);
     }
 }
