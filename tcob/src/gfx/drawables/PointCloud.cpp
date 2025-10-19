@@ -24,19 +24,24 @@ auto point_cloud::create_point() -> vertex&
     return _points.emplace_back();
 }
 
-void point_cloud::clear()
-{
-    _points.clear();
-}
-
 auto point_cloud::size() const -> i32
 {
     return static_cast<i32>(std::ssize(_points));
 }
 
+auto point_cloud::is_empty() const -> bool
+{
+    return _points.empty();
+}
+
 auto point_cloud::get_point_at(i32 index) -> vertex&
 {
     return _points.at(index);
+}
+
+void point_cloud::clear()
+{
+    _points.clear();
 }
 
 auto point_cloud::can_draw() const -> bool

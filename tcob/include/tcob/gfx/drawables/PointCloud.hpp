@@ -27,10 +27,13 @@ public:
     prop<asset_ptr<material>> Material;
 
     auto create_point() -> vertex&;
-    void clear();
 
     auto size() const -> i32;
+    auto is_empty() const -> bool;
+
     auto get_point_at(i32 index) -> vertex&;
+
+    void clear();
 
 protected:
     auto can_draw() const -> bool override;
