@@ -29,10 +29,7 @@ function(tcob_add_obj_library module sources headers)
         target_link_options(${module} PRIVATE -sFULL_ES3 -pthread)
     endif()
 
-    set_target_properties(${module} PROPERTIES
-        CXX_STANDARD 23
-        CXX_STANDARD_REQUIRED TRUE
-    )
+    target_compile_features(${module} PUBLIC cxx_std_23)
 
     if(${module} STREQUAL "tcob_core")
         target_link_libraries(${module} PUBLIC tcob_extlibs)
