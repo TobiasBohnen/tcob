@@ -7,7 +7,9 @@
 #include "tcob/tcob_config.hpp"
 
 #include <array>
+#include <cstddef>
 #include <format>
+#include <functional>
 
 #include "tcob/core/AngleUnits.hpp"
 
@@ -68,4 +70,12 @@ template <>
 struct std::formatter<tcob::color> {
     auto constexpr parse(format_parse_context& ctx) { return ctx.begin(); }
     auto format(tcob::color val, format_context& ctx) const { return format_to(ctx.out(), "(r:{},g:{},b:{},a:{})", val.R, val.G, val.B, val.A); }
+};
+
+template <>
+struct std::hash<tcob::color> {
+    auto operator()(tcob::color const& r) const noexcept -> std::size_t
+    {
+        return std::hash<tcob::u32> {}(r.value());
+    }
 };

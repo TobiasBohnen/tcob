@@ -165,16 +165,6 @@ struct tcob::detail::magic_enum_reduced::custom_range<tcob::gfx::font::weight> {
 };
 
 template <>
-struct std::hash<tcob::gfx::font::style> {
-    auto operator()(tcob::gfx::font::style const& s) const noexcept -> std::size_t
-    {
-        std::size_t const h1 {std::hash<bool> {}(s.IsItalic)};
-        std::size_t const h2 {std::hash<int> {}(static_cast<int>(s.Weight))};
-        return tcob::helper::hash_combine(h1, h2);
-    }
-};
-
-template <>
 struct std::formatter<tcob::gfx::font::style> {
     auto constexpr parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -193,5 +183,15 @@ struct std::formatter<tcob::gfx::font::style> {
         case tcob::gfx::font::weight::Heavy:      weight = "Heavy"; break;
         }
         return format_to(ctx.out(), "(IsItalic:{},Weight:{})", val.IsItalic, weight);
+    }
+};
+
+template <>
+struct std::hash<tcob::gfx::font::style> {
+    auto operator()(tcob::gfx::font::style const& s) const noexcept -> std::size_t
+    {
+        std::size_t const h1 {std::hash<bool> {}(s.IsItalic)};
+        std::size_t const h2 {std::hash<int> {}(static_cast<int>(s.Weight))};
+        return tcob::helper::hash_combine(h1, h2);
     }
 };
