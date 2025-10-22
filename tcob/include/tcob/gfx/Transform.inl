@@ -109,9 +109,9 @@ auto constexpr transform::transform_point(point_f point) const -> point_f
 
 void constexpr transform::translate(point_f offset)
 {
-    Matrix[6] += Matrix[0] * offset.X + Matrix[3] * offset.Y;
-    Matrix[7] += Matrix[1] * offset.X + Matrix[4] * offset.Y;
-    Matrix[8] += Matrix[2] * offset.X + Matrix[5] * offset.Y;
+    Matrix[6] += (Matrix[0] * offset.X) + (Matrix[3] * offset.Y);
+    Matrix[7] += (Matrix[1] * offset.X) + (Matrix[4] * offset.Y);
+    Matrix[8] += (Matrix[2] * offset.X) + (Matrix[5] * offset.Y);
 }
 
 void constexpr transform::scale(size_f factors)
@@ -129,9 +129,9 @@ void constexpr transform::scale_at(size_f factors, point_f center)
     f32 const x1 {(center.X * (1 - factors.Width))};
     f32 const y1 {(center.Y * (1 - factors.Height))};
 
-    Matrix[6] += Matrix[0] * x1 + Matrix[3] * y1;
-    Matrix[7] += Matrix[1] * x1 + Matrix[4] * y1;
-    Matrix[8] += Matrix[2] * x1 + Matrix[5] * y1;
+    Matrix[6] += (Matrix[0] * x1) + (Matrix[3] * y1);
+    Matrix[7] += (Matrix[1] * x1) + (Matrix[4] * y1);
+    Matrix[8] += (Matrix[2] * x1) + (Matrix[5] * y1);
     Matrix[0] *= factors.Width;
     Matrix[1] *= factors.Width;
     Matrix[2] *= factors.Width;
