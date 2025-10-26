@@ -1,0 +1,56 @@
+name: Asan
+
+on:
+  workflow_dispatch 
+
+jobs:
+  build:
+    runs-on: ${{matrix.config.os}}
+    name:    ${{matrix.variant}} (${{matrix.config.name}}/${{matrix.build_type}}/${{matrix.config.os}})
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ['default']
+        build_type: ['Release', 'Debug']
+        config:
+          - name: 'Clang-20'
+            os:   'ubuntu-24.04'
+            cc:   'clang-20'
+            cxx:  'clang++-20'
+            cxxflags: '-stdlib=libc++ -fexperimental-library'
+            install_commands: 'wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 20; sudo apt-get install libc++-20-dev libc++abi-20-dev'
+        include:
+          - variant:    'default'
+            definition: '-DTCOB_ASAN=ON'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name:  Install compiler
+      run:   ${{matrix.config.install_commands}}
+      shell: bash
+
+    - name:  Configure CMake
+      run:   cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DTCOB_IS_CI=ON ${{matrix.definition}}
+      shell: bash
+      env:
+         CC:       ${{matrix.config.cc}}
+         CXX:      ${{matrix.config.cxx}}
+         CFLAGS:   ${{matrix.config.cflags}}
+         CXXFLAGS: ${{matrix.config.cxxflags}}
+
+    - name:  Build
+      run:   cmake --build ./build --config ${{matrix.build_type}} -j 8
+      shell: bash
+      env:
+         CC:       ${{matrix.config.cc}}
+         CXX:      ${{matrix.config.cxx}}
+         CFLAGS:   ${{matrix.config.cflags}}
+         CXXFLAGS: ${{matrix.config.cxxflags}}
+         
+    - name: Test
+      run:  ctest -C ${{matrix.build_type}} -j 8
+      working-directory: ./build
+      env:
+         CTEST_OUTPUT_ON_FAILURE: 1
