@@ -13,12 +13,12 @@ jobs:
         variant: ['default']
         build_type: ['Release', 'Debug']
         config:
-          - name: 'Clang-20'
+          - name: 'Clang-21'
             os:   'ubuntu-24.04'
-            cc:   'clang-20'
-            cxx:  'clang++-20'
+            cc:   'clang-21'
+            cxx:  'clang++-21'
             cxxflags: '-stdlib=libc++ -fexperimental-library'
-            install_commands: 'wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 20; sudo apt-get install libc++-20-dev libc++abi-20-dev'
+            install_commands: 'wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 21; sudo apt-get install libc++-21-dev libc++abi-21-dev'
         include:
           - variant:    'default'
             definition: '-DTCOB_ASAN=ON'
@@ -30,7 +30,11 @@ jobs:
     - name:  Install compiler
       run:   ${{matrix.config.install_commands}}
       shell: bash
-
+  
+    - name:  Install SDL2 deps
+      run:   sudo apt-get update; sudo apt-get install -y libsdl2-dev
+      shell: bash
+      
     - name:  Configure CMake
       run:   cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DTCOB_IS_CI=ON ${{matrix.definition}}
       shell: bash
