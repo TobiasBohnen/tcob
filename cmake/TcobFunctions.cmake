@@ -31,6 +31,12 @@ function(tcob_add_obj_library module sources headers)
 
     target_compile_features(${module} PUBLIC cxx_std_23)
 
+    if(TCOB_ASAN)
+        target_compile_definitions(${module} PUBLIC _DISABLE_STRING_ANNOTATION _DISABLE_VECTOR_ANNOTATION)
+        target_compile_options(${module} PRIVATE -fsanitize=address,undefined)
+        target_link_options(${module} PRIVATE -fsanitize=address,undefined)
+    endif()
+
     if(${module} STREQUAL "tcob_core")
         target_link_libraries(${module} PUBLIC tcob_extlibs)
         target_precompile_headers(${module} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:../_pch.hpp>)

@@ -45,6 +45,8 @@ option(TCOB_ENABLE_FILETYPES_GFX_THEORA "" ON)
 
 option(TCOB_MINIMAL "Disable all optional dependencies" OFF)
 
+option(TCOB_ASAN "" OFF)
+
 if(TCOB_MINIMAL)
   set(TCOB_ENABLE_RENDERER_OPENGLES30 OFF CACHE BOOL "" FORCE)
 
