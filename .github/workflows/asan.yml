@@ -21,7 +21,7 @@ jobs:
       shell: bash
        
     - name:  Configure CMake
-      run:   cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DTCOB_IS_CI=ON -DTCOB_ASAN=ON
+      run:   cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DTCOB_IS_CI=ON -DTCOB_ASAN=ON -DTCOB_BUILD_EXAMPLES=OFF -DTCOB_BUILD_GAMES=OFF -DTCOB_BUILD_TOOLS=OFF
       shell: bash
       env:
          CC:       clang-21
