@@ -5,53 +5,36 @@ on:
 
 jobs:
   build:
-    runs-on: ${{matrix.config.os}}
-    name:    ${{matrix.variant}} (${{matrix.config.name}}/${{matrix.build_type}}/${{matrix.config.os}})
+    runs-on: ubuntu-24.04
+    name:    ${{matrix.build_type}}
     strategy:
       fail-fast: false
       matrix:
-        variant: ['default']
-        build_type: ['Release', 'Debug']
-        config:
-          - name: 'Clang-21'
-            os:   'ubuntu-24.04'
-            cc:   'clang-21'
-            cxx:  'clang++-21'
-            cxxflags: '-stdlib=libc++ -fexperimental-library'
-            install_commands: 'wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 21; sudo apt-get install libc++-21-dev libc++abi-21-dev'
-        include:
-          - variant:    'default'
-            definition: '-DTCOB_ASAN=ON'
+        build_type: ['Debug']
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
 
-    - name:  Install compiler
-      run:   ${{matrix.config.install_commands}}
+    - name:  Install compiler and deps
+      run:   wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 21; sudo apt-get install -y libc++-21-dev libc++abi-21-dev libsdl2-dev
       shell: bash
-  
-    - name:  Install SDL2 deps
-      run:   sudo apt-get update; sudo apt-get install -y libsdl2-dev
-      shell: bash
-      
+       
     - name:  Configure CMake
-      run:   cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DTCOB_IS_CI=ON ${{matrix.definition}}
+      run:   cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DTCOB_IS_CI=ON -DTCOB_ASAN=ON
       shell: bash
       env:
-         CC:       ${{matrix.config.cc}}
-         CXX:      ${{matrix.config.cxx}}
-         CFLAGS:   ${{matrix.config.cflags}}
-         CXXFLAGS: ${{matrix.config.cxxflags}}
+         CC:       clang-21
+         CXX:      clang++-21
+         CXXFLAGS: -stdlib=libc++ -fexperimental-library
 
     - name:  Build
       run:   cmake --build ./build --config ${{matrix.build_type}} -j 8
       shell: bash
       env:
-         CC:       ${{matrix.config.cc}}
-         CXX:      ${{matrix.config.cxx}}
-         CFLAGS:   ${{matrix.config.cflags}}
-         CXXFLAGS: ${{matrix.config.cxxflags}}
+         CC:       clang-21
+         CXX:      clang++-21
+         CXXFLAGS: -stdlib=libc++ -fexperimental-library
          
     - name: Test
       run:  ctest -C ${{matrix.build_type}} -j 8
