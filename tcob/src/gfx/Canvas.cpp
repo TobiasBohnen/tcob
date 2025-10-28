@@ -624,12 +624,12 @@ void canvas::set_global_alpha(f32 alpha)
     _states->get().Alpha = alpha;
 }
 
-void canvas::fill()
+void canvas::fill(bool enforceWinding)
 {
     state const& s {_states->get()};
     paint        fillPaint {s.Fill}; // copy
 
-    _cache->fill(s, _enforceWinding, _edgeAntiAlias, _fringeWidth);
+    _cache->fill(s, enforceWinding, _edgeAntiAlias, _fringeWidth);
 
     // Apply global alpha
     MultiplyAlphaPaint(fillPaint.Color, s.Alpha);
@@ -653,7 +653,7 @@ void canvas::stroke()
         strokeWidth = _fringeWidth;
     }
 
-    _cache->stroke(s, _enforceWinding, _edgeAntiAlias, strokeWidth, _fringeWidth);
+    _cache->stroke(s, true, _edgeAntiAlias, strokeWidth, _fringeWidth);
 
     // Apply global alpha
     MultiplyAlphaPaint(strokePaint.Color, s.Alpha);
@@ -661,10 +661,10 @@ void canvas::stroke()
     _impl->render_stroke(strokePaint, s.CompositeOperation, s.Scissor, _fringeWidth, strokeWidth, _cache->paths());
 }
 
-void canvas::clip()
+void canvas::clip(bool enforceWinding)
 {
     state const& s {_states->get()};
-    _cache->clip(_enforceWinding, _fringeWidth);
+    _cache->clip(enforceWinding, _fringeWidth);
 
     _impl->render_clip(s.Scissor, _fringeWidth, _cache->paths());
 }
@@ -809,11 +809,6 @@ void canvas::set_global_composite_blendfunc_separate(blend_func srcRGB, blend_fu
                                          .DestinationColorBlendFunc = dstRGB,
                                          .SourceAlphaBlendFunc      = srcAlpha,
                                          .DestinationAlphaBlendFunc = dstAlpha};
-}
-
-void canvas::set_global_enforce_path_winding(bool force)
-{
-    _enforceWinding = force;
 }
 
 ////////////////////////////////////////////////////////////
@@ -981,16 +976,13 @@ void canvas::draw_text(point_f offset, text_formatter::result const& formatResul
 
 void canvas::fill_text(point_f offset, utf8_string_view text)
 {
-    bool const oldWinding {_enforceWinding};
-    _enforceWinding = false;
     f32 const oldFringe {_fringeWidth};
     _fringeWidth = -1;
 
     decompose_text(text, offset);
-    fill();
+    fill(false);
 
-    _enforceWinding = oldWinding;
-    _fringeWidth    = oldFringe;
+    _fringeWidth = oldFringe;
 }
 
 void canvas::stroke_text(point_f offset, utf8_string_view text)

@@ -140,7 +140,6 @@ public:
     void set_global_composite_operation(composite_operation op);
     void set_global_composite_blendfunc(blend_func sfactor, blend_func dfactor);
     void set_global_composite_blendfunc_separate(blend_func srcRGB, blend_func dstRGB, blend_func srcAlpha, blend_func dstAlpha);
-    void set_global_enforce_path_winding(bool force);
 
     // State handling
     void save();
@@ -179,10 +178,10 @@ public:
     void ellipse(point_f c, f32 rx, f32 ry);
     void circle(point_f c, f32 r);
 
-    void fill();
+    void fill(bool enforceWinding = true);
     void stroke();
 
-    void clip();
+    void clip(bool enforceWinding = true);
     void reset_clip();
 
     void clear();
@@ -264,7 +263,6 @@ private:
     size_i _windowSize;
 
     bool _edgeAntiAlias {true};
-    bool _enforceWinding {true};
 
     std::unordered_map<i32, asset_owner_ptr<render_texture>> _rtt {};
     i32                                                      _activeRtt {0};
