@@ -184,7 +184,7 @@ public:
     void clip(bool enforceWinding = true);
     void reset_clip();
 
-    void clear();
+    void clear(color color = colors::Transparent);
 
     // Extras
     void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.0f);

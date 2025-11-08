@@ -674,14 +674,14 @@ void canvas::reset_clip()
     _impl->render_clip({}, 0, {});
 }
 
-void canvas::clear()
+void canvas::clear(color color)
 {
     state&     s {_states->get()};
     auto const oldCO {s.CompositeOperation};
     auto const oldFill {s.Fill};
 
     set_global_composite_blendfunc(blend_func::One, blend_func::Zero);
-    set_fill_style(colors::Transparent);
+    set_fill_style(color);
     fill();
 
     s.CompositeOperation = oldCO;
