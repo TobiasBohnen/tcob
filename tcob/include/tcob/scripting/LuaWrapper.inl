@@ -350,6 +350,10 @@ inline void wrapper<WrappedType>::create_metatable(string const& name, bool gc, 
             push_metamethod("__eq",
                             std::function {[](WrappedType* instance1, WrappedType* instance2) { return *instance1 == *instance2; }},
                             tableIdx);
+        } else {
+            push_metamethod("__eq",
+                            std::function {[](WrappedType* instance1, WrappedType* instance2) { return instance1 == instance2; }},
+                            tableIdx);
         }
 
         // lt metamethod
