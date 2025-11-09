@@ -150,11 +150,6 @@ void game::step()
 
     if (!plt.process_events()) { queue_finish(); }
 
-    if (plt.window_frozen()) {
-        _lastUpdate      = clock::now().time_since_epoch();
-        _nextFixedUpdate = _lastUpdate + FIXED_FRAMES;
-    }
-
     // fixed update
     u8 fixedUpdateLoops {0};
     while (clock::now().time_since_epoch() > _nextFixedUpdate && fixedUpdateLoops < MAX_FRAME_SKIP) {

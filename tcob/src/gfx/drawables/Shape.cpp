@@ -125,17 +125,17 @@ void shape_batch::on_draw_to(render_target& target)
 
         isize maxPasses {0};
         for (auto& shape : _children) {
+            if (!shape->is_visible()) { continue; }
             maxPasses = std::max(maxPasses, shape->Material->pass_count());
         }
 
         for (auto& shape : _children) {
-            if (shape->is_visible()) {
-                for (isize p {0}; p < maxPasses; ++p) {
-                    if (p >= shape->Material->pass_count()) { continue; }
+            if (!shape->is_visible()) { continue; }
+            for (isize p {0}; p < maxPasses; ++p) {
+                if (p >= shape->Material->pass_count()) { continue; }
 
-                    auto const& pass {shape->Material->get_pass(p)};
-                    _renderer.add_geometry(shape->geometry(p), &pass);
-                }
+                auto const& pass {shape->Material->get_pass(p)};
+                _renderer.add_geometry(shape->geometry(p), &pass);
             }
         }
     }

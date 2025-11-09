@@ -163,11 +163,6 @@ auto sdl_platform::get_desktop_mode(i32 display) const -> gfx::display_mode
             .RefreshRate  = mode->refresh_rate};
 }
 
-auto sdl_platform::window_frozen() const -> bool
-{
-    return _wasPaused;
-}
-
 void sdl_platform::init_locales()
 {
     i32 count {};
@@ -247,15 +242,6 @@ void sdl_platform::init_render_system(string const& windowTitle)
     FrameLimit = config()[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
 
     logger::Info("Device: {}", renderSystem->device_name());
-
-#if defined(_MSC_VER)
-    SDL_SetWindowsMessageHook([](void* userdata, tagMSG* msg) -> bool {
-        auto* plt {reinterpret_cast<sdl_platform*>(userdata)};
-        plt->_wasPaused = msg->message == WM_NCLBUTTONDOWN; // left click on title bar
-        return true;
-    },
-                              this);
-#endif
 }
 
 void sdl_platform::init_input_system()

@@ -132,14 +132,14 @@ canvas::canvas()
 
 canvas::~canvas() = default;
 
-auto canvas::get_texture(i32 level) -> asset_ptr<texture>
+auto canvas::get_texture(i32 layer) -> asset_ptr<texture>
 {
-    return _rtt[level];
+    return _rtt[layer];
 }
 
-void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt, bool clear)
+void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 layer, bool clear)
 {
-    _activeRtt  = rtt;
+    _activeRtt  = layer;
     _windowSize = windowSize;
 
     auto& artt {_rtt[_activeRtt]};
