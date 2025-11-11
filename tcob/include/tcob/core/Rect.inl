@@ -138,7 +138,7 @@ auto constexpr rect<T>::as_intersection_with(rect const& other) const -> rect
         return {x1, y1, width, height};
     }
 
-    return {0, 0, 0, 0};
+    return rect::Zero;
 }
 
 template <Arithmetic T>
