@@ -60,13 +60,13 @@ auto tilemap_base::create_layer() -> tilemap_layer&
     return *_layers.emplace_back(std::unique_ptr<tilemap_layer>(new tilemap_layer {this}));
 }
 
-void tilemap_base::remove_layer(tilemap_layer const& layer)
+auto tilemap_base::remove_layer(tilemap_layer const& layer) -> bool
 {
-    helper::erase_first(_layers, [&layer](auto const& val) {
-        return static_cast<bool>(val.get() == &layer);
-    });
-
-    mark_dirty();
+    if (helper::erase_first(_layers, [&layer](auto const& val) { return static_cast<bool>(val.get() == &layer); })) {
+        mark_dirty();
+        return true;
+    }
+    return false;
 }
 
 void tilemap_base::clear()

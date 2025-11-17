@@ -175,7 +175,7 @@ public:
     template <std::derived_from<shape> T>
     auto create_shape() -> T&;
 
-    void remove_shape(shape const& shape);
+    auto remove_shape(shape const& shape) -> bool;
 
     void bring_to_front(shape const& shape);
     void send_to_back(shape const& shape);

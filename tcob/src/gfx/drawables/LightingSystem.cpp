@@ -46,18 +46,19 @@ lighting_system::lighting_system(bool multiThreaded)
     set_blend_funcs(funcs);
 }
 
-void lighting_system::remove_light_source(light_source const& light)
+auto lighting_system::remove_light_source(light_source const& light) -> bool
 {
-    helper::erase_first(_lightSources, [&light](auto const& val) {
+    auto const retValue {helper::erase_first(_lightSources, [&light](auto const& val) {
         if (val.get() == &light) {
             val.get()->_parent = nullptr;
             return true;
         }
 
         return false;
-    });
+    })};
 
     _isDirty = true;
+    return retValue;
 }
 
 void lighting_system::clear_light_sources()
@@ -72,23 +73,24 @@ void lighting_system::notify_light_changed(light_source* /* light */)
     _isDirty = true;
 }
 
-void lighting_system::remove_shadow_caster(shadow_caster const& shadow)
+auto lighting_system::remove_shadow_caster(shadow_caster const& shadow) -> bool
 {
     if (_quadTree && shadow._bounds != rect_f::Zero) {
         _quadTree->remove({.Bounds = shadow._bounds, .Caster = &shadow});
         mark_lights_dirty();
     }
 
-    helper::erase_first(_shadowCasters, [&shadow](auto const& val) {
+    auto const retValue {helper::erase_first(_shadowCasters, [&shadow](auto const& val) {
         if (val.get() == &shadow) {
             val.get()->_parent = nullptr;
             return true;
         }
 
         return false;
-    });
+    })};
 
     _isDirty = true;
+    return retValue;
 }
 
 void lighting_system::clear_shadow_casters()

@@ -62,7 +62,7 @@ public:
 
     auto create_layer() -> parallax_background_layer&;
 
-    void remove_layer(parallax_background_layer const& layer);
+    auto remove_layer(parallax_background_layer const& layer) -> bool;
     void clear();
 
 protected:

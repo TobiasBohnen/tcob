@@ -73,7 +73,7 @@ public:
 
     auto create_layer() -> tilemap_layer&;
 
-    void remove_layer(tilemap_layer const& layer);
+    auto remove_layer(tilemap_layer const& layer) -> bool;
     void clear();
 
     void bring_to_front(tilemap_layer const& layer);

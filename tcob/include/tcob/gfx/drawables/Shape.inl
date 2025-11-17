@@ -13,6 +13,7 @@ namespace tcob::gfx {
 template <std::derived_from<shape> T>
 inline auto shape_batch::create_shape() -> T&
 {
+    _isDirty = true;
     return static_cast<T&>(*_children.emplace_back(std::make_unique<T>()));
 }
 

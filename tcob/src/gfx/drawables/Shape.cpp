@@ -34,14 +34,20 @@ shape_batch::shape_batch()
     _children.reserve(32);
 }
 
-void shape_batch::remove_shape(shape const& shape)
+auto shape_batch::remove_shape(shape const& shape) -> bool
 {
-    helper::erase_first(_children, [&shape](auto const& val) { return val.get() == &shape; });
+    if (helper::erase_first(_children, [&shape](auto const& val) { return val.get() == &shape; })) {
+        _isDirty = true;
+        return true;
+    }
+
+    return false;
 }
 
 void shape_batch::clear()
 {
     _children.clear();
+    _isDirty = true;
 }
 
 void shape_batch::bring_to_front(shape const& shape)
@@ -49,6 +55,7 @@ void shape_batch::bring_to_front(shape const& shape)
     auto it {std::ranges::find_if(_children, [&shape](auto const& val) { return val.get() == &shape; })};
     if (it != _children.end()) {
         std::rotate(it, it + 1, _children.end());
+        _isDirty = true;
     }
 }
 
@@ -57,6 +64,7 @@ void shape_batch::send_to_back(shape const& shape)
     auto it {std::ranges::find_if(_children, [&shape](auto const& val) { return val.get() == &shape; })};
     if (it != _children.end()) {
         std::rotate(_children.begin(), it, it + 1);
+        _isDirty = true;
     }
 }
 
@@ -103,7 +111,6 @@ auto shape_batch::intersect(rect_f const& rect, u32 mask) const -> std::vector<s
 
 void shape_batch::on_update(milliseconds deltaTime)
 {
-    _isDirty = false;
     for (auto& child : _children) {
         if (child->is_dirty()) { _isDirty = true; }
 

@@ -55,9 +55,9 @@ auto parallax_background::create_layer() -> parallax_background_layer&
     return *_layers.emplace_back(std::make_unique<parallax_background_layer>());
 }
 
-void parallax_background::remove_layer(parallax_background_layer const& layer)
+auto parallax_background::remove_layer(parallax_background_layer const& layer) -> bool
 {
-    helper::erase_first(_layers, [&layer](auto const& val) { return val.get() == &layer; });
+    return helper::erase_first(_layers, [&layer](auto const& val) { return val.get() == &layer; });
 }
 
 void parallax_background::clear()

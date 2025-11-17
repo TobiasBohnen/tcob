@@ -82,7 +82,7 @@ public:
 
     auto create_emitter(auto&&... args) -> Emitter&;
 
-    void remove_emitter(emitter_type const& emitter);
+    auto remove_emitter(emitter_type const& emitter) -> bool;
     void clear_emitters();
 
     auto particle_count() const -> isize;
