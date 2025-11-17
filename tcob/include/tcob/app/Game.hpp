@@ -31,6 +31,7 @@ public:
         path                        ConfigFile {"config.ini"};    //!< The configuration file name.
         std::optional<data::object> ConfigDefaults {std::nullopt};
         std::optional<isize>        WorkerThreads {std::nullopt}; //!< The number of concurrent asynchronous threads.
+        milliseconds                FixedStep {1000.0f / 50.0f};
     };
 
     explicit game(init const& gameInit);
@@ -82,6 +83,7 @@ private:
     bool         _forceQuit {false};
     milliseconds _nextFixedUpdate {};
     milliseconds _lastUpdate {};
+    milliseconds _fixedStep {};
 };
 
 }

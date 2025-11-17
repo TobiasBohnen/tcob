@@ -30,8 +30,7 @@
 
 namespace tcob {
 
-constexpr milliseconds FIXED_FRAMES {1000.0f / 50.0f};
-constexpr u8           MAX_FRAME_SKIP {10};
+constexpr u8 MAX_FRAME_SKIP {10};
 
 game::game(init const& gameInit)
 {
@@ -47,6 +46,8 @@ game::game(init const& gameInit)
 
     register_service<platform>(platform::Init(i));
     locate_service<input::system>().KeyDown.connect<&game::on_key_down>(this);
+
+    _fixedStep = gameInit.FixedStep;
 }
 
 game::~game()
@@ -153,8 +154,8 @@ void game::step()
     // fixed update
     u8 fixedUpdateLoops {0};
     while (clock::now().time_since_epoch() > _nextFixedUpdate && fixedUpdateLoops < MAX_FRAME_SKIP) {
-        FixedUpdate(FIXED_FRAMES);
-        _nextFixedUpdate += FIXED_FRAMES;
+        FixedUpdate(_fixedStep);
+        _nextFixedUpdate += _fixedStep;
         fixedUpdateLoops++;
     }
 
