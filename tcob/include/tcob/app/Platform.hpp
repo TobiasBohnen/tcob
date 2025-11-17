@@ -33,9 +33,7 @@ public:
 
     auto config() const -> data::config_file&;
 
-    virtual auto displays() const -> std::map<i32, gfx::display>          = 0;
-    virtual auto get_desktop_mode(i32 display) const -> gfx::display_mode = 0;
-
+    virtual auto displays() const -> std::map<i32, gfx::display>         = 0;
     virtual auto preferred_locales() const -> std::vector<locale> const& = 0;
 
     virtual auto process_events() const -> bool = 0;

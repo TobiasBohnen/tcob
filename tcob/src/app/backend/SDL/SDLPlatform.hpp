@@ -23,7 +23,6 @@ public:
     ~sdl_platform() override;
 
     auto displays() const -> std::map<i32, gfx::display> override;
-    auto get_desktop_mode(i32 display) const -> gfx::display_mode override;
 
     auto preferred_locales() const -> std::vector<locale> const& override;
 

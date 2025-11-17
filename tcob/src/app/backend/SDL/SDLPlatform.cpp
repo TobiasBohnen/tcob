@@ -155,14 +155,6 @@ auto sdl_platform::displays() const -> std::map<i32, gfx::display>
     return retValue;
 }
 
-auto sdl_platform::get_desktop_mode(i32 display) const -> gfx::display_mode
-{
-    auto const* mode {SDL_GetDesktopDisplayMode(display)};
-    return {.Size         = {mode->w, mode->h},
-            .PixelDensity = mode->pixel_density,
-            .RefreshRate  = mode->refresh_rate};
-}
-
 void sdl_platform::init_locales()
 {
     i32 count {};
