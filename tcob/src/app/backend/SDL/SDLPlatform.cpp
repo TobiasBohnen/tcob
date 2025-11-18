@@ -193,6 +193,14 @@ void sdl_platform::init_audio_system()
     register_service<audio::system>(system);
 }
 
+static auto desktop_size() -> size_i
+{
+    i32         numDisplays {};
+    auto*       displayID {SDL_GetDisplays(&numDisplays)};
+    auto const* mode {SDL_GetDesktopDisplayMode(displayID[0])};
+    return {mode->w, mode->h};
+}
+
 void sdl_platform::init_render_system(string const& windowTitle)
 {
     auto& rsFactory {register_service<gfx::render_system::factory>()};
@@ -216,7 +224,7 @@ void sdl_platform::init_render_system(string const& windowTitle)
     if (!renderSystem) { throw std::runtime_error("Render system creation failed"); }
 
     register_service<gfx::render_system>(renderSystem);
-    auto& window {renderSystem->init_window(video, windowTitle, displays().begin()->second.DesktopMode.Size)};
+    auto& window {renderSystem->init_window(video, windowTitle, desktop_size())};
     window.FullScreen.Changed.connect([this](bool value) {
         config()[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
     });
@@ -224,7 +232,7 @@ void sdl_platform::init_render_system(string const& windowTitle)
         config()[Cfg::Video::Name][Cfg::Video::vsync] = value;
     });
     window.Resized.connect([this, &window](auto const&) {
-        config()[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = (window.Size == displays().begin()->second.DesktopMode.Size);
+        config()[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = (window.Size == desktop_size());
         config()[Cfg::Video::Name][Cfg::Video::resolution]             = *window.Size;
     });
 
