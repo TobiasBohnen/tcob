@@ -198,6 +198,8 @@ batch_polygon_renderer::batch_polygon_renderer()
 
 void batch_polygon_renderer::add_geometry(geometry_data const& gd, pass const* pass)
 {
+    if (gd.Vertices.empty()) { return; }
+
     // check if we have to break the batch
     if (_currentBatch.NumInds > 0 && (_currentBatch.Type != gd.Type || *_currentBatch.Pass != *pass)) {
         _batches.push_back(_currentBatch);

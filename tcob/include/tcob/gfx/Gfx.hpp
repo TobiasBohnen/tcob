@@ -62,7 +62,7 @@ class TCOB_API blend_funcs final {
 public:
     blend_func SourceColorBlendFunc {blend_func::SrcAlpha};
     blend_func DestinationColorBlendFunc {blend_func::OneMinusSrcAlpha};
-    blend_func SourceAlphaBlendFunc {blend_func::SrcAlpha};
+    blend_func SourceAlphaBlendFunc {blend_func::One};
     blend_func DestinationAlphaBlendFunc {blend_func::OneMinusSrcAlpha};
 
     auto operator==(blend_funcs const& other) const -> bool = default;
