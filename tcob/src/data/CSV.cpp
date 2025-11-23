@@ -54,7 +54,7 @@ auto csv_table::parse(string const& csv, settings s) -> bool
             } else if (Rows.width() != static_cast<i32>(r.size())) {
                 return false;
             }
-            Rows.append(r);
+            Rows.append_row(r);
         }
         r.clear();
         return true;
@@ -120,7 +120,7 @@ auto csv_table::save(path const& file, settings s) const -> bool
 auto csv_table::save(io::ostream& out, settings s) const -> bool
 {
     if (!Header.empty()) { write_line(Header, out, s); }
-    for (isize j {0}; j < Rows.size().Height; ++j) {
+    for (i32 j {0}; j < Rows.size().Height; ++j) {
         write_line(Rows.row(j), out, s);
     }
 

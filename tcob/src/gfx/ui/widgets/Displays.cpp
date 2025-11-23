@@ -65,7 +65,9 @@ void dot_matrix_display::on_draw(widget_painter& painter)
     f32 const height {rect.height() / Dots->height()};
 
     for (auto const& [colorIdx, dots] : _sortedDots) {
-        canvas.set_fill_style(_style.Colors.at(colorIdx));
+        auto const col {_style.Colors.at(colorIdx)};
+        if (col.A == 0) { continue; }
+        canvas.set_fill_style(col);
         canvas.begin_path();
 
         for (auto const& dot : dots) {
@@ -93,7 +95,7 @@ void dot_matrix_display::on_update(milliseconds /* deltaTime */)
     i32 const   width {Dots->width()};
     auto const& dots {*Dots};
     _sortedDots.clear();
-    for (isize idx {0}; idx < dots.count(); ++idx) {
+    for (i32 idx {0}; idx < dots.count(); ++idx) {
         _sortedDots[dots[idx]].emplace_back(static_cast<i32>(idx % width), static_cast<i32>(idx / width));
     }
 }

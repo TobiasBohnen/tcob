@@ -38,8 +38,8 @@ grid_view::grid_view(init const& wi)
 {
     Grid.Changed.connect([this](auto const& val) {
         _columnSizes.resize(val.width());
-        for (isize y {0}; y < val.height(); ++y) {
-            for (isize x {0}; x < val.width(); ++x) {
+        for (i32 y {0}; y < val.height(); ++y) {
+            for (i32 x {0}; x < val.width(); ++x) {
                 _columnSizes[x] = std::max(_columnSizes[x], std::ssize(val[x, y].Text));
             }
         }

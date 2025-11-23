@@ -21,14 +21,14 @@ inline grid<T>::grid(size_type size, T const& defaultValue)
 }
 
 template <typename T>
-inline auto grid<T>::operator[](this auto&& self, isize idx) -> decltype(auto)
+inline auto grid<T>::operator[](this auto&& self, i32 idx) -> decltype(auto)
 {
     assert(idx < std::ssize(self._data));
     return self._data[static_cast<usize>(idx)];
 }
 
 template <typename T>
-inline auto grid<T>::operator[](this auto&& self, isize x, isize y) -> decltype(auto)
+inline auto grid<T>::operator[](this auto&& self, i32 x, i32 y) -> decltype(auto)
 {
     return self.operator[](self.get_index(x, y));
 }
@@ -40,7 +40,7 @@ inline auto grid<T>::operator[](this auto&& self, point_type pos) -> decltype(au
 }
 
 template <typename T>
-inline auto grid<T>::row(this auto&& self, isize row) -> decltype(auto)
+inline auto grid<T>::row(this auto&& self, i32 row) -> decltype(auto)
 {
     assert(row >= 0 && row < self._size.Height);
     auto const w {self.width()};
@@ -69,22 +69,46 @@ inline void grid<T>::assign(point_type pos, std::span<T const> values)
 }
 
 template <typename T>
-inline void grid<T>::append(std::initializer_list<T> values)
+inline void grid<T>::blit(rect_type const& bounds, std::span<T const> values)
 {
-    append(std::span<T const>(values));
+    assert(bounds.right() <= width());
+    assert(bounds.bottom() <= height());
+    assert(bounds.left() >= 0);
+    assert(bounds.top() >= 0);
+    assert(values.size() == bounds.width() * bounds.height());
+
+    i32 const dstX {bounds.left()};
+    i32 const dstY {bounds.top()};
+    i32 const w {bounds.width()};
+    i32 const h {bounds.height()};
+
+    assert(w > 0 && h > 0);
+
+    for (i32 row {0}; row < h; ++row) {
+        i32 const srcIndex {row * w};
+        i32 const dstIndex {get_index(dstX, dstY + row)};
+
+        std::copy_n(values.begin() + srcIndex, w, _data.begin() + dstIndex);
+    }
 }
 
 template <typename T>
-inline void grid<T>::append(std::span<T const> values)
+inline void grid<T>::append_row(std::initializer_list<T> values)
 {
-    assert(static_cast<dimension_type>(values.size()) == width());
+    append_row(std::span<T const>(values));
+}
+
+template <typename T>
+inline void grid<T>::append_row(std::span<T const> values)
+{
+    assert(static_cast<i32>(values.size()) == width());
     _data.insert(_data.end(), values.begin(), values.end());
     // _data.append_range(values);
     ++_size.Height;
 }
 
 template <typename T>
-inline void grid<T>::erase(isize row)
+inline void grid<T>::erase_row(i32 row)
 {
     assert(row >= 0 && row < _size.Height);
 
@@ -121,13 +145,13 @@ inline auto grid<T>::data(this auto&& self) -> decltype(auto)
 }
 
 template <typename T>
-inline auto grid<T>::height() const -> dimension_type
+inline auto grid<T>::height() const -> i32
 {
     return _size.Height;
 }
 
 template <typename T>
-inline auto grid<T>::width() const -> dimension_type
+inline auto grid<T>::width() const -> i32
 {
     return _size.Width;
 }
@@ -139,9 +163,9 @@ inline auto grid<T>::size() const -> size_type
 }
 
 template <typename T>
-inline auto grid<T>::count() const -> isize
+inline auto grid<T>::count() const -> i32
 {
-    return std::ssize(_data);
+    return static_cast<i32>(_data.size());
 }
 
 template <typename T>
@@ -152,9 +176,10 @@ inline void grid<T>::resize(size_type newSize)
 }
 
 template <typename T>
-inline auto grid<T>::get_index(isize x, isize y) const -> isize
+inline auto grid<T>::get_index(i32 x, i32 y) const -> i32
 {
     assert(x >= 0 && y >= 0);
+    assert(x < _size.Width && y < _size.Height);
     return (y * _size.Width) + x;
 }
 
@@ -190,14 +215,14 @@ inline static_grid<T, Width, Height>::static_grid(std::initializer_list<std::ini
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](this auto&& self, isize idx) -> decltype(auto)
+inline auto static_grid<T, Width, Height>::operator[](this auto&& self, i32 idx) -> decltype(auto)
 {
     assert(idx < std::ssize(self._data));
     return self._data[static_cast<usize>(idx)];
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](this auto&& self, isize x, isize y) -> decltype(auto)
+inline auto static_grid<T, Width, Height>::operator[](this auto&& self, i32 x, i32 y) -> decltype(auto)
 {
     return self.operator[](self.get_index(x, y));
 }
@@ -206,6 +231,14 @@ template <typename T, usize Width, usize Height>
 inline auto static_grid<T, Width, Height>::operator[](this auto&& self, point_type pos) -> decltype(auto)
 {
     return self.operator[](pos.X, pos.Y);
+}
+
+template <typename T, usize Width, usize Height>
+inline static_grid<T, Width, Height>::operator grid<T>() const
+{
+    grid<T> retValue {{static_cast<i32>(Width), static_cast<i32>(Height)}};
+    std::copy(_data.begin(), _data.end(), retValue.data().begin());
+    return retValue;
 }
 
 template <typename T, usize Width, usize Height>
@@ -233,13 +266,13 @@ inline auto static_grid<T, Width, Height>::data(this auto&& self) -> decltype(au
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::height() const -> dimension_type
+inline auto static_grid<T, Width, Height>::height() const -> i32
 {
     return Height;
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::width() const -> dimension_type
+inline auto static_grid<T, Width, Height>::width() const -> i32
 {
     return Width;
 }
@@ -257,9 +290,10 @@ inline auto static_grid<T, Width, Height>::count() const -> usize
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::get_index(isize x, isize y) const -> isize
+inline auto static_grid<T, Width, Height>::get_index(i32 x, i32 y) const -> i32
 {
     assert(x >= 0 && y >= 0);
+    assert(x < Width && y < Height);
     return (y * Width) + x;
 }
 
