@@ -477,7 +477,6 @@ void path_cache::append_commands(std::span<f32 const> vals, transform const& xfo
     if (static_cast<i32>(vals[0]) != Close && static_cast<i32>(vals[0]) != Winding) {
         _commandPoint = {vals[size - 2], vals[size - 1]};
     }
-    _commands.reserve(_commands.size() + size);
 
     // transform commands
     point_f p;
