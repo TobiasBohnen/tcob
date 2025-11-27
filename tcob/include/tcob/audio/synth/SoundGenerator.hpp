@@ -29,7 +29,6 @@ public:
 
     i32 SampleRate {44100};
 
-    // Wave type (square, sawtooth, sine, noise)
     type WaveType {type::Square};
 
     // Wave envelope parameters
