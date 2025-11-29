@@ -59,8 +59,8 @@ static auto EnumerateCallback(void* data, char const* origdir, char const* fname
 
     auto* cd {static_cast<callback_data*>(data)};
 
-    string folder {origdir};
-    string file {fname};
+    string       folder {origdir};
+    string const file {fname};
     if (!folder.ends_with("/")) { folder += "/"; }
     string const entry {folder == "/" ? file : folder + file};
 
