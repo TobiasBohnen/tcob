@@ -62,7 +62,6 @@ void dot_matrix_display::on_draw(widget_painter& painter)
     canvas.save();
 
     f32 const width {rect.width() / Dots->width()};
-    f32 const height {rect.height() / Dots->height()};
 
     for (auto const& [colorIdx, dots] : _sortedDots) {
         auto const col {_style.Colors.at(colorIdx)};
@@ -72,11 +71,11 @@ void dot_matrix_display::on_draw(widget_painter& painter)
 
         for (auto const& dot : dots) {
             rect_f const dotRect {(static_cast<f32>(dot.X) * width) + rect.left(),
-                                  (static_cast<f32>(dot.Y) * height) + rect.top(),
-                                  width, height};
+                                  (static_cast<f32>(dot.Y) * width) + rect.top(),
+                                  width, width};
 
             switch (_style.Type) {
-            case dot_type::Disc:   canvas.ellipse(dotRect.center(), width / 2, height / 2); break;
+            case dot_type::Disc:   canvas.circle(dotRect.center(), width / 2); break;
             case dot_type::Square: canvas.rect(dotRect); break;
             }
         }
