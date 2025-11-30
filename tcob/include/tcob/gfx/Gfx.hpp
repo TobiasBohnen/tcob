@@ -163,8 +163,8 @@ enum class horizontal_alignment : u8 {
 
 enum class vertical_alignment : u8 {
     Top,
-    Middle,
-    Bottom
+    Bottom,
+    Middle
 };
 
 ////////////////////////////////////////////////////////////

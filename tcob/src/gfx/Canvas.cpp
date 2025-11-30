@@ -974,24 +974,24 @@ void canvas::draw_text(point_f offset, text_formatter::result const& formatResul
     render_text(s.Font, {verts.data(), nverts});
 }
 
-void canvas::fill_text(point_f offset, utf8_string_view text)
+void canvas::fill_text(rect_f const& rect, utf8_string_view text)
 {
     f32 const oldFringe {_fringeWidth};
     _fringeWidth = -1;
 
-    decompose_text(text, offset);
+    decompose_text(text, rect);
     fill(false);
 
     _fringeWidth = oldFringe;
 }
 
-void canvas::stroke_text(point_f offset, utf8_string_view text)
+void canvas::stroke_text(rect_f const& rect, utf8_string_view text)
 {
-    decompose_text(text, offset);
+    decompose_text(text, rect);
     stroke();
 }
 
-void canvas::decompose_text(utf8_string_view text, point_f offset)
+void canvas::decompose_text(utf8_string_view text, rect_f const& rect)
 {
     begin_path();
 
@@ -1003,7 +1003,24 @@ void canvas::decompose_text(utf8_string_view text, point_f offset)
     cb.LineTo  = [this, &cb](point_f p) { line_to(p + cb.Offset); };
     cb.ConicTo = [this, &cb](point_f p0, point_f p1) { quad_bezier_to(p0 + cb.Offset, p1 + cb.Offset); };
     cb.CubicTo = [this, &cb](point_f p0, point_f p1, point_f p2) { cubic_bezier_to(p0 + cb.Offset, p1 + cb.Offset, p2 + cb.Offset); };
-    cb.Offset  = offset;
+
+    point_f     offset {rect.Position};
+    auto const& align {s.TextAlign};
+    if (align.Horizontal != horizontal_alignment::Left || align.Vertical != vertical_alignment::Top) {
+        auto const textSize {measure_text(rect.height(), text) + size_f {s.StrokeWidth, s.StrokeWidth}};
+        switch (align.Horizontal) {
+        case horizontal_alignment::Left:     break;
+        case horizontal_alignment::Right:    offset.X = rect.right() - textSize.Width; break;
+        case horizontal_alignment::Centered: offset.X = rect.left() + ((rect.width() - textSize.Width) / 2); break;
+        }
+        switch (align.Vertical) {
+        case vertical_alignment::Top:    break;
+        case vertical_alignment::Bottom: offset.Y = rect.bottom() - textSize.Height; break;
+        case vertical_alignment::Middle: offset.Y = rect.top() + ((rect.height() - textSize.Height) / 2); break;
+        }
+    }
+
+    cb.Offset = offset;
 
     s.Font->decompose_text(text, true, cb);
 }
