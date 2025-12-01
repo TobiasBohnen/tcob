@@ -78,7 +78,7 @@ inline auto particle_system<Emitter>::remove_emitter(emitter_type const& emitter
 }
 
 template <typename Emitter>
-inline void particle_system<Emitter>::clear_emitters()
+inline void particle_system<Emitter>::clear()
 {
     _emitters.clear();
     stop();

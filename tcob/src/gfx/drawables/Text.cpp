@@ -72,7 +72,7 @@ void text::format()
 {
     // clear quads
     _quads.clear();
-    Effects.clear_quads();
+    Effects.clear();
 
     _needsFormat = false;
 

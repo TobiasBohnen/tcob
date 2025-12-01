@@ -38,7 +38,7 @@ namespace detail {
         _srcQuads.push_back(q);
     }
 
-    void quad_tween_base::clear_quads()
+    void quad_tween_base::clear()
     {
         _dstQuads.clear();
         _srcQuads.clear();
@@ -83,10 +83,10 @@ auto quad_tweens::has(u8 id) const -> bool
     return _effects.contains(id);
 }
 
-void quad_tweens::clear_quads()
+void quad_tweens::clear()
 {
     for (auto& [_, effect] : _effects) {
-        effect->clear_quads();
+        effect->clear();
     }
 }
 

@@ -167,7 +167,7 @@ auto scene_node::get_child_at(isize index) const -> scene_node&
     return *_children.at(static_cast<usize>(index));
 }
 
-void scene_node::clear_children()
+void scene_node::clear()
 {
     _children.clear();
 }

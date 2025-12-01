@@ -36,7 +36,7 @@ public:
     auto create_child() -> scene_node&;
     auto child_count() const -> isize;
     auto get_child_at(isize index) const -> scene_node&;
-    void clear_children();
+    void clear();
 
     void bring_to_front();
     void send_to_back();
