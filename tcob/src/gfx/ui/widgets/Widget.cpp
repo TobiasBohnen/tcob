@@ -162,6 +162,16 @@ auto widget::hit_test(point_i pos) const -> bool
 
 auto widget::current_style() const -> widget_style const*
 {
+    if (!_currentStyle) {
+        widget_style_selectors const newSelectors {
+            .Class      = Class,
+            .Flags      = {},
+            .Attributes = attributes(),
+        };
+
+        return dynamic_cast<widget_style*>(_form->Styles->get(newSelectors));
+    }
+
     return _currentStyle;
 }
 
