@@ -24,12 +24,18 @@ template <typename R, typename... Args>
 inline auto native_closure<R(Args...)>::operator()(state_view view) -> i32
 {
     std::tuple<std::remove_cvref_t<Args>...> params;
-    std::apply(
+
+    bool const result {std::apply(
         [&view](auto&&... item) {
             [[maybe_unused]] i32 idx {1};
-            (view.pull_convert(idx, item), ...);
+            return (view.pull_convert(idx, item) && ...);
         },
-        params);
+        params)};
+
+    if (!result) {
+        view.error("parameter type mismatch");
+        return 0;
+    }
 
     i32 const oldTop {view.get_top()};
     if constexpr (std::is_void_v<R>) {
@@ -91,12 +97,14 @@ inline auto native_overload<Funcs...>::try_call_func(state_view view, i32 top, s
 {
     if (top == sizeof...(Args) && compare_types(view, 1, func)) {
         std::tuple<std::remove_cvref_t<Args>...> params;
-        std::apply(
+
+        bool const result {std::apply(
             [&view](auto&&... item) {
                 [[maybe_unused]] i32 idx {1};
-                (view.pull_convert(idx, item), ...);
+                return (view.pull_convert(idx, item) && ...);
             },
-            params);
+            params)};
+        if (!result) { return false; }
 
         if constexpr (std::is_void_v<R>) {
             std::apply(func, params);
