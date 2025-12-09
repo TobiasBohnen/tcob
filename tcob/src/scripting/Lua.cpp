@@ -5,9 +5,11 @@
 
 #include "tcob/scripting/Lua.hpp"
 
-#include <lauxlib.h>
-#include <lua.h>
-#include <lualib.h>
+extern "C" {
+#include "lauxlib.h"
+#include "lua.h"
+#include "lualib.h"
+}
 
 #include <optional>
 #include <unordered_map>

@@ -215,7 +215,11 @@ struct converter<T> {
             view.pop(2); // stack: -1 => key; -2 => table
         }
 
-        view.pop(1);     // stack: -1 => table
+        if (!retValue) {
+            value.clear();
+        }
+
+        view.pop(1); // stack: -1 => table
 
         idx++;
         return retValue;
@@ -277,6 +281,11 @@ struct converter<T> {
             view.pop(1);
             if (retValue) { value.insert(val); }
         }
+
+        if (!retValue) {
+            value.clear();
+        }
+
         idx++;
 
         return retValue;
@@ -451,6 +460,11 @@ struct converter<T> {
                 break;
             }
         }
+
+        if (!retValue) {
+            value.clear();
+        }
+
         idx++;
 
         return retValue;
@@ -850,7 +864,7 @@ struct converter<T> {
 
             void* ptr {nullptr};
 
-            if (userDataType == TypeName) {
+            if (userDataType == TypeName || std::is_void_v<std::remove_pointer_t<T>>) {
                 ptr = view.to_userdata(idx++);
             } else {
                 // try metatable
