@@ -852,6 +852,12 @@ struct converter<T> {
 
     static auto From(state_view view, i32& idx, T& value) -> bool
     {
+        if (view.is_nil(idx)) {
+            value = nullptr;
+            idx++;
+            return true;
+        }
+
         static char const* TypeName {typeid(std::remove_pointer_t<T>).name()};
 
         if (view.is_userdata(idx)) {
@@ -894,12 +900,18 @@ struct converter<T> {
             }
         } else {
             idx++;
-            return false;
         }
+
+        return false;
     }
 
     static void To(state_view view, T const& value)
     {
+        if (value == nullptr) {
+            view.push_nil();
+            return;
+        }
+
         static char const* TypeName {typeid(std::remove_pointer_t<T>).name()};
 
         T* obj {static_cast<T*>(view.new_userdata(sizeof(T*)))};
