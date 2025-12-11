@@ -323,10 +323,10 @@ inline void wrapper<WrappedType>::create_metatable(string const& name, bool gc, 
 
     // index metamethod
     push_metamethod("__index",
-                    std::function {[this](WrappedType* instance, std::variant<i32, string>& arg) {
+                    std::function {[this](WrappedType* instance, std::variant<i32, char const*>& arg) {
                         if (auto* arg0 {std::get_if<i32>(&arg)}) {
                             this->index(instance, *arg0);
-                        } else if (auto* arg1 {std::get_if<string>(&arg)}) {
+                        } else if (auto* arg1 {std::get_if<char const*>(&arg)}) {
                             this->index(instance, *arg1);
                         }
                     }},
@@ -334,10 +334,10 @@ inline void wrapper<WrappedType>::create_metatable(string const& name, bool gc, 
 
     // newindex metamethod
     push_metamethod("__newindex",
-                    std::function {[this](WrappedType* instance, std::variant<i32, string>& arg) {
+                    std::function {[this](WrappedType* instance, std::variant<i32, char const*>& arg) {
                         if (auto* arg0 {std::get_if<i32>(&arg)}) {
                             this->newindex(instance, *arg0);
-                        } else if (auto* arg1 {std::get_if<string>(&arg)}) {
+                        } else if (auto* arg1 {std::get_if<char const*>(&arg)}) {
                             this->newindex(instance, *arg1);
                         }
                     }},
@@ -474,7 +474,7 @@ inline void wrapper<WrappedType>::index(WrappedType* b, i32 arg)
 }
 
 template <typename WrappedType>
-inline void wrapper<WrappedType>::index(WrappedType* b, string const& arg)
+inline void wrapper<WrappedType>::index(WrappedType* b, char const* arg)
 {
     if constexpr (detail::StringIndexable<WrappedType>) {
         _view.push_convert((*b)[arg]);
@@ -508,12 +508,12 @@ inline void wrapper<WrappedType>::newindex(WrappedType* b, i32 arg)
 
         (*b)[static_cast<typename WrappedType::size_type>(arg - 1)] = val;
     } else {
-        _view.error("unknown set: " + std::to_string(arg));
+        _view.error("unknown set: %d", arg);
     }
 }
 
 template <typename WrappedType>
-inline void wrapper<WrappedType>::newindex(WrappedType* b, string const& arg)
+inline void wrapper<WrappedType>::newindex(WrappedType* b, char const* arg)
 {
     _view.remove(2); // remove arg
     if constexpr (detail::StringIndexable<WrappedType>) {
@@ -523,7 +523,7 @@ inline void wrapper<WrappedType>::newindex(WrappedType* b, string const& arg)
     } else {
         unknown_set_event ev {b, arg, _view};
         UnknownSet(ev);
-        if (!ev.Handled) { _view.error("unknown set: " + arg); }
+        if (!ev.Handled) { _view.error("unknown set: %s", arg); }
     }
     _view.pop(_view.get_top());
 }

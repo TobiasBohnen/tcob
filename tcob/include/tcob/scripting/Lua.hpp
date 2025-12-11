@@ -291,7 +291,7 @@ public:
     auto resume(i32 argCount) const -> coroutine_status;
     auto close_thread() const -> bool;
 
-    void error(string const& message) const;
+    void error [[noreturn]] (char const* message, ...) const;
 
     void call(i32 nargs) const;
     auto pcall(i32 nargs) const -> std::optional<error_code>;

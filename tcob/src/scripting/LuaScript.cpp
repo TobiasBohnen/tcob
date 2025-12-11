@@ -146,11 +146,6 @@ void script::remove_hook()
     _view.set_hook(nullptr, 0, 0);
 }
 
-void script::raise_error(string const& message)
-{
-    _view.error(message);
-}
-
 void script::clear_wrappers()
 {
     _wrappers.clear();

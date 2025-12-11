@@ -147,10 +147,10 @@ private:
     void push_metamethod(string const& methodname, std::function<R(P...)>&& func, i32 tableIdx);
 
     void index(WrappedType* b, i32 arg);
-    void index(WrappedType* b, string const& arg);
+    void index(WrappedType* b, char const* arg);
 
     void newindex(WrappedType* b, i32 arg);
-    void newindex(WrappedType* b, string const& arg);
+    void newindex(WrappedType* b, char const* arg);
 
     static auto gc(lua_State* l) -> i32;
 

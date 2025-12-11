@@ -21,7 +21,6 @@
 #include "tcob/scripting/LuaWrapper.hpp"
 #include "tcob/scripting/Scripting.hpp"
 
-
 namespace tcob::scripting {
 ////////////////////////////////////////////////////////////
 
@@ -74,8 +73,6 @@ public:
 
     void set_hook(HookFunc&& func, debug_mask mask = {});
     void remove_hook();
-
-    void raise_error(string const& message);
 
 private:
     void clear_wrappers();

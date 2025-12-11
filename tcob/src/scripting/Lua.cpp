@@ -11,6 +11,7 @@ extern "C" {
 #include "lualib.h"
 }
 
+#include <cstdarg>
 #include <optional>
 #include <unordered_map>
 #include <utility>
@@ -469,9 +470,14 @@ auto state_view::close_thread() const -> bool
     return lua_closethread(_state, nullptr) == LUA_OK;
 }
 
-void state_view::error(string const& message) const
+void state_view::error(char const* message, ...) const
 {
-    luaL_error(_state, message.c_str());
+    va_list args {};
+    va_start(args, message);
+    lua_pushvfstring(_state, message, args);
+    va_end(args);
+    lua_error(_state);
+    std::unreachable();
 }
 
 void state_view::call(i32 nargs) const
