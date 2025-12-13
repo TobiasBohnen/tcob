@@ -21,9 +21,6 @@ extern "C" {
 
 namespace tcob::scripting {
 
-static_assert(NOREF == LUA_NOREF);
-static_assert(REGISTRYINDEX == LUA_REGISTRYINDEX);
-
 ////////////////////////////////////////////////////////////
 
 debug::debug(state_view* view, lua_Debug* ar)
@@ -648,4 +645,15 @@ auto garbage_collector::count() const -> i32
 }
 
 ////////////////////////////////////////////////////////////
+
+auto NO_REF() -> i32
+{
+    return LUA_NOREF;
+}
+
+auto REGISTRY_INDEX() -> i32
+{
+    return LUA_REGISTRYINDEX;
+}
+
 }

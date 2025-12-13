@@ -31,7 +31,7 @@ auto ref::operator=(ref const& other) noexcept -> ref&
         if (other._view.is_valid()) {
             other.push_self();
             acquire(other._view, -1);
-            if (_ref != NOREF) {
+            if (_ref != NO_REF()) {
                 _view.pop(1); // pop extra copy
             }
         }
@@ -42,7 +42,7 @@ auto ref::operator=(ref const& other) noexcept -> ref&
 
 ref::ref(ref&& other) noexcept
     : _view {std::exchange(other._view, state_view {nullptr})}
-    , _ref {std::exchange(other._ref, NOREF)}
+    , _ref {std::exchange(other._ref, NO_REF())}
 {
 }
 
@@ -65,15 +65,15 @@ void ref::acquire(state_view view, i32 idx)
 
     if (_view.is_valid()) {
         _view.push_value(idx); // push copy of ref to top
-        _ref = _view.ref(REGISTRYINDEX);
+        _ref = _view.ref(REGISTRY_INDEX());
     }
 }
 
 void ref::release()
 {
     if (is_valid()) {
-        _view.unref(REGISTRYINDEX, _ref);
-        _ref  = NOREF;
+        _view.unref(REGISTRY_INDEX(), _ref);
+        _ref  = NO_REF();
         _view = state_view {nullptr};
     }
 }
@@ -81,7 +81,7 @@ void ref::release()
 void ref::push_self() const
 {
     assert(is_valid());
-    _view.raw_get(REGISTRYINDEX, _ref);
+    _view.raw_get(REGISTRY_INDEX(), _ref);
 }
 
 auto ref::get_view() const -> state_view
@@ -96,7 +96,7 @@ ref::operator bool() const
 
 auto ref::is_valid() const -> bool
 {
-    return _ref != NOREF && _view.is_valid();
+    return _ref != NO_REF() && _view.is_valid();
 }
 
 auto ref::operator==(ref const& other) -> bool

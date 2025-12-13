@@ -28,12 +28,7 @@ using lua_Alloc        = void* (*)(void* ud, void* ptr, size_t osize, size_t nsi
 
 namespace tcob::scripting {
 
-////////////////////////////////////////////////////////////
-
-constexpr i32 NOREF         = -2;       //  LUA_NOREF
-constexpr i32 REGISTRYINDEX = -1001000; //  LUA_REGISTRYINDEX
-
-////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 
 template <typename T>
 struct converter;
@@ -161,8 +156,8 @@ public:
     byte        ParameterCount {0};        /* (u) number of parameters */
     bool        IsVarArg {false};          /* (u) */
     bool        IsTailCall {false};        /* (t) */
-    u16         FirstTransfer {0};         /* (r) index of first value transferred */
-    u16         TransferredValueCount {0}; /* (r) number of transferred values */
+    i32         FirstTransfer {0};         /* (r) index of first value transferred */
+    i32         TransferredValueCount {0}; /* (r) number of transferred values */
     string      ShortSource;               /* (S) */
 
     auto get_local(i32 n) const -> string;
@@ -188,6 +183,9 @@ private:
     lua_State* _luaState;
     i32        _oldTop;
 };
+
+TCOB_API auto NO_REF() -> i32;
+TCOB_API auto REGISTRY_INDEX() -> i32;
 
 ////////////////////////////////////////////////////////////
 
