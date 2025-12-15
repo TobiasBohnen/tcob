@@ -5,6 +5,7 @@
 
 #include "ConfigAssetLoader.hpp"
 
+#include <any>
 #include <chrono>
 #include <future>
 #include <iterator>
@@ -12,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Music.hpp"
 #include "tcob/audio/Sound.hpp"
 #include "tcob/audio/synth/SoundFont.hpp"
@@ -59,6 +61,11 @@ namespace Music {
 
 namespace Sound {
     static char const* Name {"sound"};
+    static char const* source {"source"};
+}
+
+namespace AudioBuffer {
+    static char const* Name {"audio_buffer"};
     static char const* source {"source"};
 }
 
@@ -204,6 +211,9 @@ cfg_asset_loader_manager::cfg_asset_loader_manager(group& group)
     group.add_bucket<audio::sound>();
     add_loader(std::make_unique<cfg_sound_loader>(group, _object));
 
+    group.add_bucket<audio::buffer>();
+    add_loader(std::make_unique<cfg_audio_buffer_loader>(group, _object));
+
 #if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
     group.add_bucket<audio::sound_font>();
     add_loader(std::make_unique<cfg_sound_font_loader>(group, _object));
@@ -313,6 +323,43 @@ void cfg_sound_loader::prepare()
 {
     for (auto& def : _cache) {
         def->future = def->assetPtr->load_async(group().mount_point() + def->source);
+        set_asset_status(def->assetPtr, asset_status::Loading);
+    }
+
+    locate_service<task_manager>().run_deferred([this](def_task const& ctx) {
+        default_check_async_load(ctx, _cache, [this](auto&& asset, auto&& state) { set_asset_status(asset, state); });
+    });
+}
+
+////////////////////////////////////////////////////////////
+
+cfg_audio_buffer_loader::cfg_audio_buffer_loader(assets::group& group, data::object& object)
+    : loader {group}
+    , _object {object}
+{
+}
+
+void cfg_audio_buffer_loader::declare()
+{
+    object obj;
+    if (!_object.try_get(obj, API::AudioBuffer::Name)) { return; }
+
+    for (auto const& [k, v] : obj) {
+        auto* asset {default_new<audio::buffer, asset_def>(k, bucket(), _cache)};
+
+        if (object assetSection; v.try_get(assetSection)) {
+            assetSection.try_get(asset->source, API::AudioBuffer::source);
+        } else if (path assetString; v.try_get(assetString)) {
+            asset->source = assetString;
+        }
+    }
+}
+
+void cfg_audio_buffer_loader::prepare()
+{
+    std::any a {};
+    for (auto& def : _cache) {
+        def->future = def->assetPtr->load_async(group().mount_point() + def->source, a);
         set_asset_status(def->assetPtr, asset_status::Loading);
     }
 

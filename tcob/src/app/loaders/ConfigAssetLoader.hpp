@@ -15,6 +15,7 @@
 #include "tcob/core/assets/AssetGroup.hpp"
 #include "tcob/core/assets/AssetLoader.hpp"
 
+#include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Music.hpp"
 #include "tcob/audio/Sound.hpp"
 #include "tcob/audio/synth/SoundFont.hpp"
@@ -83,6 +84,26 @@ private:
         asset_ptr<audio::sound> assetPtr;
         std::future<bool>       future;
         string                  source;
+    };
+
+    std::vector<std::unique_ptr<asset_def>> _cache;
+    data::object&                           _object;
+};
+
+////////////////////////////////////////////////////////////
+
+class cfg_audio_buffer_loader final : public assets::loader<audio::buffer> {
+public:
+    cfg_audio_buffer_loader(assets::group& group, data::object& object);
+
+    void declare() override;
+    void prepare() override;
+
+private:
+    struct asset_def {
+        asset_ptr<audio::buffer> assetPtr;
+        std::future<bool>        future;
+        string                   source;
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;

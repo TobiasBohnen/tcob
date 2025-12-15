@@ -48,6 +48,8 @@ public:
     static auto Load(path const& file) -> std::optional<buffer>;
     static auto Load(std::shared_ptr<io::istream> in, string const& ext) -> std::optional<buffer>;
 
+    static inline char const* AssetName {"audio_buffer"};
+
 private:
     information      _info;
     std::vector<f32> _buffer;
