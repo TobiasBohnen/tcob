@@ -114,7 +114,7 @@ void source::toggle_pause()
 void source::create_output()
 {
     auto const spec {info()};
-    if (!spec) { return; }
+    if (!spec || !spec->is_valid()) { return; }
 
     _output = locate_service<system>().create_output(*spec);
     _output->set_volume(Volume);
