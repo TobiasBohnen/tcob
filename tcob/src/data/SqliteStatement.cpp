@@ -5,15 +5,13 @@
 
 #include "tcob/data/SqliteStatement.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <format>
+#include <utility>
+#include <vector>
 
-    #include <format>
-    #include <utility>
-    #include <vector>
-
-    #include "tcob/core/Logger.hpp"
-    #include "tcob/core/StringUtils.hpp"
-    #include "tcob/data/Sqlite.hpp"
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/StringUtils.hpp"
+#include "tcob/data/Sqlite.hpp"
 
 namespace tcob::db {
 
@@ -144,5 +142,3 @@ auto delete_statement::query_string() const -> utf8_string
     return std::format("{} WHERE {};", _sql, _where);
 }
 }
-
-#endif

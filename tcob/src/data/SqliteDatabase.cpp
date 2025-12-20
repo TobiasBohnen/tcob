@@ -5,19 +5,17 @@
 
 #include "tcob/data/SqliteDatabase.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <format>
+#include <functional>
+#include <optional>
+#include <set>
+#include <utility>
 
-    #include <format>
-    #include <functional>
-    #include <optional>
-    #include <set>
-    #include <utility>
-
-    #include "tcob/data/Sqlite.hpp"
-    #include "tcob/data/SqliteSavepoint.hpp"
-    #include "tcob/data/SqliteSchema.hpp"
-    #include "tcob/data/SqliteStatement.hpp"
-    #include "tcob/data/SqliteTable.hpp"
+#include "tcob/data/Sqlite.hpp"
+#include "tcob/data/SqliteSavepoint.hpp"
+#include "tcob/data/SqliteSchema.hpp"
+#include "tcob/data/SqliteStatement.hpp"
+#include "tcob/data/SqliteTable.hpp"
 
 namespace tcob::db {
 
@@ -266,5 +264,3 @@ auto database::attach(path const& file, utf8_string const& alias) const -> std::
 }
 
 }
-
-#endif

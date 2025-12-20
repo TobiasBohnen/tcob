@@ -6,18 +6,16 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <functional>
+#include <optional>
+#include <set>
 
-    #include <functional>
-    #include <optional>
-    #include <set>
-
-    #include "tcob/core/Interfaces.hpp"
-    #include "tcob/data/Sqlite.hpp"
-    #include "tcob/data/SqliteSavepoint.hpp"
-    #include "tcob/data/SqliteSchema.hpp"
-    #include "tcob/data/SqliteStatement.hpp"
-    #include "tcob/data/SqliteTable.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/data/Sqlite.hpp"
+#include "tcob/data/SqliteSavepoint.hpp"
+#include "tcob/data/SqliteSchema.hpp"
+#include "tcob/data/SqliteStatement.hpp"
+#include "tcob/data/SqliteTable.hpp"
 
 namespace tcob::db {
 ////////////////////////////////////////////////////////////
@@ -99,6 +97,4 @@ private:
 
 }
 
-    #include "SqliteDatabase.inl"
-
-#endif
+#include "SqliteDatabase.inl"

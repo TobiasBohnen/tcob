@@ -8,19 +8,17 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <cstddef>
+#include <optional>
+#include <tuple>
 
-    #include <cstddef>
-    #include <optional>
-    #include <tuple>
-
-    #include "tcob/core/Color.hpp"
-    #include "tcob/core/Concepts.hpp"
-    #include "tcob/core/Point.hpp"
-    #include "tcob/core/Rect.hpp"
-    #include "tcob/core/Size.hpp"
-    #include "tcob/core/ext/magic_enum_reduced.hpp"
-    #include "tcob/data/Sqlite.hpp"
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Concepts.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/core/ext/magic_enum_reduced.hpp"
+#include "tcob/data/Sqlite.hpp"
 
 namespace tcob::db {
 
@@ -257,5 +255,3 @@ template <Arithmetic T>
 struct converter<rect<T>> : blob_converter<rect<T>> { };
 
 }
-
-#endif

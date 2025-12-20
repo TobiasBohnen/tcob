@@ -5,11 +5,9 @@
 
 #include "tcob/data/SqliteSavepoint.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <utility>
 
-    #include <utility>
-
-    #include "tcob/data/Sqlite.hpp"
+#include "tcob/data/Sqlite.hpp"
 
 namespace tcob::db {
 
@@ -42,5 +40,3 @@ void savepoint::rollback()
 }
 
 }
-
-#endif

@@ -5,16 +5,14 @@
 
 #include "SqliteVFS.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <cassert>
+#include <cstring>
 
-    #include <cassert>
-    #include <cstring>
+#include <sqlite3/sqlite3.h>
 
-    #include <sqlite3/sqlite3.h>
-
-    #include "tcob/core/io/FileStream.hpp"
-    #include "tcob/core/io/FileSystem.hpp"
-    #include "tcob/core/io/Stream.hpp"
+#include "tcob/core/io/FileStream.hpp"
+#include "tcob/core/io/FileSystem.hpp"
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::db::detail {
 
@@ -255,5 +253,3 @@ auto register_vfs() -> string
 }
 
 }
-
-#endif

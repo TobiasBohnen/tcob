@@ -6,13 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
-
 namespace tcob::db::detail {
 ////////////////////////////////////////////////////////////
 
 auto register_vfs() -> string;
 
 }
-
-#endif

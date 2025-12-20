@@ -6,15 +6,13 @@
 #pragma once
 #include "SqliteSchema.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <format>
+#include <optional>
+#include <vector>
 
-    #include <format>
-    #include <optional>
-    #include <vector>
-
-    #include "tcob/data/Sqlite.hpp"
-    #include "tcob/data/SqliteStatement.hpp"
-    #include "tcob/data/SqliteTable.hpp"
+#include "tcob/data/Sqlite.hpp"
+#include "tcob/data/SqliteStatement.hpp"
+#include "tcob/data/SqliteTable.hpp"
 
 namespace tcob::db {
 
@@ -44,5 +42,3 @@ inline auto schema::create_view(utf8_string const& viewName, select_statement<Va
     return _db.exec(sql) ? get_view(viewName) : std::nullopt;
 }
 }
-
-#endif

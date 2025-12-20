@@ -5,16 +5,14 @@
 
 #include "tcob/data/SqliteTable.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <format>
+#include <set>
+#include <utility>
+#include <vector>
 
-    #include <format>
-    #include <set>
-    #include <utility>
-    #include <vector>
-
-    #include "tcob/core/StringUtils.hpp"
-    #include "tcob/data/Sqlite.hpp"
-    #include "tcob/data/SqliteStatement.hpp"
+#include "tcob/core/StringUtils.hpp"
+#include "tcob/data/Sqlite.hpp"
+#include "tcob/data/SqliteStatement.hpp"
 
 namespace tcob::db {
 
@@ -153,5 +151,3 @@ auto view::row_count() const -> i32
 }
 
 }
-
-#endif

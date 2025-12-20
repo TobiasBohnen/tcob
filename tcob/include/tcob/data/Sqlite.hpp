@@ -8,8 +8,6 @@
 
 #include <type_traits>
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
-
 struct sqlite3;
 struct sqlite3_stmt;
 
@@ -132,5 +130,3 @@ private:
 };
 
 }
-
-#endif

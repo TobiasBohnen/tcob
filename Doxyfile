@@ -2351,12 +2351,10 @@ INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = TCOB_ENABLE_RENDERER_OPENGL45 \
                         TCOB_ENABLE_RENDERER_OPENGLES30 \
                         TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT \
-                        TCOB_ENABLE_ADDON_DATA_SQLITE \
                         TCOB_ENABLE_ADDON_GFX_LITEHTML \
                         TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS \
                         TCOB_ENABLE_FILETYPES_AUDIO_VORBIS \
                         TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP \
-                        TCOB_ENABLE_FILETYPES_AUDIO_OPUS \
                         TCOB_ENABLE_FILETYPES_GFX_WEBP \
                         TCOB_ENABLE_FILETYPES_GFX_THEORA \
 

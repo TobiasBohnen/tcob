@@ -6,18 +6,16 @@
 #pragma once
 #include "SqliteStatement.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <array>
+#include <cassert>
+#include <format>
+#include <optional>
+#include <tuple>
+#include <type_traits>
+#include <vector>
 
-    #include <array>
-    #include <cassert>
-    #include <format>
-    #include <optional>
-    #include <tuple>
-    #include <type_traits>
-    #include <vector>
-
-    #include "tcob/core/StringUtils.hpp"
-    #include "tcob/data/Sqlite.hpp"
+#include "tcob/core/StringUtils.hpp"
+#include "tcob/data/Sqlite.hpp"
 
 namespace tcob::db {
 
@@ -372,5 +370,3 @@ inline auto delete_statement::where(T const& cond) -> delete_statement&
 }
 
 }
-
-#endif

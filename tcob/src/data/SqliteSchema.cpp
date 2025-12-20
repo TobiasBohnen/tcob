@@ -5,16 +5,14 @@
 
 #include "tcob/data/SqliteSchema.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <format>
+#include <optional>
+#include <set>
+#include <utility>
 
-    #include <format>
-    #include <optional>
-    #include <set>
-    #include <utility>
-
-    #include "tcob/data/Sqlite.hpp"
-    #include "tcob/data/SqliteStatement.hpp"
-    #include "tcob/data/SqliteTable.hpp"
+#include "tcob/data/Sqlite.hpp"
+#include "tcob/data/SqliteStatement.hpp"
+#include "tcob/data/SqliteTable.hpp"
 
 namespace tcob::db {
 
@@ -116,5 +114,3 @@ auto schema::detach() const -> bool
 }
 
 }
-
-#endif

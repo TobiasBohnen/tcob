@@ -5,17 +5,15 @@
 
 #include "tcob/data/Sqlite.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <cassert>
+#include <format>
 
-    #include <cassert>
-    #include <format>
+#include <sqlite3/sqlite3.h>
 
-    #include <sqlite3/sqlite3.h>
+#include "SqliteVFS.hpp"
 
-    #include "SqliteVFS.hpp"
-
-    #include "tcob/core/Logger.hpp"
-    #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/StringUtils.hpp"
 
 namespace tcob::db {
 
@@ -253,5 +251,3 @@ auto quote_file(utf8_string_view str) -> utf8_string
 }
 
 }
-
-#endif

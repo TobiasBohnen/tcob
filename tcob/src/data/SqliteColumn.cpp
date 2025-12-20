@@ -5,13 +5,11 @@
 
 #include "tcob/data/SqliteColumn.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <format>
+#include <utility>
 
-    #include <format>
-    #include <utility>
-
-    #include "tcob/data/Sqlite.hpp"
-    #include "tcob/data/SqliteStatement.hpp"
+#include "tcob/data/Sqlite.hpp"
+#include "tcob/data/SqliteStatement.hpp"
 
 namespace tcob::db {
 
@@ -122,5 +120,3 @@ auto check::str() const -> utf8_string
 }
 
 }
-
-#endif

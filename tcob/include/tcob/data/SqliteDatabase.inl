@@ -6,12 +6,10 @@
 #pragma once
 #include "SqliteDatabase.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <optional>
 
-    #include <optional>
-
-    #include "tcob/data/SqliteStatement.hpp"
-    #include "tcob/data/SqliteTable.hpp"
+#include "tcob/data/SqliteStatement.hpp"
+#include "tcob/data/SqliteTable.hpp"
 
 namespace tcob::db {
 
@@ -27,5 +25,3 @@ inline auto database::create_view(utf8_string const& viewName, select_statement<
 }
 
 }
-
-#endif

@@ -6,13 +6,11 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <variant>
+#include <vector>
 
-    #include <variant>
-    #include <vector>
-
-    #include "tcob/data/Sqlite.hpp"
-    #include "tcob/data/SqliteStatement.hpp"
+#include "tcob/data/Sqlite.hpp"
+#include "tcob/data/SqliteStatement.hpp"
 
 namespace tcob::db {
 ////////////////////////////////////////////////////////////
@@ -254,6 +252,4 @@ using blob_column = column<type::Blob, C>;
 
 }
 
-    #include "SqliteColumn.inl"
-
-#endif
+#include "SqliteColumn.inl"

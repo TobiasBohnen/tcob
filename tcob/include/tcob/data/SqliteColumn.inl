@@ -6,19 +6,17 @@
 #pragma once
 #include "SqliteColumn.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+#include <cassert>
+#include <format>
+#include <string>
+#include <type_traits>
+#include <unordered_set>
+#include <vector>
 
-    #include <cassert>
-    #include <format>
-    #include <string>
-    #include <type_traits>
-    #include <unordered_set>
-    #include <vector>
-
-    #include "tcob/core/Common.hpp"
-    #include "tcob/core/StringUtils.hpp"
-    #include "tcob/data/Sqlite.hpp"
-    #include "tcob/data/SqliteStatement.hpp"
+#include "tcob/core/Common.hpp"
+#include "tcob/core/StringUtils.hpp"
+#include "tcob/data/Sqlite.hpp"
+#include "tcob/data/SqliteStatement.hpp"
 
 namespace tcob::db {
 
@@ -207,5 +205,3 @@ inline auto column<Type, C>::str() const -> utf8_string
 
 ////////////////////////////////////////////////////////////
 }
-
-#endif
