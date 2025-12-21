@@ -8,6 +8,7 @@
 #include <array>
 #include <cstddef>
 #include <filesystem>
+#include <format>
 #include <ios>
 #include <unordered_set>
 #include <utility>
@@ -41,7 +42,7 @@ auto file_hasher::crc32() const -> u32
 static auto check(string const& msg, i32 c) -> bool
 {
     if (c == 0) {
-        logger::Error(msg + ": " + PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        logger::Error(std::format("{}: {}", msg, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())));
     }
 
     return c != 0;
@@ -181,7 +182,7 @@ auto unzip(ifstream& srcStream, path const& dstFolder) -> bool
 
 auto mount(path const& folderOrArchive, string const& mp) -> bool
 {
-    return check("mount", PHYSFS_mount(folderOrArchive.c_str(), mp.c_str(), true));
+    return check(std::format("mount (mount point: {}, folder: {})", mp, folderOrArchive), PHYSFS_mount(folderOrArchive.c_str(), mp.c_str(), true));
 }
 
 auto unmount(path const& folderOrArchive) -> bool
@@ -299,7 +300,7 @@ auto delete_file(path const& file) -> bool
 {
     if (!is_file(file)) { return false; }
 
-    return check("delete", PHYSFS_delete(file.c_str()));
+    return check(std::format("delete file ({})", file), PHYSFS_delete(file.c_str()));
 }
 
 auto delete_folder(path const& folder) -> bool
@@ -317,7 +318,7 @@ auto delete_folder(path const& folder) -> bool
     }
 
     PHYSFS_freeList(items);
-    return check("delete", PHYSFS_delete(folder.c_str()));
+    return check(std::format("delete folder ({})", folder), PHYSFS_delete(folder.c_str()));
 }
 
 auto create_file(path const& file) -> bool
@@ -337,7 +338,7 @@ auto create_file(path const& file) -> bool
 
 auto create_folder(path const& folder) -> bool
 {
-    return check("create folder", PHYSFS_mkdir(folder.c_str()));
+    return check(std::format("create folder ({})", folder), PHYSFS_mkdir(folder.c_str()));
 }
 
 auto enumerate(path const& folder, pattern const& pattern, bool recursive) -> std::unordered_set<string>
