@@ -133,7 +133,7 @@ void object::merge(object const& other, bool onConflictTakeOther)
             set_entry(k, v);
         } else {
             if (v.is<object>()) {
-                as<object>(k).merge(v.as<object>(), onConflictTakeOther);
+                get<object>(k).value().merge(v.as<object>(), onConflictTakeOther);
             } else if (onConflictTakeOther) {
                 set_entry(k, v);
             }

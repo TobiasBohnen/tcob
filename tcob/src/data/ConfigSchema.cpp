@@ -204,7 +204,7 @@ auto schema::validate_property(object const& obj, string_property const& prop) c
     } else if (!obj.is<string>(prop.Name)) {
         retValue.Constraint = "Type";
     } else {
-        auto const val {obj.as<string>(prop.Name)};
+        auto const val {obj[prop.Name].as<string>()};
         if (prop.MaxLength && val.length() > *prop.MaxLength) {
             retValue.Constraint = "MaxLength";
         } else if (prop.MinLength && val.length() < *prop.MinLength) {
@@ -227,7 +227,7 @@ auto schema::validate_property(object const& obj, float_property const& prop) co
         if (!obj.is<f64>(prop.Name)) {
             retValue.Constraint = "Type";
         } else {
-            auto const val {obj.as<f64>(prop.Name)};
+            auto const val {obj[prop.Name].as<f64>()};
             if (prop.MaxValue && val > *prop.MaxValue) {
                 retValue.Constraint = "MaxValue";
             } else if (prop.MinValue && val < *prop.MinValue) {
@@ -249,7 +249,7 @@ auto schema::validate_property(object const& obj, int_property const& prop) cons
         if (!obj.is<i64>(prop.Name)) {
             retValue.Constraint = "Type";
         } else {
-            auto const val {obj.as<i64>(prop.Name)};
+            auto const val {obj[prop.Name].as<i64>()};
             if (prop.MaxValue && val > *prop.MaxValue) {
                 retValue.Constraint = "MaxValue";
             } else if (prop.MinValue && val < *prop.MinValue) {
@@ -284,7 +284,7 @@ auto schema::validate_property(object const& obj, array_property const& prop) co
         if (!obj.is<array>(prop.Name)) {
             retValue.Constraint = "Type";
         } else {
-            auto const val {obj.as<array>(prop.Name)};
+            auto const val {obj[prop.Name].as<array>()};
             if (prop.MaxSize && val.size() > *prop.MaxSize) {
                 retValue.Constraint = "MaxSize";
             } else if (prop.MinSize && val.size() < *prop.MinSize) {
@@ -331,7 +331,7 @@ auto schema::validate_property(object const& obj, object_property const& prop) c
     } else {
         if (!obj.is<object>(prop.Name)) {
             retValue.Constraint = "Type";
-        } else if (prop.Schema && !prop.Schema->validate(obj.as<object>(prop.Name))) {
+        } else if (prop.Schema && !prop.Schema->validate(obj[prop.Name].as<object>())) {
             retValue.Constraint = "Schema";
         }
     }

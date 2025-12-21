@@ -636,16 +636,14 @@ void cfg_shader_loader::declare()
             assetSection.try_get(def->vertex, API::Shader::vertex);
             auto const vertSource {io::read_as_string(group().mount_point() + def->vertex)};
             if (vertSource.empty()) {
-                logger::Error("shader asset '{}': Vertex shader '{}' not found.", def->assetPtr.get()->name(), def->vertex);
-                set_asset_status(def->assetPtr, asset_status::Error);
+                logger::Error("shader asset '{}': Vertex shader '{}' not found.", k, def->vertex);
                 continue;
             }
 
             assetSection.try_get(def->fragment, API::Shader::fragment);
             auto const fragSource {io::read_as_string(group().mount_point() + def->fragment)};
             if (fragSource.empty()) {
-                logger::Error("shader asset '{}': Fragment shader '{}' not found.", def->assetPtr.get()->name(), def->fragment);
-                set_asset_status(def->assetPtr, asset_status::Error);
+                logger::Error("shader asset '{}': Fragment shader '{}' not found.", k, def->fragment);
                 continue;
             }
 
@@ -698,7 +696,7 @@ void cfg_texture_loader::declare()
                             if (auto const moreFiles {io::enumerate(io::get_parent_folder(f), {.String = f, .MatchWholePath = true}, false)}; !moreFiles.empty()) {
                                 files.insert(files.end(), moreFiles.begin(), moreFiles.end());
                             } else {
-                                logger::Error("texture asset '{}': File or folder '{}' not found.", asset->assetPtr.get()->name(), f);
+                                logger::Error("texture asset '{}': File or folder '{}' not found.", k, f);
                                 continue;
                             }
                         }
@@ -709,7 +707,7 @@ void cfg_texture_loader::declare()
                     if (io::is_file(f)) {
                         files.push_back(f);
                     } else {
-                        logger::Error("texture asset '{}': File or folder '{}' not found.", asset->assetPtr.get()->name(), file);
+                        logger::Error("texture asset '{}': File or folder '{}' not found.", k, file);
                     }
                 }
                 for (u32 i {0}; i < files.size(); ++i) {

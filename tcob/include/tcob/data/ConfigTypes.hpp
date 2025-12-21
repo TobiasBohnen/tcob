@@ -88,9 +88,6 @@ public:
 
     auto parse(string_view config, string const& ext) noexcept -> bool;
 
-    template <ConvertibleFrom T, typename... Keys>
-    auto as(string_view key, Keys&&... keys) const -> T;
-
     template <typename... Args, typename T>
     auto try_make(T& value, auto&&... keys) const -> bool;
 

@@ -160,12 +160,6 @@ inline auto object::operator[](Key key) const -> proxy<object const, Key> const
     return proxy<object const, Key> {*this, std::tuple {key}};
 }
 
-template <ConvertibleFrom T, typename... Keys>
-inline auto object::as(string_view key, Keys&&... keys) const -> T
-{
-    return get<T>(key, std::forward<Keys>(keys)...).value();
-}
-
 template <typename... Args, typename T>
 inline auto object::try_make(T& value, auto&&... keys) const -> bool
 {
