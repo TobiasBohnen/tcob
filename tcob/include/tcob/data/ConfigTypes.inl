@@ -201,8 +201,8 @@ inline auto object::get(string_view key, string_view subkey, Keys&&... keys) con
     auto const* val {get_entry(key)};
     if (!val) { return std::unexpected {error_code::Undefined}; }
 
-    if (object sub; val->try_get(sub)) {                        // If the value is a object (a nested key-value pair)
-        return sub.get<T>(subkey, std::forward<Keys>(keys)...); // Recursively search the nested object for the value
+    if (object sub; val->try_get(sub)) {
+        return sub.get<T>(subkey, std::forward<Keys>(keys)...);
     }
 
     return std::unexpected {error_code::TypeMismatch};
@@ -214,11 +214,19 @@ inline auto object::get(string_view key, isize index) const -> std::expected<T, 
     auto const* val {get_entry(key)};
     if (!val) { return std::unexpected {error_code::Undefined}; }
 
-    if (array sub; val->try_get(sub)) { // If the value is an array
-        return sub.get<T>(index);       // Recursively search the array for the value
+    if (array sub; val->try_get(sub)) {
+        return sub.get<T>(index);
     }
 
     return std::unexpected {error_code::TypeMismatch};
+}
+
+template <ConvertibleFrom T, typename... Keys>
+inline auto object::get(string_view key, isize index, Keys&&... keys) const -> std::expected<T, error_code>
+{
+    auto obj {get<object>(key, index)};
+    if (!obj) { return std::unexpected {error_code::TypeMismatch}; }
+    return obj->get<T>(std::forward<Keys>(keys)...);
 }
 
 template <ConvertibleFrom T>
@@ -235,8 +243,8 @@ inline auto object::try_get(T& value, string_view key, string_view subkey, Keys&
     if (!val) { return false; }
 
     if (val) {
-        if (object sub; val->try_get(sub)) {                                   // If the value is a object (a nested key-value pair)
-            return sub.try_get<T>(value, subkey, std::forward<Keys>(keys)...); // Recursively search the nested object for the value
+        if (object sub; val->try_get(sub)) {
+            return sub.try_get<T>(value, subkey, std::forward<Keys>(keys)...);
         }
     }
 
@@ -262,8 +270,8 @@ inline void object::set(string_view key, string_view subkey, KeysOrValue&&... ke
 {
     if (auto* val {get_entry(key)}) {
         object sub {};
-        if (!val->try_get(sub)) { val->set(sub); }           // Convert the value to a object
-        sub.set(subkey, std::forward<KeysOrValue>(keys)...); // Recursively set the value in the nested object
+        if (!val->try_get(sub)) { val->set(sub); }
+        sub.set(subkey, std::forward<KeysOrValue>(keys)...);
         return;
     }
 
@@ -280,8 +288,8 @@ inline void object::set(string_view key, isize index, Value&& value)
 {
     if (auto* val {get_entry(key)}) {
         array sub {};
-        if (!val->try_get(sub)) { val->set(sub); }  // Convert the value to an array
-        sub.set(index, std::forward<Value>(value)); // Recursively set the value in the array
+        if (!val->try_get(sub)) { val->set(sub); }
+        sub.set(index, std::forward<Value>(value));
         return;
     }
 
@@ -310,8 +318,8 @@ inline auto object::is(string_view key, string_view subkey, Keys&&... keys) cons
     auto const* val {get_entry(key)};
     if (!val) { return false; }
 
-    if (object sub {}; val->try_get(sub)) {                    // If the value is a object (a nested key-value pair)
-        return sub.is<T>(subkey, std::forward<Keys>(keys)...); // Recursively search the nested object for the value
+    if (object sub {}; val->try_get(sub)) {
+        return sub.is<T>(subkey, std::forward<Keys>(keys)...);
     }
 
     return false;
@@ -323,8 +331,8 @@ inline auto object::is(string_view key, isize index) const -> bool
     auto const* val {get_entry(key)};
     if (!val) { return false; }
 
-    if (array sub; val->try_get(sub)) { // If the value is an array
-        return sub.is<T>(index);        // Recursively search the array for the value
+    if (array sub; val->try_get(sub)) {
+        return sub.is<T>(index);
     }
 
     return false;

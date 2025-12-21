@@ -99,6 +99,8 @@ public:
     auto get(string_view key, string_view subkey, Keys&&... keys) const -> std::expected<T, error_code>;
     template <ConvertibleFrom T>
     auto get(string_view key, isize index) const -> std::expected<T, error_code>;
+    template <ConvertibleFrom T, typename... Keys>
+    auto get(string_view key, isize index, Keys&&... keys) const -> std::expected<T, error_code>;
 
     template <ConvertibleFrom T>
     auto try_get(T& value, string_view key) const -> bool;
