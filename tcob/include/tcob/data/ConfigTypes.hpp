@@ -92,6 +92,8 @@ public:
     auto try_make(T& value, auto&&... keys) const -> bool;
 
     template <ConvertibleFrom T>
+    auto get() const -> std::expected<T, error_code>;
+    template <ConvertibleFrom T>
     auto get(string_view key) const -> std::expected<T, error_code>;
     template <ConvertibleFrom T, typename... Keys>
     auto get(string_view key, string_view subkey, Keys&&... keys) const -> std::expected<T, error_code>;
@@ -111,6 +113,8 @@ public:
     void set(string_view key, isize index, Value&& val);
     void set(string_view key, std::nullptr_t);
 
+    template <ConvertibleFrom T>
+    auto is() const -> bool;
     template <ConvertibleFrom T>
     auto is(string_view key) const -> bool;
     template <ConvertibleFrom T, typename... Keys>

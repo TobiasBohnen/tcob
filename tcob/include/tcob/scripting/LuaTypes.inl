@@ -52,7 +52,15 @@ inline auto table::get(auto&&... keys) const -> std::expected<T, error_code>
 {
     auto const view {get_view()};
     auto const guard {view.create_scoped_stack()};
-    return get<T>(view, keys...);
+    if constexpr (sizeof...(keys) == 0) {
+        push_self();
+        T retValue {};
+        return view.pull_convert_idx(-1, retValue)
+            ? std::expected<T, error_code> {std::move(retValue)}
+            : std::unexpected<error_code> {error_code::TypeMismatch};
+    } else {
+        return get<T>(view, keys...);
+    }
 }
 
 template <ConvertibleFrom T>
@@ -80,7 +88,12 @@ inline auto table::is(auto&&... keys) const -> bool
 {
     auto const view {get_view()};
     auto const guard {view.create_scoped_stack()};
-    return is<T>(view, keys...);
+    if constexpr (sizeof...(keys) == 0) {
+        push_self();
+        return base_converter<T>::IsType(view, view.get_top());
+    } else {
+        return is<T>(view, keys...);
+    }
 }
 
 inline auto table::has(auto&&... keys) const -> bool

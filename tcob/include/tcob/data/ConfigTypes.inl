@@ -180,6 +180,13 @@ inline auto object::try_make(T& value, auto&&... keys) const -> bool
 }
 
 template <ConvertibleFrom T>
+inline auto object::get() const -> std::expected<T, error_code>
+{
+    entry ent {*this};
+    return ent.get<T>();
+}
+
+template <ConvertibleFrom T>
 inline auto object::get(string_view key) const -> std::expected<T, error_code>
 {
     auto const* val {get_entry(key)};
@@ -281,6 +288,13 @@ inline void object::set(string_view key, isize index, Value&& value)
     // key not found -> add new array
     add_entry(key, entry {array {}});
     set(key, index, value);
+}
+
+template <ConvertibleFrom T>
+inline auto object::is() const -> bool
+{
+    entry ent {*this};
+    return ent.is<T>();
 }
 
 template <ConvertibleFrom T>
