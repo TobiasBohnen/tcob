@@ -21,248 +21,259 @@ namespace tcob::audio {
 
 ////////////////////////////////////////////////////////////
 
-sound_generator::sound_generator(random::prng_split_mix_64 random)
-    : _random {random}
-{
-}
-
 // Generate sound: Pickup/Coin
-auto sound_generator::generate_pickup_coin() -> sound_wave
+auto sound_generator::generate_pickup_coin(u64 seed) -> sound_wave
 {
+    random::prng_split_mix_64 random {seed};
+
     sound_wave retValue {};
-    retValue.RandomSeed = _random.state()[0];
+    retValue.RandomSeed = random.state()[0];
 
-    retValue.StartFrequency = _random(0.4f, 0.9f);
+    retValue.StartFrequency = random(0.4f, 0.9f);
     retValue.AttackTime     = 0.0f;
-    retValue.SustainTime    = _random(0.0f, 0.1f);
-    retValue.DecayTime      = _random(0.1f, 0.5f);
-    retValue.SustainPunch   = _random(0.3f, 0.6f);
+    retValue.SustainTime    = random(0.0f, 0.1f);
+    retValue.DecayTime      = random(0.1f, 0.5f);
+    retValue.SustainPunch   = random(0.3f, 0.6f);
 
-    if (_random(0, 1) == 1) {
-        retValue.ChangeSpeed  = _random(0.5f, 0.7f);
-        retValue.ChangeAmount = _random(0.2f, 0.6f);
+    if (random(0, 1) == 1) {
+        retValue.ChangeSpeed  = random(0.5f, 0.7f);
+        retValue.ChangeAmount = random(0.2f, 0.6f);
     }
 
     return retValue;
 }
 
 // Generate sound: Laser shoot
-auto sound_generator::generate_laser_shoot() -> sound_wave
+auto sound_generator::generate_laser_shoot(u64 seed) -> sound_wave
 {
+    random::prng_split_mix_64 random {seed};
+
     sound_wave retValue {};
-    retValue.RandomSeed = _random.state()[0];
+    retValue.RandomSeed = random.state()[0];
 
-    retValue.WaveType = static_cast<sound_wave::type>(_random(0, 2));
+    retValue.WaveType = static_cast<sound_wave::type>(random(0, 2));
 
-    if ((retValue.WaveType == sound_wave::type::Sine) && _random(0, 1) == 1) {
-        retValue.WaveType = static_cast<sound_wave::type>(_random(0, 1));
+    if ((retValue.WaveType == sound_wave::type::Sine) && random(0, 1) == 1) {
+        retValue.WaveType = static_cast<sound_wave::type>(random(0, 1));
     }
 
-    retValue.StartFrequency = _random(0.5f, 1.0f);
-    retValue.MinFrequency   = std::max(retValue.StartFrequency - _random(0.2f, 0.8f), 0.2f);
+    retValue.StartFrequency = random(0.5f, 1.0f);
+    retValue.MinFrequency   = std::max(retValue.StartFrequency - random(0.2f, 0.8f), 0.2f);
 
-    retValue.Slide = -_random(-0.35f, -0.15f);
+    retValue.Slide = -random(-0.35f, -0.15f);
 
-    if (_random(0, 2) == 0) {
-        retValue.StartFrequency = _random(0.3f, 0.9f);
-        retValue.MinFrequency   = _random(0.0f, 0.1f);
-        retValue.Slide          = _random(-0.35f, -0.05f);
+    if (random(0, 2) == 0) {
+        retValue.StartFrequency = random(0.3f, 0.9f);
+        retValue.MinFrequency   = random(0.0f, 0.1f);
+        retValue.Slide          = random(-0.35f, -0.05f);
     }
 
-    if (_random(0, 1) == 1) {
-        retValue.SquareDuty = _random(0.0f, 0.5f);
-        retValue.DutySweep  = _random(0.0f, 0.2f);
+    if (random(0, 1) == 1) {
+        retValue.SquareDuty = random(0.0f, 0.5f);
+        retValue.DutySweep  = random(0.0f, 0.2f);
     } else {
-        retValue.SquareDuty = _random(0.4f, 0.9f);
-        retValue.DutySweep  = -_random(0.0f, 0.7f);
+        retValue.SquareDuty = random(0.4f, 0.9f);
+        retValue.DutySweep  = -random(0.0f, 0.7f);
     }
 
     retValue.AttackTime  = 0.0f;
-    retValue.SustainTime = _random(0.1f, 0.3f);
-    retValue.DecayTime   = _random(0.0f, 0.4f);
+    retValue.SustainTime = random(0.1f, 0.3f);
+    retValue.DecayTime   = random(0.0f, 0.4f);
 
-    if (_random(0, 1) == 1) {
-        retValue.SustainPunch = _random(0.0f, 0.3f);
+    if (random(0, 1) == 1) {
+        retValue.SustainPunch = random(0.0f, 0.3f);
     }
 
-    if (_random(0, 2) == 0) {
-        retValue.PhaserOffset = _random(0.0f, 0.2f);
-        retValue.PhaserSweep  = -_random(0.0f, 0.2f);
+    if (random(0, 2) == 0) {
+        retValue.PhaserOffset = random(0.0f, 0.2f);
+        retValue.PhaserSweep  = -random(0.0f, 0.2f);
     }
 
-    if (_random(0, 1) == 1) {
-        retValue.HighPassFilterCutoff = _random(0.0f, 0.3f);
+    if (random(0, 1) == 1) {
+        retValue.HighPassFilterCutoff = random(0.0f, 0.3f);
     }
 
     return retValue;
 }
 
 // Generate sound: Explosion
-auto sound_generator::generate_explosion() -> sound_wave
+auto sound_generator::generate_explosion(u64 seed) -> sound_wave
 {
+    random::prng_split_mix_64 random {seed};
+
     sound_wave retValue {};
-    retValue.RandomSeed = _random.state()[0];
+    retValue.RandomSeed = random.state()[0];
 
     retValue.WaveType = sound_wave::type::Noise;
 
-    if (_random(0, 1) == 1) {
-        retValue.StartFrequency = _random(0.1f, 0.5f);
-        retValue.Slide          = _random(-0.1f, 0.3f);
+    if (random(0, 1) == 1) {
+        retValue.StartFrequency = random(0.1f, 0.5f);
+        retValue.Slide          = random(-0.1f, 0.3f);
     } else {
-        retValue.StartFrequency = _random(0.2f, 0.7f);
-        retValue.Slide          = _random(-0.4f, -0.2f);
+        retValue.StartFrequency = random(0.2f, 0.7f);
+        retValue.Slide          = random(-0.4f, -0.2f);
     }
 
     retValue.StartFrequency *= retValue.StartFrequency;
 
-    if (_random(0, 4) == 0) {
+    if (random(0, 4) == 0) {
         retValue.Slide = 0.0f;
     }
-    if (_random(0, 2) == 0) {
-        retValue.RepeatSpeed = _random(0.3f, 0.8f);
+    if (random(0, 2) == 0) {
+        retValue.RepeatSpeed = random(0.3f, 0.8f);
     }
 
     retValue.AttackTime  = 0.0f;
-    retValue.SustainTime = _random(0.1f, 0.4f);
-    retValue.DecayTime   = _random(0.0f, 0.5f);
+    retValue.SustainTime = random(0.1f, 0.4f);
+    retValue.DecayTime   = random(0.0f, 0.5f);
 
-    if (_random(0, 1) == 1) {
-        retValue.PhaserOffset = _random(-0.3f, 0.6f);
-        retValue.PhaserSweep  = -_random(0.0f, 0.3f);
+    if (random(0, 1) == 1) {
+        retValue.PhaserOffset = random(-0.3f, 0.6f);
+        retValue.PhaserSweep  = -random(0.0f, 0.3f);
     }
 
-    retValue.SustainPunch = _random(0.2f, 0.8f);
+    retValue.SustainPunch = random(0.2f, 0.8f);
 
-    if (_random(0, 1) == 1) {
-        retValue.VibratoDepth = _random(0.0f, 0.7f);
-        retValue.VibratoSpeed = _random(0.0f, 0.6f);
+    if (random(0, 1) == 1) {
+        retValue.VibratoDepth = random(0.0f, 0.7f);
+        retValue.VibratoSpeed = random(0.0f, 0.6f);
     }
 
-    if (_random(0, 2) == 0) {
-        retValue.ChangeSpeed  = _random(0.6f, 0.9f);
-        retValue.ChangeAmount = _random(-0.8f, 0.8f);
+    if (random(0, 2) == 0) {
+        retValue.ChangeSpeed  = random(0.6f, 0.9f);
+        retValue.ChangeAmount = random(-0.8f, 0.8f);
     }
 
     return retValue;
 }
 
 // Generate sound: Powerup
-auto sound_generator::generate_powerup() -> sound_wave
+auto sound_generator::generate_powerup(u64 seed) -> sound_wave
 {
-    sound_wave retValue {};
-    retValue.RandomSeed = _random.state()[0];
+    random::prng_split_mix_64 random {seed};
 
-    if (_random(0, 1) == 1) {
+    sound_wave retValue {};
+    retValue.RandomSeed = random.state()[0];
+
+    if (random(0, 1) == 1) {
         retValue.WaveType = sound_wave::type::Sawtooth;
     } else {
-        retValue.SquareDuty = _random(0.0f, 0.6f);
+        retValue.SquareDuty = random(0.0f, 0.6f);
     }
 
-    if (_random(0, 1) == 1) {
-        retValue.StartFrequency = _random(0.2f, 0.5f);
-        retValue.Slide          = _random(0.1f, 0.5f);
-        retValue.RepeatSpeed    = _random(0.4f, 0.8f);
+    if (random(0, 1) == 1) {
+        retValue.StartFrequency = random(0.2f, 0.5f);
+        retValue.Slide          = random(0.1f, 0.5f);
+        retValue.RepeatSpeed    = random(0.4f, 0.8f);
     } else {
-        retValue.StartFrequency = _random(0.5f, 0.5f);
-        retValue.Slide          = _random(0.05f, 0.205f);
+        retValue.StartFrequency = random(0.5f, 0.5f);
+        retValue.Slide          = random(0.05f, 0.205f);
 
-        if (_random(0, 1) == 1) {
-            retValue.VibratoDepth = _random(0.0f, 0.7f);
-            retValue.VibratoSpeed = _random(0.0f, 0.6f);
+        if (random(0, 1) == 1) {
+            retValue.VibratoDepth = random(0.0f, 0.7f);
+            retValue.VibratoSpeed = random(0.0f, 0.6f);
         }
     }
 
     retValue.AttackTime  = 0.0f;
-    retValue.SustainTime = _random(0.0f, 0.4f);
-    retValue.DecayTime   = _random(0.1f, 0.5f);
+    retValue.SustainTime = random(0.0f, 0.4f);
+    retValue.DecayTime   = random(0.1f, 0.5f);
 
     return retValue;
 }
 
 // Generate sound: Hit/Hurt
-auto sound_generator::generate_hit_hurt() -> sound_wave
+auto sound_generator::generate_hit_hurt(u64 seed) -> sound_wave
 {
-    sound_wave retValue {};
-    retValue.RandomSeed = _random.state()[0];
+    random::prng_split_mix_64 random {seed};
 
-    retValue.WaveType = static_cast<sound_wave::type>(_random(0, 2));
+    sound_wave retValue {};
+    retValue.RandomSeed = random.state()[0];
+
+    retValue.WaveType = static_cast<sound_wave::type>(random(0, 2));
     if (retValue.WaveType == sound_wave::type::Sine) {
         retValue.WaveType = sound_wave::type::Noise;
     }
     if (retValue.WaveType == sound_wave::type::Square) {
-        retValue.SquareDuty = _random(0.0f, 0.6f);
+        retValue.SquareDuty = random(0.0f, 0.6f);
     }
 
-    retValue.StartFrequency = _random(0.2f, 0.8f);
-    retValue.Slide          = _random(-0.7f, -0.3f);
+    retValue.StartFrequency = random(0.2f, 0.8f);
+    retValue.Slide          = random(-0.7f, -0.3f);
     retValue.AttackTime     = 0.0f;
-    retValue.SustainTime    = _random(0.0f, 0.1f);
-    retValue.DecayTime      = _random(0.1f, 0.3f);
+    retValue.SustainTime    = random(0.0f, 0.1f);
+    retValue.DecayTime      = random(0.1f, 0.3f);
 
-    if (_random(0, 1) == 1) {
-        retValue.HighPassFilterCutoff = _random(0.0f, 0.3f);
+    if (random(0, 1) == 1) {
+        retValue.HighPassFilterCutoff = random(0.0f, 0.3f);
     }
 
     return retValue;
 }
 
 // Generate sound: Jump
-auto sound_generator::generate_jump() -> sound_wave
+auto sound_generator::generate_jump(u64 seed) -> sound_wave
 {
+    random::prng_split_mix_64 random {seed};
+
     sound_wave retValue {};
-    retValue.RandomSeed = _random.state()[0];
+    retValue.RandomSeed = random.state()[0];
 
     retValue.WaveType       = sound_wave::type::Square;
-    retValue.SquareDuty     = _random(0.0f, 0.6f);
-    retValue.StartFrequency = _random(0.3f, 0.6f);
-    retValue.Slide          = _random(0.1f, 0.3f);
+    retValue.SquareDuty     = random(0.0f, 0.6f);
+    retValue.StartFrequency = random(0.3f, 0.6f);
+    retValue.Slide          = random(0.1f, 0.3f);
     retValue.AttackTime     = 0.0f;
-    retValue.SustainTime    = _random(0.1f, 0.4f);
-    retValue.DecayTime      = _random(0.1f, 0.3f);
+    retValue.SustainTime    = random(0.1f, 0.4f);
+    retValue.DecayTime      = random(0.1f, 0.3f);
 
-    if (_random(0, 1) == 1) {
-        retValue.HighPassFilterCutoff = _random(0.0f, 0.3f);
+    if (random(0, 1) == 1) {
+        retValue.HighPassFilterCutoff = random(0.0f, 0.3f);
     }
-    if (_random(0, 1) == 1) {
-        retValue.LowPassFilterCutoff = _random(0.4f, 1.0f);
+    if (random(0, 1) == 1) {
+        retValue.LowPassFilterCutoff = random(0.4f, 1.0f);
     }
 
     return retValue;
 }
 
 // Generate sound: Blip/Select
-auto sound_generator::generate_blip_select() -> sound_wave
+auto sound_generator::generate_blip_select(u64 seed) -> sound_wave
 {
-    sound_wave retValue {};
-    retValue.RandomSeed = _random.state()[0];
+    random::prng_split_mix_64 random {seed};
 
-    retValue.WaveType = static_cast<sound_wave::type>(_random(0, 1));
+    sound_wave retValue {};
+    retValue.RandomSeed = random.state()[0];
+
+    retValue.WaveType = static_cast<sound_wave::type>(random(0, 1));
     if (retValue.WaveType == sound_wave::type::Square) {
-        retValue.SquareDuty = _random(0.0f, 0.6f);
+        retValue.SquareDuty = random(0.0f, 0.6f);
     }
-    retValue.StartFrequency       = _random(0.2f, 0.6f);
+    retValue.StartFrequency       = random(0.2f, 0.6f);
     retValue.AttackTime           = 0.0f;
-    retValue.SustainTime          = _random(0.1f, 0.2f);
-    retValue.DecayTime            = _random(0.0f, 0.2f);
+    retValue.SustainTime          = random(0.1f, 0.2f);
+    retValue.DecayTime            = random(0.0f, 0.2f);
     retValue.HighPassFilterCutoff = 0.1f;
 
     return retValue;
 }
 
 // Generate random sound
-auto sound_generator::generate_random() -> sound_wave
+auto sound_generator::generate_random(u64 seed) -> sound_wave
 {
+    random::prng_split_mix_64 random {seed};
+
     sound_wave retValue {};
-    retValue.RandomSeed = _random.state()[0];
+    retValue.RandomSeed = random.state()[0];
 
-    retValue.StartFrequency = std::pow(_random(-1.0f, 1.0f), 2.0f);
+    retValue.StartFrequency = std::pow(random(-1.0f, 1.0f), 2.0f);
 
-    if (_random(0, 1) == 1) {
-        retValue.StartFrequency = std::pow(_random(-1.0f, 1.0f), 3.0f) + 0.5f;
+    if (random(0, 1) == 1) {
+        retValue.StartFrequency = std::pow(random(-1.0f, 1.0f), 3.0f) + 0.5f;
     }
 
     retValue.MinFrequency = 0.0f;
-    retValue.Slide        = std::pow(_random(-1.0f, 1.0f), 5.0f);
+    retValue.Slide        = std::pow(random(-1.0f, 1.0f), 5.0f);
 
     if ((retValue.StartFrequency > 0.7f) && (retValue.Slide > 0.2f)) {
         retValue.Slide = -retValue.Slide;
@@ -271,67 +282,69 @@ auto sound_generator::generate_random() -> sound_wave
         retValue.Slide = -retValue.Slide;
     }
 
-    retValue.DeltaSlide   = std::pow(_random(-1.0f, 1.0f), 3.0f);
-    retValue.SquareDuty   = _random(-1.0f, 1.0f);
-    retValue.DutySweep    = std::pow(_random(-1.0f, 1.0f), 3.0f);
-    retValue.VibratoDepth = std::pow(_random(-1.0f, 1.0f), 3.0f);
-    retValue.VibratoSpeed = _random(-1.0f, 1.0f);
-    retValue.AttackTime   = std::pow(_random(-1.0f, 1.0f), 3.0f);
-    retValue.SustainTime  = std::pow(_random(-1.0f, 1.0f), 2.0f);
-    retValue.DecayTime    = _random(-1.0f, 1.0f);
-    retValue.SustainPunch = std::pow(_random(0.0f, 0.8f), 2.0f);
+    retValue.DeltaSlide   = std::pow(random(-1.0f, 1.0f), 3.0f);
+    retValue.SquareDuty   = random(-1.0f, 1.0f);
+    retValue.DutySweep    = std::pow(random(-1.0f, 1.0f), 3.0f);
+    retValue.VibratoDepth = std::pow(random(-1.0f, 1.0f), 3.0f);
+    retValue.VibratoSpeed = random(-1.0f, 1.0f);
+    retValue.AttackTime   = std::pow(random(-1.0f, 1.0f), 3.0f);
+    retValue.SustainTime  = std::pow(random(-1.0f, 1.0f), 2.0f);
+    retValue.DecayTime    = random(-1.0f, 1.0f);
+    retValue.SustainPunch = std::pow(random(0.0f, 0.8f), 2.0f);
 
     if (retValue.AttackTime + retValue.SustainTime + retValue.DecayTime < 0.2f) {
-        retValue.SustainTime += 0.2f + _random(0.0f, 0.3f);
-        retValue.DecayTime += 0.2f + _random(0.0f, 0.3f);
+        retValue.SustainTime += 0.2f + random(0.0f, 0.3f);
+        retValue.DecayTime += 0.2f + random(0.0f, 0.3f);
     }
 
-    retValue.LowPassFilterResonance   = _random(-1.0f, 1.0f);
-    retValue.LowPassFilterCutoff      = 1.0f - std::pow(_random(0.0f, 1.0f), 3.0f);
-    retValue.LowPassFilterCutoffSweep = std::pow(_random(-1.0f, 1.0f), 3.0f);
+    retValue.LowPassFilterResonance   = random(-1.0f, 1.0f);
+    retValue.LowPassFilterCutoff      = 1.0f - std::pow(random(0.0f, 1.0f), 3.0f);
+    retValue.LowPassFilterCutoffSweep = std::pow(random(-1.0f, 1.0f), 3.0f);
 
     if (retValue.LowPassFilterCutoff < 0.1f && retValue.LowPassFilterCutoffSweep < -0.05f) {
         retValue.LowPassFilterCutoffSweep = -retValue.LowPassFilterCutoffSweep;
     }
 
-    retValue.HighPassFilterCutoff      = std::pow(_random(0.0f, 1.0f), 5.0f);
-    retValue.HighPassFilterCutoffSweep = std::pow(_random(-1.0f, 1.0f), 5.0f);
-    retValue.PhaserOffset              = std::pow(_random(-1.0f, 1.0f), 3.0f);
-    retValue.PhaserSweep               = std::pow(_random(-1.0f, 1.0f), 3.0f);
-    retValue.RepeatSpeed               = _random(-1.0f, 1.0f);
-    retValue.ChangeSpeed               = _random(-1.0f, 1.0f);
-    retValue.ChangeAmount              = _random(-1.0f, 1.0f);
+    retValue.HighPassFilterCutoff      = std::pow(random(0.0f, 1.0f), 5.0f);
+    retValue.HighPassFilterCutoffSweep = std::pow(random(-1.0f, 1.0f), 5.0f);
+    retValue.PhaserOffset              = std::pow(random(-1.0f, 1.0f), 3.0f);
+    retValue.PhaserSweep               = std::pow(random(-1.0f, 1.0f), 3.0f);
+    retValue.RepeatSpeed               = random(-1.0f, 1.0f);
+    retValue.ChangeSpeed               = random(-1.0f, 1.0f);
+    retValue.ChangeAmount              = random(-1.0f, 1.0f);
 
     retValue.sanitize();
     return retValue;
 }
 
 // Mutate current sound
-auto sound_generator::mutate_wave(sound_wave const& wave) -> sound_wave
+auto sound_generator::mutate_wave(u64 seed, sound_wave const& wave) -> sound_wave
 {
+    random::prng_split_mix_64 random {seed};
+
     sound_wave retValue {wave};
 
-    if (_random(0, 1) == 1) { retValue.StartFrequency += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.Slide += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.DeltaSlide += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.SquareDuty += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.DutySweep += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.VibratoDepth += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.VibratoSpeed += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.AttackTime += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.SustainTime += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.DecayTime += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.SustainPunch += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.LowPassFilterResonance += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.LowPassFilterCutoff += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.LowPassFilterCutoffSweep += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.HighPassFilterCutoff += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.HighPassFilterCutoffSweep += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.PhaserOffset += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.PhaserSweep += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.RepeatSpeed += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.ChangeSpeed += _random(-0.05f, 0.05f); }
-    if (_random(0, 1) == 1) { retValue.ChangeAmount += _random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.StartFrequency += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.Slide += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.DeltaSlide += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.SquareDuty += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.DutySweep += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.VibratoDepth += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.VibratoSpeed += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.AttackTime += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.SustainTime += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.DecayTime += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.SustainPunch += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.LowPassFilterResonance += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.LowPassFilterCutoff += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.LowPassFilterCutoffSweep += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.HighPassFilterCutoff += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.HighPassFilterCutoffSweep += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.PhaserOffset += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.PhaserSweep += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.RepeatSpeed += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.ChangeSpeed += random(-0.05f, 0.05f); }
+    if (random(0, 1) == 1) { retValue.ChangeAmount += random(-0.05f, 0.05f); }
 
     retValue.sanitize();
     return retValue;

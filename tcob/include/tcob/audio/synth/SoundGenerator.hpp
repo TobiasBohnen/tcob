@@ -10,12 +10,11 @@
 
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Serialization.hpp"
-#include "tcob/core/random/Random.hpp"
 
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API [[nodiscard]] sound_wave {
+class TCOB_API sound_wave {
 public:
     enum class type : u8 {
         Square   = 0,
@@ -107,22 +106,18 @@ public:
 class TCOB_API sound_generator final {
 public:
     sound_generator() = default;
-    explicit sound_generator(random::prng_split_mix_64 random);
 
-    auto generate_pickup_coin() -> sound_wave;
-    auto generate_laser_shoot() -> sound_wave;
-    auto generate_explosion() -> sound_wave;
-    auto generate_powerup() -> sound_wave;
-    auto generate_hit_hurt() -> sound_wave;
-    auto generate_jump() -> sound_wave;
-    auto generate_blip_select() -> sound_wave;
-    auto generate_random() -> sound_wave;
+    auto generate_pickup_coin [[nodiscard]] (u64 seed) -> sound_wave;
+    auto generate_laser_shoot [[nodiscard]] (u64 seed) -> sound_wave;
+    auto generate_explosion [[nodiscard]] (u64 seed) -> sound_wave;
+    auto generate_powerup [[nodiscard]] (u64 seed) -> sound_wave;
+    auto generate_hit_hurt [[nodiscard]] (u64 seed) -> sound_wave;
+    auto generate_jump [[nodiscard]] (u64 seed) -> sound_wave;
+    auto generate_blip_select [[nodiscard]] (u64 seed) -> sound_wave;
+    auto generate_random [[nodiscard]] (u64 seed) -> sound_wave;
 
-    auto mutate_wave(sound_wave const& wave) -> sound_wave;
+    auto mutate_wave [[nodiscard]] (u64 seed, sound_wave const& wave) -> sound_wave;
 
     auto create_buffer [[nodiscard]] (sound_wave const& wave) -> buffer;
-
-private:
-    random::prng_split_mix_64 _random;
 };
 }
