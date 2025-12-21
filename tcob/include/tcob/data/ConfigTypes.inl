@@ -196,13 +196,13 @@ inline auto object::get(string_view key) const -> std::expected<T, error_code>
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::get(string_view key, string_view subkey, Keys&&... keys) const -> std::expected<T, error_code>
+inline auto object::get(string_view key, string_view subkey, Keys const&... keys) const -> std::expected<T, error_code>
 {
     auto const* val {get_entry(key)};
     if (!val) { return std::unexpected {error_code::Undefined}; }
 
     if (object sub; val->try_get(sub)) {
-        return sub.get<T>(subkey, std::forward<Keys>(keys)...);
+        return sub.get<T>(subkey, keys...);
     }
 
     return std::unexpected {error_code::TypeMismatch};
@@ -222,11 +222,11 @@ inline auto object::get(string_view key, isize index) const -> std::expected<T, 
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::get(string_view key, isize index, Keys&&... keys) const -> std::expected<T, error_code>
+inline auto object::get(string_view key, isize index, Keys const&... keys) const -> std::expected<T, error_code>
 {
     auto obj {get<object>(key, index)};
     if (!obj) { return std::unexpected {error_code::TypeMismatch}; }
-    return obj->get<T>(std::forward<Keys>(keys)...);
+    return obj->get<T>(keys...);
 }
 
 template <ConvertibleFrom T>
@@ -237,14 +237,14 @@ inline auto object::try_get(T& value, string_view key) const -> bool
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::try_get(T& value, string_view key, string_view subkey, Keys&&... keys) const -> bool
+inline auto object::try_get(T& value, string_view key, string_view subkey, Keys const&... keys) const -> bool
 {
     auto const* val {get_entry(key)};
     if (!val) { return false; }
 
     if (val) {
         if (object sub; val->try_get(sub)) {
-            return sub.try_get<T>(value, subkey, std::forward<Keys>(keys)...);
+            return sub.try_get<T>(value, subkey, keys...);
         }
     }
 
@@ -313,13 +313,13 @@ inline auto object::is(string_view key) const -> bool
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::is(string_view key, string_view subkey, Keys&&... keys) const -> bool
+inline auto object::is(string_view key, string_view subkey, Keys const&... keys) const -> bool
 {
     auto const* val {get_entry(key)};
     if (!val) { return false; }
 
     if (object sub {}; val->try_get(sub)) {
-        return sub.is<T>(subkey, std::forward<Keys>(keys)...);
+        return sub.is<T>(subkey, keys...);
     }
 
     return false;

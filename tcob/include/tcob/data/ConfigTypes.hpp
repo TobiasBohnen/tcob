@@ -96,16 +96,16 @@ public:
     template <ConvertibleFrom T>
     auto get(string_view key) const -> std::expected<T, error_code>;
     template <ConvertibleFrom T, typename... Keys>
-    auto get(string_view key, string_view subkey, Keys&&... keys) const -> std::expected<T, error_code>;
+    auto get(string_view key, string_view subkey, Keys const&... keys) const -> std::expected<T, error_code>;
     template <ConvertibleFrom T>
     auto get(string_view key, isize index) const -> std::expected<T, error_code>;
     template <ConvertibleFrom T, typename... Keys>
-    auto get(string_view key, isize index, Keys&&... keys) const -> std::expected<T, error_code>;
+    auto get(string_view key, isize index, Keys const&... keys) const -> std::expected<T, error_code>;
 
     template <ConvertibleFrom T>
     auto try_get(T& value, string_view key) const -> bool;
     template <ConvertibleFrom T, typename... Keys>
-    auto try_get(T& value, string_view key, string_view subkey, Keys&&... keys) const -> bool;
+    auto try_get(T& value, string_view key, string_view subkey, Keys const&... keys) const -> bool;
 
     template <ConvertibleTo Value>
     void set(string_view key, Value&& val);
@@ -120,7 +120,7 @@ public:
     template <ConvertibleFrom T>
     auto is(string_view key) const -> bool;
     template <ConvertibleFrom T, typename... Keys>
-    auto is(string_view key, string_view subkey, Keys&&... keys) const -> bool;
+    auto is(string_view key, string_view subkey, Keys const&... keys) const -> bool;
     template <ConvertibleFrom T>
     auto is(string_view key, isize index) const -> bool;
 
