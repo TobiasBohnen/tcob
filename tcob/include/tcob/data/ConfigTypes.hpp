@@ -61,13 +61,13 @@ public:
     auto get_type(Key key) const -> type;
 
 protected:
-    virtual auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool = 0;
-
     auto values(this auto&& self) -> decltype(auto);
 
     void swap(Impl& other);
 
 private:
+    virtual auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool = 0;
+
     std::shared_ptr<Container> _values;
 };
 
@@ -135,10 +135,9 @@ public:
     auto get_entry(string_view key) const -> entry const*;
     void set_entry(string_view key, entry const& entry);
 
-protected:
+private:
     auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool override;
 
-private:
     void add_entry(string_view key, entry const& entry);
     void remove_entry(string_view key);
 
@@ -192,7 +191,7 @@ public:
     auto get_entry(isize index) const -> entry*;
     void add_entry(entry const& newEntry);
 
-protected:
+private:
     auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool override;
 };
 
