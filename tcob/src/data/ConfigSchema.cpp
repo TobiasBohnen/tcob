@@ -104,35 +104,23 @@ auto schema::FromObject(object const& obj) -> std::shared_ptr<schema>
             case type::String: {
                 string_property val;
                 val.Name = k;
-                if (usize max {0}; propSec.try_get(max, "MaxLength")) {
-                    val.MaxLength = max;
-                }
-                if (usize min {0}; propSec.try_get(min, "MinLength")) {
-                    val.MinLength = min;
-                }
+                if (usize max {0}; propSec.try_get(max, "MaxLength")) { val.MaxLength = max; }
+                if (usize min {0}; propSec.try_get(min, "MinLength")) { val.MinLength = min; }
                 propSec.try_get(val.Pattern, "Pattern");
                 prop = val;
             } break;
             case type::Float: {
                 float_property val;
                 val.Name = k;
-                if (f64 max {0}; propSec.try_get(max, "MaxValue")) {
-                    val.MaxValue = max;
-                }
-                if (f64 min {0}; propSec.try_get(min, "MinValue")) {
-                    val.MinValue = min;
-                }
+                if (f64 max {0}; propSec.try_get(max, "MaxValue")) { val.MaxValue = max; }
+                if (f64 min {0}; propSec.try_get(min, "MinValue")) { val.MinValue = min; }
                 prop = val;
             } break;
             case type::Integer: {
                 int_property val;
                 val.Name = k;
-                if (i64 max {0}; propSec.try_get(max, "MaxValue")) {
-                    val.MaxValue = max;
-                }
-                if (i64 min {0}; propSec.try_get(min, "MinValue")) {
-                    val.MinValue = min;
-                }
+                if (i64 max {0}; propSec.try_get(max, "MaxValue")) { val.MaxValue = max; }
+                if (i64 min {0}; propSec.try_get(min, "MinValue")) { val.MinValue = min; }
                 prop = val;
             } break;
             case type::Bool: {
@@ -143,15 +131,9 @@ auto schema::FromObject(object const& obj) -> std::shared_ptr<schema>
             case type::Array: {
                 array_property val;
                 val.Name = k;
-                if (isize max {0}; propSec.try_get(max, "MaxSize")) {
-                    val.MaxSize = max;
-                }
-                if (isize min {0}; propSec.try_get(min, "MinSize")) {
-                    val.MinSize = min;
-                }
-                if (type itype {}; propSec.try_get(itype, "Type")) {
-                    val.ItemType = itype;
-                }
+                if (isize max {0}; propSec.try_get(max, "MaxSize")) { val.MaxSize = max; }
+                if (isize min {0}; propSec.try_get(min, "MinSize")) { val.MinSize = min; }
+                if (type itype {}; propSec.try_get(itype, "Type")) { val.ItemType = itype; }
                 prop = val;
             } break;
             case type::Object: {
@@ -293,25 +275,13 @@ auto schema::validate_property(object const& obj, array_property const& prop) co
                 for (isize i {0}; i < val.size(); ++i) {
                     bool test {false};
                     switch (*prop.ItemType) {
-                    case type::Array:
-                        test = val.is<array>(i);
-                        break;
-                    case type::Bool:
-                        test = val.is<bool>(i);
-                        break;
-                    case type::Float:
-                        test = val.is<f64>(i);
-                        break;
-                    case type::Integer:
-                        test = val.is<i64>(i);
-                        break;
-                    case type::Object:
-                        test = val.is<object>(i);
-                        break;
-                    case type::String:
-                        test = val.is<string>(i);
-                        break;
-                    case type::Null: break;
+                    case type::Array:   test = val.is<array>(i); break;
+                    case type::Bool:    test = val.is<bool>(i); break;
+                    case type::Float:   test = val.is<f64>(i); break;
+                    case type::Integer: test = val.is<i64>(i); break;
+                    case type::Object:  test = val.is<object>(i); break;
+                    case type::String:  test = val.is<string>(i); break;
+                    case type::Null:    break;
                     }
                     if (!test) { retValue.Constraint = "ItemType"; }
                 }
