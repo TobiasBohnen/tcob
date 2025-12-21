@@ -172,7 +172,31 @@ auto json_reader::ReadScalar(entry& currentEntry, utf8_string_view line) -> bool
     // string
     auto const lineSize {line.size()};
     if (lineSize > 1 && line[0] == '"' && line[lineSize - 1] == '"') {
-        currentEntry.set_value(utf8_string {line.substr(1, lineSize - 2)});
+        auto const  raw {line.substr(1, lineSize - 2)};
+        utf8_string unescaped;
+        unescaped.reserve(raw.size());
+
+        for (usize i {0}; i < raw.size(); ++i) {
+            char const c {raw[i]};
+            if (c == '\\' && i + 1 < raw.size()) {
+                char const next {raw[++i]};
+                switch (next) {
+                case '"':  unescaped += '"'; break;
+                case '\\': unescaped += '\\'; break;
+                case '/':  unescaped += '/'; break;
+                case 'b':  unescaped += '\b'; break;
+                case 'f':  unescaped += '\f'; break;
+                case 'n':  unescaped += '\n'; break;
+                case 'r':  unescaped += '\r'; break;
+                case 't':  unescaped += '\t'; break;
+                default:   unescaped += next; break;
+                }
+            } else {
+                unescaped += c;
+            }
+        }
+
+        currentEntry.set_value(unescaped);
         return true;
     }
 

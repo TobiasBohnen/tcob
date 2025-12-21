@@ -37,9 +37,10 @@ auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> 
     i32  bracketCount {0};
 
     usize start {0};
+    char  prevC {0};
     for (usize i {0}; i < str.size(); ++i) {
         char const c {str[i]};
-        if (c == '"') {
+        if (c == '"' && prevC != '\\') {
             inQuote = !inQuote;
         } else {
             switch (c) {
@@ -77,6 +78,7 @@ auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> 
             }
             start = i + 1;
         }
+        prevC = c;
     }
 
     if (start <= str.size()) {
