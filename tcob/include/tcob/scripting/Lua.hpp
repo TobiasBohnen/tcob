@@ -289,6 +289,7 @@ public:
     auto resume(i32 argCount) const -> coroutine_status;
     auto close_thread() const -> bool;
 
+    void warning(string const& message, bool toCont = false) const;
     void error [[noreturn]] (char const* message, ...) const;
 
     void call(i32 nargs) const;

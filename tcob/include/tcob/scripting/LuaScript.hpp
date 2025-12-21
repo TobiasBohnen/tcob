@@ -81,7 +81,7 @@ private:
     auto load_binary_buffer(string_view script, string const& name) const -> bool;
 
     template <typename... Args>
-    void load_library(library lib, Args... args);
+    void open_library(library lib, Args... args);
     void load_library(library lib);
 
     void register_searcher();

@@ -467,6 +467,11 @@ auto state_view::close_thread() const -> bool
     return lua_closethread(_state, nullptr) == LUA_OK;
 }
 
+void state_view::warning(string const& message, bool toCont) const
+{
+    lua_warning(_state, message.c_str(), toCont);
+}
+
 void state_view::error(char const* message, ...) const
 {
     va_list args {};

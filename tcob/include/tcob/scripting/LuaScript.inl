@@ -23,12 +23,12 @@ template <typename... Args>
 inline void script::open_libraries(Args... args)
 {
     if constexpr (sizeof...(args) == 0) {
-        load_library(library::Table, library::String,
+        open_library(library::Table, library::String,
                      library::Math, library::Coroutine,
                      library::IO, library::Utf8, library::Package);
 
     } else {
-        load_library(args...);
+        open_library(args...);
     }
 }
 
@@ -87,12 +87,12 @@ inline auto script::load_binary(io::istream& in, string const& name) const -> fu
 }
 
 template <typename... Args>
-inline void script::load_library(library lib, Args... args)
+inline void script::open_library(library lib, Args... args)
 {
     load_library(lib);
 
     if constexpr (sizeof...(args) > 0) {
-        load_library(args...);
+        open_library(args...);
     }
 }
 

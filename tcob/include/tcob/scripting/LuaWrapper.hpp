@@ -111,9 +111,6 @@ public:
 
     void hide_metatable(auto&& value) const;
 
-    template <typename S>
-    void register_base();
-
 private:
     enum class wrap_target : u8 {
         Getter,
@@ -151,6 +148,9 @@ private:
 
     void newindex(WrappedType* b, i32 arg);
     void newindex(WrappedType* b, char const* arg);
+
+    template <typename S>
+    void register_base();
 
     static auto gc(lua_State* l) -> i32;
 
