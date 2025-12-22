@@ -192,7 +192,7 @@ void polygon_renderer::on_render_to_target(render_target& target)
 ////////////////////////////////////////////////////////////
 
 batch_polygon_renderer::batch_polygon_renderer()
-    : _vertexArray {buffer_usage_hint::DynamicDraw}
+    : _vertexArray {buffer_usage_hint::StreamDraw}
 {
 }
 
