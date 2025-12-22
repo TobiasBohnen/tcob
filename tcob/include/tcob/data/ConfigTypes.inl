@@ -21,6 +21,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Proxy.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Stream.hpp"
@@ -53,7 +54,7 @@ inline auto base_type<Impl, Container>::load(io::istream& in, string const& ext,
 template <typename Impl, typename Container>
 inline auto base_type<Impl, Container>::load_async(path const& file, bool skipBinary) noexcept -> std::future<bool>
 {
-    return std::async(std::launch::async, [&, file, skipBinary] { return load(file, skipBinary); });
+    return locate_service<task_manager>().run_async<bool>([&, file, skipBinary] mutable { return load(file, skipBinary); });
 }
 
 template <typename Impl, typename Container>
