@@ -47,7 +47,7 @@ object::object(std::shared_ptr<cfg_object_entries> const& entries) noexcept
 {
 }
 
-void object::set(string_view key, std::nullptr_t)
+void object::set(index_type key, std::nullptr_t)
 {
     remove_entry(key);
 }
@@ -147,7 +147,7 @@ auto object::Parse(string_view config, string const& ext) -> std::optional<objec
     return retValue.parse(config, ext) ? std::optional {retValue} : std::nullopt;
 }
 
-auto object::get_entry(string_view key) -> entry*
+auto object::get_entry(index_type key) -> entry*
 {
     if (auto it {find(key)}; it != values()->end()) {
         return &it->second;
@@ -156,7 +156,7 @@ auto object::get_entry(string_view key) -> entry*
     return nullptr;
 }
 
-auto object::get_entry(string_view key) const -> entry const*
+auto object::get_entry(index_type key) const -> entry const*
 {
     if (auto const it {find(key)}; it != values()->end()) {
         return &it->second;
@@ -165,7 +165,7 @@ auto object::get_entry(string_view key) const -> entry const*
     return nullptr;
 }
 
-void object::set_entry(string_view key, entry const& entry)
+void object::set_entry(index_type key, entry const& entry)
 {
     if (auto it {find(key)}; it != values()->end()) {
         it->second = entry;
@@ -176,22 +176,22 @@ void object::set_entry(string_view key, entry const& entry)
     add_entry(key, entry);
 }
 
-void object::add_entry(string_view key, entry const& entry)
+void object::add_entry(index_type key, entry const& entry)
 {
     values()->emplace_back(key, entry);
 }
 
-void object::remove_entry(string_view key)
+void object::remove_entry(index_type key)
 {
     values()->erase(find(key));
 }
 
-auto object::find(string_view key) -> cfg_object_entries::iterator
+auto object::find(index_type key) -> cfg_object_entries::iterator
 {
     return std::ranges::find_if(*this, [&key](auto const& p) { return p.first == key; });
 }
 
-auto object::find(string_view key) const -> cfg_object_entries::const_iterator
+auto object::find(index_type key) const -> cfg_object_entries::const_iterator
 {
     return std::ranges::find_if(*this, [&key](auto const& p) { return p.first == key; });
 }
@@ -203,14 +203,14 @@ array::array() noexcept
 {
 }
 
-auto array::operator[](isize index) -> proxy<array, isize>
+auto array::operator[](index_type index) -> proxy<array, index_type>
 {
-    return proxy<array, isize> {*this, std::tuple {index}};
+    return proxy<array, index_type> {*this, std::tuple {index}};
 }
 
-auto array::operator[](isize index) const -> proxy<array const, isize>
+auto array::operator[](index_type index) const -> proxy<array const, index_type>
 {
-    return proxy<array const, isize> {*this, std::tuple {index}};
+    return proxy<array const, index_type> {*this, std::tuple {index}};
 }
 
 auto array::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> bool
@@ -300,7 +300,7 @@ auto array::Parse(string_view config, string const& ext) -> std::optional<array>
     return retValue.parse(config, ext) ? std::optional {retValue} : std::nullopt;
 }
 
-auto array::get_entry(isize index) const -> entry*
+auto array::get_entry(index_type index) const -> entry*
 {
     if (index >= size()) { return nullptr; }
 

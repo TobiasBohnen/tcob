@@ -77,6 +77,8 @@ class TCOB_API object : public base_type<object, cfg_object_entries> {
     friend auto operator==(object const& left, object const& right) -> bool;
 
 public:
+    using index_type = string_view;
+
     object() noexcept;
     object(std::initializer_list<std::pair<utf8_string, cfg_value>> items);
     object(std::shared_ptr<cfg_object_entries> const& entries) noexcept;
@@ -94,25 +96,25 @@ public:
     template <ConvertibleFrom T>
     auto get() const -> std::expected<T, error_code>;
     template <ConvertibleFrom T>
-    auto get(string_view key) const -> std::expected<T, error_code>;
+    auto get(index_type key) const -> std::expected<T, error_code>;
     template <ConvertibleFrom T, typename Key, typename... Keys>
-    auto get(string_view key, Key const& subkey, Keys const&... keys) const -> std::expected<T, error_code>;
+    auto get(index_type key, Key const& subkey, Keys const&... keys) const -> std::expected<T, error_code>;
 
     template <ConvertibleFrom T>
-    auto try_get(T& value, string_view key) const -> bool;
+    auto try_get(T& value, index_type key) const -> bool;
     template <ConvertibleFrom T, typename... Keys>
-    auto try_get(T& value, string_view key, string_view subkey, Keys const&... keys) const -> bool;
+    auto try_get(T& value, index_type key, index_type subkey, Keys const&... keys) const -> bool;
 
     template <typename Key, typename... KeysOrValue>
-    void set(string_view key, Key const& keyOrValue, KeysOrValue&&... keysOrValue);
-    void set(string_view key, std::nullptr_t);
+    void set(index_type key, Key const& keyOrValue, KeysOrValue&&... keysOrValue);
+    void set(index_type key, std::nullptr_t);
 
     template <ConvertibleFrom T>
     auto is() const -> bool;
     template <ConvertibleFrom T, typename... Keys>
-    auto is(string_view key, Keys const&... keys) const;
+    auto is(index_type key, Keys const&... keys) const;
 
-    auto has(string_view key, auto&&... keys) const -> bool;
+    auto has(index_type key, auto&&... keys) const -> bool;
 
     auto clone(bool deep = false) const -> object;
     void merge(object const& other, bool onConflictTakeOther = true);
@@ -121,18 +123,18 @@ public:
 
     static auto Parse(string_view config, string const& ext) -> std::optional<object>; // TODO: change to result
 
-    auto get_entry(string_view key) -> entry*;
-    auto get_entry(string_view key) const -> entry const*;
-    void set_entry(string_view key, entry const& entry);
+    auto get_entry(index_type key) -> entry*;
+    auto get_entry(index_type key) const -> entry const*;
+    void set_entry(index_type key, entry const& entry);
 
 private:
     auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool override;
 
-    void add_entry(string_view key, entry const& entry);
-    void remove_entry(string_view key);
+    void add_entry(index_type key, entry const& entry);
+    void remove_entry(index_type key);
 
-    auto find(string_view key) -> cfg_object_entries::iterator;
-    auto find(string_view key) const -> cfg_object_entries::const_iterator;
+    auto find(index_type key) -> cfg_object_entries::iterator;
+    auto find(index_type key) const -> cfg_object_entries::const_iterator;
 };
 
 ////////////////////////////////////////////////////////////
@@ -141,33 +143,35 @@ class TCOB_API array : public base_type<array, cfg_array_entries> {
     friend auto operator==(array const& left, array const& right) -> bool;
 
 public:
+    using index_type = isize;
+
     array() noexcept;
     template <ConvertibleTo... Ts>
     explicit array(Ts... values);
     template <ConvertibleTo T>
     explicit array(std::span<T> value);
 
-    auto operator[](isize index) -> proxy<array, isize>;
-    auto operator[](isize index) const -> proxy<array const, isize>;
+    auto operator[](index_type index) -> proxy<array, index_type>;
+    auto operator[](index_type index) const -> proxy<array const, index_type>;
 
     auto parse(string_view config, string const& ext) -> bool;
 
     template <ConvertibleFrom T>
-    auto as(isize index) const -> T;
+    auto as(index_type index) const -> T;
 
     template <typename T, typename... Args>
     auto make(auto&&... indices) const -> T;
 
     template <ConvertibleFrom T>
-    auto get(isize index) const -> std::expected<T, error_code>;
+    auto get(index_type index) const -> std::expected<T, error_code>;
     template <ConvertibleFrom T, typename Key, typename... Keys>
-    auto get(isize index, Key const& subkey, Keys const&... keys) const -> std::expected<T, error_code>;
+    auto get(index_type index, Key const& subkey, Keys const&... keys) const -> std::expected<T, error_code>;
 
     template <typename Key, typename... KeysOrValue>
-    void set(isize index, Key const& keyOrValue, KeysOrValue&&... keysOrValue);
+    void set(index_type index, Key const& keyOrValue, KeysOrValue&&... keysOrValue);
 
     template <ConvertibleFrom T, typename... Keys>
-    auto is(isize index, Keys const&... keys) const;
+    auto is(index_type index, Keys const&... keys) const;
 
     template <ConvertibleTo T>
     void add(T const& addValue);
@@ -180,7 +184,7 @@ public:
 
     static auto Parse(string_view config, string const& ext) -> std::optional<array>; // TODO: change to result
 
-    auto get_entry(isize index) const -> entry*;
+    auto get_entry(index_type index) const -> entry*;
     void add_entry(entry const& newEntry);
 
 private:

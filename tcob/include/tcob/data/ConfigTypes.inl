@@ -187,7 +187,7 @@ inline auto object::get() const -> std::expected<T, error_code>
 }
 
 template <ConvertibleFrom T>
-inline auto object::get(string_view key) const -> std::expected<T, error_code>
+inline auto object::get(index_type key) const -> std::expected<T, error_code>
 {
     auto const* val {get_entry(key)};
     if (!val) { return std::unexpected {error_code::Undefined}; }
@@ -196,18 +196,18 @@ inline auto object::get(string_view key) const -> std::expected<T, error_code>
 }
 
 template <ConvertibleFrom T, typename Key, typename... Keys>
-inline auto object::get(string_view key, Key const& subkey, Keys const&... keys) const -> std::expected<T, error_code>
+inline auto object::get(index_type key, Key const& subkey, Keys const&... keys) const -> std::expected<T, error_code>
 {
     auto const* val {get_entry(key)};
     if (!val) { return std::unexpected {error_code::Undefined}; }
 
-    if constexpr (std::is_convertible_v<Key, string_view>) {
+    if constexpr (std::is_convertible_v<Key, object::index_type>) {
         if (object sub; val->try_get(sub)) {
             return sub.get<T>(subkey, keys...);
         }
     }
 
-    if constexpr (std::is_convertible_v<Key, isize>) {
+    if constexpr (std::is_convertible_v<Key, array::index_type>) {
         if (array sub; val->try_get(sub)) {
             return sub.get<T>(subkey, keys...);
         }
@@ -217,14 +217,14 @@ inline auto object::get(string_view key, Key const& subkey, Keys const&... keys)
 }
 
 template <ConvertibleFrom T>
-inline auto object::try_get(T& value, string_view key) const -> bool
+inline auto object::try_get(T& value, index_type key) const -> bool
 {
     auto const* val {get_entry(key)};
     return val && val->try_get(value);
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::try_get(T& value, string_view key, string_view subkey, Keys const&... keys) const -> bool
+inline auto object::try_get(T& value, index_type key, index_type subkey, Keys const&... keys) const -> bool
 {
     auto const* val {get_entry(key)};
     if (!val) { return false; }
@@ -239,7 +239,7 @@ inline auto object::try_get(T& value, string_view key, string_view subkey, Keys 
 }
 
 template <typename Key, typename... KeysOrValue>
-inline void object::set(string_view key, Key const& keyOrValue, KeysOrValue&&... keysOrValue)
+inline void object::set(index_type key, Key const& keyOrValue, KeysOrValue&&... keysOrValue)
 {
     if constexpr (sizeof...(keysOrValue) == 0) {
         if (auto* val {get_entry(key)}) {
@@ -254,7 +254,7 @@ inline void object::set(string_view key, Key const& keyOrValue, KeysOrValue&&...
     } else {
         auto* val {get_entry(key)};
 
-        if constexpr (std::is_convertible_v<Key, string_view>) {
+        if constexpr (std::is_convertible_v<Key, object::index_type>) {
             if (val) {
                 object sub {};
                 if (!val->try_get(sub)) { val->set(sub); }
@@ -271,7 +271,7 @@ inline void object::set(string_view key, Key const& keyOrValue, KeysOrValue&&...
             }
         }
 
-        if constexpr (std::is_convertible_v<Key, isize>) {
+        if constexpr (std::is_convertible_v<Key, array::index_type>) {
             if (val) {
                 array sub {};
                 if (!val->try_get(sub)) { val->set(sub); }
@@ -295,7 +295,7 @@ inline auto object::is() const -> bool
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::is(string_view key, Keys const&... keys) const
+inline auto object::is(index_type key, Keys const&... keys) const
 {
     auto const* val {get_entry(key)};
     if (!val) { return false; }
@@ -303,13 +303,13 @@ inline auto object::is(string_view key, Keys const&... keys) const
     if constexpr (sizeof...(keys) == 0) {
         return val->template is<T>();
     } else {
-        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, string_view>) {
+        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, object::index_type>) {
             if (object sub {}; val->try_get(sub)) {
                 return sub.is<T>(keys...);
             }
         }
 
-        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, isize>) {
+        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, array::index_type>) {
             if (array sub; val->try_get(sub)) {
                 return sub.is<T>(keys...);
             }
@@ -319,7 +319,7 @@ inline auto object::is(string_view key, Keys const&... keys) const
     return false;
 }
 
-inline auto object::has(string_view key, auto&&... keys) const -> bool
+inline auto object::has(index_type key, auto&&... keys) const -> bool
 {
     auto const* val {get_entry(key)};
     if (!val) { return false; }
@@ -351,7 +351,7 @@ inline array::array(std::span<T> value)
 }
 
 template <ConvertibleFrom T>
-inline auto array::as(isize index) const -> T
+inline auto array::as(index_type index) const -> T
 {
     return get<T>(index).value();
 }
@@ -362,7 +362,7 @@ inline auto array::make(auto&&... indices) const -> T
     constexpr usize argsCount {sizeof...(Args)};
     constexpr usize indCount {sizeof...(indices)};
 
-    std::array<isize, argsCount> inds;
+    std::array<index_type, argsCount> inds;
 
     if constexpr (indCount > 0) {
         static_assert(argsCount == indCount);
@@ -383,7 +383,7 @@ inline auto array::make(auto&&... indices) const -> T
 }
 
 template <ConvertibleFrom T>
-inline auto array::get(isize index) const -> std::expected<T, error_code>
+inline auto array::get(index_type index) const -> std::expected<T, error_code>
 {
     if (index < 0 || index >= size()) { return std::unexpected {error_code::Undefined}; }
 
@@ -391,18 +391,18 @@ inline auto array::get(isize index) const -> std::expected<T, error_code>
 }
 
 template <ConvertibleFrom T, typename Key, typename... Keys>
-inline auto array::get(isize index, Key const& subkey, Keys const&... keys) const -> std::expected<T, error_code>
+inline auto array::get(index_type index, Key const& subkey, Keys const&... keys) const -> std::expected<T, error_code>
 {
     auto const* val {get_entry(index)};
     if (!val) { return std::unexpected {error_code::Undefined}; }
 
-    if constexpr (std::is_convertible_v<Key, isize>) {
+    if constexpr (std::is_convertible_v<Key, array::index_type>) {
         if (array sub; val->try_get(sub)) {
             return sub.get<T>(subkey, keys...);
         }
     }
 
-    if constexpr (std::is_convertible_v<Key, string_view>) {
+    if constexpr (std::is_convertible_v<Key, object::index_type>) {
         if (object sub; val->try_get(sub)) {
             return sub.get<T>(subkey, keys...);
         }
@@ -412,7 +412,7 @@ inline auto array::get(isize index, Key const& subkey, Keys const&... keys) cons
 }
 
 template <typename Key, typename... KeysOrValue>
-inline void array::set(isize index, Key const& keyOrValue, KeysOrValue&&... keysOrValue)
+inline void array::set(index_type index, Key const& keyOrValue, KeysOrValue&&... keysOrValue)
 {
     if (index >= 0) {
         if (index >= size()) {
@@ -424,15 +424,15 @@ inline void array::set(isize index, Key const& keyOrValue, KeysOrValue&&... keys
         if constexpr (sizeof...(keysOrValue) == 0) {
             get_entry(index)->set(keyOrValue);
         } else {
-            if constexpr (std::is_convertible_v<Key, string_view>) {
-                object sub {};
+            if constexpr (std::is_convertible_v<Key, array::index_type>) {
+                array sub {};
                 if (!val->try_get(sub)) { val->set(sub); }
                 sub.set(keyOrValue, std::forward<KeysOrValue>(keysOrValue)...);
                 return;
             }
 
-            if constexpr (std::is_convertible_v<Key, isize>) {
-                array sub {};
+            if constexpr (std::is_convertible_v<Key, object::index_type>) {
+                object sub {};
                 if (!val->try_get(sub)) { val->set(sub); }
                 sub.set(keyOrValue, std::forward<KeysOrValue>(keysOrValue)...);
                 return;
@@ -442,7 +442,7 @@ inline void array::set(isize index, Key const& keyOrValue, KeysOrValue&&... keys
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto array::is(isize index, Keys const&... keys) const
+inline auto array::is(index_type index, Keys const&... keys) const
 {
     if (index < 0 || index >= size()) { return false; }
 
@@ -452,13 +452,13 @@ inline auto array::is(isize index, Keys const&... keys) const
     if constexpr (sizeof...(keys) == 0) {
         return val->template is<T>();
     } else {
-        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, isize>) {
+        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, array::index_type>) {
             if (array sub; val->try_get(sub)) {
                 return sub.is<T>(keys...);
             }
         }
 
-        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, string_view>) {
+        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, object::index_type>) {
             if (object sub {}; val->try_get(sub)) {
                 return sub.is<T>(keys...);
             }
