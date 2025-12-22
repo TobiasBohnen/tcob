@@ -53,6 +53,8 @@ auto ispan_sink::seek(std::streamoff off, seek_dir way) -> bool
 
 auto ispan_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
 {
+    if (sizeInBytes <= 0) { return 0; }
+
     auto const retValue {std::min(std::max(sizeInBytes, std::streamsize {0}), size_in_bytes() - _pos)};
 
     if (retValue > 0) {
@@ -102,6 +104,8 @@ auto ospan_sink::seek(std::streamoff off, seek_dir way) -> bool
 
 auto ospan_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
 {
+    if (sizeInBytes <= 0) { return 0; }
+
     auto const retValue {std::min(std::max(sizeInBytes, std::streamsize {0}), static_cast<std::streamsize>(_span.size_bytes()) - _pos)};
 
     if (retValue > 0) {

@@ -62,7 +62,6 @@ public:
     explicit ifstream(path const& path, u64 bufferSize = 4096);
 
     auto close() -> bool;
-    auto flush() -> bool;
 
     auto is_valid() const -> bool override;
 

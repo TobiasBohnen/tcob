@@ -47,28 +47,26 @@ auto memory_sink::seek(std::streamoff off, seek_dir way) -> bool
 
 auto memory_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
 {
-    if (sizeInBytes == 0) { return 0; }
+    if (sizeInBytes <= 0) { return 0; }
 
     std::streamsize const retValue {std::min(sizeInBytes, size_in_bytes() - _pos)};
-
     if (retValue > 0) {
         memcpy(s, _buf.data() + static_cast<usize>(_pos), static_cast<usize>(retValue));
         _pos += retValue;
     }
-
     return retValue;
 }
 
 auto memory_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
 {
+    if (sizeInBytes <= 0) { return 0; }
+
     if (std::ssize(_buf) < sizeInBytes + _pos) {
         _buf.resize(static_cast<usize>(sizeInBytes + _pos));
     }
 
-    if (sizeInBytes > 0) {
-        memcpy(_buf.data() + static_cast<usize>(_pos), s, static_cast<usize>(sizeInBytes));
-        _pos += sizeInBytes;
-    }
+    memcpy(_buf.data() + static_cast<usize>(_pos), s, static_cast<usize>(sizeInBytes));
+    _pos += sizeInBytes;
 
     return sizeInBytes;
 }
