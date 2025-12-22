@@ -195,38 +195,25 @@ inline auto object::get(string_view key) const -> std::expected<T, error_code>
     return val->template get<T>();
 }
 
-template <ConvertibleFrom T, typename... Keys>
-inline auto object::get(string_view key, string_view subkey, Keys const&... keys) const -> std::expected<T, error_code>
+template <ConvertibleFrom T, typename Key, typename... Keys>
+inline auto object::get(string_view key, Key const& subkey, Keys const&... keys) const -> std::expected<T, error_code>
 {
     auto const* val {get_entry(key)};
     if (!val) { return std::unexpected {error_code::Undefined}; }
 
-    if (object sub; val->try_get(sub)) {
-        return sub.get<T>(subkey, keys...);
+    if constexpr (std::is_convertible_v<Key, string_view>) {
+        if (object sub; val->try_get(sub)) {
+            return sub.get<T>(subkey, keys...);
+        }
+    }
+
+    if constexpr (std::is_convertible_v<Key, isize>) {
+        if (array sub; val->try_get(sub)) {
+            return sub.get<T>(subkey, keys...);
+        }
     }
 
     return std::unexpected {error_code::TypeMismatch};
-}
-
-template <ConvertibleFrom T>
-inline auto object::get(string_view key, isize index) const -> std::expected<T, error_code>
-{
-    auto const* val {get_entry(key)};
-    if (!val) { return std::unexpected {error_code::Undefined}; }
-
-    if (array sub; val->try_get(sub)) {
-        return sub.get<T>(index);
-    }
-
-    return std::unexpected {error_code::TypeMismatch};
-}
-
-template <ConvertibleFrom T, typename... Keys>
-inline auto object::get(string_view key, isize index, Keys const&... keys) const -> std::expected<T, error_code>
-{
-    auto obj {get<object>(key, index)};
-    if (!obj) { return std::unexpected {error_code::TypeMismatch}; }
-    return obj->get<T>(keys...);
 }
 
 template <ConvertibleFrom T>
@@ -251,51 +238,53 @@ inline auto object::try_get(T& value, string_view key, string_view subkey, Keys 
     return false;
 }
 
-template <ConvertibleTo Value>
-inline void object::set(string_view key, Value&& value)
+template <typename Key, typename... KeysOrValue>
+inline void object::set(string_view key, Key const& keyOrValue, KeysOrValue&&... keysOrValue)
 {
-    if (auto* val {get_entry(key)}) {
-        val->set(std::forward<Value>(value));
-        return;
+    if constexpr (sizeof...(keysOrValue) == 0) {
+        if (auto* val {get_entry(key)}) {
+            val->set(keyOrValue);
+            return;
+        }
+
+        // key not found -> add new entry
+        entry ent; // TODO: -> constructor
+        ent.set(keyOrValue);
+        add_entry(key, ent);
+    } else {
+        auto* val {get_entry(key)};
+
+        if constexpr (std::is_convertible_v<Key, string_view>) {
+            if (val) {
+                object sub {};
+                if (!val->try_get(sub)) { val->set(sub); }
+                sub.set(keyOrValue, std::forward<KeysOrValue>(keysOrValue)...);
+                return;
+            }
+
+            using last_type = typename std::remove_cvref_t<detail::last_element_t<KeysOrValue...>>;
+            if constexpr (!std::is_same_v<last_type, std::nullptr_t>) {
+                // key not found -> add new object
+                add_entry(key, entry {object {}});
+                set(key, keyOrValue, std::forward<KeysOrValue>(keysOrValue)...);
+                return;
+            }
+        }
+
+        if constexpr (std::is_convertible_v<Key, isize>) {
+            if (val) {
+                array sub {};
+                if (!val->try_get(sub)) { val->set(sub); }
+                sub.set(keyOrValue, std::forward<KeysOrValue>(keysOrValue)...);
+                return;
+            }
+
+            // key not found -> add new array
+            add_entry(key, entry {array {}});
+            set(key, keyOrValue, std::forward<KeysOrValue>(keysOrValue)...);
+            return;
+        }
     }
-
-    // key not found -> add new entry
-    entry ent; // TODO: -> constructor
-    ent.set(value);
-    add_entry(key, ent);
-}
-
-template <typename... KeysOrValue>
-inline void object::set(string_view key, string_view subkey, KeysOrValue&&... keys)
-{
-    if (auto* val {get_entry(key)}) {
-        object sub {};
-        if (!val->try_get(sub)) { val->set(sub); }
-        sub.set(subkey, std::forward<KeysOrValue>(keys)...);
-        return;
-    }
-
-    using last_type = typename std::remove_cvref_t<detail::last_element_t<KeysOrValue...>>;
-    if constexpr (!std::is_same_v<last_type, std::nullptr_t>) {
-        // key not found -> add new object
-        add_entry(key, entry {object {}});
-        set(key, subkey, std::forward<KeysOrValue>(keys)...);
-    }
-}
-
-template <ConvertibleTo Value>
-inline void object::set(string_view key, isize index, Value&& value)
-{
-    if (auto* val {get_entry(key)}) {
-        array sub {};
-        if (!val->try_get(sub)) { val->set(sub); }
-        sub.set(index, std::forward<Value>(value));
-        return;
-    }
-
-    // key not found -> add new array
-    add_entry(key, entry {array {}});
-    set(key, index, value);
 }
 
 template <ConvertibleFrom T>
@@ -305,34 +294,26 @@ inline auto object::is() const -> bool
     return ent.is<T>();
 }
 
-template <ConvertibleFrom T>
-inline auto object::is(string_view key) const -> bool
-{
-    auto const* val {get_entry(key)};
-    return val && val->template is<T>();
-}
-
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::is(string_view key, string_view subkey, Keys const&... keys) const -> bool
+inline auto object::is(string_view key, Keys const&... keys) const
 {
     auto const* val {get_entry(key)};
     if (!val) { return false; }
 
-    if (object sub {}; val->try_get(sub)) {
-        return sub.is<T>(subkey, keys...);
-    }
+    if constexpr (sizeof...(keys) == 0) {
+        return val->template is<T>();
+    } else {
+        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, string_view>) {
+            if (object sub {}; val->try_get(sub)) {
+                return sub.is<T>(keys...);
+            }
+        }
 
-    return false;
-}
-
-template <ConvertibleFrom T>
-inline auto object::is(string_view key, isize index) const -> bool
-{
-    auto const* val {get_entry(key)};
-    if (!val) { return false; }
-
-    if (array sub; val->try_get(sub)) {
-        return sub.is<T>(index);
+        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, isize>) {
+            if (array sub; val->try_get(sub)) {
+                return sub.is<T>(keys...);
+            }
+        }
     }
 
     return false;
@@ -406,27 +387,85 @@ inline auto array::get(isize index) const -> std::expected<T, error_code>
 {
     if (index < 0 || index >= size()) { return std::unexpected {error_code::Undefined}; }
 
-    return (*values())[static_cast<usize>(index)].get<T>();
+    return get_entry(index)->get<T>();
 }
 
-template <ConvertibleTo T>
-inline void array::set(isize index, T&& value)
+template <ConvertibleFrom T, typename Key, typename... Keys>
+inline auto array::get(isize index, Key const& subkey, Keys const&... keys) const -> std::expected<T, error_code>
+{
+    auto const* val {get_entry(index)};
+    if (!val) { return std::unexpected {error_code::Undefined}; }
+
+    if constexpr (std::is_convertible_v<Key, isize>) {
+        if (array sub; val->try_get(sub)) {
+            return sub.get<T>(subkey, keys...);
+        }
+    }
+
+    if constexpr (std::is_convertible_v<Key, string_view>) {
+        if (object sub; val->try_get(sub)) {
+            return sub.get<T>(subkey, keys...);
+        }
+    }
+
+    return std::unexpected {error_code::TypeMismatch};
+}
+
+template <typename Key, typename... KeysOrValue>
+inline void array::set(isize index, Key const& keyOrValue, KeysOrValue&&... keysOrValue)
 {
     if (index >= 0) {
         if (index >= size()) {
             values()->resize(static_cast<usize>(index + 1));
         }
+        auto* val {get_entry(index)};
+        if (!val) { return; }
 
-        (*values())[static_cast<usize>(index)].set(std::forward<T>(value));
+        if constexpr (sizeof...(keysOrValue) == 0) {
+            get_entry(index)->set(keyOrValue);
+        } else {
+            if constexpr (std::is_convertible_v<Key, string_view>) {
+                object sub {};
+                if (!val->try_get(sub)) { val->set(sub); }
+                sub.set(keyOrValue, std::forward<KeysOrValue>(keysOrValue)...);
+                return;
+            }
+
+            if constexpr (std::is_convertible_v<Key, isize>) {
+                array sub {};
+                if (!val->try_get(sub)) { val->set(sub); }
+                sub.set(keyOrValue, std::forward<KeysOrValue>(keysOrValue)...);
+                return;
+            }
+        }
     }
 }
 
-template <ConvertibleFrom T>
-inline auto array::is(isize index) const -> bool
+template <ConvertibleFrom T, typename... Keys>
+inline auto array::is(isize index, Keys const&... keys) const
 {
     if (index < 0 || index >= size()) { return false; }
 
-    return (*values())[static_cast<usize>(index)].is<T>();
+    auto const* val {get_entry(index)};
+    if (!val) { return false; }
+
+    if constexpr (sizeof...(keys) == 0) {
+        return val->template is<T>();
+    } else {
+        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, isize>) {
+            if (array sub; val->try_get(sub)) {
+                return sub.is<T>(keys...);
+            }
+        }
+
+        if constexpr (std::is_convertible_v<detail::first_element_t<Keys...>, string_view>) {
+            if (object sub {}; val->try_get(sub)) {
+                return sub.is<T>(keys...);
+            }
+        }
+    }
+
+    return false;
 }
 
 template <ConvertibleTo T>
