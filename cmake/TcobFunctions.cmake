@@ -41,7 +41,7 @@ function(tcob_add_obj_library module sources headers)
         target_link_libraries(${module} PUBLIC tcob_extlibs)
         target_precompile_headers(${module} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:../_pch.hpp>)
     else()
-        target_link_libraries(${module} PUBLIC tcob_core)
+        target_link_libraries(${module} PRIVATE tcob_core)
         target_precompile_headers(${module} REUSE_FROM tcob_core)
     endif()
 
