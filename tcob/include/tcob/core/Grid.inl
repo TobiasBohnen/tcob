@@ -75,7 +75,7 @@ inline void grid<T>::blit(rect_type const& bounds, std::span<T const> values)
     assert(bounds.bottom() <= height());
     assert(bounds.left() >= 0);
     assert(bounds.top() >= 0);
-    assert(values.size() == bounds.width() * bounds.height());
+    assert(std::ssize(values) == bounds.width() * bounds.height());
 
     i32 const dstX {bounds.left()};
     i32 const dstY {bounds.top()};
