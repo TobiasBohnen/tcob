@@ -117,10 +117,10 @@ void document::on_draw_to(render_target& target)
         litehtml::position::vector redraw {};
         _lhdoc->root()->find_styles_changes(redraw);
 
-        size_i const size {Bounds->Size};
+        size_f const size {Bounds->Size};
 
-        _container->set_size(size);
-        _canvas.begin_frame(size, 1.0f);
+        _container->set_size(size_i {size});
+        _canvas.begin_frame(size_i {size}, 1.0f);
         _lhdoc->render(size.Width);
         litehtml::position const pos {0, 0, size.Width, size.Height};
         _lhdoc->draw(0, 0, 0, &pos);
@@ -154,7 +154,12 @@ void document::on_mouse_motion(input::mouse::motion_event const& ev)
 
     if (bound.contains(mp)) {
         _mousePosition = mp - bound.Position;
-        if (_lhdoc->on_mouse_over(mp.X - bound.left(), mp.Y - bound.top(), mp.X, mp.Y, redraw)) {
+        if (_lhdoc->on_mouse_over(
+                static_cast<litehtml::pixel_t>(mp.X - bound.left()),
+                static_cast<litehtml::pixel_t>(mp.Y - bound.top()),
+                static_cast<litehtml::pixel_t>(mp.X),
+                static_cast<litehtml::pixel_t>(mp.Y),
+                redraw)) {
             force_redraw();
         }
 
@@ -183,7 +188,12 @@ void document::on_mouse_button_down(input::mouse::button_event const& ev)
         rect_i const  bound {*Bounds};
         point_i const mp {convert_screen_to_world(ev.Position)};
 
-        if (_lhdoc->on_lbutton_down(mp.X - bound.left(), mp.Y - bound.top(), mp.X, mp.Y, redraw)) {
+        if (_lhdoc->on_lbutton_down(
+                static_cast<litehtml::pixel_t>(mp.X - bound.left()),
+                static_cast<litehtml::pixel_t>(mp.Y - bound.top()),
+                static_cast<litehtml::pixel_t>(mp.X),
+                static_cast<litehtml::pixel_t>(mp.Y),
+                redraw)) {
             force_redraw();
         }
     }
@@ -201,7 +211,12 @@ void document::on_mouse_button_up(input::mouse::button_event const& ev)
         rect_i const  bound {*Bounds};
         point_i const mp {convert_screen_to_world(ev.Position)};
 
-        if (_lhdoc->on_lbutton_up(mp.X - bound.left(), mp.Y - bound.top(), mp.X, mp.Y, redraw)) {
+        if (_lhdoc->on_lbutton_up(
+                static_cast<litehtml::pixel_t>(mp.X - bound.left()),
+                static_cast<litehtml::pixel_t>(mp.Y - bound.top()),
+                static_cast<litehtml::pixel_t>(mp.X),
+                static_cast<litehtml::pixel_t>(mp.Y),
+                redraw)) {
             force_redraw();
         }
     }

@@ -9,11 +9,11 @@
 #if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
 
     #include <functional>
-    #include <unordered_map>
-    #include <vector>
     #include <memory>
     #include <string>
-    
+    #include <unordered_map>
+    #include <vector>
+
     #include <litehtml.h>
     #include <litehtml/background.h>
     #include <litehtml/borders.h>
@@ -22,6 +22,7 @@
     #include <litehtml/document_container.h>
     #include <litehtml/el_space.h>
     #include <litehtml/el_text.h>
+    #include <litehtml/font_description.h>
     #include <litehtml/html.h>
     #include <litehtml/os_types.h>
     #include <litehtml/render_item.h>
@@ -29,14 +30,14 @@
     #include <litehtml/types.h>
     #include <litehtml/web_color.h>
 
-    #include "tcob/gfx/Font.hpp"
-    #include "tcob/gfx/html/HtmlDocument.hpp"
     #include "tcob/core/Color.hpp"
     #include "tcob/core/Point.hpp"
     #include "tcob/core/Rect.hpp"
     #include "tcob/core/Size.hpp"
     #include "tcob/gfx/Canvas.hpp"
+    #include "tcob/gfx/Font.hpp"
     #include "tcob/gfx/Texture.hpp"
+    #include "tcob/gfx/html/HtmlDocument.hpp"
     #include "tcob/gfx/html/HtmlElementPainter.hpp"
 
 namespace tcob::gfx::html::detail {
@@ -56,11 +57,11 @@ public:
     auto get_document() -> document&;
     void set_size(size_i size);
 
-    auto create_font(char const* faceName, i32 size, i32 weight, litehtml::font_style italic, u32 decoration, litehtml::font_metrics* fm) -> litehtml::uint_ptr override;
+    auto create_font(litehtml::font_description const& descr, litehtml::document const* doc, litehtml::font_metrics* fm) -> litehtml::uint_ptr override;
     void delete_font(litehtml::uint_ptr hFont) override;
-    auto text_width(char const* text, litehtml::uint_ptr hFont) -> i32 override;
-    auto pt_to_px(i32 pt) const -> i32 override;
-    auto get_default_font_size() const -> i32 override;
+    auto text_width(char const* text, litehtml::uint_ptr hFont) -> litehtml::pixel_t override;
+    auto pt_to_px(f32 pt) const -> litehtml::pixel_t override;
+    auto get_default_font_size() const -> litehtml::pixel_t override;
     auto get_default_font_name() const -> char const* override;
     void load_image(char const* src, char const* baseurl, bool redraw_on_ready) override;
     void get_image_size(char const* src, char const* baseurl, litehtml::size& sz) override;
@@ -74,7 +75,7 @@ public:
     void import_css(string& text, string const& url, string& baseurl) override;
     void set_clip(litehtml::position const& pos, litehtml::border_radiuses const& bdr_radius) override;
     void del_clip() override;
-    void get_client_rect(litehtml::position& client) const override;
+    void get_viewport(litehtml::position& viewport) const override;
     auto create_element(char const* tag_name, litehtml::string_map const& attributes, std::shared_ptr<litehtml::document> const& doc) -> std::shared_ptr<litehtml::element> override;
     void get_media_features(litehtml::media_features& media) const override;
     void get_language(string& language, string& culture) const override;
@@ -103,7 +104,7 @@ private:
     string                               _caption;
     std::unordered_map<string, texture*> _images {};
     std::vector<font*>                   _fonts;
-    std::unordered_map<usize, u32>       _fontDecorations {};
+    std::unordered_map<usize, i32>       _fontDecorations {};
     std::vector<std::function<void()>>   _overlayFunctions;
     string                               _language {"en"};
     string                               _culture;

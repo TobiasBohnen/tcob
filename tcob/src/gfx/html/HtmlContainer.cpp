@@ -18,6 +18,7 @@
     #include <litehtml/document_container.h>
     #include <litehtml/el_space.h>
     #include <litehtml/el_text.h>
+    #include <litehtml/font_description.h>
     #include <litehtml/html.h>
     #include <litehtml/render_item.h>
     #include <litehtml/string_id.h>
@@ -90,27 +91,25 @@ void container::set_size(size_i size)
     _windowSize = size;
 }
 
-auto container::create_font(char const* faceName, i32 size, i32 weight, litehtml::font_style italic, u32 decoration, litehtml::font_metrics* fm) -> litehtml::uint_ptr
+auto container::create_font(litehtml::font_description const& descr, litehtml::document const* /* doc */, litehtml::font_metrics* fm) -> litehtml::uint_ptr
 {
-    static_cast<void>(faceName);
-
     font::style style {};
-    if (italic == litehtml::font_style::font_style_italic) {
+    if (descr.style == litehtml::font_style::font_style_italic) {
         style.IsItalic = true;
     }
-    style.Weight = static_cast<font::weight>(weight);
+    style.Weight = static_cast<font::weight>(descr.weight);
 
-    auto const font {_config.Fonts->get_font(style, size)};
+    auto const font {_config.Fonts->get_font(style, static_cast<u32>(descr.size))};
 
     auto const& fontInfo {font->info()};
-    fm->ascent      = static_cast<i32>(fontInfo.Ascender);
-    fm->descent     = -static_cast<i32>(fontInfo.Descender);
+    fm->ascent      = fontInfo.Ascender;
+    fm->descent     = -fontInfo.Descender;
     fm->height      = fm->ascent + fm->descent;
-    fm->x_height    = font->get_glyphs("x", false)[0].Size.Height;
+    fm->x_height    = static_cast<litehtml::pixel_t>(font->get_glyphs("x", false)[0].Size.Height);
     fm->draw_spaces = true;
     _fonts.push_back(font.ptr());
     usize const retValue {_fonts.size() - 1};
-    _fontDecorations[retValue] = decoration;
+    _fontDecorations[retValue] = descr.decoration_line;
     return retValue + 1;
 }
 
@@ -120,23 +119,23 @@ void container::delete_font(litehtml::uint_ptr hFont)
     // nothing to do
 }
 
-auto container::text_width(char const* text, litehtml::uint_ptr hFont) -> i32
+auto container::text_width(char const* text, litehtml::uint_ptr hFont) -> litehtml::pixel_t
 {
     auto* f {_fonts[hFont - 1]};
     return f
-        ? static_cast<i32>(text_formatter::measure(text, *f, -1, true).Width)
+        ? text_formatter::measure(text, *f, -1, true).Width
         : -1;
 }
 
-auto container::pt_to_px(i32 pt) const -> i32
+auto container::pt_to_px(f32 pt) const -> litehtml::pixel_t
 {
     // pixels = points / 72 * 96 //TODO: get DPI from SDL or window
-    return static_cast<i32>(static_cast<f32>(pt) / 72.0f * 96.0f);
+    return pt / 72.0f * 96.0f;
 }
 
-auto container::get_default_font_size() const -> i32
+auto container::get_default_font_size() const -> litehtml::pixel_t
 {
-    return _config.DefaultFontSize;
+    return static_cast<litehtml::pixel_t>(_config.DefaultFontSize);
 }
 
 auto container::get_default_font_name() const -> char const*
@@ -167,8 +166,8 @@ void container::get_image_size(char const* src, char const* baseurl, litehtml::s
 
     auto* const tex {_images[src]};
     if (tex) {
-        sz.height = tex->info().Size.Height;
-        sz.width  = tex->info().Size.Width;
+        sz.height = static_cast<litehtml::pixel_t>(tex->info().Size.Height);
+        sz.width  = static_cast<litehtml::pixel_t>(tex->info().Size.Width);
     }
 }
 
@@ -231,8 +230,8 @@ void container::set_clip(litehtml::position const& pos, litehtml::border_radiuse
     auto& canvas {_canvas};
     canvas.set_scissor(rect_f {static_cast<f32>(pos.x),
                                static_cast<f32>(pos.y),
-                               static_cast<f32>(_windowSize.Width - pos.x),
-                               static_cast<f32>(_windowSize.Height - pos.y)});
+                               static_cast<f32>(_windowSize.Width) - pos.x,
+                               static_cast<f32>(_windowSize.Height) - pos.y});
 }
 
 void container::del_clip()
@@ -240,12 +239,12 @@ void container::del_clip()
     _canvas.reset_scissor();
 }
 
-void container::get_client_rect(litehtml::position& client) const
+void container::get_viewport(litehtml::position& viewport) const
 {
-    client.x      = 0;
-    client.y      = 0;
-    client.width  = _windowSize.Width;
-    client.height = _windowSize.Height;
+    viewport.x      = 0;
+    viewport.y      = 0;
+    viewport.width  = static_cast<f32>(_windowSize.Width);
+    viewport.height = static_cast<f32>(_windowSize.Height);
 }
 
 auto container::create_element(char const*, litehtml::string_map const&, std::shared_ptr<litehtml::document> const&) -> std::shared_ptr<litehtml::element>
@@ -256,10 +255,10 @@ auto container::create_element(char const*, litehtml::string_map const&, std::sh
 void container::get_media_features(litehtml::media_features& media) const
 {
     media.type          = litehtml::media_type_screen;
-    media.width         = _windowSize.Width;
-    media.height        = _windowSize.Height;
-    media.device_width  = (*_config.Window->Size).Width;
-    media.device_height = (*_config.Window->Size).Height;
+    media.width         = static_cast<litehtml::pixel_t>(_windowSize.Width);
+    media.height        = static_cast<litehtml::pixel_t>(_windowSize.Height);
+    media.device_width  = static_cast<litehtml::pixel_t>((*_config.Window->Size).Width);
+    media.device_height = static_cast<litehtml::pixel_t>((*_config.Window->Size).Height);
     media.color         = 8;
     media.monochrome    = 0;
     media.color_index   = 0;
@@ -307,20 +306,20 @@ void container::draw_text(litehtml::uint_ptr hdc, char const* text, litehtml::ui
     using namespace tcob::enum_ops;
 
     font_decorations deco {font_decorations::None};
-    u32 const        decos {_fontDecorations[hFont - 1]};
+    auto const       decos {_fontDecorations[hFont - 1]};
     if (decos != 0) {
-        if (decos & litehtml::font_decoration_linethrough) {
+        if (decos & litehtml::text_decoration_line::text_decoration_line_line_through) {
             deco = deco | font_decorations::Linethrough;
         }
-        if (decos & litehtml::font_decoration_overline) {
+        if (decos & litehtml::text_decoration_line::text_decoration_line_overline) {
             deco = deco | font_decorations::Overline;
         }
-        if (decos & litehtml::font_decoration_underline) {
+        if (decos & litehtml::text_decoration_line::text_decoration_line_underline) {
             deco = deco | font_decorations::Underline;
         }
     }
 
-    _painter.draw_text({text, to_rect(pos), _fonts[hFont - 1], to_color(col), deco});
+    _painter.draw_text({.Text = text, .TextBox = to_rect(pos), .Font = _fonts[hFont - 1], .TextColor = to_color(col), .FontDecorations = deco});
 }
 
 void container::init_background(base_draw_context& ctx, litehtml::background_layer const& layer)
