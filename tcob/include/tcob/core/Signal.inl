@@ -12,31 +12,73 @@ template <typename EvArgs>
 inline void signal<EvArgs>::operator()() const
     requires(IsVoid)
 {
-    for (auto it {_slots.begin()}; it != _slots.end();) {
-        if (it->second) {
-            it->second();
-            ++it;
+    bool needsCleanup {false};
+
+    for (isize i {0}; i < std::ssize(_slots); ++i) {
+        auto const& [id, func] = _slots[i];
+        if (func) {
+            func();
         } else {
-            it = _slots.erase(it);
+            needsCleanup = true;
         }
+    }
+
+    if (needsCleanup) {
+        std::erase_if(_slots, [](auto const& slot) {
+            return !slot.second;
+        });
     }
 }
 
 template <typename EvArgs>
 template <typename S>
-inline void signal<EvArgs>::operator()(S&& args) const
+inline void signal<EvArgs>::operator()(S const& args) const
     requires(!IsVoid)
 {
-    for (auto it {_slots.begin()}; it != _slots.end();) {
-        if (it->second) {
+    bool needsCleanup {false};
+
+    for (isize i {0}; i < std::ssize(_slots); ++i) {
+        auto const& [id, func] = _slots[i];
+        if (func) {
             if constexpr (requires { args.Handled; }) {
                 if (args.Handled) { break; }
             }
-            it->second(std::forward<S>(args));
-            ++it;
+            func(args);
         } else {
-            it = _slots.erase(it);
+            needsCleanup = true;
         }
+    }
+
+    if (needsCleanup) {
+        std::erase_if(_slots, [](auto const& slot) {
+            return !slot.second;
+        });
+    }
+}
+
+template <typename EvArgs>
+template <typename S>
+inline void signal<EvArgs>::operator()(S& args) const
+    requires(!IsVoid)
+{
+    bool needsCleanup {false};
+
+    for (isize i {0}; i < std::ssize(_slots); ++i) {
+        auto const& [id, func] = _slots[i];
+        if (func) {
+            if constexpr (requires { args.Handled; }) {
+                if (args.Handled) { break; }
+            }
+            func(args);
+        } else {
+            needsCleanup = true;
+        }
+    }
+
+    if (needsCleanup) {
+        std::erase_if(_slots, [](auto const& slot) {
+            return !slot.second;
+        });
     }
 }
 
