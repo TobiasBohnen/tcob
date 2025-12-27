@@ -37,11 +37,13 @@ public:
     constexpr angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept;
 
     auto sin [[nodiscard]] () const -> ValueType;
-    auto asin [[nodiscard]] () const -> ValueType;
     auto cos [[nodiscard]] () const -> ValueType;
-    auto acos [[nodiscard]] () const -> ValueType;
     auto tan [[nodiscard]] () const -> ValueType;
-    auto atan [[nodiscard]] () const -> ValueType;
+
+    static auto asin [[nodiscard]] (ValueType ratio) -> angle_unit<ValueType, OneTurn>;
+    static auto acos [[nodiscard]] (ValueType ratio) -> angle_unit<ValueType, OneTurn>;
+    static auto atan [[nodiscard]] (ValueType ratio) -> angle_unit<ValueType, OneTurn>;
+    static auto atan2 [[nodiscard]] (ValueType y, ValueType x) -> angle_unit<ValueType, OneTurn>;
 
     auto constexpr as_normalized(angle_normalize mode = angle_normalize::FullTurnSymmetric) const -> angle_unit<ValueType, OneTurn>;
 

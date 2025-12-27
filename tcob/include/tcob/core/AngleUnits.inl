@@ -44,32 +44,12 @@ inline auto angle_unit<ValueType, OneTurn>::sin() const -> ValueType
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-inline auto angle_unit<ValueType, OneTurn>::asin() const -> ValueType
-{
-    if constexpr (OneTurn == TAU) {
-        return std::asin(Value);
-    } else {
-        return static_cast<ValueType>(std::asin(Value / OneTurn * TAU));
-    }
-}
-
-template <FloatingPoint ValueType, f64 OneTurn>
 inline auto angle_unit<ValueType, OneTurn>::cos() const -> ValueType
 {
     if constexpr (OneTurn == TAU) {
         return std::cos(Value);
     } else {
         return static_cast<ValueType>(std::cos(Value / OneTurn * TAU));
-    }
-}
-
-template <FloatingPoint ValueType, f64 OneTurn>
-inline auto angle_unit<ValueType, OneTurn>::acos() const -> ValueType
-{
-    if constexpr (OneTurn == TAU) {
-        return std::acos(Value);
-    } else {
-        return static_cast<ValueType>(std::acos(Value / OneTurn * TAU));
     }
 }
 
@@ -84,12 +64,46 @@ inline auto angle_unit<ValueType, OneTurn>::tan() const -> ValueType
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-inline auto angle_unit<ValueType, OneTurn>::atan() const -> ValueType
+inline auto angle_unit<ValueType, OneTurn>::asin(ValueType ratio) -> angle_unit<ValueType, OneTurn>
 {
+    ValueType const radians {static_cast<ValueType>(std::asin(ratio))};
     if constexpr (OneTurn == TAU) {
-        return std::atan(Value);
+        return angle_unit<ValueType, OneTurn> {radians};
     } else {
-        return static_cast<ValueType>(std::atan(Value / OneTurn * TAU));
+        return angle_unit<ValueType, OneTurn> {static_cast<ValueType>(radians * OneTurn / TAU)};
+    }
+}
+
+template <FloatingPoint ValueType, f64 OneTurn>
+inline auto angle_unit<ValueType, OneTurn>::acos(ValueType ratio) -> angle_unit<ValueType, OneTurn>
+{
+    ValueType const radians {static_cast<ValueType>(std::acos(ratio))};
+    if constexpr (OneTurn == TAU) {
+        return angle_unit<ValueType, OneTurn> {radians};
+    } else {
+        return angle_unit<ValueType, OneTurn> {static_cast<ValueType>(radians * OneTurn / TAU)};
+    }
+}
+
+template <FloatingPoint ValueType, f64 OneTurn>
+inline auto angle_unit<ValueType, OneTurn>::atan(ValueType ratio) -> angle_unit<ValueType, OneTurn>
+{
+    ValueType const radians {static_cast<ValueType>(std::atan(ratio))};
+    if constexpr (OneTurn == TAU) {
+        return angle_unit<ValueType, OneTurn> {radians};
+    } else {
+        return angle_unit<ValueType, OneTurn> {static_cast<ValueType>(radians * OneTurn / TAU)};
+    }
+}
+
+template <FloatingPoint ValueType, f64 OneTurn>
+inline auto angle_unit<ValueType, OneTurn>::atan2(ValueType y, ValueType x) -> angle_unit<ValueType, OneTurn>
+{
+    ValueType const radians {static_cast<ValueType>(std::atan2(y, x))};
+    if constexpr (OneTurn == TAU) {
+        return angle_unit<ValueType, OneTurn> {radians};
+    } else {
+        return angle_unit<ValueType, OneTurn> {static_cast<ValueType>(radians * OneTurn / TAU)};
     }
 }
 
