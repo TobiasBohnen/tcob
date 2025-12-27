@@ -171,6 +171,7 @@ auto webp_anim_encoder::encode(std::span<image_frame const> frames, io::ostream&
     WebPPicture pic;
     WebPPictureInit(&pic);
 
+    i32 ts {0};
     for (auto const& frame : frames) {
         if (!retValue) {
             break;
@@ -195,7 +196,8 @@ auto webp_anim_encoder::encode(std::span<image_frame const> frames, io::ostream&
         }
 
         if (retValue) {
-            retValue = WebPAnimEncoderAdd(_encoder, &pic, static_cast<i32>(frame.Duration.count()), nullptr) != 0;
+            ts += static_cast<i32>(frame.Duration.count());
+            retValue = WebPAnimEncoderAdd(_encoder, &pic, ts, nullptr) != 0;
         }
     }
 
