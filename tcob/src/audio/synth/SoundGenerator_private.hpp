@@ -6,7 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-// based on: sfxr and rFXGen
+// based on: sfxr
 
 #include <array>
 

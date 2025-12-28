@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-// based on: sfxr and rFXGen
+// based on: sfxr
 
 #include "tcob/audio/synth/SoundGenerator.hpp"
 

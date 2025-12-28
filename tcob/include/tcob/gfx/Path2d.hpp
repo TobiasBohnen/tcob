@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-// based on NanoVG/NanoSVG
+// based on: NanoVG/NanoSVG
 // original license:
 // Copyright (c) 2013 Mikko Mononen memon@inside.org
 //

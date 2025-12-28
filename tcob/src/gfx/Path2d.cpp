@@ -200,7 +200,7 @@ void path2d::arc_to(f32 radiusX, f32 radiusY, degree_f rotX, bool largeArc, bool
         return ((ux * vy < uy * vx) ? -1.0f : 1.0f) * std::acos(std::clamp(r, -1.0f, 1.0f));
     }};
 
-    // based on https://github.com/memononen/nanosvg
+    // based on: https://github.com/memononen/nanosvg
 
     f32            rx {std::abs(radiusX)}; // y radius
     f32            ry {std::abs(radiusY)}; // x radius
