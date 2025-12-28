@@ -170,6 +170,7 @@ struct image_frame {
 
 TCOB_API auto save_animation [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> bool;
 TCOB_API auto save_animation [[nodiscard]] (io::ostream& out, string const& ext, std::span<image_frame const> frames) noexcept -> bool;
+TCOB_API auto save_animation_async [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> std::future<bool>;
 
 class TCOB_API animated_image_encoder : public non_copyable {
 public:

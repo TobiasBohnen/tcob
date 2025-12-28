@@ -234,7 +234,7 @@ auto image::load(io::istream& in, string const& ext) noexcept -> bool
 
 auto image::load_async(path const& file) noexcept -> std::future<bool>
 {
-    return locate_service<task_manager>().run_async<bool>([&, file] { return load(file); });
+    return locate_service<task_manager>().run_async<bool>([this, file] { return load(file); });
 }
 
 auto image::LoadInfo(path const& file) noexcept -> std::optional<information>
@@ -332,6 +332,10 @@ auto save_animation [[nodiscard]] (io::ostream& out, string const& ext, std::spa
 {
     auto enc {locate_service<gfx::animated_image_encoder::factory>().create(ext)};
     return enc->encode(frames, out);
+}
+auto save_animation_async [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> std::future<bool>
+{
+    return locate_service<task_manager>().run_async<bool>([file, frames] { return save_animation(file, frames); });
 }
 
 }
