@@ -113,7 +113,7 @@ inline auto sink_istream<Sink>::read_bytes(void* s, std::streamsize sizeInBytes)
 }
 
 template <ISink Sink>
-inline auto sink_istream<Sink>::tell() const -> std::streamsize
+inline auto sink_istream<Sink>::tell() const -> std::streamoff
 {
     return _sink->tell();
 }
@@ -185,7 +185,7 @@ inline auto sink_ostream<Sink>::write_bytes(void const* s, std::streamsize sizeI
 }
 
 template <OSink Sink>
-inline auto sink_ostream<Sink>::tell() const -> std::streamsize
+inline auto sink_ostream<Sink>::tell() const -> std::streamoff
 {
     return _sink->tell();
 }

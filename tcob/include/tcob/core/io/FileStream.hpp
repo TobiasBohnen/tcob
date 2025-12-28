@@ -29,7 +29,7 @@ public:
     auto close() -> bool;
     auto flush() const -> bool;
 
-    auto tell() const -> std::streamsize;
+    auto tell() const -> std::streamoff;
     auto seek(std::streamoff off, seek_dir way) const -> bool;
 
     void set_buffer_size(u64 size);

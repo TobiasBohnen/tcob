@@ -49,7 +49,7 @@ public:
     auto read_string(std::streamsize length) -> string;
     auto read_string_until(char delim) -> string;
 
-    virtual auto tell() const -> std::streamsize                = 0;
+    virtual auto tell() const -> std::streamoff                 = 0;
     virtual auto seek(std::streamoff off, seek_dir way) -> bool = 0;
     virtual auto size_in_bytes() const -> std::streamsize       = 0;
     virtual auto is_eof() const -> bool                         = 0;
@@ -72,7 +72,7 @@ concept ISink =
         { t.size_in_bytes() } -> std::same_as<std::streamsize>;
         { t.is_eof() } -> std::same_as<bool>;
         { t.read_bytes(s, sib) } -> std::same_as<std::streamsize>;
-        { t.tell() } -> std::same_as<std::streamsize>;
+        { t.tell() } -> std::same_as<std::streamoff>;
         { t.seek(off, way) } -> std::same_as<bool>;
     };
 
@@ -86,7 +86,7 @@ public:
     auto size_in_bytes() const -> std::streamsize override;
     auto is_eof() const -> bool override;
 
-    auto tell() const -> std::streamsize override;
+    auto tell() const -> std::streamoff override;
     auto seek(std::streamoff off, seek_dir way) -> bool override;
 
 protected:
@@ -115,7 +115,7 @@ public:
     template <POD T>
     auto write_filtered(std::span<T const> s, auto&& filter, auto&&... filters) -> std::streamsize;
 
-    virtual auto tell() const -> std::streamsize                = 0;
+    virtual auto tell() const -> std::streamoff                 = 0;
     virtual auto seek(std::streamoff off, seek_dir way) -> bool = 0;
     // TODO: add flush
 protected:
@@ -132,7 +132,7 @@ template <typename T>
 concept OSink =
     requires(T& t, void const* cs, std::streamsize sib, std::streamoff off, seek_dir way) {
         { t.write_bytes(cs, sib) } -> std::same_as<std::streamsize>;
-        { t.tell() } -> std::same_as<std::streamsize>;
+        { t.tell() } -> std::same_as<std::streamoff>;
         { t.seek(off, way) } -> std::same_as<bool>;
     };
 
@@ -143,7 +143,7 @@ class sink_ostream : public ostream {
 public:
     explicit sink_ostream(Sink* sink);
 
-    auto tell() const -> std::streamsize override;
+    auto tell() const -> std::streamoff override;
     auto seek(std::streamoff off, seek_dir way) -> bool override;
 
 protected:

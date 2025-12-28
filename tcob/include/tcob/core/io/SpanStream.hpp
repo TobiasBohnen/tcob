@@ -21,7 +21,7 @@ public:
     auto size_in_bytes() const -> std::streamsize;
     auto is_eof() const -> bool;
 
-    auto tell() const -> std::streamsize;
+    auto tell() const -> std::streamoff;
     auto seek(std::streamoff off, seek_dir way) -> bool;
 
     auto read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize;
@@ -48,7 +48,7 @@ class TCOB_API ospan_sink final {
 public:
     explicit ospan_sink(std::span<byte> span);
 
-    auto tell() const -> std::streamsize;
+    auto tell() const -> std::streamoff;
     auto seek(std::streamoff off, seek_dir way) -> bool;
 
     auto write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize;

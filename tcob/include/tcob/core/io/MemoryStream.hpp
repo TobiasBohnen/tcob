@@ -19,7 +19,7 @@ public:
     auto size_in_bytes() const -> std::streamsize;
     auto is_eof() const -> bool;
 
-    auto tell() const -> std::streamsize;
+    auto tell() const -> std::streamoff;
     auto seek(std::streamoff off, seek_dir way) -> bool;
 
     auto read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize;
@@ -36,7 +36,7 @@ class TCOB_API iomstream final : public sink_istream<memory_sink>, public sink_o
 public:
     iomstream();
 
-    auto tell() const -> std::streamsize override;
+    auto tell() const -> std::streamoff override;
     auto seek(std::streamoff off, seek_dir way) -> bool override;
 
 private:

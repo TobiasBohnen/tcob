@@ -24,7 +24,7 @@ auto memory_sink::is_eof() const -> bool
     return _pos >= std::ssize(_buf);
 }
 
-auto memory_sink::tell() const -> std::streamsize
+auto memory_sink::tell() const -> std::streamoff
 {
     return _pos;
 }
@@ -79,7 +79,7 @@ iomstream::iomstream()
 {
 }
 
-auto iomstream::tell() const -> std::streamsize
+auto iomstream::tell() const -> std::streamoff
 {
     return _sink.tell();
 }

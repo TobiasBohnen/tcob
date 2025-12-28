@@ -30,7 +30,7 @@ auto ispan_sink::is_eof() const -> bool
     return _pos >= std::ssize(_span);
 }
 
-auto ispan_sink::tell() const -> std::streamsize
+auto ispan_sink::tell() const -> std::streamoff
 {
     return _pos;
 }
@@ -80,7 +80,7 @@ ospan_sink::ospan_sink(std::span<byte> span)
 {
 }
 
-auto ospan_sink::tell() const -> std::streamsize
+auto ospan_sink::tell() const -> std::streamoff
 {
     return _pos;
 }

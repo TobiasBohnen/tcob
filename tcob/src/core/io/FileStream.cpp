@@ -73,10 +73,10 @@ auto file_sink::is_eof() const -> bool
     return PHYSFS_eof(_handle) != 0;
 }
 
-auto file_sink::tell() const -> std::streamsize
+auto file_sink::tell() const -> std::streamoff
 {
     if (!is_valid()) { return 0; }
-    return static_cast<std::streamsize>(PHYSFS_tell(_handle));
+    return static_cast<std::streamoff>(PHYSFS_tell(_handle));
 }
 
 auto file_sink::size_in_bytes() const -> std::streamsize
