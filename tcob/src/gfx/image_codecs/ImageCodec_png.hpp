@@ -239,21 +239,33 @@ private:
     std::optional<image>           _previousFrame;
     image                          _currentFrame;
     milliseconds                   _currentTimeStamp {0};
-    std::streamsize                _contentOffset {0};
+    std::streamoff                 _contentOffset {0};
 };
 
 ////////////////////////////////////////////////////////////
 
 class png_anim_encoder final : public animated_image_encoder {
 public:
-    auto encode(std::span<image_frame const> frames, io::ostream& out) -> bool override;
+    void start() override;
+
+    auto add_frame(image_frame const& frame) -> bool override;
+
+    auto finish() -> bool override;
 
 private:
-    void write_actl(std::span<image_frame const> frames, io::ostream& out) const;
+    void write_actl_placeholder(io::ostream& out) const;
+    void write_actl(u32 frameCount, io::ostream& out) const;
     void write_fctl(u32 idx, rect_i const& rect, image_frame const& frame, io::ostream& out) const;
     void write_fdat(u32 idx, image const& frame, io::ostream& out) const;
 
-    png_encoder _enc;
+    png_encoder    _enc;
+    u32            _seq {0};
+    u32            _frameCount {0};
+    std::streamoff _actlPos {0};
+    bool           _encoding {false};
+    bool           _firstFrame {true};
+    image          _prevFrame;
+    milliseconds   _accFrameDuration {0};
 };
 
 }

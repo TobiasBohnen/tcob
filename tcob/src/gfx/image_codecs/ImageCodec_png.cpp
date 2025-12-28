@@ -829,67 +829,105 @@ auto calculate_diff_rect(image const& a, image const& b) -> std::optional<rect_i
     return rect_i::FromLTRB(left, top, right, bottom);
 }
 
-auto png_anim_encoder::encode(std::span<image_frame const> frames, io::ostream& out) -> bool
+void png_anim_encoder::start()
 {
-    if (frames.empty()) { return false; }
+    if (_encoding) { return; }
 
-    auto const& info {frames[0].Image.info()};
-    out.write(SIGNATURE);
-    _enc.write_ihdr(info, out);
+    _seq        = 0;
+    _frameCount = 0;
+    _encoding   = true;
+    _firstFrame = true;
+}
 
-    std::vector<image_frame> newFrames;
-    newFrames.reserve(frames.size());
-    std::vector<rect_i> newFrameRects;
-    newFrameRects.reserve(frames.size());
+auto png_anim_encoder::add_frame(image_frame const& frame) -> bool
+{
+    if (!_encoding) { return false; }
 
-    newFrames.emplace_back(frames[0]);
-    newFrameRects.emplace_back(point_i::Zero, info.Size);
+    auto& str {stream()};
 
-    for (u32 i {1}; i < frames.size(); ++i) {
-        auto const diff {calculate_diff_rect(frames[i - 1].Image, frames[i].Image)};
-        if (!diff || diff->width() == 0 || diff->height() == 0) {
-            newFrames.back().Duration += frames[i].Duration;
-        } else {
-            newFrames.push_back({.Image = frames[i].Image.crop(*diff), .Duration = frames[i].Duration});
-            newFrameRects.push_back(*diff);
-        }
+    if (_firstFrame) {
+        str.write(SIGNATURE);
+        _enc.write_ihdr(frame.Image.info(), str);
+
+        _actlPos = str.tell();
+        write_actl_placeholder(str);
+
+        rect_i fullRect {point_i::Zero, frame.Image.info().Size};
+        write_fctl(_seq++, fullRect, frame, str);
+        _enc.write_idat(frame.Image, str);
+        _prevFrame  = frame.Image;
+        _firstFrame = false;
+        _frameCount++;
+        return true;
     }
 
-    write_actl(newFrames, out);
+    auto const diff {calculate_diff_rect(_prevFrame, frame.Image)};
 
-    write_fctl(0, {point_i::Zero, info.Size}, newFrames[0], out);
-    _enc.write_idat(newFrames[0].Image, out);
-
-    u32 seq {1};
-    for (u32 i {1}; i < newFrames.size(); ++i) {
-        write_fctl(seq++, newFrameRects[i], newFrames[i], out);
-        write_fdat(seq++, newFrames[i].Image, out);
+    if (!diff || diff->width() == 0 || diff->height() == 0) {
+        _accFrameDuration += frame.Duration;
+        return true;
     }
-    _enc.write_iend(out);
+
+    auto const totalFrameDuration {frame.Duration + _accFrameDuration};
+    _accFrameDuration = milliseconds {0};
+
+    auto const croppedFrame {image_frame {
+        .Image    = frame.Image.crop(*diff),
+        .Duration = totalFrameDuration}};
+
+    write_fctl(_seq++, *diff, croppedFrame, str);
+    write_fdat(_seq++, croppedFrame.Image, str);
+
+    _prevFrame = frame.Image;
+    _frameCount++;
     return true;
 }
 
-void png_anim_encoder::write_actl(std::span<image_frame const> frames, io::ostream& out) const
+auto png_anim_encoder::finish() -> bool
+{
+    if (!_encoding) { return false; }
+
+    auto& str {stream()};
+
+    auto const currentPos {str.tell()};
+    str.seek(_actlPos, io::seek_dir::Begin);
+    write_actl(_frameCount, str);
+    str.seek(currentPos, io::seek_dir::Begin);
+
+    _enc.write_iend(str);
+
+    _encoding = false;
+    return true;
+}
+
+void png_anim_encoder::write_actl_placeholder(io::ostream& out) const
 {
     std::array<u8, 12> actl {};
-
-    // TODO: endianess
-    u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::acTL))};
+    u32 const          type {std::byteswap(static_cast<u32>(png::chunk_type::acTL))};
     memcpy(actl.data(), &type, 4);
-    u32 const numFrames {std::byteswap(static_cast<u32>(frames.size()))};
+    u32 const numFrames {0};
     memcpy(actl.data() + 4, &numFrames, 4);
     u32 const numPlays {0};
     memcpy(actl.data() + 8, &numPlays, 4);
+    _enc.write_chunk(out, actl);
+}
 
+void png_anim_encoder::write_actl(u32 frameCount, io::ostream& out) const
+{
+    std::array<u8, 12> actl {};
+    u32 const          type {std::byteswap(static_cast<u32>(png::chunk_type::acTL))};
+    memcpy(actl.data(), &type, 4);
+    u32 const numFrames {std::byteswap(frameCount)};
+    memcpy(actl.data() + 4, &numFrames, 4);
+    u32 const numPlays {0};
+    memcpy(actl.data() + 8, &numPlays, 4);
     _enc.write_chunk(out, actl);
 }
 
 void png_anim_encoder::write_fctl(u32 idx, rect_i const& rect, image_frame const& frame, io::ostream& out) const
 {
     std::array<u8, 30> fctl {};
-
-    // TODO: endianess
-    u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::fcTL))};
+    u32 const          type {std::byteswap(static_cast<u32>(png::chunk_type::fcTL))};
     memcpy(fctl.data(), &type, 4);
     u32 const seq {std::byteswap(idx)};
     memcpy(fctl.data() + 4, &seq, 4);

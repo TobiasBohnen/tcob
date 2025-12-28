@@ -70,8 +70,8 @@ private:
     i32             _transIndex {0};       // transparent color index
     bool            _transparency {false}; // use transparent color
 
-    std::streamsize _contentOffset {0};
-    bool            _firstFrame {true};
+    std::streamoff _contentOffset {0};
+    bool           _firstFrame {true};
 
     image        _currentFrame;
     milliseconds _currentTimeStamp {0};

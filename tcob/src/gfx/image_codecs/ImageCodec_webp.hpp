@@ -72,11 +72,21 @@ public:
     webp_anim_encoder() = default;
     ~webp_anim_encoder() override;
 
-    auto encode(std::span<image_frame const> frames, io::ostream& out) -> bool override;
+    void start() override;
+
+    auto add_frame(image_frame const& frame) -> bool override;
+
+    auto finish() -> bool override;
 
 private:
+    auto encode(WebPPicture& pic, image const& img) -> bool;
+
     WebPAnimEncoder* _encoder {nullptr};
-    size_i           _imgSize {size_i::Zero};
+    WebPPicture      _pic {};
+    size_i           _imgSize {};
+    i32              _timestamp {0};
+    bool             _encoding {false};
+    bool             _firstFrame {true};
 };
 }
 

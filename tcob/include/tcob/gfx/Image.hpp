@@ -153,11 +153,11 @@ public:
     virtual void reset()                                      = 0;
 
 protected:
-    virtual auto open() -> std::optional<image::information> = 0;
-
     auto stream() -> io::istream&;
 
 private:
+    virtual auto open() -> std::optional<image::information> = 0;
+
     std::shared_ptr<io::istream> _stream;
 };
 
@@ -169,7 +169,7 @@ struct image_frame {
 };
 
 TCOB_API auto save_animation [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> bool;
-TCOB_API auto save_animation [[nodiscard]] (io::ostream& out, string const& ext, std::span<image_frame const> frames) noexcept -> bool;
+TCOB_API auto save_animation [[nodiscard]] (std::shared_ptr<io::ostream> out, string const& ext, std::span<image_frame const> frames) noexcept -> bool;
 TCOB_API auto save_animation_async [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> std::future<bool>;
 
 class TCOB_API animated_image_encoder : public non_copyable {
@@ -181,7 +181,20 @@ public:
     animated_image_encoder()          = default;
     virtual ~animated_image_encoder() = default;
 
-    virtual auto encode(std::span<image_frame const> frames, io::ostream& out) -> bool = 0;
+    void start(std::shared_ptr<io::ostream> out);
+
+    auto add_frames(std::span<image_frame const> frames) -> bool;
+
+    virtual auto add_frame(image_frame const& frame) -> bool = 0;
+    virtual auto finish() -> bool                            = 0;
+
+protected:
+    auto stream() -> io::ostream&;
+
+private:
+    virtual void start() = 0;
+
+    std::shared_ptr<io::ostream> _stream;
 };
 
 ////////////////////////////////////////////////////////////

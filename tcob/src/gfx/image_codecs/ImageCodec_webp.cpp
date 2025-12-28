@@ -161,61 +161,80 @@ webp_anim_encoder::~webp_anim_encoder()
 {
     if (_encoder) {
         WebPAnimEncoderDelete(_encoder);
+        _encoder = nullptr;
     }
 }
 
-auto webp_anim_encoder::encode(std::span<image_frame const> frames, io::ostream& out) -> bool
+void webp_anim_encoder::start()
 {
-    bool retValue {true};
+    if (_encoding) { return; }
 
-    WebPPicture pic;
-    WebPPictureInit(&pic);
+    _timestamp  = 0;
+    _encoding   = true;
+    _firstFrame = true;
+}
 
-    i32 ts {0};
-    for (auto const& frame : frames) {
-        if (!retValue) {
-            break;
-        }
+auto webp_anim_encoder::add_frame(image_frame const& frame) -> bool
+{
+    if (!_encoding) { return false; }
 
-        auto const& info {frame.Image.info()};
-        if (!_encoder) {
-            _encoder = WebPAnimEncoderNew(info.Size.Width, info.Size.Height, nullptr);
-            _imgSize = info.Size;
+    auto const& info {frame.Image.info()};
 
-            pic.width  = _imgSize.Width;
-            pic.height = _imgSize.Height;
-        } else if (_imgSize != info.Size) {
-            retValue = false;
-            break;
-        }
+    if (_firstFrame) {
+        _encoder = WebPAnimEncoderNew(info.Size.Width, info.Size.Height, nullptr);
+        if (!_encoder) { return false; }
 
-        if (info.Format == image::format::RGBA) {
-            retValue = WebPPictureImportRGBA(&pic, frame.Image.ptr(), info.stride());
-        } else if (info.Format == image::format::RGB) {
-            retValue = WebPPictureImportRGB(&pic, frame.Image.ptr(), info.stride());
-        }
-
-        if (retValue) {
-            ts += static_cast<i32>(frame.Duration.count());
-            retValue = WebPAnimEncoderAdd(_encoder, &pic, ts, nullptr) != 0;
-        }
-    }
-
-    WebPPictureFree(&pic);
-
-    if (!retValue) {
+        _imgSize = info.Size;
+        WebPPictureInit(&_pic);
+        _pic.width  = _imgSize.Width;
+        _pic.height = _imgSize.Height;
+        _firstFrame = false;
+    } else if (_imgSize != info.Size) {
         return false;
     }
 
-    WebPData data;
-    retValue = WebPAnimEncoderAssemble(_encoder, &data) != 0;
-    if (retValue) {
-        out.write<u8>({data.bytes, data.size});
+    if (!encode(_pic, frame.Image)) {
+        return false;
+    }
+
+    _timestamp += static_cast<i32>(frame.Duration.count());
+    return WebPAnimEncoderAdd(_encoder, &_pic, _timestamp, nullptr) != 0;
+}
+
+auto webp_anim_encoder::finish() -> bool
+{
+    if (!_encoding) { return false; }
+
+    auto& str {stream()};
+
+    WebPData   data;
+    bool const success {WebPAnimEncoderAssemble(_encoder, &data) != 0};
+
+    if (success) {
+        str.write<u8>({data.bytes, data.size});
     }
 
     WebPDataClear(&data);
-    return retValue;
+    WebPPictureFree(&_pic);
+
+    _encoding = false;
+    return success;
 }
+
+auto webp_anim_encoder::encode(WebPPicture& pic, image const& img) -> bool
+{
+    auto const& info {img.info()};
+
+    if (info.Format == image::format::RGBA) {
+        return WebPPictureImportRGBA(&pic, img.ptr(), info.stride()) != 0;
+    }
+    if (info.Format == image::format::RGB) {
+        return WebPPictureImportRGB(&pic, img.ptr(), info.stride()) != 0;
+    }
+
+    return false;
+}
+
 }
 
 #endif

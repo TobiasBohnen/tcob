@@ -324,18 +324,38 @@ auto animated_image_decoder::stream() -> io::istream&
 
 auto save_animation [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> bool
 {
-    io::ofstream of {file};
-    return save_animation(of, io::get_extension(file), frames);
+    return save_animation(std::make_shared<io::ofstream>(file), io::get_extension(file), frames);
 }
 
-auto save_animation [[nodiscard]] (io::ostream& out, string const& ext, std::span<image_frame const> frames) noexcept -> bool
+auto save_animation [[nodiscard]] (std::shared_ptr<io::ostream> out, string const& ext, std::span<image_frame const> frames) noexcept -> bool
 {
     auto enc {locate_service<gfx::animated_image_encoder::factory>().create(ext)};
-    return enc->encode(frames, out);
+    enc->start(std::move(out));
+    enc->add_frames(frames);
+    return enc->finish();
 }
+
 auto save_animation_async [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> std::future<bool>
 {
     return locate_service<task_manager>().run_async<bool>([file, frames] { return save_animation(file, frames); });
+}
+
+void animated_image_encoder::start(std::shared_ptr<io::ostream> out)
+{
+    _stream = std::move(out);
+    start();
+}
+
+auto animated_image_encoder::add_frames(std::span<image_frame const> frames) -> bool
+{
+    return std::ranges::all_of(frames, [this](auto const& frame) {
+        return add_frame(frame);
+    });
+}
+
+auto animated_image_encoder::stream() -> io::ostream&
+{
+    return *_stream;
 }
 
 }
