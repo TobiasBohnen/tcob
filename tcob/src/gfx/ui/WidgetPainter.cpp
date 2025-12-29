@@ -695,7 +695,7 @@ void widget_painter::do_border(rect_f const& rect, border_element const& borderS
             color const brightCol {color::FromHSLA(bright, col->A)};
             color const darkCol {color::FromHSLA(dark, col->A)};
 
-            rect_f const clipRect {rect.as_padded_by({-borderSize, -borderSize})};
+            rect_f const clipRect {rect.as_inset_by({-borderSize / 2, -borderSize / 2})};
             f32 const    diff {std::min(clipRect.width(), clipRect.height()) / 2};
 
             _canvas.begin_path();

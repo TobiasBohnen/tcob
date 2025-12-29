@@ -52,9 +52,9 @@ public:
     void constexpr resize_by(size<U> const& size);
 
     template <Arithmetic U>
-    auto constexpr contains [[nodiscard]] (point<U> const& point) const -> bool;
+    auto constexpr contains [[nodiscard]] (point<U> const& other, bool includeEdges = false) const -> bool;
     template <Arithmetic U>
-    auto constexpr contains [[nodiscard]] (rect<U> const& rect) const -> bool;
+    auto constexpr contains [[nodiscard]] (rect<U> const& other, bool includeEdges = false) const -> bool;
 
     auto constexpr intersects [[nodiscard]] (rect const& other, bool includeEdges = false) const -> bool;
 
@@ -65,7 +65,7 @@ public:
     auto constexpr as_centered_at(point<T> const& center) const -> rect;
     auto constexpr as_intersection_with(rect const& other) const -> rect;
     auto constexpr as_union_with(rect const& other) const -> rect;
-    auto constexpr as_padded_by(size<T> const& size) const -> rect;
+    auto constexpr as_inset_by(point<T> const& inset) const -> rect;
 
     static auto constexpr FromLTRB(T left, T top, T right, T bottom) -> rect<T>;
 

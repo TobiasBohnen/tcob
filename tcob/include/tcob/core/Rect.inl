@@ -46,29 +46,6 @@ auto constexpr rect<T>::FromLTRB(T left, T top, T right, T bottom) -> rect<T>
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::intersects(rect const& other, bool includeEdges) const -> bool
-{
-    std::pair<T, T> const r1MinMaxX {std::minmax(Position.X, static_cast<T>(Position.X + Size.Width))};
-    std::pair<T, T> const r2MinMaxX {std::minmax(other.Position.X, static_cast<T>(other.Position.X + other.Size.Width))};
-
-    if (includeEdges) {
-        if (std::max(r1MinMaxX.first, r2MinMaxX.first) <= std::min(r1MinMaxX.second, r2MinMaxX.second)) {
-            std::pair<T, T> const r1MinMaxY {std::minmax(Position.Y, static_cast<T>(Position.Y + Size.Height))};
-            std::pair<T, T> const r2MinMaxY {std::minmax(other.Position.Y, static_cast<T>(other.Position.Y + other.Size.Height))};
-            return std::max(r1MinMaxY.first, r2MinMaxY.first) <= std::min(r1MinMaxY.second, r2MinMaxY.second);
-        }
-    } else {
-        if (std::max(r1MinMaxX.first, r2MinMaxX.first) < std::min(r1MinMaxX.second, r2MinMaxX.second)) {
-            std::pair<T, T> const r1MinMaxY {std::minmax(Position.Y, static_cast<T>(Position.Y + Size.Height))};
-            std::pair<T, T> const r2MinMaxY {std::minmax(other.Position.Y, static_cast<T>(other.Position.Y + other.Size.Height))};
-            return std::max(r1MinMaxY.first, r2MinMaxY.first) < std::min(r1MinMaxY.second, r2MinMaxY.second);
-        }
-    }
-
-    return false;
-}
-
-template <Arithmetic T>
 auto constexpr rect<T>::find_edge(degree_f angle) const -> point<T>
 {
     // Ref: http://stackoverflow.com/questions/4061576/finding-points-on-a-rectangle-at-a-given-angle
@@ -120,7 +97,9 @@ auto constexpr rect<T>::find_edge(degree_f angle) const -> point<T>
 template <Arithmetic T>
 auto constexpr rect<T>::as_centered_at(point<T> const& center) const -> rect
 {
-    return {{center.X - Size.Width / 2.0f, center.Y - Size.Height / 2.0f}, Size};
+    T const halfW {Size.Width / T {2}};
+    T const halfH {Size.Height / T {2}};
+    return {{center.X - halfW, center.Y - halfH}, Size};
 }
 
 template <Arithmetic T>
@@ -131,14 +110,10 @@ auto constexpr rect<T>::as_intersection_with(rect const& other) const -> rect
     T const x2 {std::min(right(), other.right())};
     T const y2 {std::min(bottom(), other.bottom())};
 
-    T const width {x2 - x1};
-    T const height {y2 - y1};
+    T const width {std::max(T {0}, x2 - x1)};
+    T const height {std::max(T {0}, y2 - y1)};
 
-    if (width > 0 && height > 0) {
-        return {x1, y1, width, height};
-    }
-
-    return rect::Zero;
+    return {x1, y1, width, height};
 }
 
 template <Arithmetic T>
@@ -153,12 +128,12 @@ auto constexpr rect<T>::as_union_with(rect const& other) const -> rect
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::as_padded_by(size<T> const& size) const -> rect
+auto constexpr rect<T>::as_inset_by(point<T> const& inset) const -> rect
 {
-    T const x {Position.X + static_cast<T>(size.Width / 2)};
-    T const y {Position.Y + static_cast<T>(size.Height / 2)};
-    T const w {Size.Width - static_cast<T>(size.Width)};
-    T const h {Size.Height - static_cast<T>(size.Height)};
+    T const x {Position.X + inset.X};
+    T const y {Position.Y + inset.Y};
+    T const w {Size.Width - (inset.X * 2)};
+    T const h {Size.Height - (inset.Y * 2)};
 
     return {x, y, w, h};
 }
@@ -259,20 +234,64 @@ void constexpr rect<T>::resize_by(size<U> const& size)
 
 template <Arithmetic T>
 template <Arithmetic U>
-auto constexpr rect<T>::contains(rect<U> const& rect) const -> bool
+auto constexpr rect<T>::contains(point<U> const& other, bool includeEdges) const -> bool
 {
-    return contains(rect.top_left()) && contains(rect.bottom_right());
+    std::pair<T, T> const minMaxX {std::minmax(Position.X, Position.X + Size.Width)};
+    std::pair<T, T> const minMaxY {std::minmax(Position.Y, Position.Y + Size.Height)};
+
+    T const px {static_cast<T>(other.X)};
+    T const py {static_cast<T>(other.Y)};
+
+    if (includeEdges) {
+        return px >= minMaxX.first && px <= minMaxX.second && py >= minMaxY.first && py <= minMaxY.second;
+    }
+    return px >= minMaxX.first && px < minMaxX.second && py >= minMaxY.first && py < minMaxY.second;
 }
 
 template <Arithmetic T>
 template <Arithmetic U>
-auto constexpr rect<T>::contains(point<U> const& point) const -> bool
+auto constexpr rect<T>::contains(rect<U> const& other, bool includeEdges) const -> bool
 {
-    std::pair<T, T> const minMaxX {std::minmax(Position.X, static_cast<T>(Position.X + Size.Width))};
-    std::pair<T, T> const minMaxY {std::minmax(Position.Y, static_cast<T>(Position.Y + Size.Height))};
+    if (*this == other) { return true; }
 
-    return (static_cast<T>(point.X) >= minMaxX.first) && (static_cast<T>(point.X) < minMaxX.second)
-        && (static_cast<T>(point.Y) >= minMaxY.first) && (static_cast<T>(point.Y) < minMaxY.second);
+    std::pair<T, T> const minMaxX {std::minmax(Position.X, Position.X + Size.Width)};
+    std::pair<T, T> const minMaxY {std::minmax(Position.Y, Position.Y + Size.Height)};
+
+    T const oLeft {static_cast<T>(other.Position.X)};
+    T const oRight {static_cast<T>(other.Position.X + other.Size.Width)};
+    T const oTop {static_cast<T>(other.Position.Y)};
+    T const oBottom {static_cast<T>(other.Position.Y + other.Size.Height)};
+
+    std::pair<T, T> const oMinMaxX {std::minmax(oLeft, oRight)};
+    std::pair<T, T> const oMinMaxY {std::minmax(oTop, oBottom)};
+
+    if (includeEdges) {
+        return oMinMaxX.first >= minMaxX.first && oMinMaxX.second <= minMaxX.second && oMinMaxY.first >= minMaxY.first && oMinMaxY.second <= minMaxY.second;
+    }
+    return oMinMaxX.first >= minMaxX.first && oMinMaxX.second < minMaxX.second && oMinMaxY.first >= minMaxY.first && oMinMaxY.second < minMaxY.second;
+}
+
+template <Arithmetic T>
+auto constexpr rect<T>::intersects(rect const& other, bool includeEdges) const -> bool
+{
+    std::pair<T, T> const r1MinMaxX {std::minmax(Position.X, static_cast<T>(Position.X + Size.Width))};
+    std::pair<T, T> const r2MinMaxX {std::minmax(other.Position.X, static_cast<T>(other.Position.X + other.Size.Width))};
+
+    if (includeEdges) {
+        if (std::max(r1MinMaxX.first, r2MinMaxX.first) <= std::min(r1MinMaxX.second, r2MinMaxX.second)) {
+            std::pair<T, T> const r1MinMaxY {std::minmax(Position.Y, static_cast<T>(Position.Y + Size.Height))};
+            std::pair<T, T> const r2MinMaxY {std::minmax(other.Position.Y, static_cast<T>(other.Position.Y + other.Size.Height))};
+            return std::max(r1MinMaxY.first, r2MinMaxY.first) <= std::min(r1MinMaxY.second, r2MinMaxY.second);
+        }
+    } else {
+        if (std::max(r1MinMaxX.first, r2MinMaxX.first) < std::min(r1MinMaxX.second, r2MinMaxX.second)) {
+            std::pair<T, T> const r1MinMaxY {std::minmax(Position.Y, static_cast<T>(Position.Y + Size.Height))};
+            std::pair<T, T> const r2MinMaxY {std::minmax(other.Position.Y, static_cast<T>(other.Position.Y + other.Size.Height))};
+            return std::max(r1MinMaxY.first, r2MinMaxY.first) < std::min(r1MinMaxY.second, r2MinMaxY.second);
+        }
+    }
+
+    return false;
 }
 
 template <Arithmetic T>
