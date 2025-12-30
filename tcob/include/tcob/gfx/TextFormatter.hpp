@@ -41,7 +41,6 @@ struct quad_definition {
 struct format_token {
     command_definition           Command {}; // shape
     std::vector<quad_definition> Quads {};   // format
-    bool                         IsLastInLine {false};
 };
 
 ////////////////////////////////////////////////////////////

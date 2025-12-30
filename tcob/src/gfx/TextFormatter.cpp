@@ -38,7 +38,6 @@ struct token {
 struct line_definition {
     std::vector<token const*> Tokens {};
     f32                       RemainingWidth {0};
-    f32                       WhiteSpaceCount {0};
 };
 
 static auto HandleCommands(token& token) -> bool
@@ -209,7 +208,6 @@ static auto Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> 
         if (std::floor(currentToken.Width * scale) > testWidth || currentToken.Type == token_type::Newline) {
             if (!currentLine.Tokens.empty()) {
                 if (currentLine.Tokens.back()->Type == token_type::Whitespace) { // remove whitespace if last word of line
-                    currentLine.WhiteSpaceCount--;
                     currentLine.RemainingWidth += currentLine.Tokens.back()->Width * scale;
                     currentLine.Tokens.pop_back();
                 }
@@ -218,8 +216,7 @@ static auto Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> 
 
             // reset currentLine
             currentLine.Tokens.clear();
-            currentLine.WhiteSpaceCount = 0;
-            currentLine.RemainingWidth  = lineWidth < 0 ? std::numeric_limits<f32>::max() : lineWidth;
+            currentLine.RemainingWidth = lineWidth < 0 ? std::numeric_limits<f32>::max() : lineWidth;
 
             // add word to new line
             if (currentToken.Type == token_type::Text) {
@@ -233,9 +230,6 @@ static auto Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> 
             }
 
             currentLine.RemainingWidth -= currentToken.Width * scale;
-            if (currentToken.Type == token_type::Whitespace) {
-                currentLine.WhiteSpaceCount++;
-            }
         }
     }
     if (!currentLine.Tokens.empty()) {
@@ -256,11 +250,15 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
     retValue.Font = &font;
 
     for (auto const& line : lines) {
+        f32 lineStartX {0};
+
         switch (align.Horizontal) {
         case horizontal_alignment::Left:     x = 0; break;
         case horizontal_alignment::Right:    x = line.RemainingWidth; break;
         case horizontal_alignment::Centered: x = line.RemainingWidth / 2; break;
         }
+
+        lineStartX = x;
 
         for (auto const* shapeToken : line.Tokens) {
             auto& formatToken {retValue.Tokens.emplace_back()};
@@ -280,14 +278,11 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
                 retValue.QuadCount++;
                 x += glyph.AdvanceX * scale;
             }
-
-            if (shapeToken == line.Tokens.back()) {
-                formatToken.IsLastInLine = true;
-            }
         }
 
         y += fontInfo.LineHeight * scale;
-        retValue.UsedSize.Width = std::max(x, retValue.UsedSize.Width);
+        f32 const lineContentWidth {x - lineStartX};
+        retValue.UsedSize.Width = std::max(lineContentWidth, retValue.UsedSize.Width);
 
         if (y + (fontInfo.LineHeight * scale) > availableHeight) { break; }
     }
