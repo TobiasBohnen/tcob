@@ -53,7 +53,7 @@ void shape_batch::clear()
 void shape_batch::bring_to_front(shape const& shape)
 {
     auto it {std::ranges::find_if(_children, [&shape](auto const& val) { return val.get() == &shape; })};
-    if (it != _children.end()) {
+    if (it != _children.end() && std::next(it) != _children.end()) {
         std::rotate(it, it + 1, _children.end());
         _isDirty = true;
     }
@@ -62,7 +62,7 @@ void shape_batch::bring_to_front(shape const& shape)
 void shape_batch::send_to_back(shape const& shape)
 {
     auto it {std::ranges::find_if(_children, [&shape](auto const& val) { return val.get() == &shape; })};
-    if (it != _children.end()) {
+    if (it != _children.end() && it != _children.begin()) {
         std::rotate(_children.begin(), it, it + 1);
         _isDirty = true;
     }

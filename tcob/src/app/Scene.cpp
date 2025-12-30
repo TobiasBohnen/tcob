@@ -180,7 +180,7 @@ void scene_node::bring_to_front()
 void scene_node::move_child_to_front(scene_node* node)
 {
     auto it {std::ranges::find_if(_children, [node](auto& ptr) { return ptr.get() == node; })};
-    if (it != _children.end()) {
+    if (it != _children.end() && std::next(it) != _children.end()) {
         std::rotate(it, it + 1, _children.end());
     }
 }
@@ -193,7 +193,7 @@ void scene_node::send_to_back()
 void scene_node::send_child_to_back(scene_node* node)
 {
     auto it {std::ranges::find_if(_children, [node](auto& ptr) { return ptr.get() == node; })};
-    if (it != _children.end()) {
+    if (it != _children.end() && it != _children.begin()) {
         std::rotate(_children.begin(), it, it + 1);
     }
 }

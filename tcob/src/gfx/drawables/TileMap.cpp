@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iterator>
 #include <memory>
 #include <vector>
 
@@ -78,7 +79,7 @@ void tilemap_base::clear()
 void tilemap_base::bring_to_front(tilemap_layer const& layer)
 {
     auto it {std::ranges::find_if(_layers, [&layer](auto const& val) { return val.get() == &layer; })};
-    if (it != _layers.end()) {
+    if (it != _layers.end() && std::next(it) != _layers.end()) {
         std::rotate(it, it + 1, _layers.end());
     }
     mark_dirty();
@@ -87,7 +88,7 @@ void tilemap_base::bring_to_front(tilemap_layer const& layer)
 void tilemap_base::send_to_back(tilemap_layer const& layer)
 {
     auto it {std::ranges::find_if(_layers, [&layer](auto const& val) { return val.get() == &layer; })};
-    if (it != _layers.end()) {
+    if (it != _layers.end() && it != _layers.begin()) {
         std::rotate(_layers.begin(), it, it + 1);
     }
     mark_dirty();
