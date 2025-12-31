@@ -380,7 +380,7 @@ void form_base::focus_widget(widget* newFocus)
     }
 }
 
-void form_base::rehover_widget(widget* widget)
+void form_base::refresh_hover(widget* widget)
 {
     point_i const mp {locate_service<input::system>().mouse().get_position()};
     if (!widget->hit_test(mp)) { return; }
@@ -389,6 +389,8 @@ void form_base::rehover_widget(widget* widget)
 
     input::mouse::motion_event ev {};
     ev.Position = mp;
+
+    _topWidget = nullptr;
     on_mouse_hover(ev);
 }
 

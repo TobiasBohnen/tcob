@@ -60,7 +60,7 @@ public:
     auto focused_widget() const -> widget*;
     void focus_widget(widget* newFocus);
 
-    void rehover_widget(widget* widget);
+    void refresh_hover(widget* widget);
 
     virtual auto containers() const -> std::span<std::unique_ptr<widget> const> = 0;
     virtual void remove_container(widget* widget)                               = 0;

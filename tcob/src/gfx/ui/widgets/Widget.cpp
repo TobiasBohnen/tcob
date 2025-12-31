@@ -78,6 +78,7 @@ void widget::show()
     if (!_visible) {
         _visible = true;
         queue_redraw();
+        form().refresh_hover(this);
     }
 }
 
@@ -111,6 +112,7 @@ void widget::enable()
     if (_flags.Disabled) {
         _flags.Disabled = false;
         queue_redraw();
+        form().refresh_hover(this);
     }
 }
 

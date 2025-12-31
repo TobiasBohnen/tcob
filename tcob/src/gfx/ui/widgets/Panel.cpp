@@ -42,11 +42,11 @@ panel::panel(init const& wi)
     , _hScrollbar {orientation::Horizontal}
 {
     _vScrollbar.ValueChanged.connect([this] {
-        form().rehover_widget(this);
+        form().refresh_hover(this);
         queue_redraw();
     });
     _hScrollbar.ValueChanged.connect([this] {
-        form().rehover_widget(this);
+        form().refresh_hover(this);
         queue_redraw();
     });
 
