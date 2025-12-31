@@ -489,9 +489,10 @@ void state_view::call(i32 nargs) const
 
 static auto error_handler(lua_State* l) -> i32
 {
-    i32 const n {lua_gettop(l)};
-    if (lua_isstring(l, n) != 0) {
-        logger::Error("Lua: {}", lua_tostring(l, n));
+    if (lua_isstring(l, -1) != 0) {
+        luaL_traceback(l, l, lua_tostring(l, -1), 1);
+        logger::Error("Lua: {}", lua_tostring(l, -1));
+        lua_pop(l, 1);
     }
     return 0;
 }
