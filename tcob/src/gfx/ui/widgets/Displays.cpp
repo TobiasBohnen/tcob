@@ -76,7 +76,7 @@ void dot_matrix_display::on_draw(widget_painter& painter)
 
             switch (_style.Type) {
             case dot_type::Disc:   canvas.circle(dotRect.center(), width / 2); break;
-            case dot_type::Square: canvas.rect(dotRect); break;
+            case dot_type::Square: canvas.rect(dotRect.as_inset_by({1, 1})); break;
             }
         }
 
