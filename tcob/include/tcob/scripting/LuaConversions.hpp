@@ -790,7 +790,14 @@ template <Integral T>
 struct converter<T> {
     static auto IsType(state_view view, i32 idx) -> bool
     {
-        return view.is_integer(idx);
+        if (view.is_integer(idx)) {
+            return true;
+        }
+        if (view.get_type(idx) == type::Number) {
+            f64 const val {view.to_number(idx)};
+            return std::ceil(val) == val;
+        }
+        return false;
     }
 
     static auto From(state_view view, i32& idx, T& value) -> bool
@@ -823,7 +830,7 @@ template <FloatingPoint T>
 struct converter<T> {
     static auto IsType(state_view view, i32 idx) -> bool
     {
-        return view.get_type(idx) == type::Number;
+        return view.get_type(idx) == type::Number; // view.is_number(idx) would also allow strings
     }
 
     static auto From(state_view view, i32& idx, T& value) -> bool
