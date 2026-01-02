@@ -67,7 +67,7 @@ public:
     virtual auto create_vertex_array [[nodiscard]] (buffer_usage_hint usage) -> std::unique_ptr<render_backend::vertex_array_base> = 0;
     virtual auto create_window [[nodiscard]] (size_i size) -> std::unique_ptr<gfx::window>                                         = 0;
 
-    static inline char const* ServiceName {"render_system"};
+    static inline char const* ServiceName {"gfx::render_system"};
 
 private:
     render_statistics                      _stats;

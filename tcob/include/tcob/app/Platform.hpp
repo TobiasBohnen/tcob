@@ -40,10 +40,10 @@ public:
 
     static auto IsRunningOnWine() -> bool;
 
-    static inline char const* ServiceName {"platform"};
-
     static auto Init(game::init const& ginit) -> std::shared_ptr<platform>;
     static auto HeadlessInit(path const& logFile = "") -> std::shared_ptr<platform>;
+
+    static inline char const* ServiceName {"platform"};
 
 protected:
     platform(bool headless, game::init const& ginit);

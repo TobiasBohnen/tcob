@@ -65,10 +65,10 @@ public:
 
     virtual ~system() = default;
 
-    static inline char const* ServiceName {"audio::system"};
-
     virtual auto create_output(specification const& info) const -> std::unique_ptr<audio_stream> = 0;
     virtual auto create_input() const -> std::unique_ptr<audio_stream>                           = 0;
+
+    static inline char const* ServiceName {"audio::system"};
 };
 
 ////////////////////////////////////////////////////////////
