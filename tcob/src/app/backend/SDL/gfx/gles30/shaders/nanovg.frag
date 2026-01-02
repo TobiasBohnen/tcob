@@ -33,8 +33,6 @@ in vec3 vertTexCoords;
 
 out vec4 outColor;
 
-const float smoothing = 0.25;
-
 float sd_round_rect(vec2 pt, vec2 ext, float rad) {
     vec2 ext2 = ext - vec2(rad, rad);
     vec2 d = abs(pt) - ext2;
