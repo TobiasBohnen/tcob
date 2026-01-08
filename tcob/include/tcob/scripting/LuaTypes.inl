@@ -116,9 +116,7 @@ inline auto table::get_keys() const -> std::vector<T>
         view.push_value(-2);
 
         T var {};
-        if (base_converter<T>::IsType(view, -1) && view.pull_convert_idx(-1, var)) {
-            retValue.push_back(var);
-        }
+        if (view.pull_convert_idx(-1, var)) { retValue.push_back(var); }
 
         view.pop(2);
     }
@@ -197,9 +195,7 @@ inline auto table::has(state_view view, auto&& key, auto&&... keys) const -> boo
     view.get_table(-2);
 
     if constexpr (sizeof...(keys) > 0) {
-        if (!view.is_table(-1)) {
-            return false;
-        }
+        if (!view.is_table(-1)) { return false; }
         table const lt {view, -1};
         return lt.has(view, keys...);
     } else {
@@ -264,7 +260,7 @@ inline auto function<R>::unprotected_call(auto&&... params) const -> std::expect
     // call lua function
     call(paramsCount);
     if constexpr (std::is_void_v<R>) {
-        return {};
+        return std::expected<void, error_code> {};
     } else {
         R retValue {};
         if (!view.pull_convert_idx(oldTop, retValue)) {
@@ -302,7 +298,7 @@ inline auto coroutine::resume(auto&&... params) -> std::expected<R, error_code>
     _status = thread.resume(paramsCount);
     if (_status == coroutine_status::Suspended || _status == coroutine_status::Dead) {
         if constexpr (std::is_void_v<R>) {
-            return {};
+            return std::expected<void, error_code> {};
         } else {
             R retValue {};
             return thread.pull_convert_idx(1, retValue)

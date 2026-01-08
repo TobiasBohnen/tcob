@@ -235,18 +235,12 @@ auto state_view::resume(i32 argCount) const -> coroutine_status
     i32 const err {lua_resume(_state, nullptr, argCount, &resultCount)};
 
     switch (err) {
-    case LUA_OK:
-        return coroutine_status::Dead;
-    case LUA_YIELD:
-        return coroutine_status::Suspended;
-    case LUA_ERRRUN:
-        return coroutine_status::RuntimeError;
-    case LUA_ERRSYNTAX:
-        return coroutine_status::SyntaxError;
-    case LUA_ERRMEM:
-        return coroutine_status::MemError;
-    case LUA_ERRERR:
-        return coroutine_status::Error;
+    case LUA_OK:        return coroutine_status::Dead;
+    case LUA_YIELD:     return coroutine_status::Suspended;
+    case LUA_ERRRUN:    return coroutine_status::RuntimeError;
+    case LUA_ERRSYNTAX: return coroutine_status::SyntaxError;
+    case LUA_ERRMEM:    return coroutine_status::MemError;
+    case LUA_ERRERR:    return coroutine_status::Error;
     }
 
     return coroutine_status::Error;
