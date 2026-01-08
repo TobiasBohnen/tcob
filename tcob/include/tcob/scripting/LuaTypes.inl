@@ -116,7 +116,9 @@ inline auto table::get_keys() const -> std::vector<T>
         view.push_value(-2);
 
         T var {};
-        if (view.pull_convert_idx(-1, var)) { retValue.push_back(var); }
+        if (base_converter<T>::IsType(view, -1) && view.pull_convert_idx(-1, var)) {
+            retValue.push_back(var);
+        }
 
         view.pop(2);
     }
