@@ -32,8 +32,6 @@ jobs:
             cxxflags: '-stdlib=libc++ -fexperimental-library'
             install_commands: 'wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 20; sudo apt-get install libc++-20-dev libc++abi-20-dev'
         include:
-          - variant:    'minimal'
-            definition: '-DTCOB_MINIMAL=ON'
           - variant:    'default'
             definition: ''
           - variant:    'shared'
@@ -76,3 +74,4 @@ jobs:
       working-directory: ./build
       env:
          CTEST_OUTPUT_ON_FAILURE: 1
+
