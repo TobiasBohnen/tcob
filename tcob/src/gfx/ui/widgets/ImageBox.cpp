@@ -78,11 +78,11 @@ void image_box::on_draw(widget_painter& painter)
         targetRect = rect;
         break;
     case fit_mode::FitWidth: {
-        f32 const factor {texSize.Width / texSize.Height};
+        f32 const factor {texSize.Height / texSize.Width};
         targetRect = {rect.Position, {rect.width(), rect.width() * factor}};
     } break;
     case fit_mode::FitHeight: {
-        f32 const factor {texSize.Height / texSize.Width};
+        f32 const factor {texSize.Width / texSize.Height};
         targetRect = {rect.Position, {rect.height() * factor, rect.height()}};
     } break;
     }
