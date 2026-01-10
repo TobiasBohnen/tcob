@@ -25,6 +25,7 @@ inline auto core_uniform_distribution::operator()(R& rng, T min, T max) -> T
     if (min == max) { return min; }
 
     using result_type = typename R::result_type;
+    static_assert(std::is_unsigned_v<result_type>);
     static_assert(sizeof(result_type) == 8 || sizeof(result_type) == 4);
     if constexpr (FloatingPoint<T>) {
         using int_type   = std::conditional_t<sizeof(result_type) == 4, i32, std::conditional_t<sizeof(result_type) == 8, i64, void>>;
@@ -43,7 +44,7 @@ inline auto core_uniform_distribution::operator()(R& rng, T min, T max) -> T
         } while (value > unbiasedMax);
         return static_cast<T>(min + static_cast<T>(value % range));
     } else {
-        return T {};
+        static_assert(false);
     }
 }
 
