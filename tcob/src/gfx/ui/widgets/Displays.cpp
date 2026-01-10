@@ -64,7 +64,7 @@ void dot_matrix_display::on_draw(widget_painter& painter)
     f32 const width {rect.width() / Dots->width()};
 
     for (auto const& [colorIdx, dots] : _sortedDots) {
-        auto const col {_style.Colors.at(colorIdx)};
+        auto const col {_style.Colors[colorIdx]};
         if (col.A == 0) { continue; }
         canvas.set_fill_style(col);
         canvas.begin_path();

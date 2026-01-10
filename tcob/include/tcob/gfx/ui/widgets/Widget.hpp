@@ -94,6 +94,7 @@ public:
     void update(milliseconds deltaTime) override;
 
     virtual void draw(widget_painter& painter);
+    void         queue_redraw();
 
     auto hit_test(point_i pos) const -> bool;
 
@@ -126,7 +127,6 @@ protected:
 
     virtual void on_draw(widget_painter& painter) = 0;
     void         prepare_redraw();
-    void         queue_redraw();
 
     auto draw_background(auto&& style, widget_painter& painter, bool isCircle = false) -> rect_f;
 
