@@ -14,7 +14,6 @@
 #include <tcob/audio/Buffer.hpp>
 #include <tcob/audio/Effect.hpp>
 #include <tcob/audio/Music.hpp>
-#include <tcob/audio/Playlist.hpp>
 #include <tcob/audio/Recording.hpp>
 #include <tcob/audio/Sound.hpp>
 #include <tcob/audio/Source.hpp>

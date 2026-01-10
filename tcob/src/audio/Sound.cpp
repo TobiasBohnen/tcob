@@ -12,6 +12,7 @@
 
 #include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
@@ -74,6 +75,46 @@ auto sound::on_start() -> bool
 auto sound::on_stop() -> bool
 {
     return true;
+}
+
+////////////////////////////////////////////////////////////
+
+void sound_channel::play_now(std::unique_ptr<audio::sound> sound)
+{
+    if (_current) { _current->stop(); }
+
+    _queue.clear();
+    _current = std::move(sound);
+    _current->play();
+    _isPlaying = true;
+}
+
+void sound_channel::play_queued(std::unique_ptr<audio::sound> sound)
+{
+    _queue.push_back(std::move(sound));
+}
+
+void sound_channel::stop()
+{
+    if (_current) { _current->stop(); }
+
+    _queue.clear();
+    _isPlaying = false;
+}
+
+void sound_channel::update()
+{
+    if (_current && _current->state() != playback_state::Running) {
+        _current.reset();
+        _isPlaying = false;
+    }
+
+    if (!_isPlaying && !_queue.empty()) {
+        _current = std::move(_queue.front());
+        _queue.erase(_queue.begin());
+        _current->play();
+        _isPlaying = true;
+    }
 }
 
 }

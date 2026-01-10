@@ -9,6 +9,7 @@
 #include <future>
 #include <memory>
 #include <optional>
+#include <vector>
 
 #include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
@@ -37,5 +38,23 @@ private:
     auto on_stop() -> bool override;
 
     buffer _buffer;
+};
+
+////////////////////////////////////////////////////////////
+
+class sound_channel {
+public:
+    void play_now(std::unique_ptr<audio::sound> sound);
+
+    void play_queued(std::unique_ptr<audio::sound> sound);
+
+    void stop();
+
+    void update();
+
+private:
+    std::vector<std::unique_ptr<audio::sound>> _queue;
+    std::unique_ptr<audio::sound>              _current;
+    bool                                       _isPlaying {false};
 };
 }
