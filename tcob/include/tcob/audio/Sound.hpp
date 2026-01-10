@@ -42,7 +42,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class sound_channel {
+class TCOB_API sound_channel {
 public:
     void play_now(std::unique_ptr<audio::sound> sound);
 
