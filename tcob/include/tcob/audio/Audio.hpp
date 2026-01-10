@@ -49,8 +49,7 @@ public:
 
     virtual auto get() -> std::vector<f32> = 0;
 
-    virtual auto available_bytes() const -> i32 = 0;
-    virtual auto queued_bytes() const -> i32    = 0;
+    virtual auto queued_bytes() const -> i32 = 0;
 };
 
 ////////////////////////////////////////////////////////////

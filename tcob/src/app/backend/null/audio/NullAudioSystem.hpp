@@ -31,7 +31,6 @@ public:
 
     auto get() -> std::vector<f32> override;
 
-    auto available_bytes() const -> i32 override;
     auto queued_bytes() const -> i32 override;
 };
 

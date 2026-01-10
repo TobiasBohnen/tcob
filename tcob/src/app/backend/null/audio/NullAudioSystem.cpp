@@ -23,7 +23,6 @@ void null_audio_stream::put(std::span<f32 const>) { }
 void null_audio_stream::flush() { }
 void null_audio_stream::clear() { }
 auto null_audio_stream::get() -> std::vector<f32> { return {}; }
-auto null_audio_stream::available_bytes() const -> i32 { return 0; }
 auto null_audio_stream::queued_bytes() const -> i32 { return 0; }
 
 auto null_audio_system::create_output(specification const&) const -> std::unique_ptr<audio_stream>
