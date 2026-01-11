@@ -79,12 +79,21 @@ auto sound::on_stop() -> bool
 
 ////////////////////////////////////////////////////////////
 
+sound_channel::sound_channel()
+{
+    Volume.Changed.connect([this](f32 val) {
+        if (_current) { _current->Volume = val; }
+    });
+    Volume(1.0f);
+}
+
 void sound_channel::play_now(std::unique_ptr<audio::sound> sound)
 {
     if (_current) { _current->stop(); }
 
     _queue.clear();
-    _current = std::move(sound);
+    _current         = std::move(sound);
+    _current->Volume = *Volume;
     _current->play();
     _isPlaying = true;
 }
@@ -112,6 +121,7 @@ void sound_channel::update()
     if (!_isPlaying && !_queue.empty()) {
         _current = std::move(_queue.front());
         _queue.erase(_queue.begin());
+        _current->Volume = *Volume;
         _current->play();
         _isPlaying = true;
     }

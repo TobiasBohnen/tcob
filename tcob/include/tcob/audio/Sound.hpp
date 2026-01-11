@@ -14,6 +14,7 @@
 #include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Source.hpp"
+#include "tcob/core/Property.hpp"
 
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
@@ -42,8 +43,12 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sound_channel {
+class TCOB_API sound_channel final {
 public:
+    sound_channel();
+
+    prop<f32> Volume;
+
     void play_now(std::unique_ptr<audio::sound> sound);
 
     void play_queued(std::unique_ptr<audio::sound> sound);
