@@ -256,7 +256,7 @@ private:
     void write_actl_placeholder(io::ostream& out) const;
     void write_actl(u32 frameCount, io::ostream& out) const;
     void write_fctl(u32 idx, rect_i const& rect, image_frame const& frame, io::ostream& out) const;
-    void write_fdat(u32 idx, image const& frame, io::ostream& out) const;
+    void write_fdat(u32& idx, image const& frame, io::ostream& out) const;
 
     png_encoder    _enc;
     u32            _seq {0};

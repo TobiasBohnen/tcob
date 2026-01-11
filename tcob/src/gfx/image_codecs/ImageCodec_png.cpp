@@ -876,7 +876,7 @@ auto png_anim_encoder::add_frame(image_frame const& frame) -> bool
         .Duration = totalFrameDuration}};
 
     write_fctl(_seq++, *diff, croppedFrame, str);
-    write_fdat(_seq++, croppedFrame.Image, str);
+    write_fdat(_seq, croppedFrame.Image, str);
 
     _prevFrame = frame.Image;
     _frameCount++;
@@ -888,6 +888,18 @@ auto png_anim_encoder::finish() -> bool
     if (!_encoding) { return false; }
 
     auto& str {stream()};
+
+    if (_accFrameDuration > milliseconds {0} && _frameCount > 0) {
+        rect_i const fullRect {point_i::Zero, _prevFrame.info().Size};
+        auto const   finalFrame {image_frame {
+              .Image    = _prevFrame,
+              .Duration = _accFrameDuration}};
+
+        write_fctl(_seq++, fullRect, finalFrame, str);
+        write_fdat(_seq, finalFrame.Image, str);
+        _frameCount++;
+        _accFrameDuration = milliseconds {0};
+    }
 
     auto const currentPos {str.tell()};
     str.seek(_actlPos, io::seek_dir::Begin);
@@ -948,7 +960,7 @@ void png_anim_encoder::write_fctl(u32 idx, rect_i const& rect, image_frame const
     _enc.write_chunk(out, fctl);
 }
 
-void png_anim_encoder::write_fdat(u32 idx, image const& frame, io::ostream& out) const
+void png_anim_encoder::write_fdat(u32& idx, image const& frame, io::ostream& out) const
 {
     // compress
     auto buf {io::zlib_filter {}.to(data(frame))};
@@ -962,10 +974,10 @@ void png_anim_encoder::write_fdat(u32 idx, image const& frame, io::ostream& out)
     std::array<u8, fdatLength + 8> fdat {};
 
     u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::fdAT))}; // TODO: endianess
-    u32 const seq {std::byteswap(idx)};
 
     while (total > 0) {
         memcpy(fdat.data(), &type, 4);
+        u32 const seq {std::byteswap(idx++)};
         memcpy(fdat.data() + 4, &seq, 4);
         usize const length {std::min(fdatLength, total)};
         memcpy(fdat.data() + 8, buf.data() + offset, length);
