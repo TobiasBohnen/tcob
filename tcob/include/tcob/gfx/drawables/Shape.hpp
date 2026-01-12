@@ -179,6 +179,7 @@ public:
 
     void bring_to_front(shape const& shape);
     void send_to_back(shape const& shape);
+    void sort_by_y_position();
 
     auto size() const -> isize;
     auto is_empty() const -> bool;

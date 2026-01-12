@@ -68,6 +68,14 @@ void shape_batch::send_to_back(shape const& shape)
     }
 }
 
+void shape_batch::sort_by_y_position()
+{
+    std::ranges::stable_sort(_children, [](auto const& a, auto const& b) {
+        return a->aabb().bottom() < b->aabb().bottom();
+    });
+    _isDirty = true;
+}
+
 auto shape_batch::size() const -> isize
 {
     return std::ssize(_children);
