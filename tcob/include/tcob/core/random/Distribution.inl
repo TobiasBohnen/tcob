@@ -35,16 +35,15 @@ inline auto core_uniform_distribution::operator()(R& rng, T min, T max) -> T
             / static_cast<float_type>(1LL << std::numeric_limits<float_type>::digits)};
         return static_cast<T>(min + (value * (max - min)));
     } else if constexpr (Integral<T>) {
-        if (min == std::numeric_limits<T>::min() && max == std::numeric_limits<T>::max()) { --max; }
-        result_type const range {static_cast<result_type>(max - min + 1)};
+        if (min == std::numeric_limits<T>::min() && max == std::numeric_limits<T>::max()) { return static_cast<T>(rng.next()); }
+        result_type const range {static_cast<result_type>(max) - static_cast<result_type>(min) + 1};
         result_type const unbiasedMax {(std::numeric_limits<result_type>::max() / range * range) - 1};
         result_type       value;
         do {
             value = rng.next();
         } while (value > unbiasedMax);
-        return static_cast<T>(min + static_cast<T>(value % range));
-    } else {
-        static_assert(false);
+        using unsigned_t = std::make_unsigned_t<T>;
+        return static_cast<T>(static_cast<unsigned_t>(min) + static_cast<unsigned_t>(value % range));
     }
 }
 
