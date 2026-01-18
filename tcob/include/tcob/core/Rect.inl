@@ -40,7 +40,7 @@ constexpr rect<T>::rect(rect<U> const& p)
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::FromLTRB(T left, T top, T right, T bottom) -> rect<T>
+auto constexpr rect<T>::FromLTRB(T left, T top, T right, T bottom) -> rect
 {
     return {left, top, right - left, bottom - top};
 }
@@ -295,13 +295,11 @@ auto constexpr rect<T>::intersects(rect const& other, bool includeEdges) const -
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::equals(rect const& other, f32 tol) const -> bool
+template <Arithmetic U>
+auto constexpr rect<T>::equals(rect<U> const& other, f32 tol) const -> bool
 {
-    f32 const dx {static_cast<f32>(other.Position.X) - Position.X};
-    f32 const dy {static_cast<f32>(other.Position.Y) - Position.Y};
-    f32 const dw {static_cast<f32>(other.Size.Width) - Size.Width};
-    f32 const dh {static_cast<f32>(other.Size.Height) - Size.Height};
-    return ((dx * dx) + (dy * dy) + (dw * dw) + (dh * dh)) <= (tol * tol);
+    return Position.equals(other.Position, tol)
+        && Size.equals(other.Size, tol);
 }
 
 template <Arithmetic T, Arithmetic R>

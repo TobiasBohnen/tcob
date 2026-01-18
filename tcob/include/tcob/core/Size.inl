@@ -7,6 +7,7 @@
 #include "Size.hpp"
 
 #include <array>
+#include <cmath>
 #include <numeric>
 #include <tuple>
 
@@ -58,7 +59,7 @@ auto constexpr size<T>::to_array [[nodiscard]] () const -> std::array<T, 2>
 }
 
 template <Arithmetic T>
-auto constexpr size<T>::Lerp(size<T> const& from, size<T> const& to, f64 step) -> size<T>
+auto constexpr size<T>::Lerp(size const& from, size const& to, f64 step) -> size<T>
 {
     T const w {helper::lerp(from.Width, to.Width, step)};
     T const h {helper::lerp(from.Height, to.Height, step)};
@@ -73,18 +74,22 @@ auto constexpr size<T>::contains(point<U> const& point) const -> bool
 }
 
 template <Arithmetic T>
-auto constexpr size<T>::equals(size<T> const& other, f32 tol) const -> bool
+template <Arithmetic U>
+auto constexpr size<T>::equals(size<U> const& other, f32 tol) const -> bool
 {
-    f32 const dw {static_cast<f32>(other.Width) - Width};
-    f32 const dh {static_cast<f32>(other.Height) - Height};
-    return (dw * dw) + (dh * dh) <= tol * tol;
+    f32 const dw {static_cast<f32>(other.Width) - static_cast<f32>(Width)};
+    f32 const dh {static_cast<f32>(other.Height) - static_cast<f32>(Height)};
+    return std::abs(dw) <= tol && std::abs(dh) <= tol;
 }
 
 template <Arithmetic T>
-auto constexpr size<T>::as_fitted [[nodiscard]] (size<T> const& s) const -> size<T>
+template <Arithmetic U>
+auto constexpr size<T>::as_fitted [[nodiscard]] (size<U> const& s) const -> size<T>
 {
-    f32 const factor {((s.Width / s.Height) > (Width / Height)) ? (Width / s.Width) : (Height / s.Height)};
-    return {s.Width * factor, s.Height * factor};
+    f32 const factor {((static_cast<f32>(s.Width) / static_cast<f32>(s.Height)) > (static_cast<f32>(Width) / static_cast<f32>(Height)))
+                          ? (static_cast<f32>(Width) / static_cast<f32>(s.Width))
+                          : (static_cast<f32>(Height) / static_cast<f32>(s.Height))};
+    return {static_cast<T>(static_cast<f32>(s.Width) * factor), static_cast<T>(static_cast<f32>(s.Height) * factor)};
 }
 
 template <Arithmetic T>

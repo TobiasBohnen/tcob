@@ -37,13 +37,13 @@ auto constexpr point<T>::to_array [[nodiscard]] () const -> std::array<T, 2>
 }
 
 template <Arithmetic T>
-auto constexpr point<T>::dot(point<T> const& p) const -> f64
+auto constexpr point<T>::dot(point const& p) const -> f64
 {
     return static_cast<f64>(X * p.X + Y * p.Y);
 }
 
 template <Arithmetic T>
-auto constexpr point<T>::cross(point<T> const& p) const -> f64
+auto constexpr point<T>::cross(point const& p) const -> f64
 {
     return static_cast<f64>(X * p.Y - Y * p.X);
 }
@@ -55,13 +55,13 @@ inline auto point<T>::length() const -> f64
 }
 
 template <Arithmetic T>
-inline auto point<T>::distance_to(point<T> const& p) const -> f64
+inline auto point<T>::distance_to(point const& p) const -> f64
 {
     return euclidean_distance(*this, p);
 }
 
 template <Arithmetic T>
-inline auto point<T>::angle_to(point<T> const& p) const -> degree_d
+inline auto point<T>::angle_to(point const& p) const -> degree_d
 {
     degree_d retValue {radian_d {static_cast<f64>(std::atan2(p.Y - Y, p.X - X))}};
     retValue += degree_d {90};
@@ -85,7 +85,7 @@ inline auto point<T>::as_normalized() const -> point<f64>
 }
 
 template <Arithmetic T>
-auto constexpr point<T>::Lerp(point<T> const& from, point<T> const& to, f64 step) -> point<T>
+auto constexpr point<T>::Lerp(point const& from, point const& to, f64 step) -> point<T>
 {
     T const x {helper::lerp(from.X, to.X, step)};
     T const y {helper::lerp(from.Y, to.Y, step)};
@@ -96,15 +96,16 @@ template <Arithmetic T>
 auto constexpr point<T>::FromDirection(degree_d angle) -> point<T>
 {
     radian_d const rad {angle - degree_d {90}};
-    return point<T> {point_d {rad.cos(), rad.sin()}.as_normalized()};
+    return point {point_d {rad.cos(), rad.sin()}.as_normalized()};
 }
 
 template <Arithmetic T>
-auto constexpr point<T>::equals(point<T> const& other, T tol) const -> bool
+template <Arithmetic U>
+auto constexpr point<T>::equals(point<U> const& other, T tol) const -> bool
 {
-    T const dx {other.X - X};
-    T const dy {other.Y - Y};
-    return dx * dx + dy * dy <= tol * tol;
+    f32 const dx {static_cast<f32>(other.X) - static_cast<f32>(X)};
+    f32 const dy {static_cast<f32>(other.Y) - static_cast<f32>(Y)};
+    return (dx * dx) + (dy * dy) <= tol * tol;
 }
 
 template <Arithmetic T, Arithmetic R>

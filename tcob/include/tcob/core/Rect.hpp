@@ -58,7 +58,8 @@ public:
 
     auto constexpr intersects [[nodiscard]] (rect const& other, bool includeEdges = false) const -> bool;
 
-    auto constexpr equals(rect const& other, f32 tol) const -> bool;
+    template <Arithmetic U = T>
+    auto constexpr equals(rect<U> const& other, f32 tol) const -> bool;
 
     auto constexpr find_edge(degree_f angle) const -> point<T>;
 
@@ -67,7 +68,7 @@ public:
     auto constexpr as_union_with(rect const& other) const -> rect;
     auto constexpr as_inset_by(point<T> const& inset) const -> rect;
 
-    static auto constexpr FromLTRB(T left, T top, T right, T bottom) -> rect<T>;
+    static auto constexpr FromLTRB(T left, T top, T right, T bottom) -> rect;
 
     static auto constexpr Lerp(rect const& from, rect const& to, f64 step) -> rect;
 

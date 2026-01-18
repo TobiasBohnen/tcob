@@ -38,17 +38,19 @@ public:
     template <Arithmetic U = T>
     auto constexpr contains(point<U> const& point) const -> bool;
 
-    auto constexpr equals(size<T> const& other, f32 tol) const -> bool;
+    template <Arithmetic U = T>
+    auto constexpr equals(size<U> const& other, f32 tol) const -> bool;
 
-    auto constexpr as_fitted(size<T> const& s) const -> size<T>;
+    template <Arithmetic U = T>
+    auto constexpr as_fitted(size<U> const& s) const -> size;
 
-    static auto constexpr Lerp(size<T> const& from, size<T> const& to, f64 step) -> size<T>;
+    static auto constexpr Lerp(size const& from, size const& to, f64 step) -> size;
 
     T Width {0};
     T Height {0};
 
-    static size<T> const Zero;
-    static size<T> const One;
+    static size const Zero;
+    static size const One;
 
     static auto constexpr Members();
 };

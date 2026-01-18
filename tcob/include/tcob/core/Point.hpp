@@ -31,27 +31,28 @@ public:
 
     auto constexpr to_array [[nodiscard]] () const -> std::array<T, 2>;
 
-    auto constexpr dot(point<T> const& p) const -> f64;
-    auto constexpr cross(point<T> const& p) const -> f64;
+    auto constexpr dot(point const& p) const -> f64;
+    auto constexpr cross(point const& p) const -> f64;
 
     auto length() const -> f64;
-    auto distance_to(point<T> const& p) const -> f64;
+    auto distance_to(point const& p) const -> f64;
 
-    auto angle_to(point<T> const& p) const -> degree<f64>;
+    auto angle_to(point const& p) const -> degree<f64>;
 
-    auto constexpr as_perpendicular() const -> point<T>;
+    auto constexpr as_perpendicular() const -> point;
     auto as_normalized() const -> point<f64>;
 
-    auto constexpr equals(point<T> const& other, T tol) const -> bool;
+    template <Arithmetic U = T>
+    auto constexpr equals(point<U> const& other, T tol) const -> bool;
 
-    static auto constexpr Lerp(point<T> const& from, point<T> const& to, f64 step) -> point<T>;
-    static auto constexpr FromDirection(degree<f64> angle) -> point<T>;
+    static auto constexpr Lerp(point const& from, point const& to, f64 step) -> point;
+    static auto constexpr FromDirection(degree<f64> angle) -> point;
 
     T X {0};
     T Y {0};
 
-    static point<T> const Zero;
-    static point<T> const One;
+    static point const Zero;
+    static point const One;
 
     static auto constexpr Members();
 };
