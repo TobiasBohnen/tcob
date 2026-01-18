@@ -34,11 +34,9 @@ namespace detail {
 template <std::derived_from<widget> T>
 inline auto layout::add_widget(string const& name) -> T&
 {
-    auto const wi {create_init(name)};
-
-    auto  ptr {std::make_unique<T>(wi)};
-    auto& retValue {*ptr};
-    _widgets.push_back(std::move(ptr));
+    auto  widget {std::make_unique<T>(create_init(name))};
+    auto& retValue {*widget};
+    _widgets.push_back(std::move(widget));
     normalize_zorder();
     return retValue;
 }

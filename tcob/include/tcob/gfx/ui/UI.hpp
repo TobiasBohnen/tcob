@@ -262,7 +262,8 @@ enum class fit_mode : u8 {
     Contain,
     Fill,
     FitWidth,
-    FitHeight
+    FitHeight,
+    IntContain
 };
 
 ////////////////////////////////////////////////////////////

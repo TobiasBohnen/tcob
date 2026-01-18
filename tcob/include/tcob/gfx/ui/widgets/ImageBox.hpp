@@ -11,6 +11,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -46,6 +47,8 @@ public:
     void start_animation(gfx::frame_animation const& ani, playback_mode mode);
     void stop_animation();
 
+    auto image_bounds() const -> rect_f;
+
 protected:
     void on_draw(widget_painter& painter) override;
 
@@ -58,6 +61,8 @@ protected:
     auto attributes() const -> widget_attributes override;
 
 private:
+    auto image_bounds(rect_f const& rect) const -> rect_f;
+
     image_box::style _style;
 
     point_f                _dragStart {point_f::Zero};

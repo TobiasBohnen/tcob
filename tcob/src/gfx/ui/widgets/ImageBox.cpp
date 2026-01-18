@@ -53,14 +53,14 @@ void image_box::stop_animation()
     _animationTween.stop();
 }
 
-void image_box::on_draw(widget_painter& painter)
+auto image_box::image_bounds() const -> rect_f
 {
-    rect_f const rect {draw_background(_style, painter)};
+    return image_bounds(content_bounds());
+}
 
-    scoped_scissor const guard {painter, this};
-
-    // image
-    if (!Image->Texture) { return; }
+auto image_box::image_bounds(rect_f const& rect) const -> rect_f
+{
+    if (!Image->Texture) { return rect_f::Zero; }
 
     auto const& tex {Image->Texture};
     auto const  texSize {size_f {tex->info().Size}};
@@ -73,6 +73,12 @@ void image_box::on_draw(widget_painter& painter)
         break;
     case fit_mode::Contain: {
         targetRect = {rect.Position, rect.Size.as_fitted(texSize)};
+    } break;
+    case fit_mode::IntContain: {
+        f32 const factor {static_cast<f32>(static_cast<i32>(rect.width() / texSize.Width) < static_cast<i32>(rect.height() / texSize.Height)
+                                               ? static_cast<i32>(rect.width() / texSize.Width)
+                                               : static_cast<i32>(rect.height() / texSize.Height))};
+        targetRect = {rect.Position, texSize * factor};
     } break;
     case fit_mode::Fill:
         targetRect = rect;
@@ -97,6 +103,21 @@ void image_box::on_draw(widget_painter& painter)
     case gfx::vertical_alignment::Bottom: targetRect.Position.Y += rect.height() - targetRect.height(); break;
     case gfx::vertical_alignment::Middle: targetRect.Position.Y += (rect.height() - targetRect.height()) / 2; break;
     }
+
+    return targetRect;
+}
+
+void image_box::on_draw(widget_painter& painter)
+{
+    rect_f const rect {draw_background(_style, painter)};
+
+    scoped_scissor const guard {painter, this};
+
+    // image
+    if (!Image->Texture) { return; }
+
+    auto const&  tex {Image->Texture};
+    rect_f const targetRect {image_bounds(rect)};
 
     auto& canvas {painter.canvas()};
     canvas.set_fill_style(colors::White);
