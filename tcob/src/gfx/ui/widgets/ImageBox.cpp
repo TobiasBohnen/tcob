@@ -38,6 +38,9 @@ image_box::image_box(init const& wi)
     Fit.Changed.connect([this](auto const&) { queue_redraw(); });
     Fit(fit_mode::Contain);
 
+    Alignment.Changed.connect([this](auto const&) { queue_redraw(); });
+    Alignment({.Horizontal = gfx::horizontal_alignment::Left, .Vertical = gfx::vertical_alignment::Top});
+
     Class("image_box");
 
     _animationTween.Changed.connect([this](auto const& val) { Image.mutate([&val](icon& icon) { icon.TextureRegion = val; }); });
@@ -53,7 +56,7 @@ void image_box::stop_animation()
     _animationTween.stop();
 }
 
-auto image_box::image_bounds() const -> rect_f
+auto image_box::image_bounds() -> rect_f
 {
     return image_bounds(content_bounds());
 }
@@ -93,12 +96,12 @@ auto image_box::image_bounds(rect_f const& rect) const -> rect_f
     } break;
     }
 
-    switch (_style.Alignment.Horizontal) {
+    switch (Alignment->Horizontal) {
     case gfx::horizontal_alignment::Left:     break;
     case gfx::horizontal_alignment::Right:    targetRect.Position.X += rect.width() - targetRect.width(); break;
     case gfx::horizontal_alignment::Centered: targetRect.Position.X += (rect.width() - targetRect.width()) / 2; break;
     }
-    switch (_style.Alignment.Vertical) {
+    switch (Alignment->Vertical) {
     case gfx::vertical_alignment::Top:    break;
     case gfx::vertical_alignment::Bottom: targetRect.Position.Y += rect.height() - targetRect.height(); break;
     case gfx::vertical_alignment::Middle: targetRect.Position.Y += (rect.height() - targetRect.height()) / 2; break;

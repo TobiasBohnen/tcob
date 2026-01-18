@@ -28,8 +28,6 @@ class TCOB_API image_box : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        gfx::alignments Alignment {.Horizontal = gfx::horizontal_alignment::Left, .Vertical = gfx::vertical_alignment::Top};
-
         f32 DragAlpha {0.5f};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
@@ -39,15 +37,16 @@ public:
 
     signal<drop_event const> Dropped;
 
-    prop<icon>     Image;
-    prop<fit_mode> Fit;
+    prop<icon>            Image;
+    prop<fit_mode>        Fit;
+    prop<gfx::alignments> Alignment;
 
     bool Draggable {false};
 
     void start_animation(gfx::frame_animation const& ani, playback_mode mode);
     void stop_animation();
 
-    auto image_bounds() const -> rect_f;
+    auto image_bounds() -> rect_f;
 
 protected:
     void on_draw(widget_painter& painter) override;
