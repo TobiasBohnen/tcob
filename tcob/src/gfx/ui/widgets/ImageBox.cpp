@@ -74,7 +74,7 @@ auto image_box::image_bounds(rect_f const& rect) const -> rect_f
     case fit_mode::Contain: {
         targetRect = {rect.Position, rect.Size.as_fitted(texSize)};
     } break;
-    case fit_mode::IntContain: {
+    case fit_mode::PixelPerfect: {
         f32 const factor {static_cast<f32>(static_cast<i32>(rect.width() / texSize.Width) < static_cast<i32>(rect.height() / texSize.Height)
                                                ? static_cast<i32>(rect.width() / texSize.Width)
                                                : static_cast<i32>(rect.height() / texSize.Height))};

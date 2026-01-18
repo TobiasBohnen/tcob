@@ -260,7 +260,7 @@ enum class dock_style : u8 {
 enum class fit_mode : u8 {
     None,
     Contain,
-    IntContain,
+    PixelPerfect,
     Fill,
     FitWidth,
     FitHeight
