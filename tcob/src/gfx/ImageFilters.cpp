@@ -6,6 +6,8 @@
 #include "tcob/gfx/ImageFilters.hpp"
 
 #include <array>
+#include <memory>
+#include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -140,7 +142,7 @@ auto sharpen_filter::matrix() const -> std::array<i32, 25>
 
 ////////////////////////////////////////////////////////////
 
-auto grayscale_filter::operator()(image const& img) const -> image
+auto grayscale_filter::operator()(image const& img) -> image
 {
     auto const& info {img.info()};
     auto        retValue {image::CreateEmpty(info.Size, info.Format)};
@@ -169,7 +171,7 @@ auto grayscale_filter::operator()(image const& img) const -> image
 
 ////////////////////////////////////////////////////////////
 
-auto resize_nearest_neighbor::operator()(image const& img) const -> image
+auto resize_nearest_neighbor::operator()(image const& img) -> image
 {
     auto const [newWidth, newHeight] {NewSize};
 
@@ -200,7 +202,7 @@ auto resize_nearest_neighbor::operator()(image const& img) const -> image
 
 ////////////////////////////////////////////////////////////
 
-auto resize_bilinear::operator()(image const& img) const -> image
+auto resize_bilinear::operator()(image const& img) -> image
 {
     auto const [newWidth, newHeight] {NewSize};
 
@@ -253,7 +255,7 @@ auto resize_bilinear::operator()(image const& img) const -> image
 
 ////////////////////////////////////////////////////////////
 
-auto remove_alpha::operator()(image const& img) const -> image
+auto remove_alpha::operator()(image const& img) -> image
 {
     if (!image::information::HasAlpha(img.info().Format)) {
         return img;
@@ -277,6 +279,143 @@ auto remove_alpha::operator()(image const& img) const -> image
         width * height);
 
     return retValue;
+}
+
+////////////////////////////////////////////////////////////
+
+octree_quantizer::octree_quantizer(i32 maxColors)
+    : _maxColors {maxColors}
+    , _root {std::make_unique<node>()}
+{
+}
+
+auto octree_quantizer::operator()(image const& img) -> image
+{
+    auto const& info {img.info()};
+
+    auto const [width, height] {info.Size};
+    for (i32 y {0}; y < height; ++y) {
+        for (i32 x {0}; x < width; ++x) {
+            insert_color(img.get_pixel({x, y}));
+        }
+    }
+
+    while (_leafCount > _maxColors) {
+        reduce();
+    }
+
+    image      retValue {image::CreateEmpty(info.Size, info.Format)};
+    auto const bpp {info.bytes_per_pixel()};
+
+    locate_service<task_manager>().run_parallel(
+        [&](par_task const& ctx) {
+            for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
+                retValue.set_pixel(pixIdx * bpp, get_quantized_color(img.get_pixel(pixIdx * bpp)));
+            }
+        },
+
+        width * height);
+
+    return retValue;
+}
+
+void octree_quantizer::insert_color(color c)
+{
+    node* current {_root.get()};
+
+    for (i32 level {0}; level < MAX_TREE_DEPTH; ++level) {
+        if (current->IsLeaf) {
+            break;
+        }
+
+        i32 const shift {7 - level};
+        i32 const index {((c.R >> shift) & 1) << 2 | ((c.G >> shift) & 1) << 1 | ((c.B >> shift) & 1)};
+
+        auto& child {current->Children[index]};
+        if (!child) {
+            child                = std::make_unique<node>();
+            child->Parent        = current;
+            child->IndexInParent = index;
+            current->ChildCount++;
+
+            if (level < MAX_TREE_DEPTH - 1) {
+                _reducibleNodes[level + 1].push_back(current->Children[index].get());
+            } else {
+                child->IsLeaf = true;
+                _leafCount++;
+            }
+        }
+
+        current = child.get();
+    }
+
+    current->RedSum += c.R;
+    current->GreenSum += c.G;
+    current->BlueSum += c.B;
+    current->PixelCount++;
+}
+
+void octree_quantizer::reduce()
+{
+    for (i32 level {MAX_TREE_DEPTH - 1}; level >= 0; --level) {
+        if (!_reducibleNodes[level].empty()) {
+            node* n {_reducibleNodes[level].back()};
+            _reducibleNodes[level].pop_back();
+
+            if (n->ChildCount > 0) {
+                merge_leaf_nodes(n);
+                return;
+            }
+        }
+    }
+}
+
+void octree_quantizer::merge_leaf_nodes(node* n)
+{
+    for (auto& child : n->Children) {
+        if (child) {
+            n->RedSum += child->RedSum;
+            n->GreenSum += child->GreenSum;
+            n->BlueSum += child->BlueSum;
+            n->PixelCount += child->PixelCount;
+
+            if (child->IsLeaf) {
+                _leafCount--;
+            }
+            child.reset();
+        }
+    }
+
+    n->IsLeaf     = true;
+    n->ChildCount = 0;
+    _leafCount++;
+}
+
+auto octree_quantizer::get_quantized_color(color c) const -> color
+{
+    node* current {_root.get()};
+
+    for (i32 level {0}; level < MAX_TREE_DEPTH; ++level) {
+        if (current->IsLeaf) {
+            break;
+        }
+
+        i32 const shift {7 - level};
+        i32 const index {((c.R >> shift) & 1) << 2 | ((c.G >> shift) & 1) << 1 | ((c.B >> shift) & 1)};
+
+        if (current->Children[index]) {
+            current = current->Children[index].get();
+        } else {
+            break;
+        }
+    }
+
+    if (current->PixelCount == 0) { return colors::Transparent; }
+
+    return {static_cast<u8>(current->RedSum / current->PixelCount),
+            static_cast<u8>(current->GreenSum / current->PixelCount),
+            static_cast<u8>(current->BlueSum / current->PixelCount),
+            255};
 }
 
 }

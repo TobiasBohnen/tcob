@@ -65,7 +65,9 @@ public:
     void flip_vertically();
 
     auto get_pixel(point_i pos) const -> color;
+    auto get_pixel(usize idx) const -> color;
     void set_pixel(point_i pos, color c);
+    void set_pixel(usize idx, color c);
 
     void fill(rect_i const& rect, color c);
     void blit(point_i offset, image const& src);

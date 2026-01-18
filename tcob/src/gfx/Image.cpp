@@ -103,11 +103,15 @@ void image::flip_vertically()
 auto image::get_pixel(point_i pos) const -> color
 {
     assert(_info.Size.contains(pos));
-    usize const idx {static_cast<usize>((pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel())};
-    u8 const    r {_buffer[idx + 0]};
-    u8 const    g {_buffer[idx + 1]};
-    u8 const    b {_buffer[idx + 2]};
-    u8 const    a {image::information::HasAlpha(_info.Format) ? _buffer[idx + 3] : static_cast<u8>(255)};
+    return get_pixel(static_cast<usize>((pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel()));
+}
+
+auto image::get_pixel(usize idx) const -> color
+{
+    u8 const r {_buffer[idx + 0]};
+    u8 const g {_buffer[idx + 1]};
+    u8 const b {_buffer[idx + 2]};
+    u8 const a {image::information::HasAlpha(_info.Format) ? _buffer[idx + 3] : static_cast<u8>(255)};
     return {r, g, b, a};
 }
 
@@ -115,6 +119,11 @@ void image::set_pixel(point_i pos, color c)
 {
     assert(_info.Size.contains(pos));
     usize const idx {static_cast<usize>((pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel())};
+    set_pixel(idx, c);
+}
+
+void image::set_pixel(usize idx, color c)
+{
     _buffer[idx + 0] = c.R;
     _buffer[idx + 1] = c.G;
     _buffer[idx + 2] = c.B;

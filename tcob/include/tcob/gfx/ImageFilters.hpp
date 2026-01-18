@@ -7,7 +7,10 @@
 #include "tcob/tcob_config.hpp"
 
 #include <array>
+#include <memory>
+#include <vector>
 
+#include "tcob/core/Color.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Image.hpp"
 
@@ -19,7 +22,7 @@ public:
     filter_base()          = default;
     virtual ~filter_base() = default;
 
-    virtual auto operator()(image const& img) const -> image = 0;
+    virtual auto operator()(image const& img) -> image = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -31,7 +34,7 @@ class convolution_filter : public filter_base {
 public:
     bool IncludeAlpha {false};
 
-    auto operator()(image const& img) const -> image override;
+    auto operator()(image const& img) -> image override;
 
 protected:
     virtual auto factor() const -> f64                   = 0;
@@ -101,16 +104,16 @@ public:
     f32 GreenFactor {0.587f};
     f32 BlueFactor {0.114f};
 
-    auto operator()(image const& img) const -> image override;
+    auto operator()(image const& img) -> image override;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API resize_nearest_neighbor final : public filter_base {
+class TCOB_API resize_nearest_neighbor : public filter_base {
 public:
     size_i NewSize {};
 
-    auto operator()(image const& img) const -> image override;
+    auto operator()(image const& img) -> image override;
 };
 
 ////////////////////////////////////////////////////////////
@@ -119,16 +122,51 @@ class TCOB_API resize_bilinear final : public filter_base {
 public:
     size_i NewSize {};
 
-    auto operator()(image const& img) const -> image override;
+    auto operator()(image const& img) -> image override;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API remove_alpha final : public filter_base {
 public:
-    auto operator()(image const& img) const -> image override;
+    auto operator()(image const& img) -> image override;
 };
 
-}
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+class TCOB_API octree_quantizer {
+public:
+    explicit octree_quantizer(i32 maxColors);
+
+    auto operator()(image const& img) -> image;
+
+private:
+    static constexpr i32 MAX_TREE_DEPTH {8};
+
+    struct node {
+        bool                                 IsLeaf {false};
+        i32                                  PixelCount {0};
+        i32                                  RedSum {0};
+        i32                                  GreenSum {0};
+        i32                                  BlueSum {0};
+        std::array<std::unique_ptr<node>, 8> Children {};
+        node*                                Parent {nullptr};
+        i32                                  ChildCount {0};
+        i32                                  IndexInParent {0};
+    };
+
+    void insert_color(color c);
+    void reduce();
+    auto get_quantized_color(color c) const -> color;
+    void merge_leaf_nodes(node* n);
+
+    i32                                                _maxColors;
+    i32                                                _leafCount {0};
+    std::unique_ptr<node>                              _root;
+    std::array<std::vector<node*>, MAX_TREE_DEPTH + 1> _reducibleNodes;
+};
+
+};
 
 #include "ImageFilters.inl"
