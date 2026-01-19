@@ -141,6 +141,7 @@ public:
 
     auto operator()(image const& img) -> image override;
 
+    auto static GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
     auto get_palette() const -> std::vector<color>;
 
 private:
@@ -159,6 +160,7 @@ private:
         i32                                  IndexInParent {0};
     };
 
+    void build_tree(image const& img);
     void build_palette(node const* n, std::vector<color>& pal) const;
 
     void insert_color(color c);
@@ -181,6 +183,7 @@ public:
 
     auto operator()(image const& img) -> image override;
 
+    auto static GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
     auto get_palette() const -> std::vector<color>;
 
 private:
@@ -196,6 +199,55 @@ private:
 
     std::vector<neuron> _network;
     i32                 _maxColors {};
+};
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+class ditherer_base : public filter_base {
+public:
+    virtual ~ditherer_base() = default;
+
+    ditherer_base(std::vector<color> palette);
+
+protected:
+    auto find_nearest(color c) const -> color;
+
+    std::vector<color> _palette;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API ordered_dither : public ditherer_base {
+public:
+    explicit ordered_dither(std::vector<color> palette, i32 matrixSize = 8);
+
+    auto operator()(image const& img) -> image override;
+
+    auto get_threshold(i32 x, i32 y) const -> f64;
+
+    void generate_bayer_matrix();
+
+    std::vector<f64> _bayerMatrix;
+    i32              _matrixSize;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API atkinson_dither : public ditherer_base {
+public:
+    explicit atkinson_dither(std::vector<color> palette);
+
+    auto operator()(image const& img) -> image override;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API floyd_steinberg_dither : public ditherer_base {
+public:
+    explicit floyd_steinberg_dither(std::vector<color> palette);
+
+    auto operator()(image const& img) -> image override;
 };
 
 };

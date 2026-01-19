@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -293,17 +294,8 @@ octree_quantizer::octree_quantizer(i32 maxColors)
 auto octree_quantizer::operator()(image const& img) -> image
 {
     auto const& info {img.info()};
-
     auto const [width, height] {info.Size};
-    for (i32 y {0}; y < height; ++y) {
-        for (i32 x {0}; x < width; ++x) {
-            insert_color(img.get_pixel({x, y}));
-        }
-    }
-
-    while (_leafCount > _maxColors) {
-        reduce();
-    }
+    build_tree(img);
 
     image      retValue {image::CreateEmpty(info.Size, info.Format)};
     auto const bpp {info.bytes_per_pixel()};
@@ -319,12 +311,35 @@ auto octree_quantizer::operator()(image const& img) -> image
     return retValue;
 }
 
+auto octree_quantizer::GetPalette(image const& img, i32 maxColors) -> std::vector<color>
+{
+    octree_quantizer quant {maxColors};
+    quant.build_tree(img);
+    return quant.get_palette();
+}
+
 auto octree_quantizer::get_palette() const -> std::vector<color>
 {
     std::vector<color> palette;
     palette.reserve(_leafCount);
     build_palette(_root.get(), palette);
     return palette;
+}
+
+void octree_quantizer::build_tree(image const& img)
+{
+    auto const& info {img.info()};
+
+    auto const [width, height] {info.Size};
+    for (i32 y {0}; y < height; ++y) {
+        for (i32 x {0}; x < width; ++x) {
+            insert_color(img.get_pixel({x, y}));
+        }
+    }
+
+    while (_leafCount > _maxColors) {
+        reduce();
+    }
 }
 
 void octree_quantizer::build_palette(node const* n, std::vector<color>& pal) const
@@ -514,6 +529,13 @@ auto neuquant::operator()(image const& img) -> image
     return retValue;
 }
 
+auto neuquant::GetPalette(image const& img, i32 maxColors) -> std::vector<color>
+{
+    neuquant quant {maxColors};
+    quant.train(img);
+    return quant.get_palette();
+}
+
 auto neuquant::get_palette() const -> std::vector<color>
 {
     std::vector<color> palette;
@@ -597,6 +619,254 @@ void neuquant::alter_neighbor(i32 index, color c, f64 alpha)
     n.R += alpha * (static_cast<f64>(c.R) - n.R);
     n.G += alpha * (static_cast<f64>(c.G) - n.G);
     n.B += alpha * (static_cast<f64>(c.B) - n.B);
+}
+
+////////////////////////////////////////////////////////////
+
+ditherer_base::ditherer_base(std::vector<color> palette)
+    : _palette {std::move(palette)}
+{
+}
+auto ditherer_base::find_nearest(color c) const -> color
+{
+    i32 best_idx {0};
+    f64 min_dist {1e30};
+
+    for (isize i {0}; i < static_cast<isize>(_palette.size()); ++i) {
+        f64 const dr {static_cast<f64>(_palette[i].R) - c.R};
+        f64 const dg {static_cast<f64>(_palette[i].G) - c.G};
+        f64 const db {static_cast<f64>(_palette[i].B) - c.B};
+        f64 const dist {(dr * dr) + (dg * dg) + (db * db)};
+
+        if (dist < min_dist) {
+            min_dist = dist;
+            best_idx = static_cast<i32>(i);
+        }
+    }
+
+    return _palette[best_idx];
+}
+
+////////////////////////////////////////////////////////////
+
+ordered_dither::ordered_dither(std::vector<color> palette, i32 matrixSize)
+    : ditherer_base {std::move(palette)}
+    , _matrixSize {matrixSize}
+{
+    generate_bayer_matrix();
+}
+
+auto ordered_dither::operator()(image const& img) -> image
+{
+    auto const& info {img.info()};
+    image       retValue {image::CreateEmpty(info.Size, info.Format)};
+    auto const  bpp {info.bytes_per_pixel()};
+    auto const  width {info.Size.Width};
+
+    locate_service<task_manager>().run_parallel(
+        [&](par_task const& ctx) {
+            for (isize i {ctx.Start}; i < ctx.End; ++i) {
+                i32 const x {static_cast<i32>(i % width)};
+                i32 const y {static_cast<i32>(i / width)};
+
+                color const original {img.get_pixel(i * bpp)};
+
+                f64 const threshold {get_threshold(x, y)};
+
+                f64 const r {std::clamp(static_cast<f64>(original.R) + threshold, 0.0, 255.0)};
+                f64 const g {std::clamp(static_cast<f64>(original.G) + threshold, 0.0, 255.0)};
+                f64 const b {std::clamp(static_cast<f64>(original.B) + threshold, 0.0, 255.0)};
+
+                color const adjusted {static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b),
+                                      original.A};
+
+                color const quantized {find_nearest(adjusted)};
+                retValue.set_pixel(i * bpp, quantized);
+            }
+        },
+        info.Size.area());
+
+    return retValue;
+}
+
+auto ordered_dither::get_threshold(i32 x, i32 y) const -> f64
+{
+    i32 const mx {x % _matrixSize};
+    i32 const my {y % _matrixSize};
+    f64 const normalized {_bayerMatrix[(my * _matrixSize) + mx]};
+    return (normalized - 0.5) * 64.0;
+}
+
+void ordered_dither::generate_bayer_matrix()
+{
+    _bayerMatrix.resize(_matrixSize * _matrixSize);
+
+    if (_matrixSize == 2) {
+        std::array<f64, 4> const base {0.0, 0.5, 0.75, 0.25};
+        std::ranges::copy(base, _bayerMatrix.begin());
+    } else if (_matrixSize == 4) {
+        std::array<f64, 16> const base {
+            0.0 / 16, 8.0 / 16, 2.0 / 16, 10.0 / 16,
+            12.0 / 16, 4.0 / 16, 14.0 / 16, 6.0 / 16,
+            3.0 / 16, 11.0 / 16, 1.0 / 16, 9.0 / 16,
+            15.0 / 16, 7.0 / 16, 13.0 / 16, 5.0 / 16};
+        std::ranges::copy(base, _bayerMatrix.begin());
+    } else if (_matrixSize == 8) {
+        for (i32 y {0}; y < 8; ++y) {
+            for (i32 x {0}; x < 8; ++x) {
+                i32 const index {(y * 8) + x};
+                _bayerMatrix[index] = static_cast<f64>(((x * 8 + y) * 4 % 64) + ((x + y) % 4)) / 64.0;
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+atkinson_dither::atkinson_dither(std::vector<color> palette)
+    : ditherer_base {std::move(palette)}
+{
+}
+
+auto atkinson_dither::operator()(image const& img) -> image
+{
+    auto const& info {img.info()};
+    image       retValue {image::CreateEmpty(info.Size, info.Format)};
+    auto const  bpp {info.bytes_per_pixel()};
+    auto const  width {info.Size.Width};
+    auto const  height {info.Size.Height};
+
+    std::vector<f64> currErrors(width * 3, 0.0);
+    std::vector<f64> nextErrors(width * 3, 0.0);
+    std::vector<f64> next2_errors(width * 3, 0.0);
+
+    for (i32 y {0}; y < height; ++y) {
+        for (i32 x {0}; x < width; ++x) {
+            isize const idx {(y * width + x) * bpp};
+            color const original {img.get_pixel(idx)};
+
+            f64 const r {std::clamp(static_cast<f64>(original.R) + currErrors[(x * 3) + 0], 0.0, 255.0)};
+            f64 const g {std::clamp(static_cast<f64>(original.G) + currErrors[(x * 3) + 1], 0.0, 255.0)};
+            f64 const b {std::clamp(static_cast<f64>(original.B) + currErrors[(x * 3) + 2],
+                                    0.0, 255.0)};
+
+            color const quantized {find_nearest({static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b),
+                                                 original.A})};
+
+            retValue.set_pixel(idx, quantized);
+
+            f64 const errR {r - static_cast<f64>(quantized.R)};
+            f64 const errG {g - static_cast<f64>(quantized.G)};
+            f64 const errB {b - static_cast<f64>(quantized.B)};
+
+            f64 const factor {1.0 / 8.0};
+
+            if (x + 1 < width) {
+                currErrors[((x + 1) * 3) + 0] += errR * factor;
+                currErrors[((x + 1) * 3) + 1] += errG * factor;
+                currErrors[((x + 1) * 3) + 2] += errB * factor;
+            }
+
+            if (x + 2 < width) {
+                currErrors[((x + 2) * 3) + 0] += errR * factor;
+                currErrors[((x + 2) * 3) + 1] += errG * factor;
+                currErrors[((x + 2) * 3) + 2] += errB * factor;
+            }
+
+            if (y + 1 < height) {
+                if (x > 0) {
+                    nextErrors[((x - 1) * 3) + 0] += errR * factor;
+                    nextErrors[((x - 1) * 3) + 1] += errG * factor;
+                    nextErrors[((x - 1) * 3) + 2] += errB * factor;
+                }
+                nextErrors[(x * 3) + 0] += errR * factor;
+                nextErrors[(x * 3) + 1] += errG * factor;
+                nextErrors[(x * 3) + 2] += errB * factor;
+                if (x + 1 < width) {
+                    nextErrors[((x + 1) * 3) + 0] += errR * factor;
+                    nextErrors[((x + 1) * 3) + 1] += errG * factor;
+                    nextErrors[((x + 1) * 3) + 2] += errB * factor;
+                }
+            }
+            if (y + 2 < height) {
+                next2_errors[(x * 3) + 0] += errR * factor;
+                next2_errors[(x * 3) + 1] += errG * factor;
+                next2_errors[(x * 3) + 2] += errB * factor;
+            }
+        }
+
+        currErrors.swap(nextErrors);
+        nextErrors.swap(next2_errors);
+        std::ranges::fill(next2_errors, 0.0);
+    }
+
+    return retValue;
+}
+
+////////////////////////////////////////////////////////////
+
+floyd_steinberg_dither::floyd_steinberg_dither(std::vector<color> palette)
+    : ditherer_base {std::move(palette)}
+{
+}
+
+auto floyd_steinberg_dither::operator()(image const& img) -> image
+{
+    auto const& info {img.info()};
+    image       retValue {image::CreateEmpty(info.Size, info.Format)};
+    auto const  bpp {info.bytes_per_pixel()};
+    auto const  width {info.Size.Width};
+    auto const  height {info.Size.Height};
+
+    std::vector<f64> currErrors(width * 3, 0.0);
+    std::vector<f64> nextErrors(width * 3, 0.0);
+
+    for (i32 y {0}; y < height; ++y) {
+        for (i32 x {0}; x < width; ++x) {
+            isize const pixel_idx {(y * width + x) * bpp};
+            color const original {img.get_pixel(pixel_idx)};
+
+            f64 const r {std::clamp(static_cast<f64>(original.R) + currErrors[(x * 3) + 0], 0.0, 255.0)};
+            f64 const g {std::clamp(static_cast<f64>(original.G) + currErrors[(x * 3) + 1], 0.0, 255.0)};
+            f64 const b {std::clamp(static_cast<f64>(original.B) + currErrors[(x * 3) + 2], 0.0, 255.0)};
+
+            color const quantized {find_nearest({static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b),
+                                                 original.A})};
+
+            retValue.set_pixel(pixel_idx, quantized);
+
+            f64 const errR {r - static_cast<f64>(quantized.R)};
+            f64 const errG {g - static_cast<f64>(quantized.G)};
+            f64 const errB {b - static_cast<f64>(quantized.B)};
+
+            if (x + 1 < width) {
+                currErrors[((x + 1) * 3) + 0] += errR * (7.0 / 16.0);
+                currErrors[((x + 1) * 3) + 1] += errG * (7.0 / 16.0);
+                currErrors[((x + 1) * 3) + 2] += errB * (7.0 / 16.0);
+            }
+
+            if (y + 1 < height) {
+                if (x > 0) {
+                    nextErrors[((x - 1) * 3) + 0] += errR * (3.0 / 16.0);
+                    nextErrors[((x - 1) * 3) + 1] += errG * (3.0 / 16.0);
+                    nextErrors[((x - 1) * 3) + 2] += errB * (3.0 / 16.0);
+                }
+                nextErrors[(x * 3) + 0] += errR * (5.0 / 16.0);
+                nextErrors[(x * 3) + 1] += errG * (5.0 / 16.0);
+                nextErrors[(x * 3) + 2] += errB * (5.0 / 16.0);
+                if (x + 1 < width) {
+                    nextErrors[((x + 1) * 3) + 0] += errR * (1.0 / 16.0);
+                    nextErrors[((x + 1) * 3) + 1] += errG * (1.0 / 16.0);
+                    nextErrors[((x + 1) * 3) + 2] += errB * (1.0 / 16.0);
+                }
+            }
+        }
+
+        currErrors.swap(nextErrors);
+        std::ranges::fill(nextErrors, 0.0);
+    }
+
+    return retValue;
 }
 
 }
