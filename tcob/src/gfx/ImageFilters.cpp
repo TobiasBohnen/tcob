@@ -319,6 +319,32 @@ auto octree_quantizer::operator()(image const& img) -> image
     return retValue;
 }
 
+auto octree_quantizer::get_palette() const -> std::vector<color>
+{
+    std::vector<color> palette;
+    palette.reserve(_leafCount);
+    build_palette(_root.get(), palette);
+    return palette;
+}
+
+void octree_quantizer::build_palette(node const* n, std::vector<color>& pal) const
+{
+    if (n->IsLeaf) {
+        if (n->PixelCount > 0) {
+            pal.emplace_back(static_cast<u8>(n->RedSum / n->PixelCount),
+                             static_cast<u8>(n->GreenSum / n->PixelCount),
+                             static_cast<u8>(n->BlueSum / n->PixelCount),
+                             255);
+        }
+    } else {
+        for (auto const& child : n->Children) {
+            if (child) {
+                build_palette(child.get(), pal);
+            }
+        }
+    }
+}
+
 void octree_quantizer::insert_color(color c)
 {
     node* current {_root.get()};

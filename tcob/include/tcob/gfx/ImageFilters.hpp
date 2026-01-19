@@ -141,6 +141,8 @@ public:
 
     auto operator()(image const& img) -> image;
 
+    auto get_palette() const -> std::vector<color>;
+
 private:
     static constexpr i32 MAX_TREE_DEPTH {8};
 
@@ -155,6 +157,8 @@ private:
         i32                                  ChildCount {0};
         i32                                  IndexInParent {0};
     };
+
+    void build_palette(node const* n, std::vector<color>& pal) const;
 
     void insert_color(color c);
     void reduce();
