@@ -329,30 +329,30 @@ auto octree_quantizer::get_palette() const -> std::vector<color>
 
 void octree_quantizer::build_palette(node const* n, std::vector<color>& pal) const
 {
+    auto const getColor {[](node const* target) -> color {
+        return {
+            static_cast<u8>(target->RedSum / target->PixelCount),
+            static_cast<u8>(target->GreenSum / target->PixelCount),
+            static_cast<u8>(target->BlueSum / target->PixelCount),
+            255};
+    }};
+
     if (n->IsLeaf) {
-        if (n->PixelCount > 0) {
-            pal.emplace_back(static_cast<u8>(n->RedSum / n->PixelCount),
-                             static_cast<u8>(n->GreenSum / n->PixelCount),
-                             static_cast<u8>(n->BlueSum / n->PixelCount),
-                             255);
-        }
+        if (n->PixelCount > 0) { pal.push_back(getColor(n)); }
         return;
     }
 
-    i32 totalPixelCount {0};
+    bool hasNullChild {false};
     for (auto const& child : n->Children) {
         if (child) {
-            totalPixelCount += child->PixelCount;
             build_palette(child.get(), pal);
+        } else {
+            hasNullChild = true;
         }
     }
 
-    if (n->PixelCount > totalPixelCount) {
-        pal.emplace_back(
-            static_cast<u8>(n->RedSum / n->PixelCount),
-            static_cast<u8>(n->GreenSum / n->PixelCount),
-            static_cast<u8>(n->BlueSum / n->PixelCount),
-            255);
+    if (hasNullChild && n->PixelCount > 0) {
+        pal.push_back(getColor(n));
     }
 }
 
@@ -426,16 +426,27 @@ void octree_quantizer::merge_leaf_nodes(node* n, i32 level)
             child.reset();
             n->ChildCount--;
 
-            if (_leafCount < _maxColors) {
-                return;
+            if (n->ChildCount > 0) {
+                if (_leafCount + 1 <= _maxColors) {
+                    return;
+                }
+            } else {
+                n->IsLeaf = true;
+                _leafCount++;
+
+                if (_leafCount <= _maxColors) {
+                    return;
+                }
             }
         }
     }
 
-    n->IsLeaf = true;
-    _leafCount++;
+    if (n->ChildCount == 0 && !n->IsLeaf) {
+        n->IsLeaf = true;
+        _leafCount++;
+    }
 
-    if (n->Parent && n->Parent != n && level > 0) {
+    if (n->Parent && level > 0) {
         _reducibleNodes[level - 1].push_back(n->Parent);
     }
 }
