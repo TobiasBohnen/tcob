@@ -342,17 +342,10 @@ void octree_quantizer::build_palette(node const* n, std::vector<color>& pal) con
         return;
     }
 
-    bool hasNullChild {false};
     for (auto const& child : n->Children) {
         if (child) {
             build_palette(child.get(), pal);
-        } else {
-            hasNullChild = true;
         }
-    }
-
-    if (hasNullChild && n->PixelCount > 0) {
-        pal.push_back(getColor(n));
     }
 }
 
@@ -376,7 +369,11 @@ void octree_quantizer::insert_color(color c)
             current->ChildCount++;
 
             if (level < MAX_TREE_DEPTH - 1) {
-                _reducibleNodes[level + 1].push_back(current->Children[index].get());
+                node* childPtr {current->Children[index].get()};
+                if (!childPtr->IsEnqueued) {
+                    _reducibleNodes[level + 1].push_back(childPtr);
+                    childPtr->IsEnqueued = true;
+                }
             } else {
                 child->IsLeaf = true;
                 _leafCount++;
@@ -401,6 +398,8 @@ void octree_quantizer::reduce()
             node* n {list.back()};
             list.pop_back();
 
+            n->IsEnqueued = false;
+
             if (!n->IsLeaf && n->ChildCount > 0) {
                 merge_leaf_nodes(n, level);
                 return;
@@ -411,6 +410,8 @@ void octree_quantizer::reduce()
 
 void octree_quantizer::merge_leaf_nodes(node* n, i32 level)
 {
+    _leafCount -= count_leaves(n);
+
     for (auto& child : n->Children) {
         if (child) {
             n->RedSum += child->RedSum;
@@ -418,36 +419,18 @@ void octree_quantizer::merge_leaf_nodes(node* n, i32 level)
             n->BlueSum += child->BlueSum;
             n->PixelCount += child->PixelCount;
 
-            if (child->IsLeaf) {
-                _leafCount--;
-            } else {
-                _leafCount -= count_leaves(child.get());
-            }
             child.reset();
-            n->ChildCount--;
-
-            if (n->ChildCount > 0) {
-                if (_leafCount + 1 <= _maxColors) {
-                    return;
-                }
-            } else {
-                n->IsLeaf = true;
-                _leafCount++;
-
-                if (_leafCount <= _maxColors) {
-                    return;
-                }
-            }
         }
     }
 
-    if (n->ChildCount == 0 && !n->IsLeaf) {
-        n->IsLeaf = true;
-        _leafCount++;
-    }
+    n->ChildCount = 0;
+    n->IsLeaf     = true;
+    n->IsEnqueued = false;
+    _leafCount++;
 
-    if (n->Parent && level > 0) {
+    if (n->Parent && !n->Parent->IsEnqueued && level > 0) {
         _reducibleNodes[level - 1].push_back(n->Parent);
+        n->Parent->IsEnqueued = true;
     }
 }
 

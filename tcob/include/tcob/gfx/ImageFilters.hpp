@@ -148,6 +148,7 @@ private:
 
     struct node {
         bool                                 IsLeaf {false};
+        bool                                 IsEnqueued {false};
         i32                                  PixelCount {0};
         i32                                  RedSum {0};
         i32                                  GreenSum {0};
