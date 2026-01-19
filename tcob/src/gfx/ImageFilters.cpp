@@ -534,11 +534,6 @@ auto neuquant::get_palette() const -> std::vector<color>
 
 void neuquant::train(image const& img)
 {
-    for (i32 i {0}; i < _maxColors; ++i) {
-        f64 const v {(i * 255.0) / (_maxColors - 1)};
-        _network[i] = {.r = v, .g = v, .b = v};
-    }
-
     auto const& info {img.info()};
     i32 const   lengthCount {info.Size.area()};
     i32 const   bpp {info.bytes_per_pixel()};
