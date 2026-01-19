@@ -336,12 +336,23 @@ void octree_quantizer::build_palette(node const* n, std::vector<color>& pal) con
                              static_cast<u8>(n->BlueSum / n->PixelCount),
                              255);
         }
-    } else {
-        for (auto const& child : n->Children) {
-            if (child) {
-                build_palette(child.get(), pal);
-            }
+        return;
+    }
+
+    i32 totalPixelCount {0};
+    for (auto const& child : n->Children) {
+        if (child) {
+            totalPixelCount += child->PixelCount;
+            build_palette(child.get(), pal);
         }
+    }
+
+    if (n->PixelCount > totalPixelCount) {
+        pal.emplace_back(
+            static_cast<u8>(n->RedSum / n->PixelCount),
+            static_cast<u8>(n->GreenSum / n->PixelCount),
+            static_cast<u8>(n->BlueSum / n->PixelCount),
+            255);
     }
 }
 
@@ -384,19 +395,21 @@ void octree_quantizer::insert_color(color c)
 void octree_quantizer::reduce()
 {
     for (i32 level {MAX_TREE_DEPTH - 1}; level >= 0; --level) {
-        if (!_reducibleNodes[level].empty()) {
-            node* n {_reducibleNodes[level].back()};
-            _reducibleNodes[level].pop_back();
+        auto& list {_reducibleNodes[level]};
 
-            if (n->ChildCount > 0) {
-                merge_leaf_nodes(n);
+        while (!list.empty()) {
+            node* n {list.back()};
+            list.pop_back();
+
+            if (!n->IsLeaf && n->ChildCount > 0) {
+                merge_leaf_nodes(n, level);
                 return;
             }
         }
     }
 }
 
-void octree_quantizer::merge_leaf_nodes(node* n)
+void octree_quantizer::merge_leaf_nodes(node* n, i32 level)
 {
     for (auto& child : n->Children) {
         if (child) {
@@ -407,14 +420,39 @@ void octree_quantizer::merge_leaf_nodes(node* n)
 
             if (child->IsLeaf) {
                 _leafCount--;
+            } else {
+                _leafCount -= count_leaves(child.get());
             }
             child.reset();
+            n->ChildCount--;
+
+            if (_leafCount < _maxColors) {
+                return;
+            }
         }
     }
 
-    n->IsLeaf     = true;
-    n->ChildCount = 0;
+    n->IsLeaf = true;
     _leafCount++;
+
+    if (n->Parent && n->Parent != n && level > 0) {
+        _reducibleNodes[level - 1].push_back(n->Parent);
+    }
+}
+
+auto octree_quantizer::count_leaves(node* n) -> i32
+{
+    i32 retValue {0};
+    for (auto& child : n->Children) {
+        if (child) {
+            if (child->IsLeaf) {
+                retValue++;
+            } else {
+                retValue += count_leaves(child.get());
+            }
+        }
+    }
+    return retValue;
 }
 
 auto octree_quantizer::get_quantized_color(color c) const -> color
