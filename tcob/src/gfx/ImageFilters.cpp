@@ -484,7 +484,7 @@ neuquant::neuquant(i32 maxColors)
     _network.resize(_maxColors);
     for (i32 i {0}; i < _maxColors; ++i) {
         f64 const val {(i * 255.0) / std::max(1, _maxColors - 1)};
-        _network[i] = {.r = val, .g = val, .b = val};
+        _network[i] = {.R = val, .G = val, .B = val};
     }
 }
 
@@ -502,11 +502,9 @@ auto neuquant::operator()(image const& img) -> image
                 color const c {img.get_pixel(i * bpp)};
                 i32 const   bmu {find_bmu(c)};
 
-                color quant;
-                quant.R = static_cast<u8>(_network[bmu].r);
-                quant.G = static_cast<u8>(_network[bmu].g);
-                quant.B = static_cast<u8>(_network[bmu].b);
-                quant.A = 255;
+                color const quant {static_cast<u8>(_network[bmu].R),
+                                   static_cast<u8>(_network[bmu].G),
+                                   static_cast<u8>(_network[bmu].B)};
 
                 retValue.set_pixel(i * bpp, quant);
             }
@@ -523,9 +521,9 @@ auto neuquant::get_palette() const -> std::vector<color>
 
     for (auto const& n : _network) {
         palette.emplace_back(
-            static_cast<u8>(std::clamp(n.r, 0.0, 255.0)),
-            static_cast<u8>(std::clamp(n.g, 0.0, 255.0)),
-            static_cast<u8>(std::clamp(n.b, 0.0, 255.0)),
+            static_cast<u8>(std::clamp(n.R, 0.0, 255.0)),
+            static_cast<u8>(std::clamp(n.G, 0.0, 255.0)),
+            static_cast<u8>(std::clamp(n.B, 0.0, 255.0)),
             255);
     }
 
@@ -575,30 +573,30 @@ void neuquant::train(image const& img)
 
 auto neuquant::find_bmu(color c) const -> i32
 {
-    i32 best_idx {0};
-    f64 min_dist {1e30};
+    i32 bestIdx {0};
+    f64 minDist {1e30};
 
     for (i32 i {0}; i < _maxColors; ++i) {
-        f64 const dr {_network[i].r - c.R};
-        f64 const dg {_network[i].g - c.G};
-        f64 const db {_network[i].b - c.B};
+        f64 const dr {_network[i].R - c.R};
+        f64 const dg {_network[i].G - c.G};
+        f64 const db {_network[i].B - c.B};
         f64 const dist {(dr * dr) + (dg * dg) + (db * db)};
 
-        if (dist < min_dist) {
-            min_dist = dist;
-            best_idx = i;
+        if (dist < minDist) {
+            minDist = dist;
+            bestIdx = i;
         }
     }
-    return best_idx;
+    return bestIdx;
 }
 
 void neuquant::alter_neighbor(i32 index, color c, f64 alpha)
 {
     neuron& n {_network[index]};
 
-    n.r += alpha * (static_cast<f64>(c.R) - n.r);
-    n.g += alpha * (static_cast<f64>(c.G) - n.g);
-    n.b += alpha * (static_cast<f64>(c.B) - n.b);
+    n.R += alpha * (static_cast<f64>(c.R) - n.R);
+    n.G += alpha * (static_cast<f64>(c.G) - n.G);
+    n.B += alpha * (static_cast<f64>(c.B) - n.B);
 }
 
 }

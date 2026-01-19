@@ -185,9 +185,9 @@ public:
 
 private:
     struct neuron {
-        f64 r {0};
-        f64 g {0};
-        f64 b {0};
+        f64 R {0};
+        f64 G {0};
+        f64 B {0};
     };
 
     void train(image const& img);
