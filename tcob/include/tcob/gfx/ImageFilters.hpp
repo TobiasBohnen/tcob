@@ -135,11 +135,11 @@ public:
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-class TCOB_API octree_quantizer {
+class TCOB_API octree_quantizer final : public filter_base {
 public:
     explicit octree_quantizer(i32 maxColors);
 
-    auto operator()(image const& img) -> image;
+    auto operator()(image const& img) -> image override;
 
     auto get_palette() const -> std::vector<color>;
 
@@ -171,6 +171,31 @@ private:
     i32                                            _leafCount {0};
     std::unique_ptr<node>                          _root;
     std::array<std::vector<node*>, MAX_TREE_DEPTH> _reducibleNodes;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API neuquant : public filter_base {
+public:
+    explicit neuquant(i32 maxColors);
+
+    auto operator()(image const& img) -> image override;
+
+    auto get_palette() const -> std::vector<color>;
+
+private:
+    struct neuron {
+        f64 r {0};
+        f64 g {0};
+        f64 b {0};
+    };
+
+    void train(image const& img);
+    auto find_bmu(color c) const -> i32;
+    void alter_neighbor(i32 index, color c, f64 alpha);
+
+    std::vector<neuron> _network;
+    i32                 _maxColors {};
 };
 
 };

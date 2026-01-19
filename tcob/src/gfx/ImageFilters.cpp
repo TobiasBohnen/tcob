@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/ImageFilters.hpp"
 
+#include <algorithm>
 #include <array>
 #include <memory>
 #include <vector>
@@ -313,7 +314,6 @@ auto octree_quantizer::operator()(image const& img) -> image
                 retValue.set_pixel(pixIdx * bpp, get_quantized_color(img.get_pixel(pixIdx * bpp)));
             }
         },
-
         width * height);
 
     return retValue;
@@ -474,6 +474,136 @@ auto octree_quantizer::get_quantized_color(color c) const -> color
             static_cast<u8>(current->GreenSum / current->PixelCount),
             static_cast<u8>(current->BlueSum / current->PixelCount),
             255};
+}
+
+////////////////////////////////////////////////////////////
+
+neuquant::neuquant(i32 maxColors)
+    : _maxColors {maxColors}
+{
+    _network.resize(_maxColors);
+    for (i32 i {0}; i < _maxColors; ++i) {
+        f64 const val {(i * 255.0) / std::max(1, _maxColors - 1)};
+        _network[i] = {.r = val, .g = val, .b = val};
+    }
+}
+
+auto neuquant::operator()(image const& img) -> image
+{
+    train(img);
+
+    auto const& info {img.info()};
+    image       retValue {image::CreateEmpty(info.Size, info.Format)};
+    auto const  bpp {info.bytes_per_pixel()};
+
+    locate_service<task_manager>().run_parallel(
+        [&](par_task const& ctx) {
+            for (isize i {ctx.Start}; i < ctx.End; ++i) {
+                color const c {img.get_pixel(i * bpp)};
+                i32 const   bmu {find_bmu(c)};
+
+                color quant;
+                quant.R = static_cast<u8>(_network[bmu].r);
+                quant.G = static_cast<u8>(_network[bmu].g);
+                quant.B = static_cast<u8>(_network[bmu].b);
+                quant.A = 255;
+
+                retValue.set_pixel(i * bpp, quant);
+            }
+        },
+        info.Size.area());
+
+    return retValue;
+}
+
+auto neuquant::get_palette() const -> std::vector<color>
+{
+    std::vector<color> palette;
+    palette.reserve(_maxColors);
+
+    for (auto const& n : _network) {
+        palette.emplace_back(
+            static_cast<u8>(std::clamp(n.r, 0.0, 255.0)),
+            static_cast<u8>(std::clamp(n.g, 0.0, 255.0)),
+            static_cast<u8>(std::clamp(n.b, 0.0, 255.0)),
+            255);
+    }
+
+    return palette;
+}
+
+void neuquant::train(image const& img)
+{
+    for (i32 i {0}; i < _maxColors; ++i) {
+        f64 const v {(i * 255.0) / (_maxColors - 1)};
+        _network[i] = {.r = v, .g = v, .b = v};
+    }
+
+    auto const& info {img.info()};
+    i32 const   lengthCount {info.Size.area()};
+    i32 const   bpp {info.bytes_per_pixel()};
+
+    i32 const cycleCount {100};
+    i32 const sampleFac {30};
+    i32 const step {sampleFac > 0 ? sampleFac : 1};
+    u32 const primeStep {499};
+
+    f64       alpha {1.0};
+    f64       radius {std::max(static_cast<f64>(_maxColors >> 3), 2.0)};
+    f64 const radDecay {radius / cycleCount};
+
+    usize pixelPos {0};
+
+    for (i32 i {0}; i < cycleCount; ++i) {
+        if (alpha < 0.001) { break; }
+
+        for (i32 j {0}; j < lengthCount; j += step) {
+            color const c {img.get_pixel((pixelPos % lengthCount) * bpp)};
+
+            i32 const bmu {find_bmu(c)};
+            alter_neighbor(bmu, c, alpha);
+
+            i32 const rad {static_cast<i32>(radius)};
+            for (i32 k {1}; k <= rad; ++k) {
+                f64 const distAlpha {alpha * ((radius - k) / radius)};
+                if (bmu + k < _maxColors) { alter_neighbor(bmu + k, c, distAlpha); }
+                if (bmu - k >= 0) { alter_neighbor(bmu - k, c, distAlpha); }
+            }
+
+            pixelPos += primeStep;
+        }
+
+        alpha -= (1.0 / cycleCount);
+        radius -= radDecay;
+    }
+}
+
+auto neuquant::find_bmu(color c) const -> i32
+{
+    i32 best_idx {0};
+    f64 min_dist {1e30};
+
+    for (i32 i {0}; i < _maxColors; ++i) {
+        f64 const dr {_network[i].r - c.R};
+        f64 const dg {_network[i].g - c.G};
+        f64 const db {_network[i].b - c.B};
+        f64 const dist {(dr * dr) + (dg * dg) + (db * db)};
+
+        if (dist < min_dist) {
+            min_dist = dist;
+            best_idx = i;
+        }
+    }
+    return best_idx;
+}
+
+void neuquant::alter_neighbor(i32 index, color c, f64 alpha)
+{
+    neuron& n {_network[index]};
+
+    n.r += alpha * (static_cast<f64>(c.R) - n.r);
+    n.g += alpha * (static_cast<f64>(c.G) - n.g);
+    n.b += alpha * (static_cast<f64>(c.B) - n.b);
 }
 
 }
