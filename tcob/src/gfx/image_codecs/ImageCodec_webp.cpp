@@ -59,7 +59,7 @@ auto webp_decoder::decode_info(io::istream& in) -> std::optional<image::informat
 
 ////////////////////////////////////////////////////////////
 
-auto webp_encoder::encode(image const& image, io::ostream& out) const -> bool
+auto webp_encoder::encode(image const& image, io::ostream& out) -> bool
 {
     bool retValue {false};
 

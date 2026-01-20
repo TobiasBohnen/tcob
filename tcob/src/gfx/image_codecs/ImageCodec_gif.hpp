@@ -67,8 +67,8 @@ private:
 
     i32             _dispose {0};
     std::vector<u8> _pixelCache {};
-    i32             _transIndex {0};       // transparent color index
-    bool            _transparency {false}; // use transparent color
+    i32             _transIndex {0};          // transparent color index
+    bool            _hasTransparency {false}; // use transparent color
 
     std::streamoff _contentOffset {0};
     bool           _firstFrame {true};
@@ -77,6 +77,42 @@ private:
     milliseconds _currentTimeStamp {0};
 
     gif::header _header {};
+};
+
+////////////////////////////////////////////////////////////
+
+class gif_encoder final : public image_encoder, public animated_image_encoder {
+public:
+    // image_encoder
+    auto encode(image const& image, io::ostream& out) -> bool override;
+
+    // animated_image_encoder
+    void start() override;
+    auto add_frame(image_frame const& frame) -> bool override;
+    auto finish() -> bool override;
+
+private:
+    void start(io::ostream& out);
+    auto add_frame(image_frame const& frame, io::ostream& out) -> bool;
+    auto finish(io::ostream& out) -> bool;
+
+    void write_graphic_ctrl_ext(io::ostream& out) const;
+    void write_image_desc(io::ostream& out) const;
+    void write_lsd(io::ostream& out) const;
+    void write_palette(io::ostream& out, std::span<color const> pal) const;
+    void write_netscape_loop(io::ostream& out);
+    void write_pixels(io::ostream& out, std::vector<u32> const& buffer) const;
+
+    i16  _delay {0};
+    i32  _dispose {-1};
+    bool _firstFrame {true};
+
+    u8    _transIndex {0};
+    color _transparent {colors::Transparent};
+
+    bool _sizeSet {false};
+    i16  _height {0};
+    i16  _width {0};
 };
 
 }

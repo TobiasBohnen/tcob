@@ -126,7 +126,7 @@ private:
 
 class tga_encoder final : public image_encoder {
 public:
-    auto encode(image const& img, io::ostream& out) const -> bool override;
+    auto encode(image const& img, io::ostream& out) -> bool override;
 
 private:
     void write_header(image::information const& image, io::ostream& out) const;

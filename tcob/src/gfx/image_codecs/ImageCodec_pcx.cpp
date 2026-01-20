@@ -298,7 +298,7 @@ static auto Compress(std::span<u8> buf, i32 lineWidth) -> std::vector<u8>
     return retValue;
 }
 
-auto pcx_encoder::encode(image const& img, io::ostream& out) const -> bool
+auto pcx_encoder::encode(image const& img, io::ostream& out) -> bool
 {
     auto const& info {img.info()};
 

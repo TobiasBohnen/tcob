@@ -307,7 +307,7 @@ static void WriteInfoHeader(image::information const& info, io::ostream& writer)
     writer.write(0);
 }
 
-auto bmp_encoder::encode(image const& img, io::ostream& out) const -> bool
+auto bmp_encoder::encode(image const& img, io::ostream& out) -> bool
 {
     auto const& info {img.info()};
 

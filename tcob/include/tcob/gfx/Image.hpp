@@ -127,7 +127,7 @@ public:
     image_encoder()          = default;
     virtual ~image_encoder() = default;
 
-    virtual auto encode(image const& img, io::ostream& out) const -> bool = 0;
+    virtual auto encode(image const& img, io::ostream& out) -> bool = 0;
 };
 
 ////////////////////////////////////////////////////////////

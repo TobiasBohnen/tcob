@@ -210,8 +210,12 @@ public:
 
     ditherer_base(std::vector<color> palette);
 
+    auto         operator()(image const& img) -> image override;
+    virtual auto to_indexed(image const& img) -> std::vector<u32> = 0;
+
 protected:
-    auto find_nearest(color c) const -> color;
+    auto find_nearest(color c) const -> u32;
+    auto get_color(u32 idx) const -> color;
 
     std::vector<color> _palette;
 };
@@ -222,8 +226,9 @@ class TCOB_API ordered_dither : public ditherer_base {
 public:
     explicit ordered_dither(std::vector<color> palette, i32 matrixSize = 8);
 
-    auto operator()(image const& img) -> image override;
+    auto to_indexed(image const& img) -> std::vector<u32> override;
 
+private:
     auto get_threshold(i32 x, i32 y) const -> f64;
 
     void generate_bayer_matrix();
@@ -238,7 +243,7 @@ class TCOB_API atkinson_dither : public ditherer_base {
 public:
     explicit atkinson_dither(std::vector<color> palette);
 
-    auto operator()(image const& img) -> image override;
+    auto to_indexed(image const& img) -> std::vector<u32> override;
 };
 
 ////////////////////////////////////////////////////////////
@@ -247,7 +252,7 @@ class TCOB_API floyd_steinberg_dither : public ditherer_base {
 public:
     explicit floyd_steinberg_dither(std::vector<color> palette);
 
-    auto operator()(image const& img) -> image override;
+    auto to_indexed(image const& img) -> std::vector<u32> override;
 };
 
 };

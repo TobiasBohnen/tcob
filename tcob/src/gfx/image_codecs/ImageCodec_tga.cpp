@@ -389,7 +389,7 @@ auto tga_decoder::decode_info(io::istream& in) -> std::optional<image::informati
 
 ////////////////////////////////////////////////////////////
 
-auto tga_encoder::encode(image const& img, io::ostream& out) const -> bool
+auto tga_encoder::encode(image const& img, io::ostream& out) -> bool
 {
     write_header(img.info(), out);
     write_image_data(img, out);

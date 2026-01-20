@@ -120,7 +120,7 @@ auto qoi_decoder::decode_info(io::istream& in) -> std::optional<image::informati
 
 ////////////////////////////////////////////////////////////
 
-auto qoi_encoder::encode(image const& image, io::ostream& out) const -> bool
+auto qoi_encoder::encode(image const& image, io::ostream& out) -> bool
 {
     auto const& info {image.info()};
     i32 const   bpp {info.bytes_per_pixel()};

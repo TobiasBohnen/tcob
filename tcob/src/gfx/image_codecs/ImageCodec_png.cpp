@@ -671,7 +671,7 @@ void png_decoder::prepare_delegate()
 
 ////////////////////////////////////////////////////////////
 
-auto png_encoder::encode(image const& image, io::ostream& out) const -> bool
+auto png_encoder::encode(image const& image, io::ostream& out) -> bool
 {
     out.write(SIGNATURE);
     write_ihdr(image.info(), out);
@@ -833,10 +833,11 @@ void png_anim_encoder::start()
 {
     if (_encoding) { return; }
 
-    _seq        = 0;
-    _frameCount = 0;
-    _encoding   = true;
-    _firstFrame = true;
+    _seq              = 0;
+    _frameCount       = 0;
+    _encoding         = true;
+    _firstFrame       = true;
+    _accFrameDuration = milliseconds {0};
 }
 
 auto png_anim_encoder::add_frame(image_frame const& frame) -> bool
@@ -909,6 +910,7 @@ auto png_anim_encoder::finish() -> bool
     _enc.write_iend(str);
 
     _encoding = false;
+
     return true;
 }
 

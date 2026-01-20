@@ -39,7 +39,7 @@ private:
 
 class webp_encoder final : public image_encoder {
 public:
-    auto encode(image const& image, io::ostream& out) const -> bool override;
+    auto encode(image const& image, io::ostream& out) -> bool override;
 };
 
 ////////////////////////////////////////////////////////////

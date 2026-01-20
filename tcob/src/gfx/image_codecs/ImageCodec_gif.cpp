@@ -5,16 +5,19 @@
 
 #include "ImageCodec_gif.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cassert>
 #include <optional>
 #include <span>
+#include <unordered_map>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/ImageFilters.hpp"
 
 namespace tcob::gfx::detail {
 
@@ -127,8 +130,8 @@ auto gif_decoder::advance(milliseconds ts) -> animated_image_decoder::status
 
 void gif_decoder::reset()
 {
-    _firstFrame   = true;
-    _transparency = false;
+    _firstFrame      = true;
+    _hasTransparency = false;
 
     _currentTimeStamp = milliseconds::zero();
     stream().seek(_contentOffset, io::seek_dir::Begin);
@@ -316,7 +319,7 @@ void gif_decoder::read_graphic_control_ext(io::istream& reader)
         _dispose = 1;                     // elect to keep old image if discretionary
     }
 
-    _transparency = (packed & 1) != 0;
+    _hasTransparency = (packed & 1) != 0;
 
     milliseconds const delay {reader.read<u16, std::endian::little>() * 10};
     _currentTimeStamp += delay;
@@ -344,7 +347,7 @@ void gif_decoder::read_frame(io::istream& reader)
                                 ? gif::read_color_table(lctSize, reader)
                                 : _header.GlobalColorTable};
 
-    if (_transparency) {
+    if (_hasTransparency) {
         act[_transIndex] = colors::Transparent;          // set transparent color if specified
     }
 
@@ -369,7 +372,7 @@ void gif_decoder::read_frame(io::istream& reader)
         for (usize y {0}; y < ih; y++) {
             for (usize x {0}; x < iw; x++) {
                 u8 palIdx {data[index++]};
-                if (palIdx != _transIndex || (palIdx == _header.BackgroundIndex && !_transparency) || _dispose == 2) {
+                if (palIdx != _transIndex || (palIdx == _header.BackgroundIndex && !_hasTransparency) || _dispose == 2) {
                     assert(palIdx < act.size());
                     auto [r, g, b, a] {act[palIdx]};
                     usize const pixInd {((x + ix) * gif::BPP) + ((y + iy) * (_header.Width * gif::BPP))};
@@ -396,4 +399,285 @@ void gif_decoder::clear_pixel_cache()
     }
 }
 
+////////////////////////////////////////////////////////////
+
+auto gif_encoder::encode(image const& image, io::ostream& out) -> bool
+{
+    start(out);
+    image_frame const frame {.Image = image, .Duration = milliseconds {0}};
+    if (add_frame(frame, out)) { return finish(out); }
+    return false;
+}
+
+void gif_encoder::start()
+{
+    start(stream());
+}
+
+auto gif_encoder::add_frame(image_frame const& frame) -> bool
+{
+    return add_frame(frame, stream());
+}
+
+auto gif_encoder::finish() -> bool
+{
+    return finish(stream());
+}
+
+void gif_encoder::start(io::ostream& out)
+{
+    _transIndex = 0;
+    _firstFrame = true;
+    out.write("GIF89a"); // header
+}
+
+auto gif_encoder::add_frame(image_frame const& frame, io::ostream& out) -> bool
+{
+    if (!_sizeSet) {
+        _width  = static_cast<i16>(frame.Image.info().Size.Width);
+        _height = static_cast<i16>(frame.Image.info().Size.Height);
+    }
+
+    auto const palette {octree_quantizer::GetPalette(frame.Image, 256)};
+    auto const newFrame {floyd_steinberg_dither {palette}.to_indexed(frame.Image)};
+
+    if (_firstFrame) {
+        write_lsd(out);              // logical screen descriptior
+        write_palette(out, palette); // global color table
+        write_netscape_loop(out);
+    }
+
+    _delay = static_cast<i16>(frame.Duration.count() / 10);
+
+    write_graphic_ctrl_ext(out);     // write graphic control extension
+    write_image_desc(out);           // image descriptor
+    if (!_firstFrame) {
+        write_palette(out, palette); // local color table
+    }
+    write_pixels(out, newFrame);     // encode and write pixel data
+    _firstFrame = false;
+    return true;
+}
+
+auto gif_encoder::finish(io::ostream& out) -> bool
+{
+    out.write<u8>(0x3b); // gif trailer
+    return true;
+}
+
+void gif_encoder::write_graphic_ctrl_ext(io::ostream& out) const
+{
+    out.write<u8>(0x21); // extension introducer
+    out.write<u8>(0xf9); // GCE label
+    out.write<u8>(4);    // data block size
+    i32 transp {0}, disp {0};
+    if (_transparent == colors::Transparent) {
+        transp = 0;
+        disp   = 0;          // dispose = no action
+    } else {
+        transp = 1;
+        disp   = 2;          // force clear if using transparent color
+    }
+    if (_dispose >= 0) {
+        disp = _dispose & 7; // user override
+    }
+    disp <<= 2;
+
+    // packed fields
+    out.write<u8>(static_cast<u8>(0 | disp | 0 | transp));
+
+    out.write<i16>(_delay);     // delay x 1/100 sec
+    out.write<u8>(_transIndex); // transparent color index
+    out.write<u8>(0);           // block terminator
+}
+void gif_encoder::write_image_desc(io::ostream& out) const
+{
+    out.write<u8>(0x2c);    // image separator
+    out.write<i16>(0);      // image position x,y = 0,0
+    out.write<i16>(0);
+    out.write<i16>(_width); // image size
+    out.write<i16>(_height);
+    // packed fields
+    if (_firstFrame) {
+        // no LCT  - GCT is used for first (or only) frame
+        out.write<u8>(0);
+    } else {
+        // specify normal LCT
+        out.write<u8>(static_cast<u8>(0x80 | // 1 local color table  1=yes
+                                      0 |    // 2 interlace - 0=no
+                                      0 |    // 3 sorted - 0=no
+                                      0 |    // 4-5 reserved
+                                      7));   // 6-8 size of color table
+    }
+}
+void gif_encoder::write_lsd(io::ostream& out) const
+{
+    // logical screen size
+    out.write<i16>(_width);
+    out.write<i16>(_height);
+    // packed fields
+    out.write<u8>(static_cast<u8>(0x80 | // 1   : global color table flag = 1 (gct used)
+                                  0x70 | // 2-4 : color resolution = 7
+                                  0x00 | // 5   : gct sort flag = 0
+                                  7));   // 6-8 : gct size
+
+    out.write<u8>(0);                    // background color index
+    out.write<u8>(0);                    // pixel aspect ratio - assume 1:1
+}
+
+void gif_encoder::write_palette(io::ostream& out, std::span<color const> pal) const
+{
+    for (auto c : pal) {
+        out.write<u8>(c.R);
+        out.write<u8>(c.G);
+        out.write<u8>(c.B);
+    }
+    i32 const n {static_cast<i32>((3 * 256) - (3 * pal.size()))};
+    for (i32 i = 0; i < n; i++) {
+        out.write<u8>(0);
+    }
+}
+
+void gif_encoder::write_netscape_loop(io::ostream& out)
+{
+    out.write<u8>(0x21);      // Extension Introducer
+    out.write<u8>(0xFF);      // Application Label
+    out.write<u8>(0x0B);      // Block Size
+    out.write("NETSCAPE2.0"); // App Identifier
+    out.write<u8>(0x03);      // Sub-block data size
+    out.write<u8>(0x01);      // Sub-block ID
+    out.write<u8>(0x00);      // Loop Count LSB (0 = infinite)
+    out.write<u8>(0x00);      // Loop Count MSB
+    out.write<u8>(0x00);      // Block Terminator
+}
+
+class lzw_encoder {
+    struct bit_encoder {
+        i32             inBit;
+        std::vector<u8> OutList;
+        i32             CurrentBit {0};
+        u32             CurrentVal {0};
+
+        bit_encoder(i32 init_bit)
+            : inBit(init_bit)
+        {
+            OutList.reserve(1024);
+        }
+
+        void add(i32 inCode)
+        {
+            CurrentVal |= (static_cast<u32>(inCode) << CurrentBit);
+            CurrentBit += inBit;
+
+            while (CurrentBit >= 8) {
+                OutList.push_back(static_cast<u8>(CurrentVal & 0xFF));
+                CurrentVal >>= 8;
+                CurrentBit -= 8;
+            }
+        }
+
+        void end()
+        {
+            if (CurrentBit > 0) {
+                OutList.push_back(static_cast<u8>(CurrentVal & 0xFF));
+            }
+            CurrentVal = 0;
+            CurrentBit = 0;
+        }
+    };
+
+public:
+    lzw_encoder(std::span<u32 const> pixel, u8 cd)
+        : _colorDepth(std::max<u8>(2, cd))
+        , _indexedPixel(pixel)
+    {
+    }
+
+    void encode(io::ostream& out)
+    {
+        i32 const clearCode {(1 << _colorDepth)};
+        i32 const endCode {clearCode + 1};
+
+        i32 availableCode {endCode + 1};
+        i32 currentCodeSize {_colorDepth + 1};
+
+        std::unordered_map<u32, i32> codeTable;
+        codeTable.reserve(MaxStackSize);
+
+        bit_encoder bitEncoder(currentCodeSize);
+        out.write<u8>(_colorDepth);
+        bitEncoder.add(clearCode);
+
+        i32 prefix {-1};
+
+        for (u32 suffix : _indexedPixel) {
+            if (prefix == -1) {
+                prefix = suffix;
+                continue;
+            }
+
+            u32 key {(static_cast<u32>(prefix) << 8) | suffix};
+
+            if (auto it {codeTable.find(key)}; it != codeTable.end()) {
+                prefix = it->second;
+            } else {
+                bitEncoder.add(prefix);
+
+                if (availableCode < MaxStackSize) {
+                    codeTable[key] = availableCode++;
+                }
+
+                if (availableCode > (1 << currentCodeSize) && currentCodeSize < 12) {
+                    currentCodeSize++;
+                    bitEncoder.inBit = currentCodeSize;
+                }
+
+                if (availableCode >= MaxStackSize) {
+                    bitEncoder.add(clearCode);
+                    codeTable.clear();
+                    currentCodeSize  = _colorDepth + 1;
+                    bitEncoder.inBit = currentCodeSize;
+                    availableCode    = endCode + 1;
+                }
+
+                prefix = suffix;
+            }
+
+            flush_blocks(out, bitEncoder, false);
+        }
+
+        if (prefix != -1) { bitEncoder.add(prefix); }
+        bitEncoder.add(endCode);
+        bitEncoder.end();
+        flush_blocks(out, bitEncoder, true);
+
+        out.write<u8>(0x00);
+    }
+
+private:
+    void flush_blocks(io::ostream& stream, bit_encoder& encoder, bool finish)
+    {
+        auto& list {encoder.OutList};
+        while (list.size() >= 255 || (finish && !list.empty())) {
+            usize const chunkSize {std::min<usize>(list.size(), 255)};
+            if (chunkSize == 0) { break; }
+
+            stream.write<u8>(static_cast<u8>(chunkSize));
+            stream.write<u8>(std::span {list.data(), chunkSize});
+
+            list.erase(list.begin(), list.begin() + chunkSize);
+        }
+    }
+
+    static constexpr i32 MaxStackSize {4096};
+    u8                   _colorDepth;
+    std::span<u32 const> _indexedPixel;
+};
+
+void gif_encoder::write_pixels(io::ostream& out, std::vector<u32> const& buffer) const
+{
+    lzw_encoder enc {buffer, 8};
+    enc.encode(out);
+    out.write<u8>(0x00);
+}
 }

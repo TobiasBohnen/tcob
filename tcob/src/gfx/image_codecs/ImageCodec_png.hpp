@@ -213,7 +213,7 @@ private:
 
 class png_encoder : public image_encoder {
 public:
-    auto encode(image const& image, io::ostream& out) const -> bool override;
+    auto encode(image const& image, io::ostream& out) -> bool override;
 
     void write_ihdr(image::information const& info, io::ostream& out) const;
     void write_idat(image const& image, io::ostream& out) const;

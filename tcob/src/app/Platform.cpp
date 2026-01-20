@@ -242,6 +242,7 @@ void platform::InitImageCodecs()
     ieFactory.add(".bsi", &make_unique<gfx::detail::bsi_encoder>);
     ieFactory.add(".tga", &make_unique<gfx::detail::tga_encoder>);
     ieFactory.add(".pcx", &make_unique<gfx::detail::pcx_encoder>);
+    ieFactory.add(".gif", &make_unique<gfx::detail::gif_encoder>);
     ieFactory.add(".png", &make_unique<gfx::detail::png_encoder>);
     ieFactory.add(".qoi", &make_unique<gfx::detail::qoi_encoder>);
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
@@ -262,6 +263,7 @@ void platform::InitImageCodecs()
 
     // encoders
     auto& iaeFactory {register_service<gfx::animated_image_encoder::factory>()};
+    iaeFactory.add(".gif", &make_unique<gfx::detail::gif_encoder>);
     iaeFactory.add(".png", &make_unique<gfx::detail::png_anim_encoder>);
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
     iaeFactory.add(".webp", &make_unique<gfx::detail::webp_anim_encoder>);

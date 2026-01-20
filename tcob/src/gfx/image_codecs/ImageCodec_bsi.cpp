@@ -50,7 +50,7 @@ auto bsi_decoder::decode_info(io::istream& in) -> std::optional<image::informati
 
 ////////////////////////////////////////////////////////////
 
-auto bsi_encoder::encode(image const& img, io::ostream& out) const -> bool
+auto bsi_encoder::encode(image const& img, io::ostream& out) -> bool
 {
     out.write(SIGNATURE);
     auto const& info {img.info()};

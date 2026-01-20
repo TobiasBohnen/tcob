@@ -37,7 +37,7 @@ public:
 
 class bsi_encoder final : public image_encoder {
 public:
-    auto encode(image const& img, io::ostream& out) const -> bool override;
+    auto encode(image const& img, io::ostream& out) -> bool override;
 };
 
 }
