@@ -26,12 +26,8 @@ auto astar_pathfinding::find_path(AStarGrid auto&& testGrid, size_i gridExtent, 
     std::unordered_map<point_i, point_i>                         cameFrom;
 
     grid<u64> gScore {gridExtent, IMPASSABLE_COST};
-    grid<u64> fScore {gridExtent, IMPASSABLE_COST};
-
     gScore[start] = 0;
-    fScore[start] = distance(start, finish);
-
-    openSet.push({start, fScore[start]});
+    openSet.push({start, distance(start, finish)});
 
     while (!openSet.empty()) {
         point_i const current {openSet.top().pos};
@@ -53,8 +49,7 @@ auto astar_pathfinding::find_path(AStarGrid auto&& testGrid, size_i gridExtent, 
             if (tentative_gScore < gScore[neighbor]) {
                 cameFrom[neighbor] = current;
                 gScore[neighbor]   = tentative_gScore;
-                fScore[neighbor]   = tentative_gScore + distance(neighbor, finish);
-                openSet.push({neighbor, fScore[neighbor]});
+                openSet.push({neighbor, tentative_gScore + distance(neighbor, finish)});
             }
         }
     }
