@@ -27,8 +27,6 @@ public:
     auto get_fallback_style(font::style style) const -> std::optional<font::style>;
     auto has_style(font::style style) const -> bool;
 
-    void clear_assets();
-
     static void FindSources(font_family& fam, path const& source);
     static void SingleFont(font_family& fam, std::span<byte const> font);
 
@@ -39,9 +37,13 @@ private:
 
     string _name;
 
-    std::unordered_map<font::style, path>                                           _fontSources;
-    std::unordered_map<font::style, std::vector<byte>>                              _fontData;
-    std::unordered_map<font::style, std::unordered_map<u32, asset_owner_ptr<font>>> _fontAssets;
+    struct style_entry {
+        path                                           Source;
+        std::vector<byte>                              Data;
+        std::unordered_map<u32, asset_owner_ptr<font>> Fonts;
+    };
+
+    std::unordered_map<font::style, style_entry> _styles;
 };
 
 ////////////////////////////////////////////////////////////

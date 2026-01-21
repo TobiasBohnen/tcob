@@ -24,7 +24,7 @@ font_family::font_family(string name)
 
 void font_family::set_source(font::style style, path const& file)
 {
-    _fontSources[style] = file;
+    _styles[style].Source = file;
 }
 
 auto font_family::get_fallback_style(font::style style) const -> std::optional<font::style>
@@ -90,7 +90,7 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
 
 auto font_family::has_style(font::style style) const -> bool
 {
-    return _fontSources.contains(style);
+    return _styles.contains(style);
 }
 
 auto font_family::name() const -> string const&
@@ -110,42 +110,37 @@ auto font_family::get_font(font::style style, u32 size) -> asset_ptr<font>
 
     auto const fontStyle {*fallbackStyle};
 
-    // check if asset already exists
-    if (auto const styleIt {_fontAssets.find(fontStyle)}; styleIt != _fontAssets.end()) {
-        if (auto const sizeIt {styleIt->second.find(size)}; sizeIt != styleIt->second.end()) {
-            return sizeIt->second;
-        }
+    auto const styleIt {_styles.find(fontStyle)};
+    if (styleIt == _styles.end()) { return {}; }
+
+    auto& entry {styleIt->second};
+    // check if font already exists
+    if (auto const sizeIt {entry.Fonts.find(size)}; sizeIt != entry.Fonts.end()) {
+        return sizeIt->second;
+    }
+
+    // load font data
+    if (entry.Data.empty() && io::is_file(entry.Source)) {
+        io::ifstream fs {entry.Source};
+        entry.Data = fs.read_all<byte>();
     }
 
 #if !defined(__EMSCRIPTEN__) // TODO: fixed in llvm 19
     logger::Info("FontFamily {}: created new font: style {}, size {}.", _name, fontStyle, size);
 #endif
 
-    // check if font data has already been loaded
-    if (!_fontData.contains(fontStyle)) {
-        io::ifstream fs {_fontSources[fontStyle]};
-        _fontData[fontStyle] = fs.read_all<byte>();
-    }
-
     // load font
-    auto const& asset {_fontAssets[fontStyle][size]};
-    if (asset->load(_fontData[fontStyle], size)) {
+    auto const& asset {entry.Fonts[size]};
+    if (asset->load(entry.Data, size)) {
         return asset;
     }
 
     return {};
 }
 
-void font_family::clear_assets()
-{
-    _fontAssets.clear();
-}
-
 void font_family::FindSources(font_family& fam, path const& source)
 {
-    fam._fontSources.clear();
-    fam._fontData.clear();
-    fam._fontAssets.clear();
+    fam._styles.clear();
 
     auto const files {io::enumerate(io::get_parent_folder(source), {source + "*.ttf", true}, false)};
     for (auto const& file : files) {
@@ -182,18 +177,14 @@ void font_family::FindSources(font_family& fam, path const& source)
             fam.set_source(style, file);
         }
     }
-
-    fam._fontData.reserve(fam._fontSources.size());
 }
 
 void font_family::SingleFont(font_family& fam, std::span<byte const> font)
 {
-    fam._fontSources.clear();
-    fam._fontData.clear();
-    fam._fontAssets.clear();
+    fam._styles.clear();
 
-    fam._fontData[{}].assign(font.begin(), font.end());
-    fam._fontSources[{}] = "";
+    fam._styles[{}].Data.assign(font.begin(), font.end());
+    fam._styles[{}].Source = "";
 }
 
 }
