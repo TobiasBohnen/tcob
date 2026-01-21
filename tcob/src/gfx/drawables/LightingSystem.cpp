@@ -362,7 +362,7 @@ void lighting_system::mark_lights_dirty()
 
 auto lighting_system::can_draw() const -> bool
 {
-    return !_store.empty();
+    return !_store.is_empty();
 }
 
 void lighting_system::on_draw_to(render_target& target)

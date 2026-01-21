@@ -24,7 +24,7 @@ void geometry_store::clear()
     _verts.clear();
 }
 
-[[nodiscard]] auto geometry_store::empty() const -> bool
+[[nodiscard]] auto geometry_store::is_empty() const -> bool
 {
     return _inds.empty() && _verts.empty();
 }

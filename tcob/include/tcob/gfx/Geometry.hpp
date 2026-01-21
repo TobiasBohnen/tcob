@@ -55,7 +55,7 @@ public:
 
     void clear();
 
-    [[nodiscard]] auto empty() const -> bool;
+    [[nodiscard]] auto is_empty() const -> bool;
 
 private:
     index_map  _inds;
