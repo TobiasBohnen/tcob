@@ -24,7 +24,7 @@ public:
     auto name() const -> string const&;
     auto get_font(font::style style, u32 size) -> asset_ptr<font>;
 
-    auto get_fallback_style(font::style style) const -> std::optional<font::style>;
+    auto get_style(font::style want) const -> std::optional<font::style>;
     auto has_style(font::style style) const -> bool;
 
     static void FindSources(font_family& fam, path const& source);
@@ -33,7 +33,7 @@ public:
     static inline char const* AssetName {"font_family"};
 
 private:
-    void set_source(font::style style, path const& file);
+    void add_style(font::style style, path const& file);
 
     string _name;
 

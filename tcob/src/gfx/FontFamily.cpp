@@ -22,16 +22,16 @@ font_family::font_family(string name)
 {
 }
 
-void font_family::set_source(font::style style, path const& file)
+void font_family::add_style(font::style style, path const& file)
 {
     _styles[style].Source = file;
 }
 
-auto font_family::get_fallback_style(font::style style) const -> std::optional<font::style>
+auto font_family::get_style(font::style want) const -> std::optional<font::style>
 {
-    font::style retValue {style};
+    if (has_style(want)) { return want; }
 
-    if (has_style(retValue)) { return retValue; }
+    font::style retValue {want};
 
     auto const ascend {[&] {
         while (static_cast<i32>(retValue.Weight) <= static_cast<i32>(font::weight::Heavy)) {
@@ -51,7 +51,7 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
 
     // rule from https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#fallback_weights
     // If the target weight given is between 400 and 500 inclusive:
-    if (style.Weight == font::weight::Normal || style.Weight == font::weight::Medium) {
+    if (want.Weight == font::weight::Normal || want.Weight == font::weight::Medium) {
         // Look for available weights between the target and 500, in ascending order.
         retValue.Weight = font::weight::Medium;
         if (has_style(retValue)) { return retValue; }
@@ -72,7 +72,7 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
         // look for available weights less than the target, in descending order.
         if (descend()) { return retValue; }
         // If no match is found, look for available weights greater than the target, in ascending order.
-        retValue.Weight = style.Weight;
+        retValue.Weight = want.Weight;
         if (ascend()) { return retValue; }
     }
 
@@ -81,7 +81,7 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
         // look for available weights greater than the target, in ascending order.
         if (ascend()) { return retValue; }
         // If no match is found, look for available weights less than the target, in descending order.
-        retValue.Weight = style.Weight;
+        retValue.Weight = want.Weight;
         if (descend()) { return retValue; }
     }
 
@@ -100,7 +100,7 @@ auto font_family::name() const -> string const&
 
 auto font_family::get_font(font::style style, u32 size) -> asset_ptr<font>
 {
-    auto fallbackStyle {get_fallback_style(style)};
+    auto fallbackStyle {get_style(style)};
     if (!fallbackStyle) {
 #if !defined(__EMSCRIPTEN__) // TODO: fixed in llvm 19
         logger::Error("FontFamily {}: no sources for font style: style {}, size {}.", _name, style, size);
@@ -174,7 +174,7 @@ void font_family::FindSources(font_family& fam, path const& source)
         }
 
         if (!fam.has_style(style)) {
-            fam.set_source(style, file);
+            fam.add_style(style, file);
         }
     }
 }
