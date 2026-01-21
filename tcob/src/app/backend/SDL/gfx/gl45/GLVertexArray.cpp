@@ -89,7 +89,6 @@ void gl_vertex_array::resize(usize vertCount, usize indCount)
         if (creating) {
             logger::Debug("VertexArray: created ID {}: {} vertices, {} indices",
                           ID, _vboSize / sizeof(vertex), _eboSize / sizeof(GLuint));
-
         } else {
             logger::Debug("VertexArray: resized ID {}: {} vertices, {} indices",
                           ID, _vboSize / sizeof(vertex), _eboSize / sizeof(GLuint));
