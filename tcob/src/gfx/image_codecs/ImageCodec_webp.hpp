@@ -73,9 +73,7 @@ public:
     ~webp_anim_encoder() override;
 
     void start() override;
-
     auto add_frame(image_frame const& frame) -> bool override;
-
     auto finish() -> bool override;
 
 private:

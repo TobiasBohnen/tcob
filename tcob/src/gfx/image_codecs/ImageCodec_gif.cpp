@@ -490,6 +490,7 @@ void gif_encoder::write_graphic_ctrl_ext(io::ostream& out) const
     out.write<u8>(_transIndex); // transparent color index
     out.write<u8>(0);           // block terminator
 }
+
 void gif_encoder::write_image_desc(io::ostream& out) const
 {
     out.write<u8>(0x2c);    // image separator
@@ -510,6 +511,7 @@ void gif_encoder::write_image_desc(io::ostream& out) const
                                       7));   // 6-8 size of color table
     }
 }
+
 void gif_encoder::write_lsd(io::ostream& out) const
 {
     // logical screen size
@@ -682,4 +684,5 @@ void gif_encoder::write_pixels(io::ostream& out, std::vector<u32> const& buffer)
     enc.encode(out);
     out.write<u8>(0x00);
 }
+
 }

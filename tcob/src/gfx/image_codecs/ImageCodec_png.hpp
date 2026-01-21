@@ -247,9 +247,7 @@ private:
 class png_anim_encoder final : public animated_image_encoder {
 public:
     void start() override;
-
     auto add_frame(image_frame const& frame) -> bool override;
-
     auto finish() -> bool override;
 
 private:
