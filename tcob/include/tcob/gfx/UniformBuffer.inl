@@ -21,7 +21,7 @@ inline auto uniform_buffer::update(T data, usize offset) const -> usize
     return sizeof(data);
 }
 
-template <typename T>
+template <POD T>
 inline auto uniform_buffer::update(std::span<T const> data, usize offset) const -> usize
 {
     _impl->update(data.data(), data.size_bytes(), offset);

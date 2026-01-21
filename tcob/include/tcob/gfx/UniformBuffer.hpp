@@ -9,12 +9,13 @@
 #include <memory>
 #include <span>
 
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API uniform_buffer final {
+class TCOB_API uniform_buffer final : public non_copyable {
 public:
     explicit uniform_buffer(usize size);
     ~uniform_buffer();
@@ -24,7 +25,7 @@ public:
     template <POD T>
     auto update(T data, usize offset) const -> usize;
 
-    template <typename T>
+    template <POD T>
     auto update(std::span<T const> data, usize offset) const -> usize;
 
     void bind_base(u32 index) const;
