@@ -298,13 +298,12 @@ auto octree_quantizer::operator()(image const& img) -> image
     auto const [width, height] {info.Size};
     build_tree(img);
 
-    image      retValue {image::CreateEmpty(info.Size, info.Format)};
-    auto const bpp {info.bytes_per_pixel()};
+    image retValue {image::CreateEmpty(info.Size, info.Format)};
 
     locate_service<task_manager>().run_parallel(
         [&](par_task const& ctx) {
             for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
-                retValue.set_pixel(pixIdx * bpp, get_quantized_color(img.get_pixel(pixIdx * bpp)));
+                retValue.set_pixel(pixIdx, get_quantized_color(img.get_pixel(pixIdx)));
             }
         },
         width * height);
@@ -505,19 +504,18 @@ auto neuquant::operator()(image const& img) -> image
 
     auto const& info {img.info()};
     image       retValue {image::CreateEmpty(info.Size, info.Format)};
-    auto const  bpp {info.bytes_per_pixel()};
 
     locate_service<task_manager>().run_parallel(
         [&](par_task const& ctx) {
             for (isize i {ctx.Start}; i < ctx.End; ++i) {
-                color const c {img.get_pixel(i * bpp)};
+                color const c {img.get_pixel(i)};
                 i32 const   bmu {find_bmu(c)};
 
                 color const quant {static_cast<u8>(_network[bmu].R),
                                    static_cast<u8>(_network[bmu].G),
                                    static_cast<u8>(_network[bmu].B)};
 
-                retValue.set_pixel(i * bpp, quant);
+                retValue.set_pixel(i, quant);
             }
         },
         info.Size.area());
@@ -547,7 +545,6 @@ void neuquant::train(image const& img)
 {
     auto const& info {img.info()};
     i32 const   lengthCount {info.Size.area()};
-    i32 const   bpp {info.bytes_per_pixel()};
 
     i32 const cycleCount {100};
     i32 const sampleFac {30};
@@ -564,7 +561,7 @@ void neuquant::train(image const& img)
         if (alpha < 0.001) { break; }
 
         for (i32 j {0}; j < lengthCount; j += step) {
-            color const c {img.get_pixel((pixelPos % lengthCount) * bpp)};
+            color const c {img.get_pixel((pixelPos % lengthCount))};
 
             i32 const bmu {find_bmu(c)};
             alter_neighbor(bmu, c, alpha);
@@ -628,7 +625,7 @@ auto ditherer_base::operator()(image const& img) -> image
     image      retValue {image::CreateEmpty(info.Size, info.Format)};
     auto const inds {to_indexed(img)};
     for (isize idx {0}; idx < width * height; ++idx) {
-        retValue.set_pixel(idx * info.bytes_per_pixel(), get_color(inds[idx]));
+        retValue.set_pixel(idx, get_color(inds[idx]));
     }
 
     return retValue;
@@ -674,7 +671,6 @@ auto ordered_dither::to_indexed(image const& img) -> std::vector<u32>
     auto const&      info {img.info()};
     std::vector<u32> retValue;
     retValue.resize(info.Size.area());
-    auto const bpp {info.bytes_per_pixel()};
     auto const height {info.Size.Height};
     auto const width {info.Size.Width};
 
@@ -682,7 +678,7 @@ auto ordered_dither::to_indexed(image const& img) -> std::vector<u32>
         for (i32 x {0}; x < width; ++x) {
             isize const idx {(y * width + x)};
 
-            color const original {img.get_pixel(idx * bpp)};
+            color const original {img.get_pixel(idx)};
             f64 const   threshold {get_threshold(x, y)};
 
             f64 const r {std::clamp(static_cast<f64>(original.R) + threshold, 0.0, 255.0)};
@@ -741,7 +737,6 @@ auto atkinson_dither::to_indexed(image const& img) -> std::vector<u32>
     auto const&      info {img.info()};
     std::vector<u32> retValue;
     retValue.resize(info.Size.area());
-    auto const bpp {info.bytes_per_pixel()};
     auto const width {info.Size.Width};
     auto const height {info.Size.Height};
 
@@ -752,7 +747,7 @@ auto atkinson_dither::to_indexed(image const& img) -> std::vector<u32>
     for (i32 y {0}; y < height; ++y) {
         for (i32 x {0}; x < width; ++x) {
             isize const idx {(y * width + x)};
-            color const original {img.get_pixel(idx * bpp)};
+            color const original {img.get_pixel(idx)};
 
             f64 const r {std::clamp(static_cast<f64>(original.R) + currErrors[(x * 3) + 0], 0.0, 255.0)};
             f64 const g {std::clamp(static_cast<f64>(original.G) + currErrors[(x * 3) + 1], 0.0, 255.0)};
@@ -823,7 +818,6 @@ auto floyd_steinberg_dither::to_indexed(image const& img) -> std::vector<u32>
     auto const&      info {img.info()};
     std::vector<u32> retValue;
     retValue.resize(info.Size.area());
-    auto const bpp {info.bytes_per_pixel()};
     auto const width {info.Size.Width};
     auto const height {info.Size.Height};
 
@@ -838,7 +832,7 @@ auto floyd_steinberg_dither::to_indexed(image const& img) -> std::vector<u32>
     for (i32 y {0}; y < height; ++y) {
         for (i32 x {0}; x < width; ++x) {
             isize const idx {(y * width + x)};
-            color const original {img.get_pixel(idx * bpp)};
+            color const original {img.get_pixel(idx)};
 
             f64 const r {std::clamp(static_cast<f64>(original.R) + currErrors[(x * 3) + 0], 0.0, 255.0)};
             f64 const g {std::clamp(static_cast<f64>(original.G) + currErrors[(x * 3) + 1], 0.0, 255.0)};

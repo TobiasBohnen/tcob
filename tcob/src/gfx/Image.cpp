@@ -103,11 +103,12 @@ void image::flip_vertically()
 auto image::get_pixel(point_i pos) const -> color
 {
     assert(_info.Size.contains(pos));
-    return get_pixel(static_cast<usize>((pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel()));
+    return get_pixel(static_cast<usize>((pos.X + (pos.Y * _info.Size.Width))));
 }
 
 auto image::get_pixel(usize idx) const -> color
 {
+    idx *= _info.bytes_per_pixel();
     u8 const r {_buffer[idx + 0]};
     u8 const g {_buffer[idx + 1]};
     u8 const b {_buffer[idx + 2]};
@@ -118,12 +119,13 @@ auto image::get_pixel(usize idx) const -> color
 void image::set_pixel(point_i pos, color c)
 {
     assert(_info.Size.contains(pos));
-    usize const idx {static_cast<usize>((pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel())};
+    usize const idx {static_cast<usize>((pos.X + (pos.Y * _info.Size.Width)))};
     set_pixel(idx, c);
 }
 
 void image::set_pixel(usize idx, color c)
 {
+    idx *= _info.bytes_per_pixel();
     _buffer[idx + 0] = c.R;
     _buffer[idx + 1] = c.G;
     _buffer[idx + 2] = c.B;
