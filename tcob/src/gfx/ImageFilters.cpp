@@ -316,14 +316,9 @@ auto octree_quantizer::GetPalette(image const& img, i32 maxColors) -> std::vecto
 {
     octree_quantizer quant {maxColors};
     quant.build_tree(img);
-    return quant.get_palette();
-}
-
-auto octree_quantizer::get_palette() const -> std::vector<color>
-{
     std::vector<color> palette;
-    palette.reserve(_leafCount);
-    build_palette(_root.get(), palette);
+    palette.reserve(quant._leafCount);
+    quant.build_palette(quant._root.get(), palette);
     return palette;
 }
 
@@ -534,15 +529,10 @@ auto neuquant::GetPalette(image const& img, i32 maxColors) -> std::vector<color>
 {
     neuquant quant {maxColors};
     quant.train(img);
-    return quant.get_palette();
-}
-
-auto neuquant::get_palette() const -> std::vector<color>
-{
     std::vector<color> palette;
-    palette.reserve(_maxColors);
+    palette.reserve(quant._maxColors);
 
-    for (auto const& n : _network) {
+    for (auto const& n : quant._network) {
         palette.emplace_back(
             static_cast<u8>(std::clamp(n.R, 0.0, 255.0)),
             static_cast<u8>(std::clamp(n.G, 0.0, 255.0)),

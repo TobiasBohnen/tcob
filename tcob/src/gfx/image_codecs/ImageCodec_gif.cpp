@@ -552,44 +552,47 @@ void gif_encoder::write_netscape_loop(io::ostream& out)
 }
 
 class lzw_encoder {
-    struct bit_encoder {
-        i32             inBit;
+    class bit_encoder {
+    public:
         std::vector<u8> OutList;
-        i32             CurrentBit {0};
-        u32             CurrentVal {0};
+        i32             InBit;
 
-        bit_encoder(i32 init_bit)
-            : inBit(init_bit)
+        bit_encoder(i32 init)
+            : InBit {init}
         {
             OutList.reserve(1024);
         }
 
         void add(i32 inCode)
         {
-            CurrentVal |= (static_cast<u32>(inCode) << CurrentBit);
-            CurrentBit += inBit;
+            _currentVal |= (static_cast<u32>(inCode) << _currentBit);
+            _currentBit += InBit;
 
-            while (CurrentBit >= 8) {
-                OutList.push_back(static_cast<u8>(CurrentVal & 0xFF));
-                CurrentVal >>= 8;
-                CurrentBit -= 8;
+            while (_currentBit >= 8) {
+                OutList.push_back(static_cast<u8>(_currentVal & 0xFF));
+                _currentVal >>= 8;
+                _currentBit -= 8;
             }
         }
 
         void end()
         {
-            if (CurrentBit > 0) {
-                OutList.push_back(static_cast<u8>(CurrentVal & 0xFF));
+            if (_currentBit > 0) {
+                OutList.push_back(static_cast<u8>(_currentVal & 0xFF));
             }
-            CurrentVal = 0;
-            CurrentBit = 0;
+            _currentVal = 0;
+            _currentBit = 0;
         }
+
+    private:
+        i32 _currentBit {0};
+        u32 _currentVal {0};
     };
 
 public:
     lzw_encoder(std::span<u32 const> pixel, u8 cd)
-        : _colorDepth(std::max<u8>(2, cd))
-        , _indexedPixel(pixel)
+        : _colorDepth {std::max<u8>(2, cd)}
+        , _indexedPixel {pixel}
     {
     }
 
@@ -604,7 +607,7 @@ public:
         std::unordered_map<u32, i32> codeTable;
         codeTable.reserve(MaxStackSize);
 
-        bit_encoder bitEncoder(currentCodeSize);
+        bit_encoder bitEncoder {currentCodeSize};
         out.write<u8>(_colorDepth);
         bitEncoder.add(clearCode);
 
@@ -629,35 +632,34 @@ public:
 
                 if (availableCode > (1 << currentCodeSize) && currentCodeSize < 12) {
                     currentCodeSize++;
-                    bitEncoder.inBit = currentCodeSize;
+                    bitEncoder.InBit = currentCodeSize;
                 }
 
                 if (availableCode >= MaxStackSize) {
                     bitEncoder.add(clearCode);
                     codeTable.clear();
                     currentCodeSize  = _colorDepth + 1;
-                    bitEncoder.inBit = currentCodeSize;
+                    bitEncoder.InBit = currentCodeSize;
                     availableCode    = endCode + 1;
                 }
 
                 prefix = suffix;
             }
 
-            flush_blocks(out, bitEncoder, false);
+            flush_blocks(out, bitEncoder.OutList, false);
         }
 
         if (prefix != -1) { bitEncoder.add(prefix); }
         bitEncoder.add(endCode);
         bitEncoder.end();
-        flush_blocks(out, bitEncoder, true);
+        flush_blocks(out, bitEncoder.OutList, true);
 
         out.write<u8>(0x00);
     }
 
 private:
-    void flush_blocks(io::ostream& stream, bit_encoder& encoder, bool finish)
+    void flush_blocks(io::ostream& stream, std::vector<u8>& list, bool finish)
     {
-        auto& list {encoder.OutList};
         while (list.size() >= 255 || (finish && !list.empty())) {
             usize const chunkSize {std::min<usize>(list.size(), 255)};
             if (chunkSize == 0) { break; }

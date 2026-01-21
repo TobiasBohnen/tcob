@@ -142,7 +142,6 @@ public:
     auto operator()(image const& img) -> image override;
 
     auto static GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
-    auto get_palette() const -> std::vector<color>;
 
 private:
     static constexpr i32 MAX_TREE_DEPTH {8};
@@ -184,7 +183,6 @@ public:
     auto operator()(image const& img) -> image override;
 
     auto static GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
-    auto get_palette() const -> std::vector<color>;
 
 private:
     struct neuron {
