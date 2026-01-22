@@ -351,10 +351,10 @@ inline auto catmull_rom::operator()(f64 t) const -> type
     i32 const c {b + 1};
     i32 const d {std::min<i32>(c + 1, static_cast<i32>(ControlPoints.size()) - 1)};
 
-    type const& p0 {ControlPoints[static_cast<u32>(a)]};
-    type const& p1 {ControlPoints[static_cast<u32>(b)]};
-    type const& p2 {ControlPoints[static_cast<u32>(c)]};
-    type const& p3 {ControlPoints[static_cast<u32>(d)]};
+    type const& p0 {ControlPoints[static_cast<usize>(a)]};
+    type const& p1 {ControlPoints[static_cast<usize>(b)]};
+    type const& p2 {ControlPoints[static_cast<usize>(c)]};
+    type const& p3 {ControlPoints[static_cast<usize>(d)]};
 
     f64 const exp0 {curveP - curveNum};
     f64 const exp1 {exp0 * exp0};

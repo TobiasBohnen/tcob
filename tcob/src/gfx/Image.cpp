@@ -183,12 +183,14 @@ auto image::crop(rect_i const& bounds) const -> image
 auto image::count_colors [[nodiscard]] () const -> isize
 {
     std::unordered_set<u32> colors;
-    for (usize i {0}; i < _buffer.size(); i += _info.bytes_per_pixel()) {
-        u8 const r {_buffer[i + 0]};
-        u8 const g {_buffer[i + 1]};
-        u8 const b {_buffer[i + 2]};
-        u8 const a {image::information::HasAlpha(_info.Format) ? _buffer[i + 3] : static_cast<u8>(255)};
-        colors.insert(static_cast<u32>(r << 24 | g << 16 | b << 8 | a));
+    bool const              hasAlpha {image::information::HasAlpha(_info.Format)};
+    i32 const               bpp {_info.bytes_per_pixel()};
+
+    for (usize i {0}; i < _buffer.size(); i += bpp) {
+        colors.insert((static_cast<u32>(_buffer[i + 0]) << 24)
+                      | (static_cast<u32>(_buffer[i + 1]) << 16)
+                      | (static_cast<u32>(_buffer[i + 2]) << 8)
+                      | static_cast<u32>(hasAlpha ? _buffer[i + 3] : static_cast<u8>(255)));
     }
 
     return std::ssize(colors);
