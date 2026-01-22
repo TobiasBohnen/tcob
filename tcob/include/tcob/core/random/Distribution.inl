@@ -128,7 +128,7 @@ inline cauchy_distribution::cauchy_distribution(f64 x0, f64 gamma)
 inline auto cauchy_distribution::operator()(auto&& rng) -> f64
 {
     f64 const u {NextFloat(rng)};
-    return _x0 + (_gamma * std::tan(TAU_F / 2 * (u - 0.5f)));
+    return _x0 + (_gamma * std::tan(TAU / 2.0 * (u - 0.5)));
 }
 
 ////////////////////////////////////////////////////////////
@@ -269,7 +269,7 @@ inline pareto_distribution::pareto_distribution(f64 alpha, f64 xm)
 inline auto pareto_distribution::operator()(auto&& rng) -> f64
 {
     f64 const u {NextFloat(rng)};
-    return _xm / std::pow(u, 1.0f / _alpha);
+    return _xm / std::pow(u, 1.0 / _alpha);
 }
 
 ////////////////////////////////////////////////////////////

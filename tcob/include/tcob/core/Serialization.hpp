@@ -31,7 +31,7 @@ struct member {
     utf8_string_view Name;
 
     template <typename T>
-    void constexpr get(auto proxy, T const& object) const
+    void constexpr get(auto&& proxy, T const& object) const
     {
         proxy = object.*Ptr;
     }
@@ -71,7 +71,7 @@ struct member_fn {
     utf8_string_view Name;
 
     template <typename T>
-    void constexpr get(auto proxy, T const& object) const
+    void constexpr get(auto&& proxy, T const& object) const
     {
         proxy = Get(object);
     }

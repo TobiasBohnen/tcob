@@ -174,21 +174,21 @@ auto constexpr color::to_hsl() const -> hsx
     f32 const g {G / 255.0f};
     f32 const b {B / 255.0f};
 
-    f32 const max_val {std::max({r, g, b})};
-    f32 const min_val {std::min({r, g, b})};
+    f32 const max {std::max({r, g, b})};
+    f32 const min {std::min({r, g, b})};
 
     f32       h {0}, s {0};
-    f32 const l {(max_val + min_val) / 2.0f};
+    f32 const l {(max + min) / 2.0f};
 
-    if (max_val == min_val) {
+    if (max == min) {
         h = s = 0; // achromatic
     } else {
-        f32 const d {max_val - min_val};
-        s = l > 0.5f ? d / (2.0f - max_val - min_val) : d / (max_val + min_val);
+        f32 const d {max - min};
+        s = l > 0.5f ? d / (2.0f - max - min) : d / (max + min);
 
-        if (max_val == r) {
+        if (max == r) {
             h = ((g - b) / d) + (g < b ? 6.0f : 0.0f);
-        } else if (max_val == g) {
+        } else if (max == g) {
             h = ((b - r) / d) + 2.0f;
         } else {
             h = ((r - g) / d) + 4.0f;
