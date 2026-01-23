@@ -659,11 +659,15 @@ auto ditherer_base::get_color(u32 idx) const -> color
 
 ////////////////////////////////////////////////////////////
 
-ordered_dither::ordered_dither(std::vector<color> palette, i32 matrixSize)
+ordered_dither::ordered_dither(std::vector<color> palette)
     : ditherer_base {std::move(palette)}
-    , _matrixSize {matrixSize}
 {
-    generate_bayer_matrix();
+    for (i32 y {0}; y < 8; ++y) {
+        for (i32 x {0}; x < 8; ++x) {
+            i32 const index {(y * 8) + x};
+            _bayerMatrix[index] = static_cast<f64>(((x * 8 + y) * 4 % 64) + ((x + y) % 4)) / 64.0;
+        }
+    }
 }
 
 auto ordered_dither::to_indexed(image const& img) -> std::vector<u32>
@@ -695,34 +699,10 @@ auto ordered_dither::to_indexed(image const& img) -> std::vector<u32>
 
 auto ordered_dither::get_threshold(i32 x, i32 y) const -> f64
 {
-    i32 const mx {x % _matrixSize};
-    i32 const my {y % _matrixSize};
-    f64 const normalized {_bayerMatrix[(my * _matrixSize) + mx]};
+    i32 const mx {x % 8};
+    i32 const my {y % 8};
+    f64 const normalized {_bayerMatrix[(my * 8) + mx]};
     return (normalized - 0.5) * 64.0;
-}
-
-void ordered_dither::generate_bayer_matrix()
-{
-    _bayerMatrix.resize(_matrixSize * _matrixSize);
-
-    if (_matrixSize == 2) {
-        std::array<f64, 4> const base {0.0, 0.5, 0.75, 0.25};
-        std::ranges::copy(base, _bayerMatrix.begin());
-    } else if (_matrixSize == 4) {
-        std::array<f64, 16> const base {
-            0.0 / 16, 8.0 / 16, 2.0 / 16, 10.0 / 16,
-            12.0 / 16, 4.0 / 16, 14.0 / 16, 6.0 / 16,
-            3.0 / 16, 11.0 / 16, 1.0 / 16, 9.0 / 16,
-            15.0 / 16, 7.0 / 16, 13.0 / 16, 5.0 / 16};
-        std::ranges::copy(base, _bayerMatrix.begin());
-    } else if (_matrixSize == 8) {
-        for (i32 y {0}; y < 8; ++y) {
-            for (i32 x {0}; x < 8; ++x) {
-                i32 const index {(y * 8) + x};
-                _bayerMatrix[index] = static_cast<f64>(((x * 8 + y) * 4 % 64) + ((x + y) % 4)) / 64.0;
-            }
-        }
-    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -742,7 +722,7 @@ auto atkinson_dither::to_indexed(image const& img) -> std::vector<u32>
 
     std::vector<f64> currErrors(width * 3, 0.0);
     std::vector<f64> nextErrors(width * 3, 0.0);
-    std::vector<f64> next2_errors(width * 3, 0.0);
+    std::vector<f64> next2Errors(width * 3, 0.0);
 
     for (i32 y {0}; y < height; ++y) {
         for (i32 x {0}; x < width; ++x) {
@@ -792,15 +772,15 @@ auto atkinson_dither::to_indexed(image const& img) -> std::vector<u32>
                 }
             }
             if (y + 2 < height) {
-                next2_errors[(x * 3) + 0] += errR * factor;
-                next2_errors[(x * 3) + 1] += errG * factor;
-                next2_errors[(x * 3) + 2] += errB * factor;
+                next2Errors[(x * 3) + 0] += errR * factor;
+                next2Errors[(x * 3) + 1] += errG * factor;
+                next2Errors[(x * 3) + 2] += errB * factor;
             }
         }
 
         currErrors.swap(nextErrors);
-        nextErrors.swap(next2_errors);
-        std::ranges::fill(next2_errors, 0.0);
+        nextErrors.swap(next2Errors);
+        std::ranges::fill(next2Errors, 0.0);
     }
 
     return retValue;

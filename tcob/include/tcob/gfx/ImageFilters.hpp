@@ -176,7 +176,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API neuquant : public filter_base {
+class TCOB_API neuquant final : public filter_base {
 public:
     explicit neuquant(i32 maxColors);
 
@@ -202,7 +202,7 @@ private:
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-class ditherer_base : public filter_base {
+class TCOB_API ditherer_base : public filter_base {
 public:
     virtual ~ditherer_base() = default;
 
@@ -220,24 +220,21 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API ordered_dither : public ditherer_base {
+class TCOB_API ordered_dither final : public ditherer_base {
 public:
-    explicit ordered_dither(std::vector<color> palette, i32 matrixSize = 8);
+    explicit ordered_dither(std::vector<color> palette);
 
     auto to_indexed(image const& img) -> std::vector<u32> override;
 
 private:
     auto get_threshold(i32 x, i32 y) const -> f64;
 
-    void generate_bayer_matrix();
-
-    std::vector<f64> _bayerMatrix;
-    i32              _matrixSize;
+    std::array<f64, 8 * 8> _bayerMatrix {};
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API atkinson_dither : public ditherer_base {
+class TCOB_API atkinson_dither final : public ditherer_base {
 public:
     explicit atkinson_dither(std::vector<color> palette);
 
@@ -246,7 +243,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API floyd_steinberg_dither : public ditherer_base {
+class TCOB_API floyd_steinberg_dither final : public ditherer_base {
 public:
     explicit floyd_steinberg_dither(std::vector<color> palette);
 
