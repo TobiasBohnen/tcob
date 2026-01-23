@@ -14,9 +14,9 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
-#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -34,7 +34,7 @@ public:
     explicit widget_painter(gfx::canvas& canvas);
 
     void begin(f32 alpha);
-    void begin(f32 alpha, gfx::transform const& xform);
+    void begin(f32 alpha, transform const& xform);
     void end();
     void push_scissor(rect_f const& globalScissor);
     void pop_scissor();

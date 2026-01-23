@@ -11,9 +11,9 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Gfx.hpp"
-#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -130,7 +130,7 @@ void image_box::on_draw(widget_painter& painter)
         painter.add_overlay([this, targetRect](widget_painter& that) -> void {
             auto& myCanvas {that.canvas()};
 
-            gfx::transform xform;
+            transform xform;
             xform.translate(form_offset());
             that.begin(Alpha, xform);
 

@@ -14,8 +14,8 @@
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -201,7 +201,7 @@ void accordion::on_draw_children(widget_painter& painter)
     painter.push_scissor(bounds);
 
     // content
-    auto xform {gfx::transform::Identity};
+    auto xform {transform::Identity};
     xform.translate(bounds.Position);
 
     auto& sec {_sections[secIdx]};

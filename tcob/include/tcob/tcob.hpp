@@ -30,6 +30,7 @@
 #include <tcob/core/Point.hpp>
 #include <tcob/core/Property.hpp>
 #include <tcob/core/Proxy.hpp>
+#include <tcob/core/Quadtree.hpp>
 #include <tcob/core/Rect.hpp>
 #include <tcob/core/Serialization.hpp>
 #include <tcob/core/ServiceLocator.hpp>
@@ -73,6 +74,7 @@
 #include <tcob/data/SqliteStatement.hpp>
 #include <tcob/data/SqliteTable.hpp>
 
+#include <tcob/core/Transform.hpp>
 #include <tcob/gfx/Camera.hpp>
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/gfx/ColorGradient.hpp>
@@ -85,7 +87,6 @@
 #include <tcob/gfx/Material.hpp>
 #include <tcob/gfx/Path2d.hpp>
 #include <tcob/gfx/Polygon.hpp>
-#include <tcob/gfx/Quadtree.hpp>
 #include <tcob/gfx/Ray.hpp>
 #include <tcob/gfx/RenderSystem.hpp>
 #include <tcob/gfx/RenderSystemImpl.hpp>
@@ -96,7 +97,6 @@
 #include <tcob/gfx/Stats.hpp>
 #include <tcob/gfx/TextFormatter.hpp>
 #include <tcob/gfx/Texture.hpp>
-#include <tcob/gfx/Transform.hpp>
 #include <tcob/gfx/Transformable.hpp>
 #include <tcob/gfx/UniformBuffer.hpp>
 #include <tcob/gfx/VertexArray.hpp>
@@ -115,6 +115,7 @@
 #include <tcob/gfx/html/HtmlDocument.hpp>
 #include <tcob/gfx/procgen/LSystem.hpp>
 #include <tcob/gfx/procgen/Noise.hpp>
+
 
 #include <tcob/gfx/ui/Form.hpp>
 #include <tcob/gfx/ui/Layout.hpp>

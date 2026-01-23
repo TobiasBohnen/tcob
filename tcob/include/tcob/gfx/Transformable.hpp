@@ -12,7 +12,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Size.hpp"
-#include "tcob/gfx/Transform.hpp"
+#include "tcob/core/Transform.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ public:
     prop<size_f>                        Scale;
     prop<std::pair<degree_f, degree_f>> Skew;
 
-    auto transform() const -> gfx::transform const&;
+    auto transform() const -> transform const&;
 
     void translate_by(point_f offset);
     void rotate_by(degree_f angle);
@@ -44,8 +44,8 @@ protected:
     void         update_transform() const;
 
 private:
-    mutable gfx::transform _transform {};
-    mutable bool           _isDirty {true};
+    mutable class transform _transform {};
+    mutable bool            _isDirty {true};
 };
 
 }

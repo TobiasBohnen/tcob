@@ -12,7 +12,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 
-namespace tcob::gfx {
+namespace tcob {
 ////////////////////////////////////////////////////////////
 
 class [[nodiscard]] TCOB_API transform final {

@@ -14,12 +14,12 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Path2d.hpp"
 #include "tcob/gfx/Texture.hpp"
-#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
@@ -93,7 +93,7 @@ public:
     void scale_at(size_f scale, point_f p);
     void skew(degree_f angleX, degree_f angleY);
     void skew_at(degree_f angleX, degree_f angleY, point_f p);
-    void set_transform(gfx::transform xform);
+    void set_transform(transform xform);
     void reset_transform();
 
     // Scissoring

@@ -11,8 +11,9 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Gfx.hpp"
-#include "tcob/gfx/Transform.hpp"
+
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////

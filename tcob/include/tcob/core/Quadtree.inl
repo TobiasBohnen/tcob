@@ -14,7 +14,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 
-namespace tcob::gfx {
+namespace tcob {
 ////////////////////////////////////////////////////////////
 
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>

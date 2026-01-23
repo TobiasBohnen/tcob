@@ -14,8 +14,8 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -142,7 +142,7 @@ void panel::on_draw_children(widget_painter& painter)
     // content
     scoped_scissor const guard {painter, this};
 
-    auto          xform {gfx::transform::Identity};
+    auto          xform {transform::Identity};
     point_f const translate {rect.Position + form_offset() - scroll_offset()};
     xform.translate(translate);
 
@@ -420,7 +420,7 @@ void glass::on_draw_children(widget_painter& painter)
     // content
     scoped_scissor const guard {painter, this};
 
-    auto          xform {gfx::transform::Identity};
+    auto          xform {transform::Identity};
     point_f const translate {rect.Position + form_offset() - scroll_offset()};
     xform.translate(translate);
 

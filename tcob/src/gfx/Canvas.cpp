@@ -23,6 +23,7 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/Font.hpp"
@@ -34,7 +35,7 @@
 #include "tcob/gfx/RenderSystemImpl.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/Texture.hpp"
-#include "tcob/gfx/Transform.hpp"
+
 
 namespace tcob::gfx {
 using namespace detail;

@@ -10,7 +10,7 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
-#include "tcob/gfx/Transform.hpp"
+#include "tcob/core/Transform.hpp"
 
 namespace tcob::gfx {
 
@@ -23,7 +23,7 @@ transformable::transformable()
     Skew.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
-auto transformable::transform() const -> gfx::transform const&
+auto transformable::transform() const -> class transform const&
 {
     update_transform();
     return _transform;

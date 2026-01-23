@@ -18,10 +18,10 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
-#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -43,7 +43,7 @@ void widget_painter::begin(f32 alpha)
     _canvas.set_global_alpha(alpha);
 }
 
-void widget_painter::begin(f32 alpha, gfx::transform const& xform)
+void widget_painter::begin(f32 alpha, transform const& xform)
 {
     begin(alpha);
     _canvas.set_transform(xform);

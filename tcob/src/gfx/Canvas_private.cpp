@@ -20,10 +20,11 @@
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
-#include "tcob/gfx/Transform.hpp"
+
 
 namespace tcob::gfx {
 

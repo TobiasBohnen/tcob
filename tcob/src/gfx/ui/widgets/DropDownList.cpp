@@ -12,8 +12,8 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -114,7 +114,7 @@ void drop_down_list::on_draw(widget_painter& painter)
     if (_isExtended) {
         f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
         painter.add_overlay([this, itemHeight](widget_painter& that) -> void {
-            gfx::transform xform;
+            transform xform;
             xform.translate(form_offset());
             that.begin(Alpha, xform);
 

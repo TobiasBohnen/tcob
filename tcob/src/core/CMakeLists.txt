@@ -26,6 +26,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/StringUtils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/TaskManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Timer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Transform.cpp
 )
 
 list(APPEND HDR
@@ -73,6 +74,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Property.inl
     ${TCOB_INC_DIR}/tcob/core/Proxy.hpp
     ${TCOB_INC_DIR}/tcob/core/Proxy.inl
+    ${TCOB_INC_DIR}/tcob/core/Quadtree.hpp
+    ${TCOB_INC_DIR}/tcob/core/Quadtree.inl
     ${TCOB_INC_DIR}/tcob/core/Rect.hpp
     ${TCOB_INC_DIR}/tcob/core/Rect.inl
     ${TCOB_INC_DIR}/tcob/core/Serialization.hpp
@@ -88,6 +91,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/TaskManager.hpp
     ${TCOB_INC_DIR}/tcob/core/TaskManager.inl
     ${TCOB_INC_DIR}/tcob/core/Timer.hpp
+    ${TCOB_INC_DIR}/tcob/core/Transform.hpp
+    ${TCOB_INC_DIR}/tcob/core/Transform.inl
     ${TCOB_INC_DIR}/tcob/core/TypeFactory.hpp
     ${TCOB_INC_DIR}/tcob/core/TypeFactory.inl
     ${TCOB_INC_DIR}/tcob/core/ext/magic_enum_reduced.hpp

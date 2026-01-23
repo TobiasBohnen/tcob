@@ -14,8 +14,8 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -233,7 +233,7 @@ void tab_container::on_draw_children(widget_painter& painter)
 
     // active tab
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
-        auto          xform {gfx::transform::Identity};
+        auto          xform {transform::Identity};
         point_f const translate {rect.Position + form_offset()};
         xform.translate(translate);
 

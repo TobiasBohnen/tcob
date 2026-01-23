@@ -3,14 +3,14 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/Transform.hpp"
+#include "tcob/core/Transform.hpp"
 
 #include <utility>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 
-namespace tcob::gfx {
+namespace tcob {
 ////////////////////////////////////////////////////////////
 transform const transform::Identity;
 
