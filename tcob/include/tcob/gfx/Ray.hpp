@@ -17,7 +17,6 @@
 #include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Polygon.hpp"
 
-
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 

@@ -14,7 +14,6 @@
 #include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Gfx.hpp"
 
-
 namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
