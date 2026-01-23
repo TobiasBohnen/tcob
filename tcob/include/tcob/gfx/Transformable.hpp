@@ -28,7 +28,7 @@ public:
     prop<size_f>                        Scale;
     prop<std::pair<degree_f, degree_f>> Skew;
 
-    auto transform() const -> transform const&;
+    auto transform() const -> class transform const&;
 
     void translate_by(point_f offset);
     void rotate_by(degree_f angle);
