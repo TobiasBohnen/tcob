@@ -49,7 +49,6 @@
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/Texture.hpp"
 
-
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
