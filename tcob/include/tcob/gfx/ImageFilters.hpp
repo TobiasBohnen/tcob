@@ -12,6 +12,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/spatial/KDTree.hpp"
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx {
@@ -204,18 +205,26 @@ private:
 
 class TCOB_API ditherer_base : public filter_base {
 public:
-    virtual ~ditherer_base() = default;
-
     ditherer_base(std::vector<color> palette);
+    virtual ~ditherer_base() = default;
 
     auto         operator()(image const& img) -> image override;
     virtual auto to_indexed(image const& img) -> std::vector<u32> = 0;
 
 protected:
-    auto find_nearest(color c) const -> u32;
+    auto find_nearest(f64 r, f64 g, f64 b) const -> u32;
     auto get_color(u32 idx) const -> color;
 
     std::vector<color> _palette;
+    struct color_node {
+        std::array<f32, 3> Position;
+        u32                ID;
+
+        auto get_dimensions() const -> std::array<f32, 3> { return Position; }
+        auto operator==(color_node const& other) const -> bool { return ID == other.ID; }
+    };
+
+    kd_tree<color_node, 3> _tree;
 };
 
 ////////////////////////////////////////////////////////////
@@ -229,7 +238,15 @@ public:
 private:
     auto get_threshold(i32 x, i32 y) const -> f64;
 
-    std::array<f64, 8 * 8> _bayerMatrix {};
+    static constexpr std::array<f64, 8 * 8> bayer8x8 {
+        {0.000000, 0.500000, 0.125000, 0.625000, 0.031250, 0.531250, 0.156250, 0.656250,
+         0.750000, 0.250000, 0.875000, 0.375000, 0.781250, 0.281250, 0.906250, 0.406250,
+         0.187500, 0.687500, 0.062500, 0.562500, 0.218750, 0.718750, 0.093750, 0.593750,
+         0.937500, 0.437500, 0.812500, 0.312500, 0.968750, 0.468750, 0.843750, 0.343750,
+         0.046875, 0.546875, 0.171875, 0.671875, 0.015625, 0.515625, 0.140625, 0.640625,
+         0.796875, 0.296875, 0.921875, 0.421875, 0.765625, 0.265625, 0.890625, 0.390625,
+         0.234375, 0.734375, 0.109375, 0.609375, 0.203125, 0.703125, 0.078125, 0.578125,
+         0.984375, 0.484375, 0.859375, 0.359375, 0.953125, 0.453125, 0.828125, 0.328125}};
 };
 
 ////////////////////////////////////////////////////////////

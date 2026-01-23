@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <array>
-#include <limits>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -562,8 +561,7 @@ void neuquant::train(image const& img)
 
         for (i32 j {0}; j < lengthCount; j += step) {
             color const c {img.get_pixel((pixelPos % lengthCount))};
-
-            i32 const bmu {find_bmu(c)};
+            i32 const   bmu {find_bmu(c)};
             alter_neighbor(bmu, c, alpha);
 
             i32 const rad {static_cast<i32>(radius)};
@@ -613,7 +611,12 @@ void neuquant::alter_neighbor(i32 index, color c, f64 alpha)
 
 ditherer_base::ditherer_base(std::vector<color> palette)
     : _palette {std::move(palette)}
+    , _tree {{{0, 0, 0}, {255, 255, 255}}}
 {
+    for (u32 i {0}; i < _palette.size(); ++i) {
+        color const c {_palette[i]};
+        _tree.add({.Position = {static_cast<f32>(c.R), static_cast<f32>(c.G), static_cast<f32>(c.B)}, .ID = i});
+    }
 }
 
 auto ditherer_base::operator()(image const& img) -> image
@@ -631,25 +634,9 @@ auto ditherer_base::operator()(image const& img) -> image
     return retValue;
 }
 
-auto ditherer_base::find_nearest(color c) const -> u32
+auto ditherer_base::find_nearest(f64 r, f64 g, f64 b) const -> u32
 {
-    u32 bestIdx {0};
-    i32 minDist {std::numeric_limits<i32>::max()};
-
-    for (usize i {0}; i < _palette.size(); ++i) {
-        i32 const dr {static_cast<i32>(_palette[i].R) - static_cast<i32>(c.R)};
-        i32 const dg {static_cast<i32>(_palette[i].G) - static_cast<i32>(c.G)};
-        i32 const db {static_cast<i32>(_palette[i].B) - static_cast<i32>(c.B)};
-        i32 const dist {(dr * dr) + (dg * dg) + (db * db)};
-
-        if (dist < minDist) {
-            minDist = dist;
-            bestIdx = static_cast<u32>(i);
-            if (dist == 0) { break; }
-        }
-    }
-
-    return bestIdx;
+    return _tree.find_nearest(std::array<f32, 3> {{static_cast<f32>(r), static_cast<f32>(g), static_cast<f32>(b)}}).ID;
 }
 
 auto ditherer_base::get_color(u32 idx) const -> color
@@ -662,12 +649,6 @@ auto ditherer_base::get_color(u32 idx) const -> color
 ordered_dither::ordered_dither(std::vector<color> palette)
     : ditherer_base {std::move(palette)}
 {
-    for (i32 y {0}; y < 8; ++y) {
-        for (i32 x {0}; x < 8; ++x) {
-            i32 const index {(y * 8) + x};
-            _bayerMatrix[index] = static_cast<f64>(((x * 8 + y) * 4 % 64) + ((x + y) % 4)) / 64.0;
-        }
-    }
 }
 
 auto ordered_dither::to_indexed(image const& img) -> std::vector<u32>
@@ -689,8 +670,7 @@ auto ordered_dither::to_indexed(image const& img) -> std::vector<u32>
             f64 const g {std::clamp(static_cast<f64>(original.G) + threshold, 0.0, 255.0)};
             f64 const b {std::clamp(static_cast<f64>(original.B) + threshold, 0.0, 255.0)};
 
-            retValue[idx] = find_nearest({static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b),
-                                          original.A});
+            retValue[idx] = find_nearest(r, g, b);
         }
     }
 
@@ -701,7 +681,7 @@ auto ordered_dither::get_threshold(i32 x, i32 y) const -> f64
 {
     i32 const mx {x % 8};
     i32 const my {y % 8};
-    f64 const normalized {_bayerMatrix[(my * 8) + mx]};
+    f64 const normalized {bayer8x8[(my * 8) + mx]};
     return (normalized - 0.5) * 64.0;
 }
 
@@ -731,11 +711,9 @@ auto atkinson_dither::to_indexed(image const& img) -> std::vector<u32>
 
             f64 const r {std::clamp(static_cast<f64>(original.R) + currErrors[(x * 3) + 0], 0.0, 255.0)};
             f64 const g {std::clamp(static_cast<f64>(original.G) + currErrors[(x * 3) + 1], 0.0, 255.0)};
-            f64 const b {std::clamp(static_cast<f64>(original.B) + currErrors[(x * 3) + 2],
-                                    0.0, 255.0)};
+            f64 const b {std::clamp(static_cast<f64>(original.B) + currErrors[(x * 3) + 2], 0.0, 255.0)};
 
-            retValue[idx] = find_nearest({static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b),
-                                          original.A});
+            retValue[idx] = find_nearest(r, g, b);
 
             color const quantized {get_color(retValue[idx])};
             f64 const   errR {r - static_cast<f64>(quantized.R)};
@@ -818,8 +796,7 @@ auto floyd_steinberg_dither::to_indexed(image const& img) -> std::vector<u32>
             f64 const g {std::clamp(static_cast<f64>(original.G) + currErrors[(x * 3) + 1], 0.0, 255.0)};
             f64 const b {std::clamp(static_cast<f64>(original.B) + currErrors[(x * 3) + 2], 0.0, 255.0)};
 
-            retValue[idx] = find_nearest({static_cast<u8>(r), static_cast<u8>(g), static_cast<u8>(b),
-                                          original.A});
+            retValue[idx] = find_nearest(r, g, b);
 
             color const quantized {get_color(retValue[idx])};
 
