@@ -27,7 +27,7 @@ inline quadtree<T, SplitThreshold, MaxDepth>::quadtree(rect_f const& rect)
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline void quadtree<T, SplitThreshold, MaxDepth>::add(T const& value)
 {
-    assert(detail::contains(_bounds, value.get_rect()));
+    assert(node::Contains(_bounds, value.get_rect()));
 
     _root->add(0, _bounds, value);
 }
@@ -35,7 +35,7 @@ inline void quadtree<T, SplitThreshold, MaxDepth>::add(T const& value)
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline void quadtree<T, SplitThreshold, MaxDepth>::remove(T const& value)
 {
-    assert(detail::contains(_bounds, value.get_rect()));
+    assert(node::Contains(_bounds, value.get_rect()));
 
     _root->remove(_bounds, value);
 }
@@ -43,8 +43,8 @@ inline void quadtree<T, SplitThreshold, MaxDepth>::remove(T const& value)
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline void quadtree<T, SplitThreshold, MaxDepth>::replace(T const& oldValue, T const& newValue)
 {
-    assert(detail::contains(_bounds, oldValue.get_rect()));
-    assert(detail::contains(_bounds, newValue.get_rect()));
+    assert(node::Contains(_bounds, oldValue.get_rect()));
+    assert(node::Contains(_bounds, newValue.get_rect()));
 
     if (!_root->replace(_bounds, oldValue, newValue)) {
         // Otherwise, remove the old value and add the new one
@@ -62,7 +62,7 @@ inline void quadtree<T, SplitThreshold, MaxDepth>::clear()
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline auto quadtree<T, SplitThreshold, MaxDepth>::query(rect_f const& rect) const -> std::vector<T>
 {
-    if (!detail::intersects(_bounds, rect)) { return {}; }
+    if (!node::Intersects(_bounds, rect)) { return {}; }
 
     std::vector<T> retValue {};
     _root->query(_bounds, rect, retValue);
@@ -86,7 +86,7 @@ inline auto quadtree<T, SplitThreshold, MaxDepth>::bounds() const -> rect_f cons
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline auto quadtree<T, SplitThreshold, MaxDepth>::contains(rect_f const& rect) const -> bool
 {
-    return detail::contains(_bounds, rect);
+    return node::Contains(_bounds, rect);
 }
 
 ////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ inline auto quadtree<T, SplitThreshold, MaxDepth>::node::is_leaf() const -> bool
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline void quadtree<T, SplitThreshold, MaxDepth>::node::add(usize depth, rect_f const& rect, T const& value)
 {
-    assert(detail::contains(rect, value.get_rect()));
+    assert(node::Contains(rect, value.get_rect()));
 
     if (is_leaf()) {
         // Insert the value in this node if possible
@@ -146,7 +146,7 @@ inline void quadtree<T, SplitThreshold, MaxDepth>::node::split(rect_f const& rec
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline auto quadtree<T, SplitThreshold, MaxDepth>::node::remove(rect_f const& rect, T const& value) -> bool
 {
-    assert(detail::contains(rect, value.get_rect()));
+    assert(node::Contains(rect, value.get_rect()));
 
     auto const removeValue {[&] {
         // Find the value in node->values
@@ -203,13 +203,12 @@ template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline auto quadtree<T, SplitThreshold, MaxDepth>::node::replace(rect_f const& rect, T const& oldValue, T const& newValue) -> bool
 {
     // Ensure the rect contains both oldValue and newValue
-    assert(detail::contains(rect, oldValue.get_rect()));
-    assert(detail::contains(rect, newValue.get_rect()));
+    assert(node::Contains(rect, oldValue.get_rect()));
+    assert(node::Contains(rect, newValue.get_rect()));
 
     if (is_leaf()) {
         // Find and replace the oldValue with newValue in this node
-        auto it {std::ranges::find_if(_values, [&oldValue](auto const& rhs) { return oldValue == rhs; })};
-        if (it != std::end(_values)) {
+        if (auto it {std::ranges::find_if(_values, [&oldValue](auto const& rhs) { return oldValue == rhs; })}; it != std::end(_values)) {
             *it = newValue;
             return true;
         }
@@ -231,16 +230,16 @@ inline auto quadtree<T, SplitThreshold, MaxDepth>::node::replace(rect_f const& r
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline void quadtree<T, SplitThreshold, MaxDepth>::node::query(rect_f const& rect, rect_f const& queryRect, std::vector<T>& values) const
 {
-    assert(detail::intersects(queryRect, rect));
+    assert(node::Intersects(queryRect, rect));
 
     for (auto const& value : _values) {
-        if (detail::intersects(queryRect, value.get_rect())) {
+        if (node::Intersects(queryRect, value.get_rect())) {
             values.push_back(value);
         }
     }
     if (!is_leaf()) {
         for (usize i {0}; i < _children.size(); ++i) {
-            if (auto childRect {ComputeRect(rect, static_cast<i32>(i))}; detail::intersects(queryRect, childRect)) {
+            if (auto childRect {ComputeRect(rect, static_cast<i32>(i))}; node::Intersects(queryRect, childRect)) {
                 _children[i]->query(childRect, queryRect, values);
             }
         }
@@ -254,7 +253,7 @@ inline void quadtree<T, SplitThreshold, MaxDepth>::node::find_all_intersections(
     // Make sure to not report the same intersection twice
     for (usize i {0}; i < _values.size(); ++i) {
         for (usize j {0}; j < i; ++j) {
-            if (detail::intersects(_values[i].get_rect(), _values[j].get_rect())) {
+            if (node::Intersects(_values[i].get_rect(), _values[j].get_rect())) {
                 intersections.emplace_back(_values[i], _values[j]);
             }
         }
@@ -278,7 +277,7 @@ inline void quadtree<T, SplitThreshold, MaxDepth>::node::find_intersections_in_d
 {
     // Test against the values stored in this node
     for (auto const& other : _values) {
-        if (detail::intersects(value.get_rect(), other.get_rect())) {
+        if (node::Intersects(value.get_rect(), other.get_rect())) {
             intersections.emplace_back(value, other);
         }
     }
@@ -324,4 +323,17 @@ inline auto quadtree<T, SplitThreshold, MaxDepth>::node::GetQuadrant(rect_f cons
     }
     return -1;                                           // Not contained in any quadrant
 }
+
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+auto constexpr quadtree<T, SplitThreshold, MaxDepth>::node::Intersects(rect_f const& left, rect_f const& right) noexcept -> bool
+{
+    return left.left() < right.right() && left.right() > right.left() && left.top() < right.bottom() && left.bottom() > right.top();
+}
+
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+auto constexpr quadtree<T, SplitThreshold, MaxDepth>::node::Contains(rect_f const& left, rect_f const& right) noexcept -> bool
+{
+    return left.left() <= right.left() && right.right() <= left.right() && left.top() <= right.top() && right.bottom() <= left.bottom();
+}
+
 }

@@ -29,18 +29,6 @@ concept QuadtreeValue =
 
 ////////////////////////////////////////////////////////////
 
-namespace detail {
-    auto constexpr contains(rect_f const& left, rect_f const& right) noexcept -> bool
-    {
-        return left.left() <= right.left() && right.right() <= left.right() && left.top() <= right.top() && right.bottom() <= left.bottom();
-    }
-
-    auto constexpr intersects(rect_f const& left, rect_f const& right) noexcept -> bool
-    {
-        return left.left() < right.right() && left.right() > right.left() && left.top() < right.bottom() && left.bottom() > right.top();
-    }
-}
-
 template <QuadtreeValue T, usize SplitThreshold = 16, usize MaxDepth = 8>
 class quadtree {
 public:
@@ -84,6 +72,8 @@ private:
 
         static auto ComputeRect(rect_f const& rect, i32 i) -> rect_f;
         static auto GetQuadrant(rect_f const& nodeRect, rect_f const& valueRect) -> i32;
+        static auto constexpr Contains(rect_f const& left, rect_f const& right) noexcept -> bool;
+        static auto constexpr Intersects(rect_f const& left, rect_f const& right) noexcept -> bool;
 
     private:
         std::array<std::unique_ptr<node>, 4> _children;

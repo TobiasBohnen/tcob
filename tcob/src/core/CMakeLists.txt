@@ -52,6 +52,10 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/io/SpanStream.hpp
     ${TCOB_INC_DIR}/tcob/core/io/Stream.hpp
     ${TCOB_INC_DIR}/tcob/core/io/Stream.inl
+    ${TCOB_INC_DIR}/tcob/core/spatial/Quadtree.hpp
+    ${TCOB_INC_DIR}/tcob/core/spatial/Quadtree.inl
+    ${TCOB_INC_DIR}/tcob/core/spatial/KDTree.hpp
+    ${TCOB_INC_DIR}/tcob/core/spatial/KDTree.inl
     ${TCOB_INC_DIR}/tcob/core/random/Distribution.hpp
     ${TCOB_INC_DIR}/tcob/core/random/Distribution.inl
     ${TCOB_INC_DIR}/tcob/core/random/Engine.hpp
@@ -74,8 +78,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Property.inl
     ${TCOB_INC_DIR}/tcob/core/Proxy.hpp
     ${TCOB_INC_DIR}/tcob/core/Proxy.inl
-    ${TCOB_INC_DIR}/tcob/core/Quadtree.hpp
-    ${TCOB_INC_DIR}/tcob/core/Quadtree.inl
     ${TCOB_INC_DIR}/tcob/core/Rect.hpp
     ${TCOB_INC_DIR}/tcob/core/Rect.inl
     ${TCOB_INC_DIR}/tcob/core/Serialization.hpp

@@ -30,7 +30,6 @@
 #include <tcob/core/Point.hpp>
 #include <tcob/core/Property.hpp>
 #include <tcob/core/Proxy.hpp>
-#include <tcob/core/Quadtree.hpp>
 #include <tcob/core/Rect.hpp>
 #include <tcob/core/Serialization.hpp>
 #include <tcob/core/ServiceLocator.hpp>
@@ -58,6 +57,8 @@
 #include <tcob/core/random/Distribution.hpp>
 #include <tcob/core/random/Engine.hpp>
 #include <tcob/core/random/Random.hpp>
+#include <tcob/core/spatial/KDTree.hpp>
+#include <tcob/core/spatial/Quadtree.hpp>
 
 #include <tcob/data/CSV.hpp>
 #include <tcob/data/Config.hpp>
@@ -115,7 +116,6 @@
 #include <tcob/gfx/html/HtmlDocument.hpp>
 #include <tcob/gfx/procgen/LSystem.hpp>
 #include <tcob/gfx/procgen/Noise.hpp>
-
 
 #include <tcob/gfx/ui/Form.hpp>
 #include <tcob/gfx/ui/Layout.hpp>
