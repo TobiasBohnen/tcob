@@ -636,7 +636,7 @@ auto ditherer_base::operator()(image const& img) -> image
 
 auto ditherer_base::find_nearest(f64 r, f64 g, f64 b) const -> u32
 {
-    return _tree.find_nearest(std::array<f32, 3> {{static_cast<f32>(r), static_cast<f32>(g), static_cast<f32>(b)}}).ID;
+    return _tree.find_nearest(std::array<f32, 3> {{static_cast<f32>(r), static_cast<f32>(g), static_cast<f32>(b)}})->ID;
 }
 
 auto ditherer_base::get_color(u32 idx) const -> color

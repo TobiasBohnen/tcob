@@ -7,7 +7,9 @@
 #include "KDTree.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <limits>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -26,6 +28,8 @@ template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
     requires KdTreeValue<T, Dimensions>
 inline void kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::add(T const& value)
 {
+    assert(node::PointInBounds(value.get_dimensions(), _bounds));
+
     _root->add(0, _bounds, value);
 }
 
@@ -33,6 +37,8 @@ template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
     requires KdTreeValue<T, Dimensions>
 inline void kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::remove(T const& value)
 {
+    assert(node::PointInBounds(value.get_dimensions(), _bounds));
+
     _root->remove(_bounds, value);
 }
 
@@ -40,6 +46,9 @@ template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
     requires KdTreeValue<T, Dimensions>
 inline void kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::replace(T const& oldValue, T const& newValue)
 {
+    assert(node::PointInBounds(oldValue.get_dimensions(), _bounds));
+    assert(node::PointInBounds(newValue.get_dimensions(), _bounds));
+
     if (!_root->replace(_bounds, oldValue, newValue)) {
         // Otherwise, remove the old value and add the new one
         remove(oldValue);
@@ -67,21 +76,12 @@ inline auto kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::query(bounds_type 
 
 template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
     requires KdTreeValue<T, Dimensions>
-inline auto kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::find_nearest(point_type const& target) const -> T
+inline auto kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::find_nearest(point_type const& target) const -> std::optional<T>
 {
     T const* best {nullptr};
     f32      minDistSq {std::numeric_limits<f32>::max()};
     _root->find_nearest(target, _bounds, best, minDistSq);
-    return *best;
-}
-
-template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
-    requires KdTreeValue<T, Dimensions>
-inline auto kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::find_all_intersections() const -> std::vector<std::pair<T, T>>
-{
-    std::vector<std::pair<T, T>> retValue {};
-    _root->find_all_intersections(retValue);
-    return retValue;
+    return best ? std::optional<T> {*best} : std::nullopt;
 }
 
 template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
@@ -118,9 +118,9 @@ inline void kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::add(usize de
 {
     if (!is_leaf()) {
         auto const dims {value.get_dimensions()};
-        i32 const  side {GetSide(dims, _axis, _splitPos)};
+        u32 const  side {GetSide(dims, _axis, _splitPos)};
         auto const childBounds {ComputeChildBounds(bounds, _axis, _splitPos, side)};
-        _children[static_cast<usize>(side)]->add(depth + 1, childBounds, value);
+        _children[side]->add(depth + 1, childBounds, value);
     } else {
         _values.push_back(value);
         if (_values.size() > SplitThreshold && depth < MaxDepth) {
@@ -134,15 +134,15 @@ template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
 inline void kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::split(bounds_type const& bounds, usize axis)
 {
     _axis     = axis;
-    _splitPos = (bounds.first[axis] + bounds.second[axis]) * 0.5f;
+    _splitPos = bounds.first[axis] + ((bounds.second[axis] - bounds.first[axis]) * 0.5f);
 
     _children[0] = std::make_unique<node>();
     _children[1] = std::make_unique<node>();
 
     for (auto const& value : _values) {
         auto const dims {value.get_dimensions()};
-        i32 const  side {GetSide(dims, _axis, _splitPos)};
-        _children[static_cast<usize>(side)]->_values.push_back(value);
+        u32 const  side {GetSide(dims, _axis, _splitPos)};
+        _children[side]->_values.push_back(value);
     }
     _values.clear();
 }
@@ -161,10 +161,10 @@ inline auto kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::remove(bound
     }
 
     auto const dims {value.get_dimensions()};
-    i32 const  side {GetSide(dims, _axis, _splitPos)};
+    u32 const  side {GetSide(dims, _axis, _splitPos)};
     auto const childBounds {ComputeChildBounds(bounds, _axis, _splitPos, side)};
 
-    if (_children[static_cast<usize>(side)]->remove(childBounds, value)) {
+    if (_children[side]->remove(childBounds, value)) {
         return try_merge();
     }
     return false;
@@ -211,11 +211,11 @@ inline auto kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::replace(boun
     }
 
     auto const oldDims {oldValue.get_dimensions()};
-    i32 const  side {GetSide(oldDims, _axis, _splitPos)};
+    u32 const  side {GetSide(oldDims, _axis, _splitPos)};
     auto const childBounds {ComputeChildBounds(bounds, _axis, _splitPos, side)};
 
     // Recurse into the side where the old value was supposed to be
-    return _children[static_cast<usize>(side)]->replace(childBounds, oldValue, newValue);
+    return _children[side]->replace(childBounds, oldValue, newValue);
 }
 
 template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
@@ -230,10 +230,10 @@ inline void kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::query(bounds
     }
 
     if (!is_leaf()) {
-        for (i32 i {0}; i < 2; ++i) {
+        for (u32 i {0}; i < 2; ++i) {
             auto const childBounds {ComputeChildBounds(bounds, _axis, _splitPos, i)};
             if (Intersects(childBounds, queryBounds)) {
-                _children[static_cast<usize>(i)]->query(childBounds, queryBounds, values);
+                _children[i]->query(childBounds, queryBounds, values);
             }
         }
     }
@@ -259,13 +259,13 @@ inline void kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::find_nearest
 
     if (is_leaf()) { return; }
 
-    i32 const  side {GetSide(target, _axis, _splitPos)};
+    u32 const  side {GetSide(target, _axis, _splitPos)};
     auto const nearChildBounds {ComputeChildBounds(bounds, _axis, _splitPos, side)};
     _children[side]->find_nearest(target, nearChildBounds, best, minDistSq);
 
     f32 const planeDiff {target[_axis] - _splitPos};
     if ((planeDiff * planeDiff) < minDistSq) {
-        i32 const  otherSide {1 - side};
+        u32 const  otherSide {1 - side};
         auto const farChildBounds {ComputeChildBounds(bounds, _axis, _splitPos, otherSide)};
         _children[otherSide]->find_nearest(target, farChildBounds, best, minDistSq);
     }
@@ -273,46 +273,14 @@ inline void kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::find_nearest
 
 template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
     requires KdTreeValue<T, Dimensions>
-inline void kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::find_all_intersections(std::vector<std::pair<T, T>>& intersections) const
-{
-    for (usize i {0}; i < _values.size(); ++i) {
-        for (usize j {i + 1}; j < _values.size(); ++j) {
-            intersections.emplace_back(_values[i], _values[j]);
-        }
-        find_intersections_in_descendants(_values[i], intersections);
-    }
-
-    if (!is_leaf()) {
-        for (auto const& child : _children) {
-            child->find_all_intersections(intersections);
-        }
-    }
-}
-
-template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
-    requires KdTreeValue<T, Dimensions>
-inline void kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::find_intersections_in_descendants(T const& value, std::vector<std::pair<T, T>>& intersections) const
-{
-    if (!is_leaf()) {
-        for (auto const& child : _children) {
-            for (auto const& childValue : child->_values) {
-                intersections.emplace_back(value, childValue);
-            }
-            child->find_intersections_in_descendants(value, intersections);
-        }
-    }
-}
-
-template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
-    requires KdTreeValue<T, Dimensions>
-inline auto kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::GetSide(point_type const& point, usize axis, f32 splitPos) -> i32
+inline auto kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::GetSide(point_type const& point, usize axis, f32 splitPos) -> u32
 {
     return point[axis] < splitPos ? 0 : 1;
 }
 
 template <typename T, usize Dimensions, usize SplitThreshold, usize MaxDepth>
     requires KdTreeValue<T, Dimensions>
-inline auto kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::ComputeChildBounds(bounds_type const& bounds, usize axis, f32 splitPos, i32 side) -> bounds_type
+inline auto kd_tree<T, Dimensions, SplitThreshold, MaxDepth>::node::ComputeChildBounds(bounds_type const& bounds, usize axis, f32 splitPos, u32 side) -> bounds_type
 {
     bounds_type childBounds {bounds};
     if (side == 0) {

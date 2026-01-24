@@ -621,7 +621,7 @@ public:
                 continue;
             }
 
-            u32 key {(static_cast<u32>(prefix) << 8) | suffix};
+            u32 const key {(static_cast<u32>(prefix) << 8) | suffix};
 
             if (auto it {codeTable.find(key)}; it != codeTable.end()) {
                 prefix = it->second;

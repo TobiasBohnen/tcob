@@ -8,6 +8,7 @@
 
 #include <array>
 #include <memory>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -42,9 +43,7 @@ public:
 
     auto query(bounds_type const& bounds) const -> std::vector<T>;
 
-    auto find_nearest(point_type const& target) const -> T;
-
-    auto find_all_intersections() const -> std::vector<std::pair<T, T>>;
+    auto find_nearest(point_type const& target) const -> std::optional<T>;
 
     auto bounds() const -> bounds_type const&;
     auto contains(bounds_type const& bounds) const -> bool;
@@ -68,20 +67,16 @@ private:
 
         void find_nearest(point_type const& target, bounds_type const& bounds, T const*& best, f32& minDistSq) const;
 
-        void find_all_intersections(std::vector<std::pair<T, T>>& intersections) const;
-
-        void find_intersections_in_descendants(T const& value, std::vector<std::pair<T, T>>& intersections) const;
-
-        static auto GetSide(point_type const& point, usize axis, f32 splitPos) -> i32;
-        static auto ComputeChildBounds(bounds_type const& bounds, usize axis, f32 splitPos, i32 side) -> bounds_type;
+        static auto GetSide(point_type const& point, usize axis, f32 splitPos) -> u32;
+        static auto ComputeChildBounds(bounds_type const& bounds, usize axis, f32 splitPos, u32 side) -> bounds_type;
         static auto Intersects(bounds_type const& a, bounds_type const& b) -> bool;
         static auto PointInBounds(point_type const& point, bounds_type const& bounds) -> bool;
 
     private:
         std::array<std::unique_ptr<node>, 2> _children;
         std::vector<T>                       _values;
-        f32                                  _splitPos;
-        usize                                _axis;
+        f32                                  _splitPos {};
+        usize                                _axis {};
     };
 
     bounds_type           _bounds;
