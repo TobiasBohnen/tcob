@@ -28,7 +28,9 @@ template <typename Object, typename... Keys>
 inline auto proxy<Object, Keys...>::operator=(auto&& other) -> proxy&
 {
     static_assert(!std::is_const_v<Object>, "object is const");
-    std::apply([&](auto&&... args) { return _object.set(args..., std::forward<decltype(other)>(other)); }, _keys);
+    if constexpr (!std::is_const_v<Object>) {
+        std::apply([&](auto&&... args) { return _object.set(args..., std::forward<decltype(other)>(other)); }, _keys);
+    }
     return *this;
 }
 

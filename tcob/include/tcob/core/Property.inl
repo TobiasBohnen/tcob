@@ -8,6 +8,7 @@
 
 #include <compare>
 #include <type_traits>
+#include <utility>
 
 namespace tcob::detail {
 
@@ -129,11 +130,14 @@ inline auto prop_base<T, Source>::operator!() const -> bool
 template <typename T, typename Source>
 inline auto prop_base<T, Source>::operator->() const
 {
-    if constexpr (OverloadsArrowOp<T>) {
+    if constexpr (OverloadsArrowOp<T> || std::is_pointer_v<T>) {
         return _source.get();
     } else {
         static_assert(std::is_reference_v<return_type>);
-        return &_source.get();
+        if constexpr (std::is_reference_v<return_type>) {
+            return &_source.get();
+        }
+        std::unreachable();
     }
 }
 
