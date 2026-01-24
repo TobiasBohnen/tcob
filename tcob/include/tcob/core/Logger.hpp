@@ -90,7 +90,7 @@ protected:
 
 class TCOB_API stdout_logger final : public logger {
 public:
-    stdout_logger() = default;
+    stdout_logger();
 
 protected:
     void log(string const& message, level level) const override;

@@ -78,20 +78,11 @@ auto logger::format_message(string const& message, level level) const -> string
     string prefix;
 
     switch (level) {
-    case level::Debug:
-        prefix = "[debug] ";
-        break;
-    case level::Info:
-        prefix = "[info]  ";
-        break;
-    case level::Warning:
-        prefix = "[warn]  ";
-        break;
-    case level::Error:
-        prefix = "[error] ";
-        break;
-    case level::Off:
-        break;
+    case level::Debug:   prefix = "[debug] "; break;
+    case level::Info:    prefix = "[info]  "; break;
+    case level::Warning: prefix = "[warn]  "; break;
+    case level::Error:   prefix = "[error] "; break;
+    case level::Off:     break;
     }
 #if __cpp_lib_chrono >= 201907L
     auto const time {std::chrono::current_zone()->to_local(std::chrono::system_clock::now())};
@@ -139,31 +130,26 @@ void null_logger::log(string const&, level) const
 
 ////////////////////////////////////////////////////////////
 
-void stdout_logger::log(string const& message, level level) const
+stdout_logger::stdout_logger()
 {
 #if defined(_MSC_VER)
     SetConsoleOutputCP(CP_UTF8);
 #endif
+}
 
+void stdout_logger::log(string const& message, level level) const
+{
     if (level < MinLevel) { return; }
 
 #if !defined(__EMSCRIPTEN__)
     std::cout << "\033[";
 
     switch (level) {
-    case logger::level::Debug:
-        std::cout << "36";
-        break;
-    case logger::level::Info:
-        std::cout << "32";
-        break;
-    case logger::level::Warning:
-        std::cout << "33";
-        break;
-    case logger::level::Error:
-        std::cout << "31";
-        break;
-    case logger::level::Off: break;
+    case logger::level::Debug:   std::cout << "36"; break;
+    case logger::level::Info:    std::cout << "32"; break;
+    case logger::level::Warning: std::cout << "33"; break;
+    case logger::level::Error:   std::cout << "31"; break;
+    case logger::level::Off:     break;
     }
 
     std::cout << "m"
@@ -173,5 +159,4 @@ void stdout_logger::log(string const& message, level level) const
     std::cout << format_message(message, level);
 #endif
 }
-
 }
