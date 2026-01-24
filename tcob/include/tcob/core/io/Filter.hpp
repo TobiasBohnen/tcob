@@ -21,6 +21,8 @@ public:
     auto from(std::span<byte const> bytes) const -> std::vector<byte>;
 
 private:
+    static constexpr usize BUFFER_SIZE {8192};
+
     i32 _level;
 };
 

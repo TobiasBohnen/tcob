@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cctype>
 #include <cstring>
+#include <limits>
 #include <span>
 #include <string_view>
 #include <vector>
@@ -29,8 +30,9 @@ zlib_filter::zlib_filter(i32 complevel)
 
 auto zlib_filter::to(std::span<byte const> bytes) const -> std::vector<byte>
 {
-    static constexpr usize BUFFER_SIZE {1024};
-    std::vector<byte>      retValue;
+    if (bytes.size() > std::numeric_limits<unsigned int>::max()) { return {}; } // Input too large
+
+    std::vector<byte> retValue;
 
     mz_stream stream;
     memset(&stream, 0, sizeof(stream));
@@ -42,7 +44,7 @@ auto zlib_filter::to(std::span<byte const> bytes) const -> std::vector<byte>
     while (status == MZ_OK) {
         retValue.resize(retValue.size() + BUFFER_SIZE);
         stream.next_out  = retValue.data() + stream.total_out;
-        stream.avail_out = static_cast<u32>(retValue.size() - stream.total_out);
+        stream.avail_out = static_cast<unsigned int>(retValue.size() - stream.total_out);
         status           = mz_deflate(&stream, MZ_FINISH);
     }
 
@@ -59,20 +61,27 @@ auto zlib_filter::to(std::span<byte const> bytes) const -> std::vector<byte>
 
 auto zlib_filter::from(std::span<byte const> bytes) const -> std::vector<byte>
 {
-    static constexpr usize BUFFER_SIZE {1024};
-    std::vector<byte>      retValue;
+    if (bytes.size() > std::numeric_limits<unsigned int>::max()) { return {}; } // Input too large
+    static constexpr usize MAX_DECOMPRESSED_SIZE {512 * 1024 * 1024};
+
+    std::vector<byte> retValue;
 
     mz_stream stream;
     memset(&stream, 0, sizeof(stream));
 
     stream.next_in  = bytes.data();
-    stream.avail_in = static_cast<u32>(bytes.size());
+    stream.avail_in = static_cast<unsigned int>(bytes.size());
 
     i32 status {mz_inflateInit(&stream)};
     while (status == MZ_OK) {
+        if (retValue.size() + BUFFER_SIZE > MAX_DECOMPRESSED_SIZE) {
+            mz_inflateEnd(&stream);
+            return {}; // Decompressed data too large
+        }
+
         retValue.resize(retValue.size() + BUFFER_SIZE);
-        stream.next_out  = reinterpret_cast<unsigned char*>(retValue.data() + stream.total_out);
-        stream.avail_out = static_cast<u32>(retValue.size() - stream.total_out);
+        stream.next_out  = retValue.data() + stream.total_out;
+        stream.avail_out = static_cast<unsigned int>(retValue.size() - stream.total_out);
         status           = mz_inflate(&stream, MZ_NO_FLUSH);
     }
 
