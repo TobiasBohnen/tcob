@@ -27,7 +27,7 @@ public:
     template <typename Key>
     auto operator[](Key key) -> proxy<Object, Keys..., Key>;
     template <typename Key>
-    auto operator[](Key key) const -> proxy<Object, Keys..., Key> const;
+    auto operator[](Key key) const -> proxy<Object const, Keys..., Key>;
 
     template <typename T>
     auto as() const -> T;

@@ -27,7 +27,8 @@ inline proxy<Object, Keys...>::operator T() const
 template <typename Object, typename... Keys>
 inline auto proxy<Object, Keys...>::operator=(auto&& other) -> proxy&
 {
-    std::apply([&](auto&&... args) { return _object.set(args..., std::move(other)); }, _keys);
+    static_assert(!std::is_const_v<Object>, "object is const");
+    std::apply([&](auto&&... args) { return _object.set(args..., std::forward<decltype(other)>(other)); }, _keys);
     return *this;
 }
 
@@ -40,7 +41,7 @@ inline auto proxy<Object, Keys...>::operator[](Key key) -> proxy<Object, Keys...
 
 template <typename Object, typename... Keys>
 template <typename Key>
-inline auto proxy<Object, Keys...>::operator[](Key key) const -> proxy<Object, Keys..., Key> const
+inline auto proxy<Object, Keys...>::operator[](Key key) const -> proxy<Object const, Keys..., Key>
 {
     return proxy<Object, Keys..., Key>(_object, std::tuple_cat(_keys, std::tuple {key}));
 }
