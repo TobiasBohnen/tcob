@@ -682,7 +682,6 @@ void gif_encoder::write_pixels(io::ostream& out, std::vector<u32> const& buffer)
 {
     lzw_encoder enc {buffer, 8};
     enc.encode(out);
-    out.write<u8>(0x00);
 }
 
 }
