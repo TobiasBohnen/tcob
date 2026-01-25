@@ -44,7 +44,8 @@ game::game(init const& gameInit)
         i.ConfigDefaults      = obj;
     }
 
-    register_service<platform>(platform::Init(i));
+    _plt = &register_service<platform>(platform::Init(i));
+    _tm  = &locate_service<task_manager>();
     locate_service<input::system>().KeyDown.connect<&game::on_key_down>(this);
 
     _fixedStep = gameInit.FixedStep;
@@ -146,10 +147,7 @@ void game::loop()
 
 void game::step()
 {
-    auto& plt {locate_service<platform>()};
-    auto& tm {locate_service<task_manager>()};
-
-    if (!plt.process_events()) { queue_finish(); }
+    if (!_plt->process_events()) { queue_finish(); }
 
     // fixed update
     u8 fixedUpdateLoops {0};
@@ -161,9 +159,9 @@ void game::step()
 
     milliseconds const now {clock::now().time_since_epoch()};
     milliseconds const deltaUpdate {now - _lastUpdate};
-    milliseconds const frameLimit {1000.0f / static_cast<f32>(plt.FrameLimit)};
+    milliseconds const frameLimit {1000.0f / static_cast<f32>(_plt->FrameLimit)};
 
-    tm.process_queue(deltaUpdate, false);
+    _tm->process_queue(deltaUpdate, false);
 
     if (deltaUpdate >= frameLimit) {
         // update
@@ -189,6 +187,8 @@ void game::step()
 
             rs.statistics().update(deltaUpdate);
         }
+    } else {
+        std::this_thread::yield();
     }
 }
 

@@ -13,12 +13,15 @@
 #include "tcob/app/Scene.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/TaskManager.hpp"
 #include "tcob/core/assets/AssetLibrary.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob {
+
+class platform;
 
 ////////////////////////////////////////////////////////////
 
@@ -84,6 +87,9 @@ private:
     milliseconds _nextFixedUpdate {};
     milliseconds _lastUpdate {};
     milliseconds _fixedStep {};
+
+    platform*     _plt {nullptr};
+    task_manager* _tm {nullptr};
 };
 
 }
