@@ -408,8 +408,7 @@ void circle_shape::create()
         inds.push_back(1);
         inds.push_back(*Segments);
 
-        _store.set_vertices(p, verts);
-        _store.set_indices(p, inds);
+        _store.set(p, inds, verts);
     }
 }
 
@@ -560,8 +559,7 @@ void poly_shape::create()
             }
         }
 
-        _store.set_vertices(p, verts);
-        _store.set_indices(p, inds);
+        _store.set(p, inds, verts);
     }
 }
 

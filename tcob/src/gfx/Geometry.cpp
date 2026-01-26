@@ -16,7 +16,6 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
 
-
 namespace tcob::gfx {
 
 void geometry_store::clear()
@@ -46,14 +45,16 @@ auto geometry_store::get_vertices(isize id) const -> std::span<vertex const>
     return {};
 }
 
-void geometry_store::set_indices(isize id, std::vector<u32> const& values)
+void geometry_store::set(isize id, std::vector<u32> const& inds, std::vector<vertex> const& verts)
 {
-    _inds[id] = values;
+    _inds[id]  = inds;
+    _verts[id] = verts;
 }
 
-void geometry_store::set_vertices(isize id, std::vector<vertex> const& values)
+void geometry_store::add(isize id, std::vector<u32> const& inds, std::vector<vertex> const& verts)
 {
-    _verts[id] = values;
+    _inds[id].append_range(inds);
+    _verts[id].append_range(verts);
 }
 
 }

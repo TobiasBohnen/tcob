@@ -50,8 +50,8 @@ public:
     auto get_indices(isize id) const -> std::span<u32 const>;
     auto get_vertices(isize id) const -> std::span<vertex const>;
 
-    void set_indices(isize id, std::vector<u32> const& values);
-    void set_vertices(isize id, std::vector<vertex> const& values);
+    void set(isize id, std::vector<u32> const& inds, std::vector<vertex> const& verts);
+    void add(isize id, std::vector<u32> const& inds, std::vector<vertex> const& verts);
 
     void clear();
 
