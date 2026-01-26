@@ -163,8 +163,9 @@ private:
     bool _isDirty {false};
     bool _updateGeometry {false};
 
-    polygon_renderer _renderer {buffer_usage_hint::DynamicDraw};
-    geometry_store   _store;
+    polygon_renderer    _renderer {buffer_usage_hint::DynamicDraw};
+    std::vector<vertex> _verts;
+    std::vector<u32>    _inds;
 
     asset_owner_ptr<material> _material;
 
