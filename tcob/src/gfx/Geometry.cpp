@@ -53,8 +53,10 @@ void geometry_store::set(isize id, std::vector<u32> const& inds, std::vector<ver
 
 void geometry_store::add(isize id, std::vector<u32> const& inds, std::vector<vertex> const& verts)
 {
-    _inds[id].append_range(inds);
-    _verts[id].append_range(verts);
+    _inds[id].insert(_inds[id].end(), inds.begin(), inds.end());
+    _verts[id].insert(_verts[id].end(), verts.begin(), verts.end());
+    //_inds[id].append_range(inds);
+    //_verts[id].append_range(verts);
 }
 
 }
