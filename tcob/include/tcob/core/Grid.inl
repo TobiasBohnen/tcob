@@ -21,7 +21,7 @@ inline grid<T>::grid(size_type size, T const& defaultValue)
 }
 
 template <typename T>
-inline auto grid<T>::operator[](this auto&& self, i32 idx) -> decltype(auto)
+inline auto grid<T>::operator[](this auto&& self, isize idx) -> decltype(auto)
 {
     assert(idx < std::ssize(self._data));
     return self._data[static_cast<usize>(idx)];
@@ -215,7 +215,7 @@ inline static_grid<T, Width, Height>::static_grid(std::initializer_list<std::ini
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](this auto&& self, i32 idx) -> decltype(auto)
+inline auto static_grid<T, Width, Height>::operator[](this auto&& self, isize idx) -> decltype(auto)
 {
     assert(idx < std::ssize(self._data));
     return self._data[static_cast<usize>(idx)];

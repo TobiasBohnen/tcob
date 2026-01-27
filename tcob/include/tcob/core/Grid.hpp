@@ -28,7 +28,7 @@ public:
     grid() = default;
     explicit grid(size_type size, T const& defaultValue = T {});
 
-    auto operator[](this auto&& self, i32 idx) -> decltype(auto);
+    auto operator[](this auto&& self, isize idx) -> decltype(auto);
     auto operator[](this auto&& self, i32 x, i32 y) -> decltype(auto);
     auto operator[](this auto&& self, point_type pos) -> decltype(auto);
 
@@ -87,7 +87,7 @@ public:
     explicit static_grid(T const& defaultValue);
     explicit static_grid(std::initializer_list<std::initializer_list<T>> rows);
 
-    auto operator[](this auto&& self, i32 idx) -> decltype(auto);
+    auto operator[](this auto&& self, isize idx) -> decltype(auto);
     auto operator[](this auto&& self, i32 x, i32 y) -> decltype(auto);
     auto operator[](this auto&& self, point_type pos) -> decltype(auto);
 
