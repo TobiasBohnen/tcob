@@ -36,8 +36,6 @@ public:
 
     ray(point_f origin, degree_f direction, f64 maxDistance = std::numeric_limits<f64>::max());
 
-    auto direction_vector() const -> point_d;
-
     auto get_point(f64 distance) const -> point_f;
 
     auto intersect_line(point_f a, point_f b) const -> std::optional<result>;

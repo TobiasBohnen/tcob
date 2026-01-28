@@ -17,7 +17,6 @@
 #include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Polygon.hpp"
 
-
 namespace tcob::gfx {
 
 f32 constexpr epsilon {std::numeric_limits<f32>::epsilon()};
@@ -27,11 +26,6 @@ ray::ray(point_f origin, degree_f direction, f64 maxDistance)
     , _maxDistance {maxDistance}
     , _direction {point_d::FromDirection(direction)}
 {
-}
-
-auto ray::direction_vector() const -> point_d
-{
-    return _direction;
 }
 
 auto ray::get_point(f64 distance) const -> point_f
