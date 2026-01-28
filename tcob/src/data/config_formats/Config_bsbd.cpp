@@ -202,7 +202,7 @@ auto bsbd_reader::read_string_pool(io::istream& stream) -> bool
 {
     _stringPoolSize = stream.read<bsbd::marker_type>();
 
-    u64 poolSize {0};
+    usize poolSize {0};
     switch (_stringPoolSize) {
     case bsbd::marker_type::UInt8:  poolSize = stream.read<u8>(); break;
     case bsbd::marker_type::UInt16: poolSize = stream.read<u16, std::endian::little>(); break;
@@ -212,7 +212,7 @@ auto bsbd_reader::read_string_pool(io::istream& stream) -> bool
 
     auto const element {stream.read<bsbd::marker_type>()};
     _stringPool.resize(poolSize);
-    for (u64 i {0}; i < poolSize; ++i) {
+    for (usize i {0}; i < poolSize; ++i) {
         std::streamsize len {0};
         switch (element) {
         case bsbd::marker_type::UInt8:  len = stream.read<u8>(); break;

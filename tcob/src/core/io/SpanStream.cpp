@@ -55,7 +55,7 @@ auto ispan_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::stream
 {
     if (sizeInBytes <= 0) { return 0; }
 
-    auto const retValue {std::min(std::max(sizeInBytes, std::streamsize {0}), size_in_bytes() - _pos)};
+    auto const retValue {std::min(std::max(sizeInBytes, std::streamsize {0}), size_in_bytes() - static_cast<std::streamsize>(_pos))};
 
     if (retValue > 0) {
         memcpy(s, _span.data() + _pos, static_cast<usize>(retValue));
@@ -106,7 +106,7 @@ auto ospan_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std:
 {
     if (sizeInBytes <= 0) { return 0; }
 
-    auto const retValue {std::min(std::max(sizeInBytes, std::streamsize {0}), static_cast<std::streamsize>(_span.size_bytes()) - _pos)};
+    auto const retValue {std::min(std::max(sizeInBytes, std::streamsize {0}), static_cast<std::streamsize>(_span.size_bytes()) - static_cast<std::streamsize>(_pos))};
 
     if (retValue > 0) {
         memcpy(_span.data() + _pos, s, static_cast<usize>(retValue));

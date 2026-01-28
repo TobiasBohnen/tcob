@@ -28,7 +28,7 @@ public:
 
 private:
     std::span<byte const> _span;
-    std::streamsize       _pos {0};
+    std::streamoff        _pos {0};
 };
 
 ////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ public:
 
 private:
     std::span<byte> _span;
-    std::streamsize _pos {0};
+    std::streamoff  _pos {0};
 };
 
 ////////////////////////////////////////////////////////////

@@ -49,7 +49,7 @@ auto memory_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::strea
 {
     if (sizeInBytes <= 0) { return 0; }
 
-    std::streamsize const retValue {std::min(sizeInBytes, size_in_bytes() - _pos)};
+    std::streamsize const retValue {std::min(sizeInBytes, size_in_bytes() - static_cast<std::streamsize>(_pos))};
     if (retValue > 0) {
         memcpy(s, _buf.data() + static_cast<usize>(_pos), static_cast<usize>(retValue));
         _pos += retValue;

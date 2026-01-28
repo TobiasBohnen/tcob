@@ -27,7 +27,7 @@ public:
 
 private:
     std::vector<byte> _buf;
-    std::streamsize   _pos {0};
+    std::streamoff    _pos {0};
 };
 
 ////////////////////////////////////////////////////////////

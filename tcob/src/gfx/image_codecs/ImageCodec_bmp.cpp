@@ -260,7 +260,7 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
 
 ////////////////////////////////////////////////////////////
 
-static void WriteFileHeader(std::streamsize imageOffset, std::streamsize fileSize, io::ostream& writer)
+static void WriteFileHeader(std::streamoff imageOffset, std::streamoff fileSize, io::ostream& writer)
 {
     writer.write(SIGNATURE);
     writer.write<u32, std::endian::little>(static_cast<u32>(fileSize));
@@ -316,7 +316,7 @@ auto bmp_encoder::encode(image const& img, io::ostream& out) -> bool
 
     WriteInfoHeader(info, out);
 
-    auto imageOffset {out.tell()};
+    auto const imageOffset {out.tell()};
     WriteImageData(img, out);
 
     auto endPos {out.tell()};

@@ -253,8 +253,8 @@ auto png_anim_decoder::get_next_frame(io::istream& in) -> animated_image_decoder
     for (;;) {
         if (in.is_eof()) { return animated_image_decoder::status::NoMoreFrames; }
 
-        std::streamsize const lastPos {in.tell()};
-        auto const            chunk {read_chunk(in)};
+        std::streamoff const lastPos {in.tell()};
+        auto const           chunk {read_chunk(in)};
 
         if (chunk.Type == png::chunk_type::fcTL) {
             if (fctl) { // next fctl found -> break

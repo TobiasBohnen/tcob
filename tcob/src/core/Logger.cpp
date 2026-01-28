@@ -22,6 +22,10 @@
     #define WIN32_LEAN_AND_MEAN
     #include "Windows.h"
 #endif
+#if defined(__EMSCRIPTEN__)
+    #include "emscripten.h"
+    #include "emscripten/console.h"
+#endif
 
 namespace tcob {
 
@@ -141,7 +145,18 @@ void stdout_logger::log(string const& message, level level) const
 {
     if (level < MinLevel) { return; }
 
-#if !defined(__EMSCRIPTEN__)
+#if defined(__EMSCRIPTEN__)
+    auto const str {format_message(message, level)};
+
+    switch (level) {
+    case logger::level::Debug:   emscripten_console_log(str.c_str()); break;
+    case logger::level::Info:    emscripten_console_log(str.c_str()); break;
+    case logger::level::Warning: emscripten_console_warn(str.c_str()); break;
+    case logger::level::Error:   emscripten_console_error(str.c_str()); break;
+    case logger::level::Off:     break;
+    }
+    std::cout << str;
+#else
     std::cout << "\033[";
 
     switch (level) {
@@ -155,8 +170,6 @@ void stdout_logger::log(string const& message, level level) const
     std::cout << "m"
               << format_message(message, level)
               << "\033[0m";
-#else
-    std::cout << format_message(message, level);
 #endif
 }
 }

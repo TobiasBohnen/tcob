@@ -132,7 +132,7 @@ private:
     void write_header(image::information const& image, io::ostream& out) const;
     void write_image_data(image const& img, io::ostream& out) const;
     void write_extension_area(io::ostream& out) const;
-    void write_footer(io::ostream& out, std::streamsize extOffset) const;
+    void write_footer(io::ostream& out, std::streamoff extOffset) const;
 };
 
 }

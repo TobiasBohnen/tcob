@@ -394,7 +394,7 @@ auto tga_encoder::encode(image const& img, io::ostream& out) -> bool
     write_header(img.info(), out);
     write_image_data(img, out);
 
-    auto extOffset {out.tell()};
+    auto const extOffset {out.tell()};
     write_extension_area(out);
 
     write_footer(out, extOffset);
@@ -514,7 +514,7 @@ void tga_encoder::write_extension_area(io::ostream& out) const
     out.write<u8>(static_cast<u8>(tga::attribute_type::Alpha));
 }
 
-void tga_encoder::write_footer(io::ostream& out, std::streamsize extOffset) const
+void tga_encoder::write_footer(io::ostream& out, std::streamoff extOffset) const
 {
     out.write<u32>(static_cast<u32>(extOffset));
     out.write<byte>(SIGNATURE);
