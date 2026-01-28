@@ -652,24 +652,34 @@ public:
     {
         if (std::holds_alternative<object>(config)) {
             object const& obj {std::get<object>(config)};
-            return std::apply([&](auto&&... m) { return (m.set(obj[m.Name], value) && ...); }, Members);
+            return std::apply([&](auto&&... m) {
+                return (([&]() {
+                            for (usize i {0}; i < m.NameCount; ++i) {
+                                if (m.set(obj[m.Names[i]], value)) { return true; }
+                            }
+                            return false;
+                        }())
+                        && ...);
+            },
+                              Members);
         }
+
         if (std::holds_alternative<array>(config)) {
             array const& arr {std::get<array>(config)};
             if (arr.size() != std::tuple_size_v<decltype(Members)>) { return false; }
-
             auto const assign {[&]<usize... I>(std::index_sequence<I...>) {
                 return ((std::get<I>(Members).set(arr[I], value)) && ...);
             }};
             return assign(std::make_index_sequence<std::tuple_size_v<decltype(Members)>> {});
         }
+
         return false;
     }
 
     static void To(cfg_value& config, T const& value)
     {
         object obj {};
-        std::apply([&](auto&&... m) { ((m.get(obj[m.Name], value)), ...); }, Members);
+        std::apply([&](auto&&... m) { ((m.get(obj[m.primary_name()], value)), ...); }, Members);
         config = obj;
     }
 

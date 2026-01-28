@@ -204,7 +204,7 @@ template <Arithmetic T>
 auto constexpr size<T>::Members()
 {
     return std::tuple {
-        member<&size<T>::Width> {"width"},
-        member<&size<T>::Height> {"height"}};
+        member<&size<T>::Width> {"width", "w"},
+        member<&size<T>::Height> {"height", "h"}};
 }
 }

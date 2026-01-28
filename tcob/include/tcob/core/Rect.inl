@@ -344,10 +344,10 @@ template <Arithmetic T>
 auto constexpr rect<T>::Members()
 {
     return std::tuple {
-        member_fn<[](rect<T> const& rect) { return rect.left(); }, [](rect<T>& rect, T const& val) { rect.Position.X = val; }> {"x"},
-        member_fn<[](rect<T> const& rect) { return rect.top(); }, [](rect<T>& rect, T const& val) { rect.Position.Y = val; }> {"y"},
-        member_fn<[](rect<T> const& rect) { return rect.width(); }, [](rect<T>& rect, T const& val) { rect.Size.Width = val; }> {"width"},
-        member_fn<[](rect<T> const& rect) { return rect.height(); }, [](rect<T>& rect, T const& val) { rect.Size.Height = val; }> {"height"},
+        member_fn<[](rect<T> const& rect) { return rect.left(); }, [](rect<T>& rect, T const& val) { rect.Position.X = val; }> {"x", "left"},
+        member_fn<[](rect<T> const& rect) { return rect.top(); }, [](rect<T>& rect, T const& val) { rect.Position.Y = val; }> {"y", "top"},
+        member_fn<[](rect<T> const& rect) { return rect.width(); }, [](rect<T>& rect, T const& val) { rect.Size.Width = val; }> {"width", "w"},
+        member_fn<[](rect<T> const& rect) { return rect.height(); }, [](rect<T>& rect, T const& val) { rect.Size.Height = val; }> {"height", "h"},
     };
 }
 

@@ -1029,10 +1029,8 @@ public:
     static auto From(state_view view, i32& idx, T& value) -> bool
     {
         if (!view.is_table(idx)) { return false; }
-
         table tab {table::Acquire(view, idx++)};
 
-        // array
         if (tab.raw_length() == std::tuple_size_v<decltype(Members)>) {
             auto const assign {[]<usize... I>(auto& members, auto const& arr, auto& object, std::index_sequence<I...>) {
                 return ((std::get<I>(members).set(arr[I + 1], object)) && ...);
@@ -1040,15 +1038,23 @@ public:
             return assign(Members, tab, value, std::make_index_sequence<std::tuple_size_v<decltype(Members)>> {});
         }
 
-        // table
-        return std::apply([&](auto&&... m) { return (m.set(tab[m.Name], value) && ...); }, Members);
+        return std::apply([&](auto&&... m) {
+            return (([&]() {
+                        for (usize i {0}; i < m.NameCount; ++i) {
+                            if (m.set(tab[m.Names[i]], value)) { return true; }
+                        }
+                        return false;
+                    }())
+                    && ...);
+        },
+                          Members);
     }
 
     static void To(state_view view, T const& value)
     {
         table tab {table::PushNew(view)};
 
-        std::apply([&](auto&&... m) { (m.get(tab[m.Name], value), ...); }, Members);
+        std::apply([&](auto&&... m) { (m.get(tab[m.primary_name()], value), ...); }, Members);
     }
 
 private:

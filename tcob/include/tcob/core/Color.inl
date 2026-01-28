@@ -245,10 +245,10 @@ auto constexpr operator==(hsx left, hsx right) -> bool
 auto constexpr color::Members()
 {
     return std::tuple {
-        member<&color::R> {"r"},
-        member<&color::G> {"g"},
-        member<&color::B> {"b"},
-        member<&color::A, u8 {255}> {"a"},
+        member<&color::R> {"r", "red"},
+        member<&color::G> {"g", "green"},
+        member<&color::B> {"b", "blue"},
+        member<&color::A, u8 {255}> {"a", "alpha"},
     };
 }
 

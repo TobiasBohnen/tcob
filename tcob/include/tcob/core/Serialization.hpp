@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
 #include <type_traits>
 
 #include "tcob/core/Common.hpp"
@@ -23,21 +24,27 @@ template <auto Ptr, auto Default = no_default>
 struct member {
     using field_type = typename detail::member_pointer_traits<decltype(Ptr)>::field_type;
 
-    constexpr member(utf8_string_view name)
-        : Name {name}
+    template <typename... Names>
+    constexpr member(utf8_string_view name, Names... aliases)
+        : Names {name, aliases...}
+        , NameCount {1 + sizeof...(aliases)}
     {
     }
 
-    utf8_string_view Name;
+    static constexpr usize                 MaxNames {4};
+    std::array<utf8_string_view, MaxNames> Names;
+    usize                                  NameCount;
+
+    constexpr auto primary_name() const -> utf8_string_view { return Names[0]; }
 
     template <typename T>
-    void constexpr get(auto&& proxy, T const& object) const
+    void get(auto&& proxy, T const& object) const
     {
         proxy = object.*Ptr;
     }
 
     template <typename T>
-    auto constexpr set(auto const& proxy, T& object) const -> bool
+    auto set(auto const& proxy, T& object) const -> bool
     {
         if constexpr (PropertyLike<field_type>) {
             using prop_type = std::remove_cvref_t<typename field_type::return_type>;
@@ -51,7 +58,6 @@ struct member {
                 return true;
             }
         }
-
         if constexpr (!std::is_same_v<decltype(Default), no_default_t>) {
             object.*Ptr = Default;
             return true;
@@ -63,21 +69,27 @@ struct member {
 
 template <auto Get, auto Set>
 struct member_fn {
-    constexpr member_fn(utf8_string_view name)
-        : Name {name}
+    template <typename... Names>
+    constexpr member_fn(utf8_string_view name, Names... aliases)
+        : Names {name, aliases...}
+        , NameCount {1 + sizeof...(aliases)}
     {
     }
 
-    utf8_string_view Name;
+    static constexpr usize                 MaxNames {4};
+    std::array<utf8_string_view, MaxNames> Names;
+    usize                                  NameCount;
+
+    constexpr auto primary_name() const -> utf8_string_view { return Names[0]; }
 
     template <typename T>
-    void constexpr get(auto&& proxy, T const& object) const
+    void get(auto&& proxy, T const& object) const
     {
         proxy = Get(object);
     }
 
     template <typename T>
-    auto constexpr set(auto const& proxy, T& object) const -> bool
+    auto set(auto const& proxy, T& object) const -> bool
     {
         using FieldType = std::invoke_result_t<decltype(Get), T const&>;
         FieldType temp;

@@ -214,8 +214,8 @@ template <Arithmetic T>
 auto constexpr point<T>::Members()
 {
     return std::tuple {
-        member<&point<T>::X> {"x"},
-        member<&point<T>::Y> {"y"}};
+        member<&point<T>::X> {"x", "left"},
+        member<&point<T>::Y> {"y", "top"}};
 }
 
 template <Arithmetic T>
