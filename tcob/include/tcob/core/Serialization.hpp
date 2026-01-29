@@ -24,8 +24,8 @@ template <auto Ptr, auto Default = no_default>
 struct member {
     using field_type = typename detail::member_pointer_traits<decltype(Ptr)>::field_type;
 
-    template <typename... Names>
-    constexpr member(utf8_string_view name, Names... aliases)
+    template <typename... Aliases>
+    constexpr member(utf8_string_view name, Aliases... aliases)
         : Names {name, aliases...}
         , NameCount {1 + sizeof...(aliases)}
     {
@@ -69,8 +69,8 @@ struct member {
 
 template <auto Get, auto Set>
 struct member_fn {
-    template <typename... Names>
-    constexpr member_fn(utf8_string_view name, Names... aliases)
+    template <typename... Aliases>
+    constexpr member_fn(utf8_string_view name, Aliases... aliases)
         : Names {name, aliases...}
         , NameCount {1 + sizeof...(aliases)}
     {
