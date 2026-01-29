@@ -52,7 +52,7 @@ auto round_down_to_multiple(i32 num, i32 step) -> i32
     if (rem == 0) { return num; }
 
     return num < 0
-        ? -(std::abs(num) + rem)
+        ? -(std::abs(num) + step - rem)
         : num - rem;
 }
 
