@@ -207,6 +207,27 @@ auto json_reader::ReadScalar(entry& currentEntry, utf8_string_view line) -> bool
 
 constexpr usize MAX_DEPTH {1000};
 
+static auto escape_json_string(utf8_string_view str) -> utf8_string
+{
+    utf8_string result;
+    result.reserve(str.size());
+
+    for (auto const c : str) {
+        switch (c) {
+        case '"':  result += "\\\""; break;
+        case '\\': result += "\\\\"; break;
+        case '\b': result += "\\b"; break;
+        case '\f': result += "\\f"; break;
+        case '\n': result += "\\n"; break;
+        case '\r': result += "\\r"; break;
+        case '\t': result += "\\t"; break;
+        default:   result += c; break;
+        }
+    }
+
+    return result;
+}
+
 auto json_writer::write(io::ostream& stream, object const& obj) -> bool
 {
     return write_object(stream, 0, obj, MAX_DEPTH);
@@ -228,7 +249,7 @@ auto json_writer::write_object(io::ostream& stream, usize indent, object const& 
     bool first {true};
     for (auto const& [k, v] : obj) {
         if (!first) { stream << ", \n"; }
-        stream << indentEntry << "\"" << k << "\": ";
+        stream << indentEntry << "\"" << escape_json_string(k) << "\": ";
 
         if (!write_entry(stream, indent + INDENT_SPACES, v, maxDepth - 1)) { return false; }
 
@@ -274,7 +295,7 @@ auto json_writer::write_entry(io::ostream& stream, usize indent, entry const& en
     } else if (ent.is<f64>()) {
         stream << std::to_string(ent.as<f64>());
     } else if (ent.is<utf8_string>()) {
-        stream << "\"" << ent.as<utf8_string>() << "\"";
+        stream << "\"" << escape_json_string(ent.as<utf8_string>()) << "\"";
     } else if (ent.is<array>()) {
         return write_array(stream, indent, ent.as<array>(), maxDepth);
     } else if (ent.is<object>()) {
