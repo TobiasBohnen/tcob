@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <cstddef>
 #include <future>
 #include <memory>
 #include <optional>
@@ -77,6 +78,7 @@ public:
     auto count_colors [[nodiscard]] () const -> isize;
 
     static auto Create(size_i size, format f, std::span<u8 const> data) -> image;
+    static auto Create(size_i size, format f, std::span<std::byte const> data) -> image;
     static auto CreateEmpty(size_i size, format f) -> image;
 
     static auto Load(path const& file) noexcept -> std::optional<image>;

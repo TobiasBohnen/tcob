@@ -9,6 +9,7 @@
 #include <array>
 #include <cassert>
 #include <cctype>
+#include <cstddef>
 #include <cstring>
 #include <limits>
 #include <span>
@@ -28,22 +29,22 @@ zlib_filter::zlib_filter(i32 complevel)
 {
 }
 
-auto zlib_filter::to(std::span<u8 const> bytes) const -> std::vector<u8>
+auto zlib_filter::to(std::span<std::byte const> bytes) const -> std::vector<std::byte>
 {
     if (bytes.size() > std::numeric_limits<unsigned int>::max()) { return {}; } // Input too large
 
-    std::vector<u8> retValue;
+    std::vector<std::byte> retValue;
 
     mz_stream stream;
     memset(&stream, 0, sizeof(stream));
 
-    stream.next_in  = bytes.data();
+    stream.next_in  = reinterpret_cast<unsigned char const*>(bytes.data());
     stream.avail_in = static_cast<unsigned int>(bytes.size());
 
     i32 status {mz_deflateInit(&stream, _level)};
     while (status == MZ_OK) {
         retValue.resize(retValue.size() + BUFFER_SIZE);
-        stream.next_out  = retValue.data() + stream.total_out;
+        stream.next_out  = reinterpret_cast<unsigned char*>(std::launder(retValue.data())) + stream.total_out;
         stream.avail_out = static_cast<unsigned int>(retValue.size() - stream.total_out);
         status           = mz_deflate(&stream, MZ_FINISH);
     }
@@ -59,17 +60,17 @@ auto zlib_filter::to(std::span<u8 const> bytes) const -> std::vector<u8>
     return retValue;
 }
 
-auto zlib_filter::from(std::span<u8 const> bytes) const -> std::vector<u8>
+auto zlib_filter::from(std::span<std::byte const> bytes) const -> std::vector<std::byte>
 {
     if (bytes.size() > std::numeric_limits<unsigned int>::max()) { return {}; } // Input too large
     static constexpr usize MAX_DECOMPRESSED_SIZE {512 * 1024 * 1024};
 
-    std::vector<u8> retValue;
+    std::vector<std::byte> retValue;
 
     mz_stream stream;
     memset(&stream, 0, sizeof(stream));
 
-    stream.next_in  = bytes.data();
+    stream.next_in  = reinterpret_cast<unsigned char const*>(bytes.data());
     stream.avail_in = static_cast<unsigned int>(bytes.size());
 
     i32 status {mz_inflateInit(&stream)};
@@ -80,7 +81,7 @@ auto zlib_filter::from(std::span<u8 const> bytes) const -> std::vector<u8>
         }
 
         retValue.resize(retValue.size() + BUFFER_SIZE);
-        stream.next_out  = retValue.data() + stream.total_out;
+        stream.next_out  = reinterpret_cast<unsigned char*>(std::launder(retValue.data())) + stream.total_out;
         stream.avail_out = static_cast<unsigned int>(retValue.size() - stream.total_out);
         status           = mz_inflate(&stream, MZ_NO_FLUSH);
     }
@@ -106,27 +107,27 @@ static inline auto is_base64(char c) -> bool
 
 static string_view const base64_chars {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"sv};
 
-auto base64_filter::to(std::span<u8 const> bytes) const -> std::vector<u8>
+auto base64_filter::to(std::span<std::byte const> bytes) const -> std::vector<std::byte>
 {
-    u8 const*         buf {bytes.data()};
-    isize             bufLen {std::ssize(bytes)};
-    u32               i {0};
-    std::array<u8, 3> charArray3 {};
-    std::array<u8, 4> charArray4 {};
+    std::byte const*    buf {bytes.data()};
+    isize               bufLen {std::ssize(bytes)};
+    u32                 i {0};
+    std::array<char, 3> charArray3 {};
+    std::array<char, 4> charArray4 {};
 
-    std::vector<u8> retValue {};
+    std::vector<std::byte> retValue {};
     retValue.reserve(static_cast<usize>(((4 * bufLen / 3) + 3) & ~3));
 
     while (bufLen--) {
-        charArray3[i++] = *(buf++);
+        charArray3[i++] = static_cast<char>(*(buf++));
         if (i == 3) {
             charArray4[0] = (charArray3[0] & 0xfc) >> 2;
-            charArray4[1] = static_cast<u8>((charArray3[0] & 0x03) << 4) + ((charArray3[1] & 0xf0) >> 4);
-            charArray4[2] = static_cast<u8>((charArray3[1] & 0x0f) << 2) + ((charArray3[2] & 0xc0) >> 6);
+            charArray4[1] = static_cast<char>((charArray3[0] & 0x03) << 4) + ((charArray3[1] & 0xf0) >> 4);
+            charArray4[2] = static_cast<char>((charArray3[1] & 0x0f) << 2) + ((charArray3[2] & 0xc0) >> 6);
             charArray4[3] = charArray3[2] & 0x3f;
 
             for (i = 0; i < 4; i++) {
-                retValue.push_back(static_cast<u8>(base64_chars[charArray4[i]]));
+                retValue.push_back(static_cast<std::byte>(base64_chars[charArray4[i]]));
             }
             i = 0;
         }
@@ -138,23 +139,23 @@ auto base64_filter::to(std::span<u8 const> bytes) const -> std::vector<u8>
         }
 
         charArray4[0] = (charArray3[0] & 0xfc) >> 2;
-        charArray4[1] = static_cast<u8>(((charArray3[0] & 0x03) << 4) + ((charArray3[1] & 0xf0) >> 4));
-        charArray4[2] = static_cast<u8>(((charArray3[1] & 0x0f) << 2) + ((charArray3[2] & 0xc0) >> 6));
+        charArray4[1] = static_cast<char>(((charArray3[0] & 0x03) << 4) + ((charArray3[1] & 0xf0) >> 4));
+        charArray4[2] = static_cast<char>(((charArray3[1] & 0x0f) << 2) + ((charArray3[2] & 0xc0) >> 6));
         charArray4[3] = charArray3[2] & 0x3f;
 
         for (u32 j {0}; (j < i + 1); j++) {
-            retValue.push_back(static_cast<u8>(base64_chars[charArray4[j]]));
+            retValue.push_back(static_cast<std::byte>(base64_chars[charArray4[j]]));
         }
 
         while ((i++ < 3)) {
-            retValue.push_back('=');
+            retValue.push_back(std::byte {'='});
         }
     }
 
     return retValue;
 }
 
-auto base64_filter::from(std::span<u8 const> bytes) const -> std::vector<u8>
+auto base64_filter::from(std::span<std::byte const> bytes) const -> std::vector<std::byte>
 {
     isize               bufLen {std::ssize(bytes)};
     u32                 i {0};
@@ -162,11 +163,12 @@ auto base64_filter::from(std::span<u8 const> bytes) const -> std::vector<u8>
     std::array<char, 3> charArray3 {};
     std::array<char, 4> charArray4 {};
 
-    std::vector<u8> retValue {};
+    std::vector<std::byte> retValue {};
     retValue.reserve(static_cast<usize>(3 * (bufLen / 4)));
 
-    while (bufLen-- && (bytes[in] != '=') && is_base64(bytes[in])) {
-        charArray4[i++] = bytes[in];
+    char byte {static_cast<char>(bytes[in])};
+    while (bufLen-- && (byte != '=') && is_base64(byte)) {
+        charArray4[i++] = byte;
         in++;
         if (i == 4) {
             for (i = 0; i < 4; i++) {
@@ -178,10 +180,12 @@ auto base64_filter::from(std::span<u8 const> bytes) const -> std::vector<u8>
             charArray3[2] = static_cast<char>(((charArray4[2] & 0x3) << 6) + charArray4[3]);
 
             for (i = 0; i < 3; i++) {
-                retValue.push_back(charArray3[i]);
+                retValue.push_back(static_cast<std::byte>(charArray3[i]));
             }
             i = 0;
         }
+
+        byte = static_cast<char>(bytes[in]);
     }
 
     if (i) {
@@ -198,7 +202,7 @@ auto base64_filter::from(std::span<u8 const> bytes) const -> std::vector<u8>
         charArray3[2] = static_cast<char>(((charArray4[2] & 0x3) << 6) + charArray4[3]);
 
         for (u32 j {0}; j < i - 1; j++) {
-            retValue.push_back(charArray3[j]);
+            retValue.push_back(static_cast<std::byte>(charArray3[j]));
         }
     }
 
@@ -221,24 +225,25 @@ static std::array<char, 96> const z85_decode = {0x00, 0x44, 0x00, 0x54, 0x53, 0x
                                                 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
                                                 0x21, 0x22, 0x23, 0x4F, 0x00, 0x50, 0x00, 0x00};
 
-auto z85_filter::to(std::span<u8 const> bytes) const -> std::vector<u8>
+auto z85_filter::to(std::span<std::byte const> bytes) const -> std::vector<std::byte>
 {
     usize const bufLen {bytes.size()};
 
     if (bufLen % 4) { return {}; }
 
-    usize const     encodedLen {bufLen * 5 / 4};
-    std::vector<u8> encoded(encodedLen);
+    usize const            encodedLen {bufLen * 5 / 4};
+    std::vector<std::byte> encoded(encodedLen);
 
     u32 charNbr {0};
     u32 byteNbr {0};
     u32 value {0};
     while (byteNbr < bufLen) {
-        value = (value * 256) + bytes[byteNbr++];
+        u8 const byte {static_cast<u8>(bytes[byteNbr++])};
+        value = (value * 256) + byte;
         if (byteNbr % 4 == 0) {
             u32 divisor {85 * 85 * 85 * 85};
             while (divisor) {
-                encoded[charNbr++] = static_cast<u8>(z85_encode[value / divisor % 85]);
+                encoded[charNbr++] = static_cast<std::byte>(z85_encode[value / divisor % 85]);
                 divisor /= 85;
             }
             value = 0;
@@ -249,24 +254,25 @@ auto z85_filter::to(std::span<u8 const> bytes) const -> std::vector<u8>
     return encoded;
 }
 
-auto z85_filter::from(std::span<u8 const> bytes) const -> std::vector<u8>
+auto z85_filter::from(std::span<std::byte const> bytes) const -> std::vector<std::byte>
 {
     usize const bufLen {bytes.size()};
 
     if (bufLen % 5) { return {}; }
 
-    usize const     decodedSize {bufLen * 4 / 5};
-    std::vector<u8> decoded(decodedSize);
+    usize const            decodedSize {bufLen * 4 / 5};
+    std::vector<std::byte> decoded(decodedSize);
 
     u32 charNbr {0};
     u32 byteNbr {0};
     u32 value {0};
     while (charNbr < bufLen) {
-        value = (value * 85) + static_cast<u32>(z85_decode[bytes[charNbr++] - 32]);
+        u32 const byte {static_cast<u32>(bytes[charNbr++])};
+        value = (value * 85) + static_cast<u32>(z85_decode[byte - 32]);
         if (charNbr % 5 == 0) {
             u32 divisor {256 * 256 * 256};
             while (divisor) {
-                decoded[byteNbr++] = static_cast<u8>(value / divisor % 256);
+                decoded[byteNbr++] = static_cast<std::byte>(value / divisor % 256);
                 divisor /= 256;
             }
             value = 0;
@@ -279,14 +285,14 @@ auto z85_filter::from(std::span<u8 const> bytes) const -> std::vector<u8>
 
 ////////////////////////////////////////////////////////////
 
-auto reverser_filter::to(std::span<u8 const> bytes) const -> std::vector<u8>
+auto reverser_filter::to(std::span<std::byte const> bytes) const -> std::vector<std::byte>
 {
-    std::vector<u8> retValue {bytes.begin(), bytes.end()};
+    std::vector<std::byte> retValue {bytes.begin(), bytes.end()};
     std::ranges::reverse(retValue);
     return retValue;
 }
 
-auto reverser_filter::from(std::span<u8 const> bytes) const -> std::vector<u8>
+auto reverser_filter::from(std::span<std::byte const> bytes) const -> std::vector<std::byte>
 {
     return to(bytes);
 }

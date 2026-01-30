@@ -9,6 +9,7 @@
 #include <bit>
 #include <iterator>
 #include <optional>
+#include <span>
 
 #include "tcob/core/io/Filter.hpp"
 #include "tcob/core/io/Stream.hpp"
@@ -30,7 +31,7 @@ constexpr std::array<u8, 3> SIGNATURE {'B', 'S', 'I'};
 auto bsi_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (auto info {decode_info(in)}) {
-        auto const pixels {in.read_filtered<u8>(in.size_in_bytes(), io::zlib_filter {})};
+        auto const pixels {in.read_filtered(in.size_in_bytes(), io::zlib_filter {})};
         if (std::ssize(pixels) == info->size_in_bytes()) {
             return image::Create(info->Size, info->Format, pixels);
         }
@@ -58,7 +59,7 @@ auto bsi_encoder::encode(image const& img, io::ostream& out) -> bool
     out.write<u32, std::endian::little>(info.Size.Height);
     out.write<u8>(static_cast<u8>(info.Format));
 
-    return out.write_filtered<u8>(img.data(), io::zlib_filter {}) > 0;
+    return out.write_filtered(std::as_bytes(img.data()), io::zlib_filter {}) > 0;
 }
 
 }

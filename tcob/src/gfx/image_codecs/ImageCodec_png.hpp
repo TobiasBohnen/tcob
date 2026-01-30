@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <cstddef>
 #include <ios>
 #include <optional>
 #include <span>
@@ -65,15 +66,15 @@ namespace png {
     };
 
     struct chunk {
-        u32             Length {0};
-        chunk_type      Type {0};
-        u32             Crc {0};
-        std::vector<u8> Data;
+        u32                    Length {0};
+        chunk_type             Type {0};
+        u32                    Crc {0};
+        std::vector<std::byte> Data;
     };
 
     struct IHDR_chunk {
         IHDR_chunk() = default;
-        IHDR_chunk(std::span<u8 const> data);
+        IHDR_chunk(std::span<std::byte const> data);
 
         i32        Width {0};
         i32        Height {0};
@@ -86,13 +87,13 @@ namespace png {
     };
 
     struct PLTE_chunk {
-        PLTE_chunk(std::span<u8 const> data);
+        PLTE_chunk(std::span<std::byte const> data);
 
         std::vector<color> Entries;
     };
 
     struct tRNS_chunk {
-        tRNS_chunk(std::span<u8 const> data, color_type colorType, std::optional<PLTE_chunk>& plte);
+        tRNS_chunk(std::span<std::byte const> data, color_type colorType, std::optional<PLTE_chunk>& plte);
 
         auto is_gray_transparent(u8 val) -> bool;
 
@@ -102,20 +103,20 @@ namespace png {
     };
 
     struct pHYs_chunk {
-        pHYs_chunk(std::span<u8 const> data);
+        pHYs_chunk(std::span<std::byte const> data);
 
         f32 Value {1.0f};
     };
 
     struct acTL_chunk {
-        acTL_chunk(std::span<u8 const> data);
+        acTL_chunk(std::span<std::byte const> data);
 
         u32 NumFrames {0};
         u32 NumPlays {0};
     };
 
     struct fcTL_chunk {
-        fcTL_chunk(std::span<u8 const> data);
+        fcTL_chunk(std::span<std::byte const> data);
 
         u32        SequenceNumber {0};
         i32        Width {0};
@@ -146,7 +147,7 @@ protected:
     auto read_chunk(io::istream& in) const -> png::chunk;
     auto check_sig(io::istream& in) -> bool;
 
-    auto read_image(std::span<u8 const> idat, i32 width, i32 height) -> bool;
+    auto read_image(std::span<std::byte const> idat, i32 width, i32 height) -> bool;
 
     auto ihdr() const -> png::IHDR_chunk const&;
     void handle_plte(png::chunk const& chunk);
@@ -219,8 +220,8 @@ public:
     void write_idat(image const& image, io::ostream& out) const;
     void write_iend(io::ostream& out) const;
 
-    void write_chunk(io::ostream& out, std::span<u8 const> buf) const;
-    void write_chunk(io::ostream& out, std::span<u8 const> buf, u32 length) const;
+    void write_chunk(io::ostream& out, std::span<std::byte const> buf) const;
+    void write_chunk(io::ostream& out, std::span<std::byte const> buf, u32 length) const;
 };
 
 ////////////////////////////////////////////////////////////

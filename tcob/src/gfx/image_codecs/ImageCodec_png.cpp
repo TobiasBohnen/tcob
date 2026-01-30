@@ -9,6 +9,7 @@
 #include <array>
 #include <bit>
 #include <cassert>
+#include <cstddef>
 #include <cstring>
 #include <ios>
 #include <iterator>
@@ -29,68 +30,72 @@
 
 namespace tcob::gfx::detail {
 
-static auto to_i32(std::span<u8 const> data, usize start) -> i32
+static auto to_i32(std::span<std::byte const> data, usize start) -> i32
 {
-    return static_cast<i32>(data[start] << 24 | data[start + 1] << 16 | data[start + 2] << 8 | data[start + 3]);
+    return static_cast<i32>(static_cast<u8>(data[start]) << 24 | static_cast<u8>(data[start + 1]) << 16 | static_cast<u8>(data[start + 2]) << 8 | static_cast<u8>(data[start + 3]));
 }
-static auto to_u32(std::span<u8 const> data, usize start) -> u32
+static auto to_u32(std::span<std::byte const> data, usize start) -> u32
 {
-    return static_cast<u32>(data[start] << 24 | data[start + 1] << 16 | data[start + 2] << 8 | data[start + 3]);
+    return static_cast<u32>(static_cast<u8>(data[start]) << 24 | static_cast<u8>(data[start + 1]) << 16 | static_cast<u8>(data[start + 2]) << 8 | static_cast<u8>(data[start + 3]));
 }
-static auto to_u16(std::span<u8 const> data, usize start) -> u16
+static auto to_u16(std::span<std::byte const> data, usize start) -> u16
 {
-    return static_cast<u16>(data[start] << 8 | data[start + 1]);
+    return static_cast<u16>(static_cast<u8>(data[start]) << 8 | static_cast<u8>(data[start + 1]));
+}
+static auto to_u8(std::span<std::byte const> data, usize start) -> u8
+{
+    return static_cast<u8>(data[start]);
 }
 
-png::IHDR_chunk::IHDR_chunk(std::span<u8 const> data)
+png::IHDR_chunk::IHDR_chunk(std::span<std::byte const> data)
     : Width {to_i32(data, 0)}
     , Height {to_i32(data, 4)}
-    , BitDepth {data[8]}
+    , BitDepth {to_u8(data, 8)}
     , ColorType {static_cast<color_type>(data[9])}
-    , CompressionMethod {data[10]}
-    , FilterMethod {data[11]}
-    , InterlaceMethod {data[12]}
+    , CompressionMethod {to_u8(data, 10)}
+    , FilterMethod {to_u8(data, 11)}
+    , InterlaceMethod {to_u8(data, 12)}
     , NonInterlaced {InterlaceMethod == 0}
 {
 }
 
-png::PLTE_chunk::PLTE_chunk(std::span<u8 const> data)
+png::PLTE_chunk::PLTE_chunk(std::span<std::byte const> data)
 {
     usize const size {std::min<usize>(data.size() / 3, 256)};
     Entries.resize(size);
 
     for (u32 i {0}; i < size; ++i) {
         auto& color {Entries[i]};
-        color.R = data[(i * 3) + 0];
-        color.G = data[(i * 3) + 1];
-        color.B = data[(i * 3) + 2];
+        color.R = to_u8(data, (i * 3) + 0);
+        color.G = to_u8(data, (i * 3) + 1);
+        color.B = to_u8(data, (i * 3) + 2);
         color.A = 255;
     }
 }
 
-png::tRNS_chunk::tRNS_chunk(std::span<u8 const> data, color_type colorType, std::optional<PLTE_chunk>& plte)
+png::tRNS_chunk::tRNS_chunk(std::span<std::byte const> data, color_type colorType, std::optional<PLTE_chunk>& plte)
 {
     switch (colorType) {
     case color_type::Grayscale:
         if (data.size() >= 2) {
             Indicies.resize(1);
-            Indicies[0] = data[1];
+            Indicies[0] = to_u8(data, 1);
         }
         break;
 
     case color_type::TrueColor:
         if (data.size() >= 6) {
             Indicies.resize(3);
-            Indicies[0] = data[1];
-            Indicies[1] = data[3];
-            Indicies[2] = data[5];
+            Indicies[0] = to_u8(data, 1);
+            Indicies[1] = to_u8(data, 3);
+            Indicies[2] = to_u8(data, 5);
         }
         break;
 
     case color_type::Indexed:
         if (plte) {
             for (usize i {0}; i < data.size(); ++i) {
-                plte->Entries[i].A = data[i];
+                plte->Entries[i].A = to_u8(data, i);
             }
         }
         break;
@@ -112,7 +117,7 @@ auto png::tRNS_chunk::is_rgb_transparent(u8 r, u8 g, u8 b) -> bool
         && b == Indicies[2];
 }
 
-png::pHYs_chunk::pHYs_chunk(std::span<u8 const> data)
+png::pHYs_chunk::pHYs_chunk(std::span<std::byte const> data)
 {
     if (data.size() != 9) { return; }
 
@@ -122,13 +127,13 @@ png::pHYs_chunk::pHYs_chunk(std::span<u8 const> data)
     Value = static_cast<f32>(ppuX) / (ppuY != 0 ? static_cast<f32>(ppuY) : 1.0f);
 }
 
-png::acTL_chunk::acTL_chunk(std::span<u8 const> data)
+png::acTL_chunk::acTL_chunk(std::span<std::byte const> data)
     : NumFrames {to_u32(data, 0)}
     , NumPlays {to_u32(data, 4)}
 {
 }
 
-png::fcTL_chunk::fcTL_chunk(std::span<u8 const> data)
+png::fcTL_chunk::fcTL_chunk(std::span<std::byte const> data)
     : SequenceNumber {to_u32(data, 0)}
     , Width {to_i32(data, 4)}
     , Height {to_i32(data, 8)}
@@ -160,7 +165,7 @@ auto png_decoder::decode(io::istream& in) -> std::optional<image>
     if (!decode_info(in)) { return std::nullopt; }
     if (_ihdr.Width > png::MAX_SIZE || _ihdr.Height > png::MAX_SIZE) { return std::nullopt; }
 
-    std::vector<u8>                idat {};
+    std::vector<std::byte>         idat {};
     std::optional<png::pHYs_chunk> phys {};
 
     for (;;) {
@@ -247,7 +252,7 @@ auto png_anim_decoder::current_frame() const -> std::span<u8 const>
 
 auto png_anim_decoder::get_next_frame(io::istream& in) -> animated_image_decoder::status
 {
-    std::vector<u8>                idat {};
+    std::vector<std::byte>         idat {};
     std::optional<png::fcTL_chunk> fctl {};
 
     for (;;) {
@@ -357,7 +362,7 @@ auto png_decoder::read_chunk(io::istream& in) const -> png::chunk
 
     if (retValue.Length > 0) {
         retValue.Data.resize(retValue.Length);
-        in.read_to<u8>(retValue.Data);
+        in.read_to<std::byte>(retValue.Data);
     }
 
     retValue.Crc = in.read<u32, std::endian::big>();
@@ -367,19 +372,19 @@ auto png_decoder::read_chunk(io::istream& in) const -> png::chunk
 
 auto png_decoder::check_sig(io::istream& in) -> bool
 {
-    std::array<u8, 8> buf {};
-    in.read_to<u8>(buf);
-    return buf == SIGNATURE;
+    std::array<std::byte, 8> buf {};
+    in.read_to<std::byte>(buf);
+    return std::ranges::equal(buf, SIGNATURE, [](std::byte a, u8 b) { return a == static_cast<std::byte>(b); });
 }
 
-auto png_decoder::read_image(std::span<u8 const> idat, i32 width, i32 height) -> bool
+auto png_decoder::read_image(std::span<std::byte const> idat, i32 width, i32 height) -> bool
 {
-    auto const idatInflated {io::zlib_filter {}.from(idat)};
+    auto const  idatInflated {io::zlib_filter {}.from(idat)};
+    isize const idatSize {std::ssize(idatInflated)};
 
     prepare(width, height);
     if (_pixelSize == 0) { return false; }
 
-    auto const idatSize {std::ssize(idatInflated)};
     if (_ihdr.NonInterlaced) { // size check for non-interlaced
         if (height * (1 + std::ssize(_curLine)) != idatSize) { return false; }
     }
@@ -397,7 +402,8 @@ auto png_decoder::read_image(std::span<u8 const> idat, i32 width, i32 height) ->
             }
         }
 
-        auto const idatIt {idatInflated.begin() + bufferIndex};
+        auto const* idatIt {reinterpret_cast<u8 const*>(idatInflated.data()) + bufferIndex};
+
         if (_pixel.X == -1) { // First byte is filter type for the line.
             _filter    = *idatIt;
             _curLineIt = _curLine.begin();
@@ -682,7 +688,7 @@ auto png_encoder::encode(image const& image, io::ostream& out) -> bool
 
 void png_encoder::write_ihdr(image::information const& info, io::ostream& out) const
 {
-    std::array<u8, 17> header {};
+    std::array<std::byte, 17> header {};
 
     // TODO: endianess
     u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::IHDR))};
@@ -692,30 +698,30 @@ void png_encoder::write_ihdr(image::information const& info, io::ostream& out) c
     u32 const height {std::byteswap(static_cast<u32>(info.Size.Height))};
     memcpy(header.data() + 8, &height, 4);
 
-    u8 bitDepth {0};
-    u8 colorType {0};
+    std::byte bitDepth {0};
+    std::byte colorType {0};
 
     switch (info.Format) {
     case image::format::RGB:
-        colorType = static_cast<u8>(png::color_type::TrueColor);
-        bitDepth  = 8;
+        colorType = static_cast<std::byte>(png::color_type::TrueColor);
+        bitDepth  = std::byte {8};
         break;
     case image::format::RGBA:
-        colorType = static_cast<u8>(png::color_type::TrueColorAlpha);
-        bitDepth  = 8;
+        colorType = static_cast<std::byte>(png::color_type::TrueColorAlpha);
+        bitDepth  = std::byte {8};
         break;
     }
 
     header[12] = bitDepth;
     header[13] = colorType;
-    header[14] = 0;
-    header[15] = 0;
-    header[16] = 0;
+    header[14] = std::byte {0};
+    header[15] = std::byte {0};
+    header[16] = std::byte {0};
 
     write_chunk(out, header);
 }
 
-static auto data(image const& image) -> std::vector<u8>
+static auto rgba_data(image const& image) -> std::vector<u8>
 {
     auto const  buffer {image.data()};
     auto const& info {image.info()};
@@ -755,15 +761,16 @@ static auto data(image const& image) -> std::vector<u8>
 void png_encoder::write_idat(image const& image, io::ostream& out) const
 {
     // compress
-    auto buf {io::zlib_filter {}.to(data(image))};
+    auto const imgD {rgba_data(image)};
+    auto       buf {io::zlib_filter {}.to(std::as_bytes(std::span {imgD}))};
     if (buf.empty()) { return; }
 
     // write in 8192 byte chunks
     isize offset {0};
     usize total {buf.size()};
 
-    constexpr usize                idatLength {8192};
-    std::array<u8, idatLength + 4> idat {};
+    constexpr usize                       idatLength {8192};
+    std::array<std::byte, idatLength + 4> idat {};
 
     u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::IDAT))}; // TODO: endianess
     while (total > 0) {
@@ -778,22 +785,22 @@ void png_encoder::write_idat(image const& image, io::ostream& out) const
 
 void png_encoder::write_iend(io::ostream& out) const
 {
-    std::array<u8, 4> iend {};
-    u32 const         type {std::byteswap(static_cast<u32>(png::chunk_type::IEND))}; // TODO: endianess
+    std::array<std::byte, 4> iend {};
+    u32 const                type {std::byteswap(static_cast<u32>(png::chunk_type::IEND))}; // TODO: endianess
     memcpy(iend.data(), &type, 4);
     write_chunk(out, iend);
 }
 
-void png_encoder::write_chunk(io::ostream& out, std::span<u8 const> buf) const
+void png_encoder::write_chunk(io::ostream& out, std::span<std::byte const> buf) const
 {
     write_chunk(out, buf, static_cast<u32>(buf.size()));
 }
 
-void png_encoder::write_chunk(io::ostream& out, std::span<u8 const> buf, u32 length) const
+void png_encoder::write_chunk(io::ostream& out, std::span<std::byte const> buf, u32 length) const
 {
     out.write<u32, std::endian::big>(length - 4);
-    out.write<u8 const>({buf.data(), length});
-    u32 const crc {static_cast<u32>(mz_crc32(MZ_CRC32_INIT, buf.data(), length))};
+    out.write<std::byte const>({buf.data(), length});
+    u32 const crc {static_cast<u32>(mz_crc32(MZ_CRC32_INIT, reinterpret_cast<mz_uint8 const*>(buf.data()), length))};
     out.write<u32, std::endian::big>(crc);
 }
 
@@ -916,8 +923,8 @@ auto png_anim_encoder::finish() -> bool
 
 void png_anim_encoder::write_actl_placeholder(io::ostream& out) const
 {
-    std::array<u8, 12> actl {};
-    u32 const          type {std::byteswap(static_cast<u32>(png::chunk_type::acTL))};
+    std::array<std::byte, 12> actl {};
+    u32 const                 type {std::byteswap(static_cast<u32>(png::chunk_type::acTL))};
     memcpy(actl.data(), &type, 4);
     u32 const numFrames {0};
     memcpy(actl.data() + 4, &numFrames, 4);
@@ -928,8 +935,8 @@ void png_anim_encoder::write_actl_placeholder(io::ostream& out) const
 
 void png_anim_encoder::write_actl(u32 frameCount, io::ostream& out) const
 {
-    std::array<u8, 12> actl {};
-    u32 const          type {std::byteswap(static_cast<u32>(png::chunk_type::acTL))};
+    std::array<std::byte, 12> actl {};
+    u32 const                 type {std::byteswap(static_cast<u32>(png::chunk_type::acTL))};
     memcpy(actl.data(), &type, 4);
     u32 const numFrames {std::byteswap(frameCount)};
     memcpy(actl.data() + 4, &numFrames, 4);
@@ -940,8 +947,8 @@ void png_anim_encoder::write_actl(u32 frameCount, io::ostream& out) const
 
 void png_anim_encoder::write_fctl(u32 idx, rect_i const& rect, image_frame const& frame, io::ostream& out) const
 {
-    std::array<u8, 30> fctl {};
-    u32 const          type {std::byteswap(static_cast<u32>(png::chunk_type::fcTL))};
+    std::array<std::byte, 30> fctl {};
+    u32 const                 type {std::byteswap(static_cast<u32>(png::chunk_type::fcTL))};
     memcpy(fctl.data(), &type, 4);
     u32 const seq {std::byteswap(idx)};
     memcpy(fctl.data() + 4, &seq, 4);
@@ -957,23 +964,24 @@ void png_anim_encoder::write_fctl(u32 idx, rect_i const& rect, image_frame const
     memcpy(fctl.data() + 24, &delayNum, 2);
     u16 const delayDen {std::byteswap(u16 {1000})};
     memcpy(fctl.data() + 26, &delayDen, 2);
-    fctl[28] = static_cast<u8>(png::dispose_op::None);
-    fctl[29] = static_cast<u8>(png::blend_op::Source);
+    fctl[28] = static_cast<std::byte>(png::dispose_op::None);
+    fctl[29] = static_cast<std::byte>(png::blend_op::Source);
     _enc.write_chunk(out, fctl);
 }
 
 void png_anim_encoder::write_fdat(u32& idx, image const& frame, io::ostream& out) const
 {
     // compress
-    auto buf {io::zlib_filter {}.to(data(frame))};
+    auto const imgD {rgba_data(frame)};
+    auto       buf {io::zlib_filter {}.to(std::as_bytes(std::span {imgD}))};
     if (buf.empty()) { return; }
 
     // write in 8192 byte chunks
     isize offset {0};
     usize total {buf.size()};
 
-    constexpr usize                fdatLength {8192};
-    std::array<u8, fdatLength + 8> fdat {};
+    constexpr usize                       fdatLength {8192};
+    std::array<std::byte, fdatLength + 8> fdat {};
 
     u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::fdAT))}; // TODO: endianess
 

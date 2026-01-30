@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <future>
 #include <memory>
 #include <optional>
@@ -199,6 +200,11 @@ auto image::count_colors [[nodiscard]] () const -> isize
 auto image::Create(size_i size, format f, std::span<u8 const> data) -> image
 {
     return {size, f, data};
+}
+
+auto image::Create(size_i size, format f, std::span<std::byte const> data) -> image
+{
+    return {size, f, {reinterpret_cast<u8 const*>(data.data()), data.size()}};
 }
 
 auto image::CreateEmpty(size_i size, format f) -> image

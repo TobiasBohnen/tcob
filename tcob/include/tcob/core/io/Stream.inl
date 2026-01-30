@@ -48,10 +48,9 @@ inline auto istream::read_n() -> std::array<T, Size>
     return retValue;
 }
 
-template <POD T>
-inline auto istream::read_filtered(std::streamsize n, auto&&... filters) -> std::vector<T>
+inline auto istream::read_filtered(std::streamsize n, auto&&... filters) -> std::vector<std::byte>
 {
-    auto vec {read_n<T>(n)};
+    auto vec {read_n<std::byte>(n)};
     ((vec = filters.from(vec)), ...);
     return vec;
 }
@@ -148,14 +147,13 @@ inline auto ostream::write(std::span<T const> s) -> std::streamsize
     return write_bytes(s.data(), static_cast<std::streamsize>(s.size_bytes()));
 }
 
-template <POD T>
-inline auto ostream::write_filtered(std::span<T const> s, auto&& filter, auto&&... filters) -> std::streamsize
+inline auto ostream::write_filtered(std::span<std::byte const> s, auto&& filter, auto&&... filters) -> std::streamsize
 {
     auto vec {filter.to(s)};
     if constexpr (sizeof...(filters) > 0) {
-        return write_filtered<T>(vec, filters...);
+        return write_filtered(vec, filters...);
     } else {
-        return write<T>(vec);
+        return write<std::byte>(vec);
     }
 }
 

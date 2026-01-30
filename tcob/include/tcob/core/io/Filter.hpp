@@ -6,19 +6,19 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <cstddef>
 #include <span>
 #include <vector>
 
 namespace tcob::io {
-// TODO: u8 should be byte
 ////////////////////////////////////////////////////////////
 
 class TCOB_API zlib_filter {
 public:
     explicit zlib_filter(i32 complevel = -1);
 
-    auto to(std::span<u8 const> bytes) const -> std::vector<u8>;
-    auto from(std::span<u8 const> bytes) const -> std::vector<u8>;
+    auto to(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
+    auto from(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
 
 private:
     static constexpr usize BUFFER_SIZE {8192};
@@ -30,24 +30,24 @@ private:
 
 class TCOB_API base64_filter {
 public:
-    auto to(std::span<u8 const> bytes) const -> std::vector<u8>;
-    auto from(std::span<u8 const> bytes) const -> std::vector<u8>;
+    auto to(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
+    auto from(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API z85_filter {
 public:
-    auto to(std::span<u8 const> bytes) const -> std::vector<u8>;
-    auto from(std::span<u8 const> bytes) const -> std::vector<u8>;
+    auto to(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
+    auto from(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API reverser_filter {
 public:
-    auto to(std::span<u8 const> bytes) const -> std::vector<u8>;
-    auto from(std::span<u8 const> bytes) const -> std::vector<u8>;
+    auto to(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
+    auto from(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
 };
 
 }
