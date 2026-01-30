@@ -6,6 +6,7 @@
 #include "tcob/core/io/Magic.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <ios>
 #include <optional>
 #include <span>
@@ -31,15 +32,15 @@ void add_signature(signature const& sig)
 auto get_signature(istream& stream) -> std::optional<signature>
 {
     auto const offset {stream.tell()};
-    auto const startBuffer {stream.read_n<u8, BUFFER_LENGTH>()};
+    auto const startBuffer {stream.read_n<std::byte, BUFFER_LENGTH>()};
     stream.seek(-std::min(stream.size_in_bytes(), static_cast<std::streamsize>(BUFFER_LENGTH)), seek_dir::End);
-    auto const endBuffer {stream.read_n<u8, BUFFER_LENGTH>()};
+    auto const endBuffer {stream.read_n<std::byte, BUFFER_LENGTH>()};
     stream.seek(offset, seek_dir::Begin);
 
     for (auto const& sig : GetSignatures()) {
         bool found {true};
         for (auto const& part : sig.Parts) {
-            std::span<u8 const> slice;
+            std::span<std::byte const> slice;
 
             if (part.Offset >= 0) {
                 usize const startIndex {static_cast<usize>(part.Offset)};
@@ -58,7 +59,7 @@ auto get_signature(istream& stream) -> std::optional<signature>
             }
 
             // Compare the slice with the signature part
-            if (!std::equal(slice.begin(), slice.end(), part.Bytes.begin())) {
+            if (!std::equal(slice.begin(), slice.end(), part.Bytes.begin(), [](std::byte first, u8 second) { return first == static_cast<std::byte>(second); })) {
                 found = false;
                 break;
             }
