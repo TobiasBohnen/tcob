@@ -40,8 +40,8 @@ static auto xRead(sqlite3_file* f, void* dst, int iAmt, sqlite3_int64 iOfst) -> 
 
     if (!stream.seek(iOfst, io::seek_dir::Begin)) { return SQLITE_IOERR_READ; }
 
-    auto* dstBuffer {static_cast<byte*>(dst)};
-    auto  nRead {stream.read_to<byte>({dstBuffer, static_cast<usize>(iAmt)})};
+    auto* dstBuffer {static_cast<u8*>(dst)};
+    auto  nRead {stream.read_to<u8>({dstBuffer, static_cast<usize>(iAmt)})};
 
     if (nRead < 0) { return SQLITE_IOERR_READ; }
     if (nRead < iAmt) { std::memset(dstBuffer + nRead, 0, iAmt - nRead); }
@@ -59,8 +59,8 @@ static auto xWrite(sqlite3_file* f, void const* src, int iAmt, sqlite3_int64 iOf
 
     if (!stream.seek(iOfst, io::seek_dir::Begin)) { return SQLITE_IOERR_SEEK; }
 
-    auto const* srcBuffer {static_cast<byte const*>(src)};
-    auto const  written {stream.write<byte>({srcBuffer, static_cast<usize>(iAmt)})};
+    auto const* srcBuffer {static_cast<u8 const*>(src)};
+    auto const  written {stream.write<u8>({srcBuffer, static_cast<usize>(iAmt)})};
 
     return written == iAmt ? SQLITE_OK : SQLITE_IOERR_WRITE;
 }

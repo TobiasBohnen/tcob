@@ -73,7 +73,7 @@ void truetype_font_engine::Done()
     FT_Done_FreeType(library);
 }
 
-auto truetype_font_engine::load_data(std::span<byte const> data, u32 fontsize) -> std::optional<font::information>
+auto truetype_font_engine::load_data(std::span<u8 const> data, u32 fontsize) -> std::optional<font::information>
 {
     assert(library);
 
@@ -118,7 +118,7 @@ auto truetype_font_engine::render_glyph(u32 cp) -> std::pair<glyph, glyph_bitmap
     retValue.first = load_glyph(cp);
     FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL);
 
-    retValue.second.Bitmap = std::vector<byte> {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (_face->glyph->bitmap.width * _face->glyph->bitmap.rows)};
+    retValue.second.Bitmap = std::vector<u8> {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (_face->glyph->bitmap.width * _face->glyph->bitmap.rows)};
 
     retValue.second.BitmapSize.Width  = _face->glyph->bitmap.width;
     retValue.second.BitmapSize.Height = _face->glyph->bitmap.rows;

@@ -28,7 +28,7 @@ public:
     auto has_style(font::style style) const -> bool;
 
     static void FindSources(font_family& fam, path const& source);
-    static void SingleFont(font_family& fam, std::span<byte const> font);
+    static void SingleFont(font_family& fam, std::span<u8 const> font);
 
     static inline char const* AssetName {"font_family"};
 
@@ -39,7 +39,7 @@ private:
 
     struct style_entry {
         path                                           Source;
-        std::vector<byte>                              Data;
+        std::vector<u8>                                Data;
         std::unordered_map<u32, asset_owner_ptr<font>> Fonts;
     };
 

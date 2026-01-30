@@ -147,7 +147,7 @@ png::fcTL_chunk::fcTL_chunk(std::span<u8 const> data)
     Duration = milliseconds {(DelayNum * 1000) / (DelayDen != 0 ? static_cast<u32>(DelayDen) : 100)};
 }
 
-constexpr std::array<byte, 8> SIGNATURE {0x89, 0x50, 0x4e, 0x47, 0x0d, 0xa, 0x1a, 0x0a};
+constexpr std::array<u8, 8> SIGNATURE {0x89, 0x50, 0x4e, 0x47, 0x0d, 0xa, 0x1a, 0x0a};
 
 ////////////////////////////////////////////////////////////
 
@@ -160,7 +160,7 @@ auto png_decoder::decode(io::istream& in) -> std::optional<image>
     if (!decode_info(in)) { return std::nullopt; }
     if (_ihdr.Width > png::MAX_SIZE || _ihdr.Height > png::MAX_SIZE) { return std::nullopt; }
 
-    std::vector<byte>              idat {};
+    std::vector<u8>                idat {};
     std::optional<png::pHYs_chunk> phys {};
 
     for (;;) {
@@ -247,7 +247,7 @@ auto png_anim_decoder::current_frame() const -> std::span<u8 const>
 
 auto png_anim_decoder::get_next_frame(io::istream& in) -> animated_image_decoder::status
 {
-    std::vector<byte>              idat {};
+    std::vector<u8>                idat {};
     std::optional<png::fcTL_chunk> fctl {};
 
     for (;;) {
@@ -367,12 +367,12 @@ auto png_decoder::read_chunk(io::istream& in) const -> png::chunk
 
 auto png_decoder::check_sig(io::istream& in) -> bool
 {
-    std::array<byte, 8> buf {};
-    in.read_to<byte>(buf);
+    std::array<u8, 8> buf {};
+    in.read_to<u8>(buf);
     return buf == SIGNATURE;
 }
 
-auto png_decoder::read_image(std::span<byte const> idat, i32 width, i32 height) -> bool
+auto png_decoder::read_image(std::span<u8 const> idat, i32 width, i32 height) -> bool
 {
     auto const idatInflated {io::zlib_filter {}.from(idat)};
 

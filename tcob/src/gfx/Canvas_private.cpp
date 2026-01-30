@@ -25,7 +25,6 @@
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 
-
 namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
@@ -1002,7 +1001,7 @@ void path_cache::add_point(f32 x, f32 y, i32 flags)
     canvas_point& pt {_points.emplace_back()};
     pt.X     = x;
     pt.Y     = y;
-    pt.Flags = static_cast<byte>(flags);
+    pt.Flags = static_cast<u8>(flags);
 
     ++path.Count;
     path.Closed = false;

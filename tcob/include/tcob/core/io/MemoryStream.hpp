@@ -26,8 +26,8 @@ public:
     auto write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize;
 
 private:
-    std::vector<byte> _buf;
-    std::streamoff    _pos {0};
+    std::vector<u8> _buf;
+    std::streamoff  _pos {0};
 };
 
 ////////////////////////////////////////////////////////////

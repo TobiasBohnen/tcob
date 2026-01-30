@@ -21,7 +21,7 @@ extern "C" {
 static auto read_mp3(void* userdata, void* buffer, usize bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
-    return static_cast<usize>(stream->read_to<byte>({static_cast<byte*>(buffer), bytesToRead}));
+    return static_cast<usize>(stream->read_to<u8>({static_cast<u8*>(buffer), bytesToRead}));
 }
 
 static auto seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> drmp3_bool32

@@ -58,11 +58,11 @@ auto font::load(io::istream& stream, u32 size) noexcept -> bool
 {
     if (!stream) { return false; }
 
-    _fontData = stream.read_all<byte>();
+    _fontData = stream.read_all<u8>();
     return load(_fontData, size);
 }
 
-auto font::load(std::span<byte const> fontData, u32 size) noexcept -> bool
+auto font::load(std::span<u8 const> fontData, u32 size) noexcept -> bool
 {
     if (auto info {_engine->load_data(fontData, size)}) {
         _info = *info;

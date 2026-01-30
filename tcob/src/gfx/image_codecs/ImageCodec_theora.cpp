@@ -21,7 +21,7 @@ extern "C" {
 static auto read(THEORAPLAY_Io* io, void* buf, long buflen) -> long
 {
     auto* stream {static_cast<io::istream*>(io->userdata)};
-    return static_cast<long>(stream->read_to<byte>({static_cast<byte*>(buf), static_cast<usize>(buflen)}));
+    return static_cast<long>(stream->read_to<u8>({static_cast<u8*>(buf), static_cast<usize>(buflen)}));
 }
 
 static auto streamlen(THEORAPLAY_Io* io) -> long

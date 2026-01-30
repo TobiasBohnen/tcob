@@ -152,8 +152,8 @@ public:
     i32         LineDefined {0};           /* (S) */
     i32         LastLineDefined {0};       /* (S) */
     string      NameWhat;                  /* (n) */
-    byte        UpvalueCount {0};          /* (u) number of upvalues */
-    byte        ParameterCount {0};        /* (u) number of parameters */
+    u8          UpvalueCount {0};          /* (u) number of upvalues */
+    u8          ParameterCount {0};        /* (u) number of parameters */
     bool        IsVarArg {false};          /* (u) */
     bool        IsTailCall {false};        /* (t) */
     i32         FirstTransfer {0};         /* (r) index of first value transferred */

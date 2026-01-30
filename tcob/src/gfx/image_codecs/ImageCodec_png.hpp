@@ -146,7 +146,7 @@ protected:
     auto read_chunk(io::istream& in) const -> png::chunk;
     auto check_sig(io::istream& in) -> bool;
 
-    auto read_image(std::span<byte const> idat, i32 width, i32 height) -> bool;
+    auto read_image(std::span<u8 const> idat, i32 width, i32 height) -> bool;
 
     auto ihdr() const -> png::IHDR_chunk const&;
     void handle_plte(png::chunk const& chunk);

@@ -69,7 +69,7 @@ auto midi_decoder::open() -> std::optional<buffer::information>
     _info.Specs.SampleRate = _font->info().SampleRate;
     _info.Specs.Channels   = _font->info().Channels;
 
-    auto const buffer {stream().read_all<byte>()};
+    auto const buffer {stream().read_all<u8>()};
     _firstMessage   = {tml_load_memory(buffer.data(), static_cast<i32>(buffer.size()))};
     _currentMessage = _firstMessage;
     u32 duration {0};

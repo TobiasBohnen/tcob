@@ -106,11 +106,11 @@ void pcx::header::read(io::istream& reader)
 
 void pcx::header::Write(image::information const& info, io::ostream& writer)
 {
-    byte bpp {8}, cpc {3};
+    u8 bpp {8}, cpc {3};
 
     writer.write(ManufacturerMagicNumber);
-    writer.write<byte>(5);
-    writer.write<byte>(1);
+    writer.write<u8>(5);
+    writer.write<u8>(1);
     writer.write(bpp);
     writer.write<i16, std::endian::little>(0);
     writer.write<i16, std::endian::little>(0);
@@ -122,11 +122,11 @@ void pcx::header::Write(image::information const& info, io::ostream& writer)
 
     writer.seek(HeaderPaletteLength, io::seek_dir::Current);
 
-    writer.write<byte>(0);
+    writer.write<u8>(0);
     writer.write(cpc);
 
     writer.write<i16, std::endian::little>(static_cast<i16>(info.Size.Width));
-    writer.write<byte>(1);
+    writer.write<u8>(1);
     writer.write<i16, std::endian::little>(0);
     writer.write<i16, std::endian::little>(0);
 }

@@ -34,8 +34,8 @@ auto file_hasher::crc32() const -> u32
 {
     if (!is_file(_path)) { return 0; }
 
-    ifstream          fs {_path};
-    std::vector<byte> fileData {fs.read_all<byte>()};
+    ifstream        fs {_path};
+    std::vector<u8> fileData {fs.read_all<u8>()};
     return static_cast<u32>(mz_crc32(MZ_CRC32_INIT, fileData.data(), fileData.size()));
 }
 
@@ -112,14 +112,14 @@ static auto mz_read(void* pOpaque, mz_uint64 file_ofs, void* pBuf, size_t n) -> 
 {
     auto* fs {static_cast<ifstream*>(pOpaque)};
     fs->seek(static_cast<std::streamoff>(file_ofs), seek_dir::Begin);
-    return static_cast<size_t>(fs->read_to<byte>({static_cast<byte*>(pBuf), n}));
+    return static_cast<size_t>(fs->read_to<u8>({static_cast<u8*>(pBuf), n}));
 }
 
 static auto mz_write(void* pOpaque, mz_uint64 file_ofs, void const* pBuf, size_t n) -> size_t
 {
     auto* fs {static_cast<ofstream*>(pOpaque)};
     fs->seek(static_cast<std::streamoff>(file_ofs), seek_dir::Begin);
-    return static_cast<size_t>(fs->write<byte>({static_cast<byte const*>(pBuf), n}));
+    return static_cast<size_t>(fs->write<u8>({static_cast<u8 const*>(pBuf), n}));
 }
 }
 

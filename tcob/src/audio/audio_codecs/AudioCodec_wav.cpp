@@ -23,13 +23,13 @@ extern "C" {
 static auto read_wav(void* userdata, void* buffer, usize bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
-    return static_cast<usize>(stream->read_to<byte>({static_cast<byte*>(buffer), bytesToRead}));
+    return static_cast<usize>(stream->read_to<u8>({static_cast<u8*>(buffer), bytesToRead}));
 }
 
 static auto write_wav(void* userdata, void const* buffer, usize bytesToWrite) -> usize
 {
     auto*      stream {static_cast<io::ostream*>(userdata)};
-    auto const retValue {stream->write<byte>({static_cast<byte const*>(buffer), bytesToWrite})};
+    auto const retValue {stream->write<u8>({static_cast<u8 const*>(buffer), bytesToWrite})};
     return static_cast<usize>(std::max<isize>(0, retValue));
 }
 

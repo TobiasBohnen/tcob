@@ -142,7 +142,7 @@ private:
     std::vector<nvg_path> _paths;
     std::vector<vertex>   _verts;
     usize                 _nverts {0};
-    std::vector<byte>     _uniforms;
+    std::vector<u8>       _uniforms;
     usize                 _nuniforms {0};
 
     gl_texture _gradientTexture;

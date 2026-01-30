@@ -21,16 +21,16 @@
 
 namespace tcob::data::detail {
 
-constexpr std::array<byte, 5> MAGIC {'B', 'S', 'B', 'D', 1};
-constexpr u8                  LitIntVal {static_cast<u8>(bsbd::marker_type::LitInt)};
+constexpr std::array<u8, 5> MAGIC {'B', 'S', 'B', 'D', 1};
+constexpr u8                LitIntVal {static_cast<u8>(bsbd::marker_type::LitInt)};
 
 using short_string_size_t = u8;
 using long_string_size_t  = u32;
 
 auto bsbd_reader::read_as_object(io::istream& stream) -> std::optional<object>
 {
-    std::array<byte, 5> buf {};
-    stream.read_to<byte>(buf);
+    std::array<u8, 5> buf {};
+    stream.read_to<u8>(buf);
     if (MAGIC != buf) { return std::nullopt; }
 
     read_string_pool(stream);
@@ -46,8 +46,8 @@ auto bsbd_reader::read_as_object(io::istream& stream) -> std::optional<object>
 
 auto bsbd_reader::read_as_array(io::istream& stream) -> std::optional<array>
 {
-    std::array<byte, 5> buf {};
-    stream.read_to<byte>(buf);
+    std::array<u8, 5> buf {};
+    stream.read_to<u8>(buf);
     if (MAGIC != buf) { return std::nullopt; }
 
     read_string_pool(stream);

@@ -277,7 +277,7 @@ namespace detail {
     static auto writer(lua_State*, void const* p, usize sz, void* ud) -> i32
     {
         auto* stream {static_cast<io::ostream*>(ud)};
-        stream->write<byte>({static_cast<byte const*>(p), sz});
+        stream->write<u8>({static_cast<u8 const*>(p), sz});
         return 0;
     }
 
