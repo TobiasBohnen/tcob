@@ -142,6 +142,8 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
     if (endPos == utf8_string_view::npos || endPos == 1) { return false; } // ERROR: invalid object header
 
     auto const lineSize {line.size()};
+    if (lineSize == 1) { return false; }
+
     // quoted key
     if ((line[1] == '\'' || line[1] == '"') && line[1] == line[lineSize - 2]) {
         line = line.substr(2, lineSize - 4);
