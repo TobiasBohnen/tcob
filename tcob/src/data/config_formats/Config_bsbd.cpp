@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <cassert>
 #include <cmath>
 #include <ios>
 #include <limits>
@@ -23,8 +24,8 @@ namespace tcob::data::detail {
 constexpr std::array<byte, 5> MAGIC {'B', 'S', 'B', 'D', 1};
 constexpr u8                  LitIntVal {static_cast<u8>(bsbd::marker_type::LitInt)};
 
-using short_string_size = u8;
-using long_string_size  = u32;
+using short_string_size_t = u8;
+using long_string_size_t  = u32;
 
 auto bsbd_reader::read_as_object(io::istream& stream) -> std::optional<object>
 {
@@ -107,8 +108,8 @@ auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type
     case bsbd::marker_type::BoolTrue:     entry = true; break;
     case bsbd::marker_type::BoolFalse:    entry = false; break;
 
-    case bsbd::marker_type::LongString:   entry = stream.read_string(stream.read<long_string_size, std::endian::little>()); break;
-    case bsbd::marker_type::ShortString:  entry = stream.read_string(stream.read<short_string_size, std::endian::little>()); break;
+    case bsbd::marker_type::LongString:   entry = stream.read_string(stream.read<long_string_size_t, std::endian::little>()); break;
+    case bsbd::marker_type::ShortString:  entry = stream.read_string(stream.read<short_string_size_t, std::endian::little>()); break;
 
     case bsbd::marker_type::SectionStart: {
         if (auto subSec {read_section(stream)}) {
@@ -170,8 +171,8 @@ auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, 
     case bsbd::marker_type::BoolTrue:     entry = true; break;
     case bsbd::marker_type::BoolFalse:    entry = false; break;
 
-    case bsbd::marker_type::LongString:   entry = stream.read_string(stream.read<long_string_size, std::endian::little>()); break;
-    case bsbd::marker_type::ShortString:  entry = stream.read_string(stream.read<short_string_size, std::endian::little>()); break;
+    case bsbd::marker_type::LongString:   entry = stream.read_string(stream.read<long_string_size_t, std::endian::little>()); break;
+    case bsbd::marker_type::ShortString:  entry = stream.read_string(stream.read<short_string_size_t, std::endian::little>()); break;
 
     case bsbd::marker_type::SectionStart: {
         if (auto subSec {read_section(stream)}) {
@@ -318,13 +319,13 @@ void bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
         }
     } else if (ent.is<utf8_string>()) {
         auto const str {ent.as<utf8_string>()};
-        if (str.size() <= std::numeric_limits<short_string_size>::max()) {
+        if (str.size() <= std::numeric_limits<short_string_size_t>::max()) {
             write_key(stream, bsbd::marker_type::ShortString, name);
-            stream.write<short_string_size, std::endian::little>(static_cast<short_string_size>(str.size()));
+            stream.write<short_string_size_t, std::endian::little>(static_cast<short_string_size_t>(str.size()));
         } else {
-            // TODO: size check
+            assert(str.size() <= std::numeric_limits<long_string_size_t>::max());
             write_key(stream, bsbd::marker_type::LongString, name);
-            stream.write<long_string_size, std::endian::little>(static_cast<long_string_size>(str.size()));
+            stream.write<long_string_size_t, std::endian::little>(static_cast<long_string_size_t>(str.size()));
         }
         stream.write(str);
     } else if (ent.is<array>()) {
