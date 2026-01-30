@@ -6,6 +6,7 @@
 #include <tcob/core/io/SpanStream.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstring>
 #include <ios>
 #include <iterator>
@@ -15,7 +16,7 @@
 
 namespace tcob::io {
 
-ispan_sink::ispan_sink(std::span<u8 const> span)
+ispan_sink::ispan_sink(std::span<std::byte const> span)
     : _span {span}
 {
 }
@@ -67,7 +68,7 @@ auto ispan_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::stream
 
 ////////////////////////////////////////////////////////////
 
-isstream::isstream(std::span<u8 const> span)
+isstream::isstream(std::span<std::byte const> span)
     : sink_istream<ispan_sink> {&_sink}
     , _sink {span}
 {
@@ -75,7 +76,7 @@ isstream::isstream(std::span<u8 const> span)
 
 ////////////////////////////////////////////////////////////
 
-ospan_sink::ospan_sink(std::span<u8> span)
+ospan_sink::ospan_sink(std::span<std::byte> span)
     : _span {span}
 {
 }
@@ -118,7 +119,7 @@ auto ospan_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std:
 
 ////////////////////////////////////////////////////////////
 
-osstream::osstream(std::span<u8> span)
+osstream::osstream(std::span<std::byte> span)
     : sink_ostream<ospan_sink> {&_sink}
     , _sink {span}
 {
