@@ -7,6 +7,7 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
 
+    #include <cstddef>
     #include <optional>
     #include <span>
 
@@ -21,7 +22,7 @@ extern "C" {
 static auto read_mp3(void* userdata, void* buffer, usize bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
-    return static_cast<usize>(stream->read_to<u8>({static_cast<u8*>(buffer), bytesToRead}));
+    return static_cast<usize>(stream->read_to<std::byte>({static_cast<std::byte*>(buffer), bytesToRead}));
 }
 
 static auto seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> drmp3_bool32

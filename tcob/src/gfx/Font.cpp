@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/Font.hpp"
 
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <span>
@@ -58,11 +59,11 @@ auto font::load(io::istream& stream, u32 size) noexcept -> bool
 {
     if (!stream) { return false; }
 
-    _fontData = stream.read_all<u8>();
+    _fontData = stream.read_all<std::byte>();
     return load(_fontData, size);
 }
 
-auto font::load(std::span<u8 const> fontData, u32 size) noexcept -> bool
+auto font::load(std::span<std::byte const> fontData, u32 size) noexcept -> bool
 {
     if (auto info {_engine->load_data(fontData, size)}) {
         _info = *info;

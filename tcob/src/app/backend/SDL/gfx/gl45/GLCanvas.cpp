@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstring>
 #include <span>
 #include <stdexcept>
@@ -637,7 +638,7 @@ auto gl_canvas::alloc_frag_uniforms(usize n) -> usize
 
 auto gl_canvas::get_frag_uniformptr(usize i) -> nvg_frag_uniforms*
 {
-    u8* data {_uniforms.data()};
+    std::byte* data {_uniforms.data()};
     return reinterpret_cast<nvg_frag_uniforms*>(&data[i]);
 }
 

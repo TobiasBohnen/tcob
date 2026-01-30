@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <optional>
 #include <unordered_set>
 #include <utility>
@@ -277,7 +278,7 @@ namespace detail {
     static auto writer(lua_State*, void const* p, usize sz, void* ud) -> i32
     {
         auto* stream {static_cast<io::ostream*>(ud)};
-        stream->write<u8>({static_cast<u8 const*>(p), sz});
+        stream->write<std::byte>({static_cast<std::byte const*>(p), sz});
         return 0;
     }
 

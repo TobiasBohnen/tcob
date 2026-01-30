@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/FontFamily.hpp"
 
+#include <cstddef>
 #include <optional>
 #include <span>
 #include <utility>
@@ -122,7 +123,7 @@ auto font_family::get_font(font::style style, u32 size) -> asset_ptr<font>
     // load font data
     if (entry.Data.empty() && io::is_file(entry.Source)) {
         io::ifstream fs {entry.Source};
-        entry.Data = fs.read_all<u8>();
+        entry.Data = fs.read_all<std::byte>();
     }
 
 #if !defined(__EMSCRIPTEN__) // TODO: fixed in llvm 19
@@ -179,7 +180,7 @@ void font_family::FindSources(font_family& fam, path const& source)
     }
 }
 
-void font_family::SingleFont(font_family& fam, std::span<u8 const> font)
+void font_family::SingleFont(font_family& fam, std::span<std::byte const> font)
 {
     fam._styles.clear();
 

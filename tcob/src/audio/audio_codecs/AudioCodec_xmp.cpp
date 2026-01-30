@@ -7,6 +7,7 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP)
 
+    #include <cstddef>
     #include <iterator>
     #include <limits>
     #include <optional>
@@ -26,7 +27,7 @@ extern "C" {
 static auto read_xmp(void* dest, unsigned long len, unsigned long nmemb, void* priv) -> unsigned long
 {
     auto* stream {static_cast<io::istream*>(priv)};
-    return static_cast<unsigned long>(stream->read_to<u8>({static_cast<u8*>(dest), len * nmemb}) / len);
+    return static_cast<unsigned long>(stream->read_to<std::byte>({static_cast<std::byte*>(dest), len * nmemb}) / len);
 }
 
 static auto seek_xmp(void* priv, long offset, int whence) -> int

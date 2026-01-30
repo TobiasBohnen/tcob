@@ -12,6 +12,7 @@
 #include "tcob/core/io/Stream.hpp"
 
 namespace tcob::io {
+// TODO: u8 should be byte
 ////////////////////////////////////////////////////////////
 
 class TCOB_API ispan_sink final {

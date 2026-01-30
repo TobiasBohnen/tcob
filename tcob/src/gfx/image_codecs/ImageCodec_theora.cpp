@@ -4,8 +4,10 @@
 // https://opensource.org/licenses/MIT
 
 #include "ImageCodec_theora.hpp"
+
 #if defined(TCOB_ENABLE_FILETYPES_GFX_THEORA)
 
+    #include <cstddef>
     #include <optional>
     #include <span>
     #include <thread>
@@ -21,7 +23,7 @@ extern "C" {
 static auto read(THEORAPLAY_Io* io, void* buf, long buflen) -> long
 {
     auto* stream {static_cast<io::istream*>(io->userdata)};
-    return static_cast<long>(stream->read_to<u8>({static_cast<u8*>(buf), static_cast<usize>(buflen)}));
+    return static_cast<long>(stream->read_to<std::byte>({static_cast<std::byte*>(buf), static_cast<usize>(buflen)}));
 }
 
 static auto streamlen(THEORAPLAY_Io* io) -> long

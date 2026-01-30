@@ -8,6 +8,7 @@
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
 
     #include <algorithm>
+    #include <cstddef>
     #include <optional>
     #include <span>
     #include <vector>
@@ -23,13 +24,13 @@ extern "C" {
 static auto read_wav(void* userdata, void* buffer, usize bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
-    return static_cast<usize>(stream->read_to<u8>({static_cast<u8*>(buffer), bytesToRead}));
+    return static_cast<usize>(stream->read_to<std::byte>({static_cast<std::byte*>(buffer), bytesToRead}));
 }
 
 static auto write_wav(void* userdata, void const* buffer, usize bytesToWrite) -> usize
 {
     auto*      stream {static_cast<io::ostream*>(userdata)};
-    auto const retValue {stream->write<u8>({static_cast<u8 const*>(buffer), bytesToWrite})};
+    auto const retValue {stream->write<std::byte>({static_cast<std::byte const*>(buffer), bytesToWrite})};
     return static_cast<usize>(std::max<isize>(0, retValue));
 }
 

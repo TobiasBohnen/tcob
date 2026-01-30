@@ -24,10 +24,11 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <glad/gl45.h>
-
+#include <cstddef>
 #include <span>
 #include <vector>
+
+#include <glad/gl45.h>
 
 #include "GLShaderProgram.hpp"
 #include "GLTexture.hpp"
@@ -134,17 +135,17 @@ private:
     auto alloc_frag_uniforms(usize n) -> usize;
     auto get_frag_uniformptr(usize i) -> nvg_frag_uniforms*;
 
-    gl_shader             _shader;
-    gl_vertex_array       _vertexArray {buffer_usage_hint::StreamDraw};
-    GLuint                _fragBuf {0};
-    usize                 _fragSize {0};
+    gl_shader              _shader;
+    gl_vertex_array        _vertexArray {buffer_usage_hint::StreamDraw};
+    GLuint                 _fragBuf {0};
+    usize                  _fragSize {0};
     // Per frame buffers
-    std::vector<nvg_call> _calls;
-    std::vector<nvg_path> _paths;
-    std::vector<vertex>   _verts;
-    usize                 _nverts {0};
-    std::vector<u8>       _uniforms;
-    usize                 _nuniforms {0};
+    std::vector<nvg_call>  _calls;
+    std::vector<nvg_path>  _paths;
+    std::vector<vertex>    _verts;
+    usize                  _nverts {0};
+    std::vector<std::byte> _uniforms;
+    usize                  _nuniforms {0};
 
     gl_texture _gradientTexture;
 };

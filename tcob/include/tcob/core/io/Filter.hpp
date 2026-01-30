@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace tcob::io {
-
+// TODO: u8 should be byte
 ////////////////////////////////////////////////////////////
 
 class TCOB_API zlib_filter {

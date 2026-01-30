@@ -112,14 +112,14 @@ static auto mz_read(void* pOpaque, mz_uint64 file_ofs, void* pBuf, size_t n) -> 
 {
     auto* fs {static_cast<ifstream*>(pOpaque)};
     fs->seek(static_cast<std::streamoff>(file_ofs), seek_dir::Begin);
-    return static_cast<size_t>(fs->read_to<u8>({static_cast<u8*>(pBuf), n}));
+    return static_cast<size_t>(fs->read_to<std::byte>({static_cast<std::byte*>(pBuf), n}));
 }
 
 static auto mz_write(void* pOpaque, mz_uint64 file_ofs, void const* pBuf, size_t n) -> size_t
 {
     auto* fs {static_cast<ofstream*>(pOpaque)};
     fs->seek(static_cast<std::streamoff>(file_ofs), seek_dir::Begin);
-    return static_cast<size_t>(fs->write<u8>({static_cast<u8 const*>(pBuf), n}));
+    return static_cast<size_t>(fs->write<std::byte>({static_cast<std::byte const*>(pBuf), n}));
 }
 }
 

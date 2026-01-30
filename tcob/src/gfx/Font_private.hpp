@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <cstddef>
 #include <optional>
 #include <span>
 #include <unordered_map>
@@ -30,7 +31,7 @@ public:
     truetype_font_engine();
     ~truetype_font_engine();
 
-    auto load_data(std::span<u8 const> data, u32 fontsize) -> std::optional<font::information>;
+    auto load_data(std::span<std::byte const> data, u32 fontsize) -> std::optional<font::information>;
     auto get_kerning(u32 cp0, u32 cp1) -> f32;
 
     auto render_glyph(u32 cp) -> std::pair<glyph, glyph_bitmap>;

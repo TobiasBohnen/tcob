@@ -33,7 +33,7 @@ extern "C" {
 static auto read_vorbis(void* ptr, size_t size, size_t nmemb, void* datasource) -> size_t
 {
     auto* stream {static_cast<io::istream*>(datasource)};
-    return static_cast<size_t>(stream->read_to<u8>({reinterpret_cast<u8*>(ptr), static_cast<usize>(size * nmemb)}));
+    return static_cast<size_t>(stream->read_to<std::byte>({reinterpret_cast<std::byte*>(ptr), static_cast<usize>(size * nmemb)}));
 }
 
 static auto seek_vorbis(void* datasource, ogg_int64_t offset, int whence) -> int

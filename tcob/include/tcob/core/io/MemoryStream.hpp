@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <cstddef>
 #include <ios>
 #include <vector>
 
@@ -26,8 +27,8 @@ public:
     auto write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize;
 
 private:
-    std::vector<u8> _buf;
-    std::streamoff  _pos {0};
+    std::vector<std::byte> _buf;
+    std::streamoff         _pos {0};
 };
 
 ////////////////////////////////////////////////////////////

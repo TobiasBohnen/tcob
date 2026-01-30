@@ -6,6 +6,7 @@
 #include "Font_private.hpp"
 
 #include <cassert>
+#include <cstddef>
 #include <optional>
 #include <span>
 #include <utility>
@@ -73,14 +74,14 @@ void truetype_font_engine::Done()
     FT_Done_FreeType(library);
 }
 
-auto truetype_font_engine::load_data(std::span<u8 const> data, u32 fontsize) -> std::optional<font::information>
+auto truetype_font_engine::load_data(std::span<std::byte const> data, u32 fontsize) -> std::optional<font::information>
 {
     assert(library);
 
     _fontSize = fontsize;
     _glyphIndices.clear();
 
-    if (!FT_New_Memory_Face(library, data.data(), static_cast<FT_Long>(data.size()), 0, &_face)) {
+    if (!FT_New_Memory_Face(library, reinterpret_cast<FT_Byte const*>(data.data()), static_cast<FT_Long>(data.size()), 0, &_face)) {
         FT_Set_Pixel_Sizes(_face, _fontSize, _fontSize);
         FT_Select_Charmap(_face, FT_ENCODING_UNICODE);
 
