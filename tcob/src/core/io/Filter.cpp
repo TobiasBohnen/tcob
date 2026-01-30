@@ -44,7 +44,7 @@ auto zlib_filter::to(std::span<std::byte const> bytes) const -> std::vector<std:
     i32 status {mz_deflateInit(&stream, _level)};
     while (status == MZ_OK) {
         retValue.resize(retValue.size() + BUFFER_SIZE);
-        stream.next_out  = reinterpret_cast<unsigned char*>(std::launder(retValue.data())) + stream.total_out;
+        stream.next_out  = reinterpret_cast<unsigned char*>(retValue.data()) + stream.total_out;
         stream.avail_out = static_cast<unsigned int>(retValue.size() - stream.total_out);
         status           = mz_deflate(&stream, MZ_FINISH);
     }
@@ -81,7 +81,7 @@ auto zlib_filter::from(std::span<std::byte const> bytes) const -> std::vector<st
         }
 
         retValue.resize(retValue.size() + BUFFER_SIZE);
-        stream.next_out  = reinterpret_cast<unsigned char*>(std::launder(retValue.data())) + stream.total_out;
+        stream.next_out  = reinterpret_cast<unsigned char*>(retValue.data()) + stream.total_out;
         stream.avail_out = static_cast<unsigned int>(retValue.size() - stream.total_out);
         status           = mz_inflate(&stream, MZ_NO_FLUSH);
     }
