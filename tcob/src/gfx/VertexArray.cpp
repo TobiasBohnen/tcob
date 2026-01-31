@@ -29,7 +29,9 @@ void vertex_array::resize(usize vertCount, usize indCount)
 
 void vertex_array::update_data(std::span<vertex const> verts, usize vertOffset) const
 {
-    _impl->update_data(verts, vertOffset);
+    if (!verts.empty()) {
+        _impl->update_data(verts, vertOffset);
+    }
 }
 
 void vertex_array::update_data(std::span<quad const> quads, usize quadOffset) const
@@ -41,7 +43,9 @@ void vertex_array::update_data(std::span<quad const> quads, usize quadOffset) co
 
 void vertex_array::update_data(std::span<u32 const> inds, usize indOffset) const
 {
-    _impl->update_data(inds, indOffset);
+    if (!inds.empty()) {
+        _impl->update_data(inds, indOffset);
+    }
 }
 
 void vertex_array::draw_elements(primitive_type mode, usize count, u32 offset) const
