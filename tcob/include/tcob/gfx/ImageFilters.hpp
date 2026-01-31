@@ -18,24 +18,16 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API filter_base {
-public:
-    filter_base()          = default;
-    virtual ~filter_base() = default;
-
-    virtual auto operator()(image const& img) -> image = 0;
-};
-
-////////////////////////////////////////////////////////////
-
 template <i32 Width, i32 Height>
-class convolution_filter : public filter_base {
+class convolution_filter {
     static constexpr i32 Size {Width * Height};
 
 public:
+    virtual ~convolution_filter() = default;
+
     bool IncludeAlpha {false};
 
-    auto operator()(image const& img) -> image override;
+    auto operator()(image const& img) const -> image;
 
 protected:
     virtual auto factor() const -> f64                   = 0;
@@ -99,48 +91,48 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API grayscale_filter final : public filter_base {
+class TCOB_API grayscale_filter final {
 public:
     f32 RedFactor {0.299f};
     f32 GreenFactor {0.587f};
     f32 BlueFactor {0.114f};
 
-    auto operator()(image const& img) -> image override;
+    auto operator()(image const& img) const -> image;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API resize_nearest_neighbor : public filter_base {
+class TCOB_API resize_nearest_neighbor {
 public:
     size_i NewSize {};
 
-    auto operator()(image const& img) -> image override;
+    auto operator()(image const& img) const -> image;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API resize_bilinear final : public filter_base {
+class TCOB_API resize_bilinear final {
 public:
     size_i NewSize {};
 
-    auto operator()(image const& img) -> image override;
+    auto operator()(image const& img) const -> image;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API remove_alpha final : public filter_base {
+class TCOB_API remove_alpha final {
 public:
-    auto operator()(image const& img) -> image override;
+    auto operator()(image const& img) const -> image;
 };
 
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-class TCOB_API octree_quantizer final : public filter_base {
+class TCOB_API octree_quantizer final {
 public:
     explicit octree_quantizer(i32 maxColors);
 
-    auto operator()(image const& img) -> image override;
+    auto operator()(image const& img) -> image;
 
     auto static GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
 
@@ -177,11 +169,11 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API neuquant final : public filter_base {
+class TCOB_API neuquant final {
 public:
     explicit neuquant(i32 maxColors);
 
-    auto operator()(image const& img) -> image override;
+    auto operator()(image const& img) -> image;
 
     auto static GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
 
@@ -203,13 +195,13 @@ private:
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-class TCOB_API ditherer_base : public filter_base {
+class TCOB_API ditherer_base {
 public:
     ditherer_base(std::vector<color> palette);
     virtual ~ditherer_base() = default;
 
-    auto         operator()(image const& img) -> image override;
-    virtual auto to_indexed(image const& img) -> std::vector<u32> = 0;
+    auto         operator()(image const& img) const -> image;
+    virtual auto to_indexed(image const& img) const -> std::vector<u32> = 0;
 
 protected:
     auto find_nearest(f64 r, f64 g, f64 b) const -> u32;
@@ -233,7 +225,7 @@ class TCOB_API ordered_dither final : public ditherer_base {
 public:
     explicit ordered_dither(std::vector<color> palette);
 
-    auto to_indexed(image const& img) -> std::vector<u32> override;
+    auto to_indexed(image const& img) const -> std::vector<u32> override;
 
 private:
     auto get_threshold(i32 x, i32 y) const -> f64;
@@ -255,7 +247,7 @@ class TCOB_API atkinson_dither final : public ditherer_base {
 public:
     explicit atkinson_dither(std::vector<color> palette);
 
-    auto to_indexed(image const& img) -> std::vector<u32> override;
+    auto to_indexed(image const& img) const -> std::vector<u32> override;
 };
 
 ////////////////////////////////////////////////////////////
@@ -264,7 +256,7 @@ class TCOB_API floyd_steinberg_dither final : public ditherer_base {
 public:
     explicit floyd_steinberg_dither(std::vector<color> palette);
 
-    auto to_indexed(image const& img) -> std::vector<u32> override;
+    auto to_indexed(image const& img) const -> std::vector<u32> override;
 };
 
 };

@@ -372,9 +372,9 @@ auto png_decoder::read_chunk(io::istream& in) const -> png::chunk
 
 auto png_decoder::check_sig(io::istream& in) -> bool
 {
-    std::array<std::byte, 8> buf {};
-    in.read_to<std::byte>(buf);
-    return std::ranges::equal(buf, SIGNATURE, [](std::byte a, u8 b) { return a == static_cast<std::byte>(b); });
+    std::array<u8, 8> buf {};
+    in.read_to<u8>(buf);
+    return buf == SIGNATURE;
 }
 
 auto png_decoder::read_image(std::span<std::byte const> idat, i32 width, i32 height) -> bool

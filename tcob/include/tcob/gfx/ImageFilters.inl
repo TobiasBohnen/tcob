@@ -16,7 +16,7 @@
 namespace tcob::gfx {
 
 template <i32 Width, i32 Height>
-inline auto convolution_filter<Width, Height>::operator()(image const& img) -> image
+inline auto convolution_filter<Width, Height>::operator()(image const& img) const -> image
 {
     auto const& info {img.info()};
     auto const [imgWidth, imgHeight] {info.Size};

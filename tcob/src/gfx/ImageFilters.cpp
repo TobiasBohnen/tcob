@@ -144,7 +144,7 @@ auto sharpen_filter::matrix() const -> std::array<i32, 25>
 
 ////////////////////////////////////////////////////////////
 
-auto grayscale_filter::operator()(image const& img) -> image
+auto grayscale_filter::operator()(image const& img) const -> image
 {
     auto const& info {img.info()};
     auto        retValue {image::CreateEmpty(info.Size, info.Format)};
@@ -173,7 +173,7 @@ auto grayscale_filter::operator()(image const& img) -> image
 
 ////////////////////////////////////////////////////////////
 
-auto resize_nearest_neighbor::operator()(image const& img) -> image
+auto resize_nearest_neighbor::operator()(image const& img) const -> image
 {
     auto const [newWidth, newHeight] {NewSize};
 
@@ -204,7 +204,7 @@ auto resize_nearest_neighbor::operator()(image const& img) -> image
 
 ////////////////////////////////////////////////////////////
 
-auto resize_bilinear::operator()(image const& img) -> image
+auto resize_bilinear::operator()(image const& img) const -> image
 {
     auto const [newWidth, newHeight] {NewSize};
 
@@ -257,7 +257,7 @@ auto resize_bilinear::operator()(image const& img) -> image
 
 ////////////////////////////////////////////////////////////
 
-auto remove_alpha::operator()(image const& img) -> image
+auto remove_alpha::operator()(image const& img) const -> image
 {
     if (!image::information::HasAlpha(img.info().Format)) {
         return img;
@@ -619,7 +619,7 @@ ditherer_base::ditherer_base(std::vector<color> palette)
     }
 }
 
-auto ditherer_base::operator()(image const& img) -> image
+auto ditherer_base::operator()(image const& img) const -> image
 {
     auto const& info {img.info()};
     auto const  width {info.Size.Width};
@@ -651,7 +651,7 @@ ordered_dither::ordered_dither(std::vector<color> palette)
 {
 }
 
-auto ordered_dither::to_indexed(image const& img) -> std::vector<u32>
+auto ordered_dither::to_indexed(image const& img) const -> std::vector<u32>
 {
     auto const&      info {img.info()};
     std::vector<u32> retValue;
@@ -692,7 +692,7 @@ atkinson_dither::atkinson_dither(std::vector<color> palette)
 {
 }
 
-auto atkinson_dither::to_indexed(image const& img) -> std::vector<u32>
+auto atkinson_dither::to_indexed(image const& img) const -> std::vector<u32>
 {
     auto const&      info {img.info()};
     std::vector<u32> retValue;
@@ -771,7 +771,7 @@ floyd_steinberg_dither::floyd_steinberg_dither(std::vector<color> palette)
 {
 }
 
-auto floyd_steinberg_dither::to_indexed(image const& img) -> std::vector<u32>
+auto floyd_steinberg_dither::to_indexed(image const& img) const -> std::vector<u32>
 {
     auto const&      info {img.info()};
     std::vector<u32> retValue;
