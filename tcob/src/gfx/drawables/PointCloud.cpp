@@ -9,6 +9,7 @@
 #include <span>
 
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob::gfx {
@@ -54,7 +55,7 @@ void point_cloud::on_draw_to(render_target& target)
     for (isize i {0}; i < Material->pass_count(); ++i) {
         auto const& pass {Material->get_pass(i)};
 
-        _renderer.set_geometry(_points, &pass);
+        _renderer.set_geometry({.Vertices = _points, .Indices = {}, .Type = primitive_type::Points}, &pass);
         _renderer.render_to_target(target);
     }
 }

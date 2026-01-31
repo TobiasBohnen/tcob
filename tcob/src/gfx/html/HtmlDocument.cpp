@@ -25,6 +25,7 @@
     #include "tcob/core/io/FileStream.hpp"
     #include "tcob/core/io/FileSystem.hpp"
     #include "tcob/gfx/Geometry.hpp"
+    #include "tcob/gfx/Gfx.hpp"
     #include "tcob/gfx/RenderTarget.hpp"
     #include "tcob/gfx/RenderTexture.hpp"
     #include "tcob/gfx/html/HtmlElementPainter.hpp"
@@ -129,7 +130,7 @@ void document::on_draw_to(render_target& target)
         _needsRedraw = false;
     }
 
-    _renderer.set_geometry(_quad, &_material->first_pass());
+    _renderer.set_geometry({.Vertices = _quad, .Indices = QuadIndicies, .Type = primitive_type::Triangles}, &_material->first_pass());
     _renderer.render_to_target(target);
 }
 

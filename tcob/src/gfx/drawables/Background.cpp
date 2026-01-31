@@ -11,6 +11,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob::gfx {
@@ -36,10 +37,8 @@ void background::on_draw_to(render_target& target)
 
     for (isize i {0}; i < Material->pass_count(); ++i) {
         auto const& pass {Material->get_pass(i)};
-
         geometry::set_texcoords(_quad, pass, TextureRegion);
-
-        _renderer.set_geometry(_quad, &pass);
+        _renderer.set_geometry({.Vertices = _quad, .Indices = QuadIndicies, .Type = primitive_type::Triangles}, &pass);
         _renderer.render_to_target(target);
     }
 
@@ -104,7 +103,7 @@ void parallax_background::on_draw_to(render_target& target)
             }
         }
 
-        _renderer.set_geometry(_quads, &pass);
+        _renderer.set_geometry({.Vertices = geometry::flatten(_quads), .Indices = geometry::get_indices(_quads.size()), .Type = primitive_type::Triangles}, &pass);
         _renderer.render_to_target(target);
     }
 

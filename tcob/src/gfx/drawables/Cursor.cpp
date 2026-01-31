@@ -11,6 +11,7 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob::gfx {
@@ -64,10 +65,9 @@ void cursor::on_draw_to(render_target& target)
 {
     for (isize i {0}; i < Material->pass_count(); ++i) {
         auto const& pass {Material->get_pass(i)};
-
         auto const& region {pass.Texture->regions()[ActiveMode]};
         geometry::set_texcoords(_quad, region);
-        _renderer.set_geometry(_quad, &pass);
+        _renderer.set_geometry({.Vertices = _quad, .Indices = QuadIndicies, .Type = primitive_type::Triangles}, &pass);
         _renderer.render_to_target(target);
     }
 }

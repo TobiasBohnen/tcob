@@ -91,7 +91,7 @@ private:
     asset_owner_ptr<material> _material {};
 
     std::unique_ptr<render_backend::window_base> _impl;
-    quad_renderer                                _renderer {buffer_usage_hint::StaticDraw};
+    polygon_renderer                             _renderer {buffer_usage_hint::StaticDraw};
 };
 
 }

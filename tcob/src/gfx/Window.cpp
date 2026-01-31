@@ -15,6 +15,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
@@ -75,7 +76,7 @@ auto window::get_impl() const -> render_backend::window_base*
 
 void window::init_renderer(quad const& q)
 {
-    _renderer.set_geometry(q, &_material->first_pass());
+    _renderer.set_geometry({.Vertices = q, .Indices = QuadIndicies, .Type = primitive_type::Triangles}, &_material->first_pass());
 }
 
 }

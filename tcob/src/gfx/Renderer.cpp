@@ -5,7 +5,6 @@
 
 #include "tcob/gfx/Renderer.hpp"
 
-#include <array>
 #include <span>
 #include <utility>
 #include <vector>
@@ -126,20 +125,8 @@ void quad_renderer::prepare(usize quadCount)
     if (quadCount > _numQuads) {
         usize const vertCount {quadCount * 4};
         usize const indCount {quadCount * 6};
-
         _vertexArray.resize(vertCount, indCount);
-
-        std::vector<u32> inds(indCount);
-        for (u32 i {0}, j {0}; i < quadCount; ++i, j += 4) {
-            inds[(i * 6) + 0] = 3 + j;
-            inds[(i * 6) + 1] = 1 + j;
-            inds[(i * 6) + 2] = 0 + j;
-            inds[(i * 6) + 3] = 3 + j;
-            inds[(i * 6) + 4] = 2 + j;
-            inds[(i * 6) + 5] = 1 + j;
-        }
-
-        _vertexArray.update_data(inds, 0);
+        _vertexArray.update_data(geometry::get_indices(quadCount), 0);
     }
 }
 
@@ -285,9 +272,7 @@ canvas_renderer::canvas_renderer(canvas& c)
     usize const indCount {6};
 
     _vertexArray.resize(vertCount, indCount);
-
-    static constexpr std::array<u32, 6> inds {3, 1, 0, 3, 2, 1};
-    _vertexArray.update_data(inds, 0);
+    _vertexArray.update_data(QuadIndicies, 0);
 }
 
 void canvas_renderer::set_bounds(rect_f const& bounds)

@@ -62,6 +62,8 @@ private:
     vertex_map _verts;
 };
 
+inline constexpr std::array<u32, 6> QuadIndicies {3, 1, 0, 3, 2, 1};
+
 ////////////////////////////////////////////////////////////
 
 namespace geometry {
@@ -75,6 +77,9 @@ namespace geometry {
     TCOB_API void set_texcoords(quad& q, pass const& pass, string const& region, bool flipHorizontally = false, bool flipVertically = false);
 
     TCOB_API void scroll_texcoords(quad& q, point_f offset);
+
+    TCOB_API auto get_indices(usize quadCount) -> std::vector<u32>;
+    TCOB_API auto flatten(std::span<quad const> quads) -> std::span<vertex const>;
 }
 
 }

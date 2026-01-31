@@ -53,8 +53,8 @@ private:
     std::unordered_map<string, cursor_mode> _modes {};
     cursor_mode                             _currentMode {};
 
-    size_i        _size {};
-    quad          _quad {};
-    quad_renderer _renderer {buffer_usage_hint::StreamDraw};
+    size_i           _size {};
+    quad             _quad {};
+    polygon_renderer _renderer {buffer_usage_hint::StreamDraw};
 };
 }

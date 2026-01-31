@@ -232,14 +232,12 @@ rect_shape::rect_shape()
 
 auto rect_shape::geometry(isize pass) -> geometry_data
 {
-    static constexpr std::array<u32, 6> Inds {3, 1, 0, 3, 2, 1};
-
     auto it {_quads.find(pass)};
     if (it == _quads.end()) { return {}; }
 
     return {
         .Vertices = it->second,
-        .Indices  = Inds,
+        .Indices  = QuadIndicies,
         .Type     = primitive_type::Triangles};
 }
 

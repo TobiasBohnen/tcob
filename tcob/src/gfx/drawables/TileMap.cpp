@@ -15,6 +15,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
@@ -115,6 +116,7 @@ void tilemap_base::on_update(milliseconds /* deltaTime */)
             auto const tilePos {IndexToPosition(i, layer->RenderDirection, tiles.size())};
             for (isize p {0}; p < Material->pass_count(); ++p) {
                 setup_quad(Material->get_pass(p), _quads[p].emplace_back(), tilePos + *layer->Offset, tiles[tilePos]);
+                _inds[p] = geometry::get_indices(_quads[p].size());
             }
         }
     }
@@ -130,7 +132,9 @@ void tilemap_base::on_draw_to(render_target& target)
     for (isize p {0}; p < Material->pass_count(); ++p) {
         auto const& pass {Material->get_pass(p)};
 
-        _renderer.set_geometry(_quads[p], &pass);
+        _renderer.set_geometry(
+            {.Vertices = geometry::flatten(_quads[p]), .Indices = _inds[p], .Type = primitive_type::Triangles},
+            &pass);
         _renderer.render_to_target(target);
     }
 }
@@ -189,5 +193,4 @@ auto hexagonal_grid::layout_tile(hexagonal_tile const& /* tile */, point_i coord
 }
 
 ////////////////////////////////////////////////////////////
-
 }

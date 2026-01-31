@@ -139,4 +139,27 @@ void scroll_texcoords(quad& q, point_f offset)
     q[3].TexCoords = {.U = rect.left(), .V = rect.top(), .Level = level};
 }
 
+auto get_indices(usize quadCount) -> std::vector<u32>
+{
+    usize const      indCount {quadCount * 6};
+    std::vector<u32> retValue(indCount);
+    for (u32 i {0}; i < quadCount; ++i) {
+        u32 const vertexOffset {i * 4};
+        u32 const indexOffset {i * 6};
+
+        retValue[indexOffset + 0] = vertexOffset + 3;
+        retValue[indexOffset + 1] = vertexOffset + 1;
+        retValue[indexOffset + 2] = vertexOffset + 0;
+        retValue[indexOffset + 3] = vertexOffset + 3;
+        retValue[indexOffset + 4] = vertexOffset + 2;
+        retValue[indexOffset + 5] = vertexOffset + 1;
+    }
+    return retValue;
+}
+
+auto flatten(std::span<quad const> quads) -> std::span<vertex const>
+{
+    return quads.empty() ? std::span<vertex const> {}
+                         : std::span<vertex const>(quads.front().data(), quads.size() * 4);
+}
 }

@@ -1124,8 +1124,7 @@ void canvas::draw_nine_patch(texture* image, string const& region, rect_f const&
         geometry::set_color(q, colors::White);
         geometry::set_texcoords(q, {.UVRect = uv, .Level = level});
 
-        static constexpr std::array<usize, 6> idx {3, 1, 0, 3, 2, 1};
-        for (usize j {0}; j < 6; ++j) { verts[i++] = q[idx[j]]; }
+        for (usize j {0}; j < 6; ++j) { verts[i++] = q[QuadIndicies[j]]; }
     }};
 
     emitQuad(rect_f::FromLTRB(left, top, leftCenter, topCenter), rect_f::FromLTRB(uv_left, uv_top, uv_leftCenter, uv_topCenter));
