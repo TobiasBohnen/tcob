@@ -17,6 +17,7 @@
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/ShaderProgram.hpp"
+#include "tcob/gfx/Stats.hpp"
 #include "tcob/gfx/VertexArray.hpp"
 
 namespace tcob::gfx {
@@ -24,6 +25,7 @@ namespace tcob::gfx {
 
 class TCOB_API renderer : public non_copyable {
 public:
+    renderer();
     virtual ~renderer() = default;
 
     void render_to_target(render_target& target, bool prepare = true);
@@ -32,6 +34,8 @@ protected:
     virtual void prepare_render(render_target& target);
     virtual void on_render_to_target(render_target& target) = 0;
     virtual void finalize_render(render_target& target);
+
+    render_statistics& _stats;
 };
 
 ////////////////////////////////////////////////////////////

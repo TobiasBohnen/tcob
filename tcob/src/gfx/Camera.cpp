@@ -11,7 +11,6 @@
 #include "tcob/core/Transform.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
-
 namespace tcob::gfx {
 
 camera::camera(render_target& parent)
@@ -24,14 +23,14 @@ auto camera::matrix() const -> mat4
     return get_transform().as_matrix4();
 }
 
-auto camera::viewport() const -> rect_f
+auto camera::viewport() const -> rect_i
 {
-    return {ViewOffset, size_f {*_parent.Size}};
+    return {ViewOffset, *_parent.Size};
 }
 
 auto camera::transformed_viewport() const -> rect_f
 {
-    return convert_screen_to_world(rect_i {viewport()});
+    return convert_screen_to_world(viewport());
 }
 
 void camera::zoom_by(size_f factor)
@@ -65,7 +64,7 @@ auto camera::convert_world_to_screen(rect_f const& rect) const -> rect_i
 
 auto camera::convert_world_to_screen(point_f point) const -> point_i
 {
-    return point_i {get_transform() * point + ViewOffset};
+    return point_i {get_transform() * point} + ViewOffset;
 }
 
 auto camera::convert_screen_to_world(rect_i const& rect) const -> rect_f
@@ -78,7 +77,7 @@ auto camera::convert_screen_to_world(rect_i const& rect) const -> rect_f
 
 auto camera::convert_screen_to_world(point_i point) const -> point_f
 {
-    return get_transform().as_inverted() * (point_f {point} - ViewOffset);
+    return get_transform().as_inverted() * point_f {point - ViewOffset};
 }
 
 void camera::push_state()

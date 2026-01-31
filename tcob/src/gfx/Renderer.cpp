@@ -11,17 +11,25 @@
 #include <vector>
 
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/assets/Asset.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/RenderSystem.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/RenderTexture.hpp"
 #include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/VertexArray.hpp"
 
 namespace tcob::gfx {
+
+renderer::renderer()
+    : _stats {locate_service<render_system>().statistics()}
+{
+}
 
 void renderer::render_to_target(render_target& target, bool prepare)
 {
@@ -32,7 +40,12 @@ void renderer::render_to_target(render_target& target, bool prepare)
 
 void renderer::prepare_render(render_target& target)
 {
-    target.prepare_render();
+    target.prepare_render({.ViewMatrix            = target.camera().matrix(),
+                           .Viewport              = target.camera().viewport(),
+                           .MousePosition         = locate_service<input::system>().mouse().get_position(),
+                           .Time                  = _stats.current_time(),
+                           .Debug                 = false, // TODO
+                           .UseDefaultFramebuffer = false});
 }
 
 void renderer::finalize_render(render_target& target)
@@ -299,7 +312,7 @@ void canvas_renderer::set_shader(asset_ptr<shader> shader)
 void canvas_renderer::prepare_render(render_target& target)
 {
     target.camera().push_state();
-    target.prepare_render();
+    renderer::prepare_render(target);
 }
 
 void canvas_renderer::on_render_to_target(render_target& target)

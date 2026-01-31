@@ -53,7 +53,7 @@ public:
     auto copy_to_image() const -> image;
 
     // Renderer
-    virtual void prepare_render();
+    virtual void prepare_render(render_properties const& props);
     virtual void finalize_render() const;
     void         bind_pass(pass const& pass) const;
     void         unbind_pass() const;
@@ -80,7 +80,7 @@ public:
 protected:
     auto get_size() const -> size_i override;
 
-    void prepare_render() override;
+    void prepare_render(render_properties const&) override;
 
 private:
     void set_size(size_i newsize) override;

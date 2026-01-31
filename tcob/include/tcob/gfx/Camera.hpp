@@ -21,7 +21,7 @@ class TCOB_API camera final {
 public:
     explicit camera(render_target& parent);
 
-    point_f ViewOffset;
+    point_i ViewOffset;
 
     size_f  Zoom {size_f::One};
     point_f Position;
@@ -29,7 +29,7 @@ public:
     u32 VisibilityMask {0xFFFFFFFF};
 
     auto matrix() const -> mat4;
-    auto viewport() const -> rect_f;
+    auto viewport() const -> rect_i;
     auto transformed_viewport() const -> rect_f;
 
     void move_by(point_f offset);
