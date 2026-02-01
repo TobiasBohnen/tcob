@@ -84,6 +84,8 @@ private:
         u32            NumInds {0};
         u32            OffsetVerts {0};
         u32            OffsetInds {0};
+
+        auto is_empty() const { return NumVerts == 0; }
     };
 
     batch              _currentBatch;

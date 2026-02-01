@@ -9,13 +9,14 @@
 #include <memory>
 #include <span>
 
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API vertex_array {
+class TCOB_API vertex_array final : public non_copyable {
 public:
     explicit vertex_array(buffer_usage_hint usage);
     ~vertex_array();

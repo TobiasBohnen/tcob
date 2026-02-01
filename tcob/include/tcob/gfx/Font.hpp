@@ -102,18 +102,14 @@ public:
         Heavy      = 900  // Black
     };
 
-    struct style {
+    class style {
+    public:
         bool   IsItalic {false};
         weight Weight {weight::Normal};
 
         auto operator==(font::style const& other) const -> bool = default;
 
-        static auto constexpr Members()
-        {
-            return std::tuple {
-                member<&font::style::IsItalic> {"is_italic"},
-                member<&font::style::Weight> {"weight"}};
-        }
+        static auto constexpr Members() { return std::tuple {member<&font::style::IsItalic> {"is_italic"}, member<&font::style::Weight> {"weight"}}; }
     };
 
     ////////////////////////////////////////////////////////////

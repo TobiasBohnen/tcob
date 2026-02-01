@@ -123,7 +123,7 @@ void batch_renderer::add_geometry(geometry_data const& gd, pass const* pass)
     if (gd.Vertices.empty()) { return; }
 
     // check if we have to break the batch
-    if (_currentBatch.NumInds > 0 && (_currentBatch.Type != gd.Type || *_currentBatch.Pass != *pass)) {
+    if (!_currentBatch.is_empty() && (_currentBatch.Type != gd.Type || *_currentBatch.Pass != *pass)) {
         _batches.push_back(_currentBatch);
         _currentBatch.OffsetInds += _currentBatch.NumInds;
         _currentBatch.OffsetVerts += _currentBatch.NumVerts;
@@ -163,11 +163,12 @@ void batch_renderer::reset_geometry()
 
 void batch_renderer::on_render_to_target(render_target& target)
 {
-    if (_currentBatch.NumVerts == 0 && _batches.empty()) { // nothing to draw
+    if (_currentBatch.is_empty() && _batches.empty()) { // nothing to draw
         return;
     }
 
-    if (_currentBatch.NumVerts > 0) { // push current batch
+    // geometry was changed -> update vertex arrays
+    if (!_currentBatch.is_empty()) {
         _batches.push_back(_currentBatch);
         _currentBatch = {};
 

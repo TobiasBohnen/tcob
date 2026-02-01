@@ -8,12 +8,14 @@
 
 #include <memory>
 
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/gfx/Gfx.hpp"
+
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API shader final {
+class TCOB_API shader final : public non_copyable {
 public:
     shader(string const& vertexShaderSource, string const& fragmentShaderSource);
     ~shader();
