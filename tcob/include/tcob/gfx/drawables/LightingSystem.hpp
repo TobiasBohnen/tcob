@@ -163,8 +163,8 @@ private:
     bool _isDirty {false};
     bool _updateGeometry {false};
 
-    polygon_renderer _renderer {buffer_usage_hint::DynamicDraw};
-    geometry_store   _store;
+    renderer       _renderer {buffer_usage_hint::DynamicDraw};
+    geometry_store _store;
 
     asset_owner_ptr<material> _material;
 

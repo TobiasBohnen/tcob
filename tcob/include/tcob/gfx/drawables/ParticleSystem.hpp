@@ -52,7 +52,6 @@ class particle_system final : public drawable, public updatable {
     using particle_type = typename Emitter::particle_type;
     using emitter_type  = Emitter;
     using geometry_type = typename Emitter::geometry_type;
-    using renderer_type = typename Emitter::renderer_type;
 
     static_assert(requires(particle_type p, geometry_type* q, milliseconds deltaTime) {
         { p.is_alive() } -> std::same_as<bool>;
@@ -98,7 +97,7 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
-    renderer_type              _renderer {buffer_usage_hint::DynamicDraw};
+    renderer                   _renderer {buffer_usage_hint::DynamicDraw};
     std::vector<geometry_type> _geometry;
 
     std::vector<std::unique_ptr<emitter_type>> _emitters {};
@@ -198,7 +197,6 @@ public:
 
     using particle_type = point_particle;
     using geometry_type = vertex;
-    using renderer_type = point_renderer;
 
     settings Settings;
 
@@ -291,7 +289,6 @@ public:
 
     using particle_type = quad_particle;
     using geometry_type = quad;
-    using renderer_type = quad_renderer;
 
     settings Settings;
 

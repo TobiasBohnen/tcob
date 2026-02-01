@@ -95,10 +95,10 @@ private:
     std::shared_ptr<detail::container>  _container;
     std::shared_ptr<litehtml::document> _lhdoc;
 
-    polygon_renderer _renderer {buffer_usage_hint::DynamicDraw};
-    quad             _quad {};
-    bool             _isTransformDirty {true};
-    bool             _needsRedraw {true};
+    renderer _renderer {buffer_usage_hint::DynamicDraw};
+    quad     _quad {};
+    bool     _isTransformDirty {true};
+    bool     _needsRedraw {true};
 
     bool    _isMouseOver {false};
     point_i _mousePosition;

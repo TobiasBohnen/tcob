@@ -200,7 +200,7 @@ protected:
 private:
     bool                                _isDirty {false};
     std::vector<std::unique_ptr<shape>> _children {};
-    batch_polygon_renderer              _renderer {};
+    batch_renderer                      _renderer {};
 };
 
 }

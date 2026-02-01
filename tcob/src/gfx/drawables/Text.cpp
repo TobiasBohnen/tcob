@@ -46,9 +46,7 @@ auto text::can_draw() const -> bool
 
 void text::on_draw_to(render_target& target)
 {
-    _renderer.set_geometry(
-        {.Vertices = geometry::flatten(_quads), .Indices = geometry::get_indices(_quads.size()), .Type = primitive_type::Triangles},
-        &_material->first_pass());
+    _renderer.set_geometry(_quads, &_material->first_pass());
     _renderer.render_to_target(target);
 }
 

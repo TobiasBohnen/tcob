@@ -70,7 +70,7 @@ private:
 
     std::vector<quad> _quads {};
 
-    polygon_renderer          _renderer {buffer_usage_hint::DynamicDraw};
+    renderer                  _renderer {buffer_usage_hint::DynamicDraw};
     asset_owner_ptr<material> _material {};
 
     asset_ptr<font> _font;

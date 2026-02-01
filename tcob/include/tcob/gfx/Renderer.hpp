@@ -23,10 +23,10 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API renderer : public non_copyable {
+class TCOB_API renderer_base : public non_copyable {
 public:
-    renderer();
-    virtual ~renderer() = default;
+    renderer_base();
+    virtual ~renderer_base() = default;
 
     void render_to_target(render_target& target, bool prepare = true);
 
@@ -40,55 +40,16 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API point_renderer final : public renderer {
+class TCOB_API renderer final : public renderer_base {
 public:
-    explicit point_renderer(buffer_usage_hint usage);
+    explicit renderer(buffer_usage_hint usage);
 
-    void set_geometry(vertex const& v, pass const* pass);
     void set_geometry(std::span<vertex const> vertices, pass const* pass);
-    void reset_geometry();
-
-private:
-    void prepare(usize vertCount);
-    void on_render_to_target(render_target& target) override;
-
-    pass const* _pass {nullptr};
-    usize       _numVerts {0};
-
-    vertex_array _vertexArray;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API quad_renderer final : public renderer {
-public:
-    explicit quad_renderer(buffer_usage_hint usage);
-
-    void set_geometry(quad const& q, pass const* pass);
     void set_geometry(std::span<quad const> quads, pass const* pass);
-    void reset_geometry();
-
-private:
-    void prepare(usize quadCount);
-    void on_render_to_target(render_target& target) override;
-
-    pass const* _pass {nullptr};
-    usize       _numQuads {0};
-
-    vertex_array _vertexArray;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API polygon_renderer final : public renderer {
-public:
-    explicit polygon_renderer(buffer_usage_hint usage);
-
     void set_geometry(geometry_data const& gd, pass const* pass);
     void reset_geometry();
 
 private:
-    void prepare(usize vcount, usize icount);
     void on_render_to_target(render_target& target) override;
 
     pass const* _pass {nullptr};
@@ -101,9 +62,9 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API batch_polygon_renderer final : public renderer {
+class TCOB_API batch_renderer final : public renderer_base {
 public:
-    batch_polygon_renderer();
+    batch_renderer();
 
     void add_geometry(geometry_data const& gd, pass const* pass);
     void reset_geometry();
@@ -131,7 +92,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API canvas_renderer final : public renderer {
+class TCOB_API canvas_renderer final : public renderer_base {
 public:
     explicit canvas_renderer(canvas& c);
 

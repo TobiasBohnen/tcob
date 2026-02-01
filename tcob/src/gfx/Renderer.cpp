@@ -25,19 +25,19 @@
 
 namespace tcob::gfx {
 
-renderer::renderer()
+renderer_base::renderer_base()
     : _stats {locate_service<render_system>().statistics()}
 {
 }
 
-void renderer::render_to_target(render_target& target, bool prepare)
+void renderer_base::render_to_target(render_target& target, bool prepare)
 {
     if (prepare) { prepare_render(target); }
     on_render_to_target(target);
     if (prepare) { finalize_render(target); }
 }
 
-void renderer::prepare_render(render_target& target)
+void renderer_base::prepare_render(render_target& target)
 {
     target.prepare_render({.ViewMatrix            = target.camera().matrix(),
                            .Viewport              = target.camera().viewport(),
@@ -47,135 +47,57 @@ void renderer::prepare_render(render_target& target)
                            .UseDefaultFramebuffer = false});
 }
 
-void renderer::finalize_render(render_target& target)
+void renderer_base::finalize_render(render_target& target)
 {
     target.finalize_render();
 }
 
 ////////////////////////////////////////////////////////////
 
-point_renderer::point_renderer(buffer_usage_hint usage)
+renderer::renderer(buffer_usage_hint usage)
     : _vertexArray {usage}
 {
 }
 
-void point_renderer::set_geometry(vertex const& v, pass const* pass)
+void renderer::set_geometry(std::span<vertex const> vertices, pass const* pass)
 {
-    set_geometry(std::span {&v, 1}, pass);
+    set_geometry(geometry_data {.Vertices = vertices, .Indices = {}, .Type = primitive_type::Points}, pass);
 }
 
-void point_renderer::set_geometry(std::span<vertex const> vertices, pass const* pass)
+void renderer::set_geometry(std::span<quad const> quads, pass const* pass)
 {
-    prepare(vertices.size());
-    _vertexArray.update_data(vertices, 0);
-    _pass = pass;
+    set_geometry(geometry_data {.Vertices = geometry::flatten(quads),
+                                .Indices  = geometry::get_indices(quads.size()),
+                                .Type     = primitive_type::Triangles},
+                 pass);
 }
 
-void point_renderer::reset_geometry()
+void renderer::set_geometry(geometry_data const& gd, pass const* pass)
 {
-    _numVerts = 0;
-}
+    usize const vCount {gd.Vertices.size()};
+    usize const iCount {gd.Indices.size()};
 
-void point_renderer::prepare(usize vertCount)
-{
-    if (vertCount > _numVerts) {
-        _vertexArray.resize(vertCount, 0);
-    }
-    _numVerts = vertCount;
-}
-
-void point_renderer::on_render_to_target(render_target& target)
-{
-    if (_numVerts == 0 || !_pass) {
-        return;
+    if (vCount > _numVerts || iCount > _numIndices) {
+        _vertexArray.resize(vCount, iCount);
     }
 
-    target.bind_pass(*_pass);
-    _vertexArray.draw_arrays(primitive_type::Points, 0, _numVerts);
-    target.unbind_pass();
-}
-
-////////////////////////////////////////////////////////////
-
-quad_renderer::quad_renderer(buffer_usage_hint usage)
-    : _vertexArray {usage}
-{
-}
-
-void quad_renderer::set_geometry(quad const& q, pass const* pass)
-{
-    set_geometry(std::span {&q, 1}, pass);
-}
-
-void quad_renderer::set_geometry(std::span<quad const> quads, pass const* pass)
-{
-    prepare(quads.size());
-    _vertexArray.update_data(quads, 0);
-    _numQuads = quads.size();
-    _pass     = pass;
-}
-
-void quad_renderer::reset_geometry()
-{
-    _numQuads = 0;
-}
-
-void quad_renderer::prepare(usize quadCount)
-{
-    if (quadCount > _numQuads) {
-        usize const vertCount {quadCount * 4};
-        usize const indCount {quadCount * 6};
-        _vertexArray.resize(vertCount, indCount);
-        _vertexArray.update_data(geometry::get_indices(quadCount), 0);
-    }
-}
-
-void quad_renderer::on_render_to_target(render_target& target)
-{
-    if (_numQuads == 0 || !_pass) {
-        return;
-    }
-
-    target.bind_pass(*_pass);
-    _vertexArray.draw_elements(primitive_type::Triangles, _numQuads * 6, 0);
-    target.unbind_pass();
-}
-
-////////////////////////////////////////////////////////////
-
-polygon_renderer::polygon_renderer(buffer_usage_hint usage)
-    : _vertexArray {usage}
-{
-}
-
-void polygon_renderer::set_geometry(geometry_data const& gd, pass const* pass)
-{
-    prepare(gd.Vertices.size(), gd.Indices.size());
-
-    _vertexArray.update_data(gd.Indices, 0);
     _vertexArray.update_data(gd.Vertices, 0);
+    _vertexArray.update_data(gd.Indices, 0);
     _type = gd.Type;
 
-    _numIndices = gd.Indices.size();
-    _numVerts   = gd.Vertices.size();
+    _numVerts   = vCount;
+    _numIndices = iCount;
 
     _pass = pass;
 }
 
-void polygon_renderer::reset_geometry()
+void renderer::reset_geometry()
 {
     _numIndices = 0;
     _numVerts   = 0;
 }
 
-void polygon_renderer::prepare(usize vcount, usize icount)
-{
-    if (vcount > _numVerts || icount > _numIndices) {
-        _vertexArray.resize(vcount, icount);
-    }
-}
-
-void polygon_renderer::on_render_to_target(render_target& target)
+void renderer::on_render_to_target(render_target& target)
 {
     if (_numVerts == 0 || !_pass) { return; }
 
@@ -191,12 +113,12 @@ void polygon_renderer::on_render_to_target(render_target& target)
 
 ////////////////////////////////////////////////////////////
 
-batch_polygon_renderer::batch_polygon_renderer()
+batch_renderer::batch_renderer()
     : _vertexArray {buffer_usage_hint::StreamDraw}
 {
 }
 
-void batch_polygon_renderer::add_geometry(geometry_data const& gd, pass const* pass)
+void batch_renderer::add_geometry(geometry_data const& gd, pass const* pass)
 {
     if (gd.Vertices.empty()) { return; }
 
@@ -230,7 +152,7 @@ void batch_polygon_renderer::add_geometry(geometry_data const& gd, pass const* p
     _vertexArray.resize(_verts.size(), _indices.size());
 }
 
-void batch_polygon_renderer::reset_geometry()
+void batch_renderer::reset_geometry()
 {
     _batches.clear();
     _currentBatch = {};
@@ -239,7 +161,7 @@ void batch_polygon_renderer::reset_geometry()
     _indices.clear();
 }
 
-void batch_polygon_renderer::on_render_to_target(render_target& target)
+void batch_renderer::on_render_to_target(render_target& target)
 {
     if (_currentBatch.NumVerts == 0 && _batches.empty()) { // nothing to draw
         return;
@@ -297,7 +219,7 @@ void canvas_renderer::set_shader(asset_ptr<shader> shader)
 void canvas_renderer::prepare_render(render_target& target)
 {
     target.camera().push_state();
-    renderer::prepare_render(target);
+    renderer_base::prepare_render(target);
 }
 
 void canvas_renderer::on_render_to_target(render_target& target)

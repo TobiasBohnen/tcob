@@ -94,7 +94,7 @@ private:
 
     std::vector<std::unique_ptr<tilemap_layer>> _layers {};
 
-    polygon_renderer                             _renderer;
+    renderer                                     _renderer;
     std::unordered_map<isize, std::vector<quad>> _quads {};
     std::unordered_map<isize, std::vector<u32>>  _inds {};
     bool                                         _isDirty {true};

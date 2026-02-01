@@ -35,8 +35,8 @@ protected:
     void on_draw_to(render_target& target) final;
 
 private:
-    quad             _quad;
-    polygon_renderer _renderer {buffer_usage_hint::StreamDraw};
+    quad     _quad;
+    renderer _renderer {buffer_usage_hint::StreamDraw};
 };
 
 ////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ private:
     std::vector<std::unique_ptr<parallax_background_layer>> _layers {};
 
     std::vector<quad> _quads;
-    polygon_renderer  _renderer {buffer_usage_hint::StreamDraw};
+    renderer          _renderer {buffer_usage_hint::StreamDraw};
 };
 
 }

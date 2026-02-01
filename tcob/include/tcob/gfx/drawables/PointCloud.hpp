@@ -41,7 +41,7 @@ protected:
 
 private:
     std::vector<vertex> _points {};
-    polygon_renderer    _renderer {buffer_usage_hint::DynamicDraw};
+    renderer            _renderer {buffer_usage_hint::DynamicDraw};
 };
 
 }

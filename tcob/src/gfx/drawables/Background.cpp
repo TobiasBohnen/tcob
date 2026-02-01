@@ -103,7 +103,7 @@ void parallax_background::on_draw_to(render_target& target)
             }
         }
 
-        _renderer.set_geometry({.Vertices = geometry::flatten(_quads), .Indices = geometry::get_indices(_quads.size()), .Type = primitive_type::Triangles}, &pass);
+        _renderer.set_geometry(_quads, &pass);
         _renderer.render_to_target(target);
     }
 
