@@ -9,13 +9,62 @@
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/random/Random.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
 
 using namespace std::chrono_literals;
+
+////////////////////////////////////////////////////////////
+
+static auto minmax_rng(min_max<f32> const& range, auto&& rng) -> f32
+{
+    return rng(range.first, range.second);
+}
+
+static auto minmax_rng(min_max<point_f> const& range, auto&& rng) -> point_f
+{
+    return point_f {rng(range.first.X, range.second.X), rng(range.first.Y, range.second.Y)};
+}
+
+static auto minmax_rng(min_max<degree_f> const& range, auto&& rng) -> degree_f
+{
+    return degree_f {rng(range.first.Value, range.second.Value)};
+}
+
+static auto minmax_rng(min_max<milliseconds> const& range, auto&& rng) -> milliseconds
+{
+    return milliseconds {rng(range.first.count(), range.second.count())};
+}
+
+static void setup_particle_base(particle_base& particle, auto&& tmpl, auto&& rng)
+{
+    auto const dir {point_f::FromDirection(minmax_rng(tmpl.Direction, rng))};
+    particle.Velocity               = dir * minmax_rng(tmpl.Speed, rng);
+    particle.LinearAcceleration     = dir * minmax_rng(tmpl.LinearAcceleration, rng);
+    particle.LinearDamping          = minmax_rng(tmpl.LinearDamping, rng);
+    particle.RadialAcceleration     = minmax_rng(tmpl.RadialAcceleration, rng);
+    particle.TangentialAcceleration = minmax_rng(tmpl.TangentialAcceleration, rng);
+    particle.Gravity                = minmax_rng(tmpl.Gravity, rng);
+
+    auto const col {tmpl.Colors.empty() ? colors::White : tmpl.Colors[rng(usize {0}, tmpl.Colors.size() - 1)]};
+    u8 const   alpha {static_cast<u8>(col.A * (1.0f - std::clamp(minmax_rng(tmpl.Transparency, rng), 0.0f, 1.0f)))};
+    particle.Color = color {col.R, col.G, col.B, alpha};
+
+    // reset userdata
+    particle.UserData.reset();
+
+    // set life
+    auto const life {minmax_rng(tmpl.Lifetime, rng)};
+    particle.RemainingLife = life;
+    particle.StartingLife  = life;
+}
 
 ////////////////////////////////////////////////////////////
 
@@ -49,6 +98,21 @@ void point_particle::update(milliseconds deltaTime)
     Position += Velocity * seconds;
 }
 
+void point_particle::init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen)
+{
+    Region = texRegion;
+
+    setup_particle_base(*this, tmpl, randomGen);
+
+    // calculate random postion
+    f32 const x {randomGen(spawnArea.left(), spawnArea.right())};
+    f32 const y {randomGen(spawnArea.top(), spawnArea.bottom())};
+
+    // set position
+    Position = {x, y};
+    Origin   = Position;
+}
+
 ////////////////////////////////////////////////////////////
 
 void quad_particle::convert_to(quad* quad) const
@@ -80,156 +144,30 @@ void quad_particle::update(milliseconds deltaTime)
     if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation, origin); }
 }
 
-////////////////////////////////////////////////////////////
-
-static auto minmax_rng(min_max<f32> const& range, auto&& rng) -> f32
+void quad_particle::init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen)
 {
-    return rng(range.first, range.second);
-}
+    Region = texRegion;
 
-static auto minmax_rng(min_max<point_f> const& range, auto&& rng) -> point_f
-{
-    return point_f {rng(range.first.X, range.second.X), rng(range.first.Y, range.second.Y)};
-}
+    setup_particle_base(*this, tmpl, randomGen);
 
-static auto minmax_rng(min_max<degree_f> const& range, auto&& rng) -> degree_f
-{
-    return degree_f {rng(range.first.Value, range.second.Value)};
-}
+    // set scale
+    f32 const scaleF {minmax_rng(tmpl.Scale, randomGen)};
+    Scale = {scaleF, scaleF};
 
-static auto minmax_rng(min_max<milliseconds> const& range, auto&& rng) -> milliseconds
-{
-    return milliseconds {rng(range.first.count(), range.second.count())};
-}
+    // set spin and rotation
+    Spin     = minmax_rng(tmpl.Spin, randomGen);
+    Rotation = minmax_rng(tmpl.Rotation, randomGen);
 
-static void setup_particle(auto&& particle, auto&& tmpl, auto&& _randomGen)
-{
-    auto const dir {point_f::FromDirection(minmax_rng(tmpl.Direction, _randomGen))};
-    particle.Velocity               = dir * minmax_rng(tmpl.Speed, _randomGen);
-    particle.LinearAcceleration     = dir * minmax_rng(tmpl.LinearAcceleration, _randomGen);
-    particle.LinearDamping          = minmax_rng(tmpl.LinearDamping, _randomGen);
-    particle.RadialAcceleration     = minmax_rng(tmpl.RadialAcceleration, _randomGen);
-    particle.TangentialAcceleration = minmax_rng(tmpl.TangentialAcceleration, _randomGen);
-    particle.Gravity                = minmax_rng(tmpl.Gravity, _randomGen);
+    // calculate random postion
+    f32 const x {randomGen(spawnArea.left(), spawnArea.right()) - (tmpl.Size.Width / 2)};
+    f32 const y {randomGen(spawnArea.top(), spawnArea.bottom()) - (tmpl.Size.Height / 2)};
 
-    auto const col {tmpl.Colors.empty() ? colors::White : tmpl.Colors[_randomGen(usize {0}, tmpl.Colors.size() - 1)]};
-    u8 const   alpha {static_cast<u8>(col.A * (1.0f - std::clamp(minmax_rng(tmpl.Transparency, _randomGen), 0.0f, 1.0f)))};
-    particle.Color = color {col.R, col.G, col.B, alpha};
-
-    // reset userdata
-    particle.UserData.reset();
-
-    // set life
-    auto const life {minmax_rng(tmpl.Lifetime, _randomGen)};
-    particle.RemainingLife = life;
-    particle.StartingLife  = life;
+    // set bounds
+    Bounds = {{x, y}, tmpl.Size};
+    Origin = Bounds.center();
 }
 
 ////////////////////////////////////////////////////////////
-
-auto point_particle_emitter::is_alive() const -> bool
-{
-    return _alive && (!Settings.Lifetime || _remainingLife > 0ms);
-}
-
-void point_particle_emitter::reset()
-{
-    if (Settings.Lifetime) { _remainingLife = *Settings.Lifetime; }
-    _alive = true;
-}
-
-void point_particle_emitter::emit(particle_system<point_particle_emitter>& system, milliseconds deltaTime)
-{
-    if (!is_alive()) { return; }
-
-    _remainingLife -= deltaTime;
-
-    i32 particleCount {0};
-    if (Settings.IsExplosion) {
-        particleCount = static_cast<i32>(Settings.SpawnRate);
-        _alive        = false;
-    } else {
-        f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};
-        particleCount = static_cast<i32>(particleAmount);
-        _emissionDiff = particleAmount - particleCount;
-    }
-
-    auto const& tmpl {Settings.Template};
-    auto const& texRegion {system.Material->first_pass().Texture->regions()[tmpl.TextureRegion]}; // TODO texRegion pass
-
-    for (i32 i {0}; i < particleCount; ++i) {
-        auto& particle {system.activate_particle()};
-
-        particle.Region = texRegion;
-
-        setup_particle(particle, tmpl, _rng);
-
-        // calculate random postion
-        f32 const x {_rng(Settings.SpawnArea.left(), Settings.SpawnArea.right())};
-        f32 const y {_rng(Settings.SpawnArea.top(), Settings.SpawnArea.bottom())};
-
-        // set position
-        particle.Position = {x, y};
-        particle.Origin   = particle.Position;
-    }
-}
-
-////////////////////////////////////////////////////////////
-
-auto quad_particle_emitter::is_alive() const -> bool
-{
-    return _alive && (!Settings.Lifetime || _remainingLife > 0ms);
-}
-
-void quad_particle_emitter::reset()
-{
-    if (Settings.Lifetime) { _remainingLife = *Settings.Lifetime; }
-    _alive = true;
-}
-
-void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system, milliseconds deltaTime)
-{
-    if (!is_alive()) { return; }
-
-    _remainingLife -= deltaTime;
-
-    i32 particleCount {0};
-    if (Settings.IsExplosion) {
-        particleCount = static_cast<i32>(Settings.SpawnRate);
-        _alive        = false;
-    } else {
-        f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};
-        particleCount = static_cast<i32>(particleAmount);
-        _emissionDiff = particleAmount - particleCount;
-    }
-
-    auto const& tmpl {Settings.Template};
-    auto const& texRegion {system.Material->first_pass().Texture->regions()[tmpl.TextureRegion]}; // TODO texRegion pass
-
-    for (i32 i {0}; i < particleCount; ++i) {
-        auto& particle {system.activate_particle()};
-
-        particle.Region = texRegion;
-
-        setup_particle(particle, tmpl, _randomGen);
-
-        // set scale
-        f32 const scaleF {minmax_rng(tmpl.Scale, _randomGen)};
-        particle.Scale = {scaleF, scaleF};
-
-        // set spin and rotation
-        particle.Spin     = minmax_rng(tmpl.Spin, _randomGen);
-        particle.Rotation = minmax_rng(tmpl.Rotation, _randomGen);
-
-        // calculate random postion
-        f32 const x {_randomGen(Settings.SpawnArea.left(), Settings.SpawnArea.right()) - (tmpl.Size.Width / 2)};
-        f32 const y {_randomGen(Settings.SpawnArea.top(), Settings.SpawnArea.bottom()) - (tmpl.Size.Height / 2)};
-
-        // set bounds
-        particle.Bounds = {{x, y}, tmpl.Size};
-        particle.Origin = particle.Bounds.center();
-    }
-}
 
 auto particle_base::is_alive() const -> bool
 {

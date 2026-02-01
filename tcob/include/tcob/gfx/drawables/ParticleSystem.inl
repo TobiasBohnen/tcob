@@ -26,8 +26,8 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////
 
-template <typename Emitter>
-particle_system<Emitter>::particle_system(bool multiThreaded, isize reservedParticleCount)
+template <typename Particle>
+particle_system<Particle>::particle_system(bool multiThreaded, isize reservedParticleCount)
     : _multiThreaded {multiThreaded}
 {
     if (reservedParticleCount > 0) {
@@ -35,14 +35,14 @@ particle_system<Emitter>::particle_system(bool multiThreaded, isize reservedPart
     }
 }
 
-template <typename Emitter>
-inline auto particle_system<Emitter>::is_running() const -> bool
+template <typename Particle>
+inline auto particle_system<Particle>::is_running() const -> bool
 {
     return _isRunning;
 }
 
-template <typename Emitter>
-inline void particle_system<Emitter>::start()
+template <typename Particle>
+inline void particle_system<Particle>::start()
 {
     if (_isRunning) { return; }
 
@@ -53,15 +53,15 @@ inline void particle_system<Emitter>::start()
     _aliveParticleCount = 0;
 }
 
-template <typename Emitter>
-inline void particle_system<Emitter>::restart()
+template <typename Particle>
+inline void particle_system<Particle>::restart()
 {
     stop();
     start();
 }
 
-template <typename Emitter>
-inline void particle_system<Emitter>::stop()
+template <typename Particle>
+inline void particle_system<Particle>::stop()
 {
     _isRunning = false;
 
@@ -71,27 +71,33 @@ inline void particle_system<Emitter>::stop()
     _geometry.clear();
 }
 
-template <typename Emitter>
-inline auto particle_system<Emitter>::remove_emitter(emitter_type const& emitter) -> bool
+template <typename Particle>
+inline auto particle_system<Particle>::create_emitter() -> particle_emitter<particle_type>&
+{
+    return *_emitters.emplace_back(std::make_unique<particle_emitter<particle_type>>());
+}
+
+template <typename Particle>
+inline auto particle_system<Particle>::remove_emitter(particle_emitter<particle_type> const& emitter) -> bool
 {
     return helper::erase_first(_emitters, [&emitter](auto const& val) { return val.get() == &emitter; });
 }
 
-template <typename Emitter>
-inline void particle_system<Emitter>::clear()
+template <typename Particle>
+inline void particle_system<Particle>::clear()
 {
     _emitters.clear();
     stop();
 }
 
-template <typename Emitter>
-inline auto particle_system<Emitter>::particle_count() const -> isize
+template <typename Particle>
+inline auto particle_system<Particle>::particle_count() const -> isize
 {
     return _aliveParticleCount;
 }
 
-template <typename Emitter>
-inline auto particle_system<Emitter>::activate_particle() -> particle_type&
+template <typename Particle>
+inline auto particle_system<Particle>::activate_particle() -> particle_type&
 {
     if (_aliveParticleCount == std::ssize(_particles)) {
         _aliveParticleCount++;
@@ -101,21 +107,15 @@ inline auto particle_system<Emitter>::activate_particle() -> particle_type&
     return _particles[_aliveParticleCount++];
 }
 
-template <typename Emitter>
-inline void particle_system<Emitter>::deactivate_particle(particle_type& particle)
+template <typename Particle>
+inline void particle_system<Particle>::deactivate_particle(particle_type& particle)
 {
     assert(_aliveParticleCount > 0);
     std::swap(particle, _particles[--_aliveParticleCount]);
 }
 
-template <typename Emitter>
-inline auto particle_system<Emitter>::create_emitter(auto&&... args) -> Emitter&
-{
-    return *_emitters.emplace_back(std::make_unique<Emitter>(args...));
-}
-
-template <typename Emitter>
-inline void particle_system<Emitter>::on_update(milliseconds deltaTime)
+template <typename Particle>
+inline void particle_system<Particle>::on_update(milliseconds deltaTime)
 {
     if (!_isRunning || !Material) { return; }
 
@@ -145,14 +145,14 @@ inline void particle_system<Emitter>::on_update(milliseconds deltaTime)
     }
 }
 
-template <typename Emitter>
-inline auto particle_system<Emitter>::can_draw() const -> bool
+template <typename Particle>
+inline auto particle_system<Particle>::can_draw() const -> bool
 {
     return _isRunning && _aliveParticleCount != 0 && !(*Material).is_expired();
 }
 
-template <typename Emitter>
-inline void particle_system<Emitter>::on_draw_to(render_target& target)
+template <typename Particle>
+inline void particle_system<Particle>::on_draw_to(render_target& target)
 {
     _geometry.resize(_aliveParticleCount);
 
@@ -169,6 +169,48 @@ inline void particle_system<Emitter>::on_draw_to(render_target& target)
 
         _renderer.set_geometry({_geometry.data(), static_cast<usize>(_aliveParticleCount)}, &pass);
         _renderer.render_to_target(target);
+    }
+}
+
+////////////////////////////////////////////////////////
+
+template <typename Particle>
+inline auto particle_emitter<Particle>::is_alive() const -> bool
+{
+    return _alive && (!Settings.Lifetime || _remainingLife > milliseconds {0});
+}
+
+template <typename Particle>
+inline void particle_emitter<Particle>::reset()
+{
+    if (Settings.Lifetime) { _remainingLife = *Settings.Lifetime; }
+    _alive = true;
+}
+
+template <typename Particle>
+template <typename ParticleSystem>
+inline void particle_emitter<Particle>::emit(ParticleSystem& system, milliseconds deltaTime)
+{
+    if (!is_alive()) { return; }
+
+    _remainingLife -= deltaTime;
+
+    i32 particleCount {0};
+    if (Settings.IsExplosion) {
+        particleCount = static_cast<i32>(Settings.SpawnRate);
+        _alive        = false;
+    } else {
+        f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};
+        particleCount = static_cast<i32>(particleAmount);
+        _emissionDiff = particleAmount - particleCount;
+    }
+
+    auto const& tmpl {Settings.Template};
+    auto const& texRegion {system.Material->first_pass().Texture->regions()[tmpl.TextureRegion]}; // TODO texRegion pass
+
+    for (i32 i {0}; i < particleCount; ++i) {
+        auto& particle {system.activate_particle()};
+        particle.init(tmpl, texRegion, Settings.SpawnArea, _rng);
     }
 }
 
@@ -222,25 +264,15 @@ auto constexpr quad_particle::settings::Members()
     };
 }
 
-auto constexpr point_particle_emitter::settings::Members()
+template <typename Particle>
+auto constexpr particle_emitter<Particle>::settings::Members()
 {
     return std::tuple {
-        member<&point_particle_emitter::settings::Template> {"template"},
-        member<&point_particle_emitter::settings::SpawnArea> {"spawn_area"},
-        member<&point_particle_emitter::settings::SpawnRate> {"spawn_rate"},
-        member<&point_particle_emitter::settings::IsExplosion> {"is_explosion"},
-        member<&point_particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
-    };
-}
-
-auto constexpr quad_particle_emitter::settings::Members()
-{
-    return std::tuple {
-        member<&quad_particle_emitter::settings::Template> {"template"},
-        member<&quad_particle_emitter::settings::SpawnArea> {"spawn_area"},
-        member<&quad_particle_emitter::settings::SpawnRate> {"spawn_rate"},
-        member<&quad_particle_emitter::settings::IsExplosion> {"is_explosion"},
-        member<&quad_particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
+        member<&particle_emitter::settings::Template> {"template"},
+        member<&particle_emitter::settings::SpawnArea> {"spawn_area"},
+        member<&particle_emitter::settings::SpawnRate> {"spawn_rate"},
+        member<&particle_emitter::settings::IsExplosion> {"is_explosion"},
+        member<&particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
     };
 }
 

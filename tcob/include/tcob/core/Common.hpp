@@ -10,6 +10,7 @@
 #include <cmath>
 #include <functional>
 #include <type_traits>
+#include <utility>
 
 #include "tcob/core/Concepts.hpp"
 
@@ -157,5 +158,10 @@ struct locale {
     string Language;
     string Country;
 };
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+using min_max = std::pair<T, T>;
 
 }

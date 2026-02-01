@@ -253,6 +253,10 @@ namespace gfx {
     class background;
     class canvas;
     class font;
+    template <typename Particle>
+    class particle_emitter;
+    template <typename Particle>
+    class particle_system;
     class parallax_background;
     class render_system;
     class render_target;

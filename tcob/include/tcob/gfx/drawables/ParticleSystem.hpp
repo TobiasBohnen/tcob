@@ -10,11 +10,11 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <utility>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
@@ -33,11 +33,6 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-using min_max = std::pair<T, T>;
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
 struct particle_event {
     T&           Particle;
     milliseconds DeltaTime;
@@ -45,24 +40,10 @@ struct particle_event {
 
 ////////////////////////////////////////////////////////////
 
-template <typename Emitter>
+template <typename Particle>
 class particle_system final : public drawable, public updatable {
-    ////////////////////////////////////////////////////////////
-
-    using particle_type = typename Emitter::particle_type;
-    using emitter_type  = Emitter;
-    using geometry_type = typename Emitter::geometry_type;
-
-    static_assert(requires(particle_type p, geometry_type* q, milliseconds deltaTime) {
-        { p.is_alive() } -> std::same_as<bool>;
-        { p.convert_to(q) };
-        { p.update(deltaTime) }; }, "Invalid particle type");
-
-    static_assert(requires(Emitter t, particle_system& system, milliseconds deltaTime) {
-        { t.reset() };
-        { t.emit(system, deltaTime) }; }, "Invalid emitter type");
-
-    ////////////////////////////////////////////////////////////
+    using particle_type = Particle;
+    using geometry_type = typename Particle::geometry_type;
 
 public:
     explicit particle_system(bool multiThreaded = false, isize reservedParticleCount = 0);
@@ -79,9 +60,9 @@ public:
     void restart();
     void stop();
 
-    auto create_emitter(auto&&... args) -> Emitter&;
+    auto create_emitter() -> particle_emitter<particle_type>&;
 
-    auto remove_emitter(emitter_type const& emitter) -> bool;
+    auto remove_emitter(particle_emitter<particle_type> const& emitter) -> bool;
     void clear();
 
     auto particle_count() const -> isize;
@@ -100,14 +81,56 @@ private:
     renderer                   _renderer {buffer_usage_hint::DynamicDraw};
     std::vector<geometry_type> _geometry;
 
-    std::vector<std::unique_ptr<emitter_type>> _emitters {};
-    std::vector<particle_type>                 _particles {};
-    isize                                      _aliveParticleCount {0};
+    std::vector<std::unique_ptr<particle_emitter<particle_type>>> _emitters {};
+    std::vector<particle_type>                                    _particles {};
+    isize                                                         _aliveParticleCount {0};
 
     std::mutex _mutex {};
     bool       _multiThreaded;
 
     bool _isRunning {false};
+};
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+template <typename Particle>
+class particle_emitter final : public non_copyable {
+public:
+    ////////////////////////////////////////////////////////////
+
+    class settings {
+    public:
+        typename Particle::settings Template;
+
+        bool                        IsExplosion {false};
+        rect_f                      SpawnArea {rect_f::Zero};
+        f32                         SpawnRate {0};
+        std::optional<milliseconds> Lifetime {};
+
+        auto operator==(settings const& other) const -> bool = default;
+
+        static auto constexpr Members();
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    using particle_type = Particle;
+
+    settings Settings;
+
+    auto is_alive() const -> bool;
+
+    void reset();
+
+    template <typename ParticleSystem>
+    void emit(ParticleSystem& system, milliseconds deltaTime);
+
+private:
+    rng          _rng;
+    milliseconds _remainingLife {1000};
+    f64          _emissionDiff {0};
+    bool         _alive {true};
 };
 
 ////////////////////////////////////////////////////////////
@@ -133,7 +156,6 @@ public:
     auto is_alive() const -> bool;
 };
 
-////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
 class TCOB_API point_particle final : public particle_base {
@@ -165,55 +187,18 @@ public:
 
     ////////////////////////////////////////////////////////////
 
+    using geometry_type = vertex;
+
     point_f Position {point_f::Zero};
     point_f Origin {point_f::Zero};
 
     void convert_to(vertex* vertex) const;
 
     void update(milliseconds deltaTime);
+
+    void init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen);
 };
 
-////////////////////////////////////////////////////////////
-
-class TCOB_API point_particle_emitter final : public non_copyable {
-public:
-    ////////////////////////////////////////////////////////////
-
-    class TCOB_API settings {
-    public:
-        point_particle::settings Template;
-
-        bool                        IsExplosion {false};
-        rect_f                      SpawnArea {rect_f::Zero};
-        f32                         SpawnRate {0};
-        std::optional<milliseconds> Lifetime {};
-
-        auto operator==(settings const& other) const -> bool = default;
-
-        static auto constexpr Members();
-    };
-
-    ////////////////////////////////////////////////////////////
-
-    using particle_type = point_particle;
-    using geometry_type = vertex;
-
-    settings Settings;
-
-    auto is_alive() const -> bool;
-
-    void reset();
-
-    void emit(particle_system<point_particle_emitter>& system, milliseconds deltaTime);
-
-private:
-    rng          _rng;
-    milliseconds _remainingLife {1000};
-    f64          _emissionDiff {0};
-    bool         _alive {true};
-};
-
-////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
 class TCOB_API quad_particle final : public particle_base {
@@ -248,7 +233,10 @@ public:
 
         static auto constexpr Members();
     };
+
     ////////////////////////////////////////////////////////////
+
+    using geometry_type = quad;
 
     size_f  Scale {size_f::One};
     rect_f  Bounds {rect_f::Zero};
@@ -261,54 +249,16 @@ public:
 
     void update(milliseconds deltaTime);
 
+    void init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen);
+
 private:
     transform _transform {};
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API quad_particle_emitter final : public non_copyable {
-public:
-    ////////////////////////////////////////////////////////////
-
-    class TCOB_API settings {
-    public:
-        quad_particle::settings Template;
-
-        bool                        IsExplosion {false};
-        rect_f                      SpawnArea {rect_f::Zero};
-        f32                         SpawnRate {0};
-        std::optional<milliseconds> Lifetime {};
-
-        auto operator==(settings const& other) const -> bool = default;
-
-        static auto constexpr Members();
-    };
-
-    ////////////////////////////////////////////////////////////
-
-    using particle_type = quad_particle;
-    using geometry_type = quad;
-
-    settings Settings;
-
-    auto is_alive() const -> bool;
-
-    void reset();
-
-    void emit(particle_system<quad_particle_emitter>& system, milliseconds deltaTime);
-
-private:
-    rng          _randomGen;
-    milliseconds _remainingLife {1000};
-    f64          _emissionDiff {0};
-    bool         _alive {true};
-};
-
-////////////////////////////////////////////////////////////
-
-using point_particle_system = particle_system<point_particle_emitter>;
-using quad_particle_system  = particle_system<quad_particle_emitter>;
+using point_particle_system = particle_system<point_particle>;
+using quad_particle_system  = particle_system<quad_particle>;
 
 ////////////////////////////////////////////////////////////
 
