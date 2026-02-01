@@ -17,6 +17,7 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/data/ConfigFile.hpp"
 #include "tcob/gfx/Gfx.hpp"
 
@@ -34,6 +35,7 @@ public:
     auto config() const -> data::config_file&;
 
     virtual auto displays() const -> std::map<i32, gfx::display>         = 0;
+    virtual auto desktop_size() const -> size_i                          = 0;
     virtual auto preferred_locales() const -> std::vector<locale> const& = 0;
 
     virtual auto process_events() const -> bool = 0;
@@ -55,6 +57,8 @@ protected:
     static void InitAudioCodecs();
     static void InitFontEngines();
     static void InitTaskManager(std::optional<isize> workerThreads);
+
+    void init_window(gfx::render_system& rs, gfx::video_config const& config, string const& windowTitle) const;
 
 private:
     void remove_services() const;

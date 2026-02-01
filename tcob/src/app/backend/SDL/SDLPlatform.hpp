@@ -12,6 +12,7 @@
 #include "tcob/app/Game.hpp"
 #include "tcob/app/Platform.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob {
@@ -23,7 +24,7 @@ public:
     ~sdl_platform() override;
 
     auto displays() const -> std::map<i32, gfx::display> override;
-
+    auto desktop_size() const -> size_i override;
     auto preferred_locales() const -> std::vector<locale> const& override;
 
     auto process_events() const -> bool override;

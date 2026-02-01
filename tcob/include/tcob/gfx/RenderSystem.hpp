@@ -20,6 +20,10 @@
 #include "tcob/gfx/Texture.hpp"
 #include "tcob/gfx/Window.hpp"
 
+namespace tcob {
+class platform;
+}
+
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
@@ -40,6 +44,8 @@ struct render_system_information {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API render_system : public non_copyable {
+    friend class ::tcob::platform;
+
 public:
     struct factory : public type_factory<std::shared_ptr<render_system>> {
         static inline char const* ServiceName {"gfx::render_system::factory"};
@@ -47,8 +53,6 @@ public:
 
     render_system();
     virtual ~render_system();
-
-    auto init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> window&;
 
     virtual auto name() const -> string                    = 0;
     virtual auto device_name() const -> string             = 0;
@@ -70,6 +74,8 @@ public:
     static inline char const* ServiceName {"gfx::render_system"};
 
 private:
+    auto init_window(size_i resolution) -> gfx::window&;
+
     render_statistics                      _stats;
     std::unique_ptr<gfx::window>           _window;
     std::unique_ptr<default_render_target> _defaultTarget;

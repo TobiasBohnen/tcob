@@ -33,7 +33,9 @@
 #include "tcob/data/ConfigConversions.hpp"
 #include "tcob/data/ConfigFile.hpp"
 #include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/RenderSystem.hpp"
 
 #include "backend/SDL/SDLPlatform.hpp"
 
@@ -81,6 +83,9 @@ platform::platform(bool headless, game::init const& ginit)
     if (!headless) {
         _configFile = std::make_unique<data::config_file>(ginit.ConfigFile); // load config
         _configFile->merge(*ginit.ConfigDefaults, false);                    // merge config with default
+
+        FrameLimit.Changed.connect([this](i32 value) { config()[Cfg::Video::Name][Cfg::Video::frame_limit] = value; });
+        FrameLimit = config()[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
     }
 }
 
@@ -96,6 +101,21 @@ platform::~platform()
 
     //  FreeType
     gfx::truetype_font_engine::Done();
+}
+
+void platform::init_window(gfx::render_system& rs, gfx::video_config const& config, string const& windowTitle) const
+{
+    auto& window {rs.init_window(config.UseDesktopResolution ? desktop_size() : config.Resolution)};
+    window.FullScreen(config.FullScreen || config.UseDesktopResolution);
+    window.VSync(config.VSync);
+    window.Title = windowTitle;
+
+    window.FullScreen.Changed.connect([this](bool value) { (*_configFile)[Cfg::Video::Name][Cfg::Video::fullscreen] = value; });
+    window.VSync.Changed.connect([this](bool value) { (*_configFile)[Cfg::Video::Name][Cfg::Video::vsync] = value; });
+    window.Resized.connect([this, &window](auto const&) {
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = (window.Size == desktop_size());
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = *window.Size;
+    });
 }
 
 void platform::remove_services() const
@@ -360,4 +380,5 @@ single_instance::operator bool() const
 {
     return _locked;
 }
+
 }

@@ -24,13 +24,9 @@ render_system::~render_system()
     _defaultTarget = nullptr;
 }
 
-auto render_system::init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> gfx::window&
+auto render_system::init_window(size_i resolution) -> gfx::window&
 {
-    size_i const resolution {config.UseDesktopResolution ? desktopResolution : config.Resolution};
     _window = create_window(resolution);
-    _window->FullScreen(config.FullScreen || config.UseDesktopResolution);
-    _window->VSync(config.VSync);
-    _window->Title = windowTitle;
     assert(_window->Size == resolution);
 
     _defaultTarget = std::make_unique<gfx::default_render_target>(_window.get());

@@ -20,7 +20,6 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigConversions.hpp"
 #include "tcob/data/ConfigFile.hpp"
 #include "tcob/data/ConfigTypes.hpp"
@@ -193,7 +192,7 @@ void sdl_platform::init_audio_system()
     register_service<audio::system>(system);
 }
 
-static auto desktop_size() -> size_i
+auto sdl_platform::desktop_size() const -> size_i
 {
     i32         numDisplays {};
     auto*       displayID {SDL_GetDisplays(&numDisplays)};
@@ -224,22 +223,8 @@ void sdl_platform::init_render_system(string const& windowTitle)
     if (!renderSystem) { throw std::runtime_error("Render system creation failed"); }
 
     register_service<gfx::render_system>(renderSystem);
-    auto& window {renderSystem->init_window(video, windowTitle, desktop_size())};
-    window.FullScreen.Changed.connect([this](bool value) {
-        config()[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
-    });
-    window.VSync.Changed.connect([this](bool value) {
-        config()[Cfg::Video::Name][Cfg::Video::vsync] = value;
-    });
-    window.Resized.connect([this, &window](auto const&) {
-        config()[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = (window.Size == desktop_size());
-        config()[Cfg::Video::Name][Cfg::Video::resolution]             = *window.Size;
-    });
 
-    FrameLimit.Changed.connect([this](i32 value) {
-        config()[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
-    });
-    FrameLimit = config()[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
+    init_window(*renderSystem, video, windowTitle);
 
     logger::Info("Device: {}", renderSystem->device_name());
 }
