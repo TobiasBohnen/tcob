@@ -22,7 +22,7 @@ render_texture::render_texture()
 
 auto render_texture::UVRect() -> rect_f
 {
-    return locate_service<render_system>().capabilities().RenderTextureUVRect;
+    return locate_service<render_system>().info().RenderTextureUVRect;
 }
 
 auto render_texture::get_size() const -> size_i

@@ -23,7 +23,7 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-struct render_capabilities {
+struct render_system_information {
     struct point_size {
         std::pair<f32, f32> Range;
         f32                 Granularity {};
@@ -50,9 +50,9 @@ public:
 
     auto init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> window&;
 
-    virtual auto name() const -> string                      = 0;
-    virtual auto device_name() const -> string               = 0;
-    virtual auto capabilities() const -> render_capabilities = 0;
+    virtual auto name() const -> string                    = 0;
+    virtual auto device_name() const -> string             = 0;
+    virtual auto info() const -> render_system_information = 0;
 
     auto statistics() -> render_statistics&;
 
