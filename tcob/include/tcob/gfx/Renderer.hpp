@@ -96,7 +96,7 @@ class TCOB_API canvas_renderer final : public renderer_base {
 public:
     explicit canvas_renderer(canvas& c);
 
-    void add_layer(i32 layer);
+    void queue_layer(i32 layer);
 
     void set_bounds(rect_f const& bounds);
 

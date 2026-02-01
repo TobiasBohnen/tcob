@@ -310,12 +310,12 @@ void form_base::on_draw_to(gfx::render_target& target)
 
     // render
     for (i32 j {0}; j < layerCount; ++j) {
-        _renderer.add_layer(firstUILayer + j);
+        _renderer.queue_layer(firstUILayer + j);
     }
 
     // overlay
     if (_drawOverlay) {
-        _renderer.add_layer(overlayLayer);
+        _renderer.queue_layer(overlayLayer);
     }
 
     // tooltip
@@ -331,7 +331,7 @@ void form_base::on_draw_to(gfx::render_target& target)
         _topWidget->Tooltip->draw(*_painter);
         _canvas.end_frame();
 
-        _renderer.add_layer(tooltipLayer);
+        _renderer.queue_layer(tooltipLayer);
     }
 
     // modal
@@ -344,7 +344,7 @@ void form_base::on_draw_to(gfx::render_target& target)
             }
             _canvas.end_frame();
         }
-        _renderer.add_layer(modalLayer);
+        _renderer.queue_layer(modalLayer);
     }
 
     _renderer.render_to_target(target);

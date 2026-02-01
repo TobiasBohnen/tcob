@@ -206,7 +206,7 @@ void canvas_renderer::set_bounds(rect_f const& bounds)
     _vertexArray.update_data(std::span {&q, 1}, 0);
 }
 
-void canvas_renderer::add_layer(i32 layer)
+void canvas_renderer::queue_layer(i32 layer)
 {
     _layers.push_back(layer);
 }
