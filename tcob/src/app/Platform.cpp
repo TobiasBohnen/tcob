@@ -14,6 +14,7 @@
 #include "../audio/audio_codecs/AudioCodecs.hpp"
 #include "../data/config_formats/ConfigFormats.hpp"
 #include "../gfx/image_codecs/ImageCodecs.hpp"
+#include "../gfx/mesh_formats/MeshFormats.hpp"
 
 #include "../gfx/Font_private.hpp"
 
@@ -36,6 +37,7 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/drawables/Shape.hpp"
 
 #include "backend/SDL/SDLPlatform.hpp"
 
@@ -73,12 +75,13 @@ platform::platform(bool headless, game::init const& ginit)
     logger::Info("starting");
 
     InitSignatures();
-    InitTaskManager(ginit.WorkerThreads);
     InitConfigFormats();
+    InitAssetFormats();
+    InitMeshFormats();
     InitImageCodecs();
     InitAudioCodecs();
     InitFontEngines();
-    InitAssetFormats();
+    InitTaskManager(ginit.WorkerThreads);
 
     if (!headless) {
         _configFile = std::make_unique<data::config_file>(ginit.ConfigFile); // load config
@@ -238,6 +241,12 @@ void platform::InitAssetFormats()
                 [](assets::group& group) {
                     return std::make_unique<detail::cfg_asset_loader_manager>(group);
                 });
+}
+
+void platform::InitMeshFormats()
+{
+    auto& factory {register_service<gfx::mesh_loader::factory>()};
+    factory.add(".obj", &make_unique<gfx::detail::obj_loader>);
 }
 
 void platform::InitImageCodecs()

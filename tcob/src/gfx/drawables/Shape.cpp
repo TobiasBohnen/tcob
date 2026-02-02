@@ -10,6 +10,7 @@
 #include <cmath>
 #include <iterator>
 #include <limits>
+#include <map>
 #include <memory>
 #include <span>
 #include <unordered_map>
@@ -19,6 +20,11 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Transform.hpp"
+#include "tcob/core/io/FileStream.hpp"
+#include "tcob/core/io/FileSystem.hpp"
+#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Polygon.hpp"
@@ -230,7 +236,7 @@ rect_shape::rect_shape()
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
-auto rect_shape::geometry(isize pass) -> geometry_data
+auto rect_shape::geometry(isize pass) -> geometry_view
 {
     auto it {_quads.find(pass)};
     if (it == _quads.end()) { return {}; }
@@ -248,11 +254,6 @@ auto rect_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 
 auto rect_shape::aabb() const -> rect_f
 {
-    return _aabb;
-}
-
-void rect_shape::update_aabb()
-{
     auto const& xform {transform()};
     auto const& rect {*Bounds};
 
@@ -264,7 +265,7 @@ void rect_shape::update_aabb()
     std::pair<f32, f32> const tb {std::minmax({topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y})};
     std::pair<f32, f32> const lr {std::minmax({topLeft.X, topRight.X, bottomLeft.X, bottomRight.X})};
 
-    _aabb = {{lr.first, tb.first}, {lr.second - lr.first, tb.second - tb.first}};
+    return {{lr.first, tb.first}, {lr.second - lr.first, tb.second - tb.first}};
 }
 
 void rect_shape::move_by(point_f offset)
@@ -276,7 +277,6 @@ void rect_shape::on_update(milliseconds deltaTime)
 {
     if (is_dirty()) {
         update_geometry();
-        mark_clean();
     }
 
     if (TextureScroll != point_f::Zero) {
@@ -288,6 +288,8 @@ void rect_shape::on_update(milliseconds deltaTime)
 
 void rect_shape::update_geometry()
 {
+    mark_clean();
+
     _quads.clear();
 
     auto const& xform {transform()};
@@ -299,8 +301,6 @@ void rect_shape::update_geometry()
         geometry::set_texcoords(quad, get_texture_region(pass));
         geometry::set_position(quad, *Bounds, xform);
     }
-
-    update_aabb();
 }
 
 auto rect_shape::center() const -> point_f
@@ -317,7 +317,7 @@ circle_shape::circle_shape()
     Segments.Changed.connect([this](auto const&) { mark_dirty(); });
 }
 
-auto circle_shape::geometry(isize pass) -> geometry_data
+auto circle_shape::geometry(isize pass) -> geometry_view
 {
     return {
         .Vertices = _store.get_vertices(pass),
@@ -328,9 +328,8 @@ auto circle_shape::geometry(isize pass) -> geometry_data
 auto circle_shape::aabb() const -> rect_f
 {
     auto const worldCenter {transform() * Center};
-    return {
-        worldCenter - point_f {Radius, Radius},
-        {Radius * 2.0f, Radius * 2.0f}};
+    return {worldCenter - point_f {Radius, Radius},
+            {Radius * 2.0f, Radius * 2.0f}};
 }
 
 auto circle_shape::intersect(ray const& ray) const -> std::vector<ray::result>
@@ -341,18 +340,14 @@ auto circle_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 void circle_shape::on_update(milliseconds /* deltaTime */)
 {
     if (!is_dirty()) { return; }
-    mark_clean();
 
     update_geometry();
 }
 
 void circle_shape::update_geometry()
 {
-    create();
-}
+    mark_clean();
 
-void circle_shape::create()
-{
     _store.clear();
     auto const& xform {transform()};
 
@@ -406,7 +401,7 @@ void circle_shape::create()
         inds.push_back(1);
         inds.push_back(*Segments);
 
-        _store.set(p, inds, verts);
+        _store.set(p, verts, inds);
     }
 }
 
@@ -422,7 +417,7 @@ poly_shape::poly_shape()
     Polygons.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
-auto poly_shape::geometry(isize pass) -> geometry_data
+auto poly_shape::geometry(isize pass) -> geometry_view
 {
     return {
         .Vertices = _store.get_vertices(pass),
@@ -431,11 +426,6 @@ auto poly_shape::geometry(isize pass) -> geometry_data
 }
 
 auto poly_shape::aabb() const -> rect_f
-{
-    return _aabb;
-}
-
-void poly_shape::update_aabb()
 {
     auto const& xform {transform()};
 
@@ -452,7 +442,7 @@ void poly_shape::update_aabb()
         }
     }
 
-    _aabb = rect_f::FromLTRB(min.X, min.Y, max.X, max.Y);
+    return rect_f::FromLTRB(min.X, min.Y, max.X, max.Y);
 }
 
 auto poly_shape::intersect(ray const& ray) const -> std::vector<ray::result>
@@ -487,19 +477,8 @@ void poly_shape::move_by(point_f offset)
 void poly_shape::on_update(milliseconds /* deltaTime */)
 {
     if (!is_dirty()) { return; }
-    mark_clean();
 
     update_geometry();
-}
-
-void poly_shape::update_geometry()
-{
-    auto const info {polygons::info(*Polygons)};
-    _boundingBox = info.BoundingBox;
-    _centroid    = info.Centroid;
-
-    create();
-    update_aabb();
 }
 
 auto poly_shape::center() const -> point_f
@@ -507,8 +486,14 @@ auto poly_shape::center() const -> point_f
     return _centroid;
 }
 
-void poly_shape::create()
+void poly_shape::update_geometry()
 {
+    mark_clean();
+
+    auto const info {polygons::info(*Polygons)};
+    _boundingBox = info.BoundingBox;
+    _centroid    = info.Centroid;
+
     _store.clear();
     auto const& xform {transform()};
 
@@ -557,8 +542,161 @@ void poly_shape::create()
             }
         }
 
-        _store.set(p, inds, verts);
+        _store.set(p, verts, inds);
     }
+}
+
+////////////////////////////////////////////////////////////
+
+void mesh_shape::set(std::span<vertex const> verts, std::span<u32 const> inds)
+{
+    _verts = {verts.begin(), verts.end()};
+    _inds  = {inds.begin(), inds.end()};
+    _edgeCount.clear();
+    mark_transform_dirty();
+
+    if (_verts.empty()) {
+        _localBounds = rect_f::Zero;
+    } else {
+        point_f min {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
+        point_f max {std::numeric_limits<f32>::lowest(), std::numeric_limits<f32>::lowest()};
+
+        for (auto const& v : _verts) {
+            min.X = std::min(min.X, v.Position.X);
+            min.Y = std::min(min.Y, v.Position.Y);
+            max.X = std::max(max.X, v.Position.X);
+            max.Y = std::max(max.Y, v.Position.Y);
+        }
+        _localBounds = rect_f::FromLTRB(min.X, min.Y, max.X, max.Y);
+    }
+}
+
+auto mesh_shape::load(path const& file) noexcept -> bool
+{
+    io::ifstream fs {file};
+    return load(fs, io::get_extension(file));
+}
+
+auto mesh_shape::load(io::istream& in, string const& ext) noexcept -> bool
+{
+    if (!in) { return false; }
+
+    if (auto loader {locate_service<mesh_loader::factory>().create(ext)}) {
+        if (auto store {loader->load(in)}) {
+            set(store->get_vertices(0), store->get_indices(0));
+            return true;
+        }
+    }
+
+    return false;
+}
+
+auto mesh_shape::geometry(isize /* pass */) -> geometry_view
+{
+    return {.Vertices = _xformVerts, .Indices = _inds, .Type = primitive_type::Triangles};
+}
+
+auto mesh_shape::aabb() const -> rect_f
+{
+    if (_verts.empty()) { return rect_f::Zero; }
+
+    auto const& xform {transform()};
+
+    auto const topLeft {xform * _localBounds.top_left()};
+    auto const topRight {xform * _localBounds.top_right()};
+    auto const bottomLeft {xform * _localBounds.bottom_left()};
+    auto const bottomRight {xform * _localBounds.bottom_right()};
+
+    std::pair<f32, f32> const tb {std::minmax({topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y})};
+    std::pair<f32, f32> const lr {std::minmax({topLeft.X, topRight.X, bottomLeft.X, bottomRight.X})};
+
+    return {{lr.first, tb.first}, {lr.second - lr.first, tb.second - tb.first}};
+}
+
+auto mesh_shape::intersect(ray const& ray) const -> std::vector<ray::result>
+{
+    std::vector<ray::result> results {};
+
+    for (auto const& [edge, count] : _edgeCount) {
+        if (count == 1) { // Boundary edge
+            auto const& v0 {_xformVerts[edge.first].Position};
+            auto const& v1 {_xformVerts[edge.second].Position};
+
+            if (auto hit {ray.intersect_line(v0, v1)}) {
+                results.push_back(*hit);
+            }
+        }
+    }
+
+    return results;
+}
+
+void mesh_shape::move_by(point_f offset)
+{
+    for (auto& v : _verts) {
+        v.Position += offset;
+    }
+    mark_dirty();
+    if (!_verts.empty()) {
+        _localBounds.Position += offset;
+    }
+}
+
+void mesh_shape::on_update(milliseconds /* deltaTime */)
+{
+    if (!is_dirty()) { return; }
+
+    update_geometry();
+}
+
+void mesh_shape::update_geometry()
+{
+    mark_clean();
+
+    auto const xform {transform()};
+
+    _xformVerts.clear();
+    _xformVerts.reserve(_verts.size());
+
+    // Pre-calculate color mods
+    f32 const rMod {Color->R / 255.f};
+    f32 const gMod {Color->G / 255.f};
+    f32 const bMod {Color->B / 255.f};
+    f32 const aMod {Color->A / 255.f};
+
+    for (auto v : _verts) {
+        v.Position = xform * v.Position;
+        v.Color.R  = static_cast<u8>(v.Color.R * rMod);
+        v.Color.G  = static_cast<u8>(v.Color.G * gMod);
+        v.Color.B  = static_cast<u8>(v.Color.B * bMod);
+        v.Color.A  = static_cast<u8>(v.Color.A * aMod);
+        _xformVerts.push_back(v);
+    }
+
+    // Edge counting
+    _edgeCount.clear();
+    for (usize i {0}; i + 2 < _inds.size(); i += 3) {
+        u32 const v0 {_inds[i]};
+        u32 const v1 {_inds[i + 1]};
+        u32 const v2 {_inds[i + 2]};
+
+        _edgeCount[std::minmax(v0, v1)]++;
+        _edgeCount[std::minmax(v1, v2)]++;
+        _edgeCount[std::minmax(v2, v0)]++;
+    }
+}
+
+auto mesh_shape::center() const -> point_f
+{
+    if (_verts.empty()) { return {0, 0}; }
+
+    point_f sum {0, 0};
+    for (auto const& v : _verts) {
+        sum.X += v.Position.X;
+        sum.Y += v.Position.Y;
+    }
+
+    return {sum.X / static_cast<f32>(_verts.size()), sum.Y / static_cast<f32>(_verts.size())};
 }
 
 }

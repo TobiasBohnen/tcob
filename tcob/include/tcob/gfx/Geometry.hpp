@@ -34,7 +34,7 @@ using quad     = std::array<vertex, 4>;
 
 ////////////////////////////////////////////////////////////
 
-struct geometry_data {
+struct geometry_view {
     std::span<vertex const> Vertices;
     std::span<u32 const>    Indices;
     primitive_type          Type {};
@@ -44,22 +44,22 @@ struct geometry_data {
 
 class TCOB_API geometry_store {
 public:
-    using index_map  = std::unordered_map<isize, std::vector<u32>>;
     using vertex_map = std::unordered_map<isize, std::vector<vertex>>;
+    using index_map  = std::unordered_map<isize, std::vector<u32>>;
 
-    auto get_indices(isize id) const -> std::span<u32 const>;
     auto get_vertices(isize id) const -> std::span<vertex const>;
+    auto get_indices(isize id) const -> std::span<u32 const>;
 
-    void set(isize id, std::vector<u32> const& inds, std::vector<vertex> const& verts);
-    void add(isize id, std::vector<u32> const& inds, std::vector<vertex> const& verts);
+    void set(isize id, std::vector<vertex> const& verts, std::vector<u32> const& inds);
+    void add(isize id, std::vector<vertex> const& verts, std::vector<u32> const& inds);
 
     void clear();
 
     [[nodiscard]] auto is_empty() const -> bool;
 
 private:
-    index_map  _inds;
     vertex_map _verts;
+    index_map  _inds;
 };
 
 inline constexpr std::array<u32, 6> QuadIndicies {3, 1, 0, 3, 2, 1};

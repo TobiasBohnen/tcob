@@ -7,9 +7,12 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
+#include <map>
 #include <memory>
 #include <optional>
+#include <span>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -17,6 +20,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/TypeFactory.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -51,7 +55,7 @@ public:
     void hide();
     auto is_visible() const -> bool;
 
-    virtual auto geometry(isize pass) -> geometry_data = 0;
+    virtual auto geometry(isize pass) -> geometry_view = 0;
     virtual auto aabb() const -> rect_f                = 0;
 
     virtual auto intersect(ray const& ray) const -> std::vector<ray::result> = 0;
@@ -83,7 +87,7 @@ public:
     prop<rect_f>  Bounds;
     prop<point_f> TextureScroll;
 
-    auto geometry(isize pass) -> geometry_data override;
+    auto geometry(isize pass) -> geometry_view override;
     auto aabb() const -> rect_f override;
 
     auto intersect(ray const& ray) const -> std::vector<ray::result> override;
@@ -97,10 +101,8 @@ protected:
 
 private:
     void update_geometry();
-    void update_aabb();
 
     std::unordered_map<isize, quad> _quads {};
-    rect_f                          _aabb {rect_f::Zero};
 };
 
 ////////////////////////////////////////////////////////////
@@ -113,7 +115,7 @@ public:
     prop<f32>     Radius;
     prop<i32>     Segments {90};
 
-    auto geometry(isize pass) -> geometry_data override;
+    auto geometry(isize pass) -> geometry_view override;
     auto aabb() const -> rect_f override;
 
     auto intersect(ray const& ray) const -> std::vector<ray::result> override;
@@ -124,7 +126,6 @@ protected:
     auto center() const -> point_f override;
 
 private:
-    void create();
     void update_geometry();
 
     geometry_store _store;
@@ -138,7 +139,7 @@ public:
 
     prop<std::vector<polygon>> Polygons;
 
-    auto geometry(isize pass) -> geometry_data override;
+    auto geometry(isize pass) -> geometry_view override;
     auto aabb() const -> rect_f override;
 
     auto intersect(ray const& ray) const -> std::vector<ray::result> override;
@@ -153,16 +154,57 @@ protected:
     auto center() const -> point_f override;
 
 private:
-    void create();
     void update_geometry();
-    void update_aabb();
 
     geometry_store _store;
 
     rect_f  _boundingBox {rect_f::Zero};
     point_f _centroid {point_f::Zero};
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API mesh_shape final : public shape {
+public:
+    void set(std::span<vertex const> verts, std::span<u32 const> inds);
+    auto load [[nodiscard]] (path const& file) noexcept -> bool;
+    auto load [[nodiscard]] (io::istream& in, string const& ext) noexcept -> bool;
+
+    auto geometry(isize pass) -> geometry_view override;
+    auto aabb() const -> rect_f override;
+
+    auto intersect(ray const& ray) const -> std::vector<ray::result> override;
+
+    void move_by(point_f offset);
+
+protected:
+    void on_update(milliseconds deltaTime) override;
+
+    auto center() const -> point_f override;
+
+private:
+    void update_geometry();
 
     rect_f _aabb {rect_f::Zero};
+
+    std::vector<vertex> _verts;
+    std::vector<vertex> _xformVerts;
+    std::vector<u32>    _inds;
+
+    std::map<std::pair<u32, u32>, u32> _edgeCount {};
+    rect_f                             _localBounds {0, 0, 0, 0};
+};
+
+class TCOB_API mesh_loader : public non_copyable {
+public:
+    struct factory : public type_factory<std::unique_ptr<mesh_loader>> {
+        static inline char const* ServiceName {"gfx::mesh_loader::factory"};
+    };
+
+    mesh_loader()          = default;
+    virtual ~mesh_loader() = default;
+
+    virtual auto load(io::istream& in) -> std::optional<geometry_store> = 0;
 };
 
 ////////////////////////////////////////////////////////////

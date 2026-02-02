@@ -46,7 +46,7 @@ public:
 
     void set_geometry(std::span<vertex const> vertices, pass const* pass);
     void set_geometry(std::span<quad const> quads, pass const* pass);
-    void set_geometry(geometry_data const& gd, pass const* pass);
+    void set_geometry(geometry_view const& gd, pass const* pass);
     void reset_geometry();
 
 private:
@@ -66,7 +66,7 @@ class TCOB_API batch_renderer final : public renderer_base {
 public:
     batch_renderer();
 
-    void add_geometry(geometry_data const& gd, pass const* pass);
+    void add_geometry(geometry_view const& gd, pass const* pass);
     void reset_geometry();
 
 private:

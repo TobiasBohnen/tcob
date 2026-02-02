@@ -53,6 +53,7 @@ protected:
     static void InitSignatures();
     static void InitConfigFormats();
     static void InitAssetFormats();
+    static void InitMeshFormats();
     static void InitImageCodecs();
     static void InitAudioCodecs();
     static void InitFontEngines();

@@ -26,6 +26,8 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/UniformBuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/VertexArray.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/animation/Animation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/animation/QuadTween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Background.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Cursor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Drawable.cpp
@@ -45,8 +47,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_pnm.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_qoi.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_tga.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/animation/Animation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/animation/QuadTween.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/mesh_formats/Mesh_obj.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/LSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Chart.cpp

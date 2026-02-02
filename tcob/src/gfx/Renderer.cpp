@@ -61,18 +61,18 @@ renderer::renderer(buffer_usage_hint usage)
 
 void renderer::set_geometry(std::span<vertex const> vertices, pass const* pass)
 {
-    set_geometry(geometry_data {.Vertices = vertices, .Indices = {}, .Type = primitive_type::Points}, pass);
+    set_geometry(geometry_view {.Vertices = vertices, .Indices = {}, .Type = primitive_type::Points}, pass);
 }
 
 void renderer::set_geometry(std::span<quad const> quads, pass const* pass)
 {
-    set_geometry(geometry_data {.Vertices = geometry::flatten(quads),
+    set_geometry(geometry_view {.Vertices = geometry::flatten(quads),
                                 .Indices  = geometry::get_indices(quads.size()),
                                 .Type     = primitive_type::Triangles},
                  pass);
 }
 
-void renderer::set_geometry(geometry_data const& gd, pass const* pass)
+void renderer::set_geometry(geometry_view const& gd, pass const* pass)
 {
     usize const vCount {gd.Vertices.size()};
     usize const iCount {gd.Indices.size()};
@@ -118,7 +118,7 @@ batch_renderer::batch_renderer()
 {
 }
 
-void batch_renderer::add_geometry(geometry_data const& gd, pass const* pass)
+void batch_renderer::add_geometry(geometry_view const& gd, pass const* pass)
 {
     if (gd.Vertices.empty()) { return; }
 

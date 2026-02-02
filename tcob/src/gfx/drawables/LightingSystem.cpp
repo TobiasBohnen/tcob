@@ -291,7 +291,7 @@ void lighting_system::build_geometry(light_source& light, f32 lightRange, u32& i
     }
     indOffset += n + 1;
 
-    _store.add(0, inds, verts);
+    _store.add(0, verts, inds);
 }
 
 auto lighting_system::collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>
@@ -367,7 +367,7 @@ auto lighting_system::can_draw() const -> bool
 void lighting_system::on_draw_to(render_target& target)
 {
     if (_updateGeometry) {
-        geometry_data const data {.Vertices = _store.get_vertices(0),
+        geometry_view const data {.Vertices = _store.get_vertices(0),
                                   .Indices  = _store.get_indices(0),
                                   .Type     = primitive_type::Triangles};
         _renderer.set_geometry(data, &_material->first_pass());
