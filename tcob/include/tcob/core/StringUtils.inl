@@ -12,7 +12,7 @@
 
 namespace tcob::helper {
 
-auto split_for_each(string_view str, char delim, auto&& f) -> bool
+inline auto split_for_each(string_view str, char delim, auto&& f) -> bool
 {
     usize start {0};
     usize end {str.find(delim)};
@@ -29,7 +29,7 @@ auto split_for_each(string_view str, char delim, auto&& f) -> bool
     return true;
 }
 
-auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> bool
+inline auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> bool
 {
     bool inQuote {false};
 
@@ -91,7 +91,7 @@ auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> 
 }
 
 template <typename T>
-auto to_string(T&& value) -> string
+inline auto to_string(T&& value) -> string
 {
     if constexpr (std::is_convertible_v<T, string> || std::is_convertible_v<T, string_view>) {
         return string {std::forward<T>(value)};
@@ -101,7 +101,7 @@ auto to_string(T&& value) -> string
 }
 
 template <Arithmetic T>
-auto to_number(string_view str) -> std::optional<T>
+inline auto to_number(string_view str) -> std::optional<T>
 {
 #if defined(__cpp_lib_to_chars)
     auto const* valueStrData {str.data()};
@@ -135,7 +135,18 @@ auto to_number(string_view str) -> std::optional<T>
 #endif
 }
 
-auto join(auto&& container, string_view delim) -> string
+template <Arithmetic T>
+inline auto try_to_number(string_view str, T& val) -> bool
+{
+    if (auto x {to_number<T>(str)}) {
+        val = *x;
+        return true;
+    }
+
+    return false;
+}
+
+inline auto join(auto&& container, string_view delim) -> string
 {
     auto       it {std::begin(container)};
     auto const last {std::end(container)};

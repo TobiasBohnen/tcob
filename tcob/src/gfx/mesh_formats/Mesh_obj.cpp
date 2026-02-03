@@ -24,7 +24,7 @@ auto obj_loader::load(io::istream& in) -> std::optional<geometry_store>
 
     while (!in.is_eof()) {
         string const line {in.read_string_until('\n')};
-        if (line.empty()) { continue; }
+        if (line.empty() || line[0] == '#') { continue; }
 
         auto const split {helper::split(line, ' ')};
         if (split.empty()) { continue; }
@@ -34,7 +34,7 @@ auto obj_loader::load(io::istream& in) -> std::optional<geometry_store>
             auto const x {helper::to_number<f32>(split[1])};
             auto const y {helper::to_number<f32>(split[2])};
             if (!x || !y) { return std::nullopt; }
-            pos.emplace_back(*x, *y); // Negate Y
+            pos.emplace_back(*x, *y);
         } else if (split[0] == "vt" && split.size() >= 3) {
             // Texture coordinate: vt u v
             auto const u {helper::to_number<f32>(split[1])};
@@ -43,7 +43,7 @@ auto obj_loader::load(io::istream& in) -> std::optional<geometry_store>
             uv.emplace_back(*u, *v);
         } else if (split[0] == "f" && split.size() >= 4) {
             // Face: f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3
-            for (int i {1}; i <= 3; ++i) {
+            for (i32 i {1}; i <= 3; ++i) {
                 auto const& faceStr {split[i]};
                 auto const  slashes {helper::split(faceStr, '/')};
 

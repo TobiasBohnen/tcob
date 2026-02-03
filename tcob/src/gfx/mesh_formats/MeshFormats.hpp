@@ -7,4 +7,5 @@
 
 // IWYU pragma: begin_exports
 #include "Mesh_obj.hpp"
+#include "Mesh_ply.hpp"
 // IWYU pragma: end_exports

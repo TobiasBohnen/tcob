@@ -247,6 +247,7 @@ void platform::InitMeshFormats()
 {
     auto& factory {register_service<gfx::mesh_loader::factory>()};
     factory.add(".obj", &make_unique<gfx::detail::obj_loader>);
+    factory.add(".ply", &make_unique<gfx::detail::ply_loader>);
 }
 
 void platform::InitImageCodecs()

@@ -12,6 +12,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <set>
 #include <span>
 #include <unordered_map>
 #include <utility>
@@ -552,7 +553,19 @@ void mesh_shape::set(std::span<vertex const> verts, std::span<u32 const> inds)
 {
     _verts = {verts.begin(), verts.end()};
     _inds  = {inds.begin(), inds.end()};
+
+    // Edge counting
     _edgeCount.clear();
+    for (usize i {0}; i < _inds.size() - 2; i += 3) {
+        u32 const v0 {_inds[i]};
+        u32 const v1 {_inds[i + 1]};
+        u32 const v2 {_inds[i + 2]};
+
+        _edgeCount[{v0, v1}]++;
+        _edgeCount[{v1, v2}]++;
+        _edgeCount[{v2, v0}]++;
+    }
+
     mark_transform_dirty();
 
     if (_verts.empty()) {
@@ -615,15 +628,21 @@ auto mesh_shape::aabb() const -> rect_f
 
 auto mesh_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
-    std::vector<ray::result> results {};
+    std::vector<ray::result>      results {};
+    std::set<std::pair<u32, u32>> tested;
 
     for (auto const& [edge, count] : _edgeCount) {
-        if (count == 1) { // Boundary edge
-            auto const& v0 {_xformVerts[edge.first].Position};
-            auto const& v1 {_xformVerts[edge.second].Position};
+        auto const [a, b] {edge};
+        auto const reverseEdge {std::make_pair(b, a)};
 
-            if (auto hit {ray.intersect_line(v0, v1)}) {
-                results.push_back(*hit);
+        if (!_edgeCount.contains(reverseEdge)) {
+            if (tested.insert(std::minmax(a, b)).second) {
+                auto const& v0 {_xformVerts[a].Position};
+                auto const& v1 {_xformVerts[b].Position};
+
+                if (auto hit {ray.intersect_line(v0, v1)}) {
+                    results.push_back(*hit);
+                }
             }
         }
     }
@@ -671,18 +690,6 @@ void mesh_shape::update_geometry()
         v.Color.B  = static_cast<u8>(v.Color.B * bMod);
         v.Color.A  = static_cast<u8>(v.Color.A * aMod);
         _xformVerts.push_back(v);
-    }
-
-    // Edge counting
-    _edgeCount.clear();
-    for (usize i {0}; i + 2 < _inds.size(); i += 3) {
-        u32 const v0 {_inds[i]};
-        u32 const v1 {_inds[i + 1]};
-        u32 const v2 {_inds[i + 2]};
-
-        _edgeCount[std::minmax(v0, v1)]++;
-        _edgeCount[std::minmax(v1, v2)]++;
-        _edgeCount[std::minmax(v2, v0)]++;
     }
 }
 

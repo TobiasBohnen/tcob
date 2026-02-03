@@ -26,6 +26,8 @@ TCOB_API auto to_string(char const* s) -> string;
 
 template <Arithmetic T>
 auto to_number(string_view str) -> std::optional<T>;
+template <Arithmetic T>
+auto try_to_number(string_view str, T& val) -> bool;
 
 auto          join(auto&& container, string_view delim) -> string;
 TCOB_API auto join(string_view c, usize count, string_view delim) -> string;
