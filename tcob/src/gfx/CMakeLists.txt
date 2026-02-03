@@ -47,8 +47,8 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_pnm.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_qoi.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_tga.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/mesh_formats/Mesh_obj.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/mesh_formats/Mesh_ply.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/mesh_formats/MeshFormat_obj.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/mesh_formats/MeshFormat_ply.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/LSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Chart.cpp

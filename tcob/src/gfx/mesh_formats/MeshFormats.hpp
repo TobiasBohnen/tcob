@@ -6,6 +6,6 @@
 #pragma once
 
 // IWYU pragma: begin_exports
-#include "Mesh_obj.hpp"
-#include "Mesh_ply.hpp"
+#include "MeshFormat_obj.hpp"
+#include "MeshFormat_ply.hpp"
 // IWYU pragma: end_exports
