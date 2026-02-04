@@ -55,18 +55,6 @@ inline auto istream::read_filtered(std::streamsize n, auto&&... filters) -> std:
     return vec;
 }
 
-inline auto istream::read_string_until(auto&& pred) -> string
-{
-    string retValue;
-    while (!is_eof()) {
-        char const c {read<char>()};
-        if (pred(c)) { break; }
-        retValue += c;
-    }
-
-    return retValue;
-}
-
 template <POD T>
 inline auto istream::read_all() -> std::vector<T>
 {
@@ -88,6 +76,27 @@ inline auto istream::read_all() -> std::vector<T>
     }
 
     return retValue;
+}
+
+inline auto istream::read_string_until(auto&& pred) -> string
+{
+    string retValue;
+    while (!is_eof()) {
+        char const c {read<char>()};
+        if (pred(c)) { break; }
+        retValue += c;
+    }
+
+    return retValue;
+}
+
+template <POD T, std::endian Endianess>
+inline auto istream::peek() -> T
+{
+    auto const pos {tell()};
+    T          value {read<T, Endianess>()};
+    seek(pos, seek_dir::Begin);
+    return value;
 }
 
 template <typename T>

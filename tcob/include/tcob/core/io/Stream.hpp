@@ -51,6 +51,9 @@ public:
     auto read_string_until(char delim) -> string;
     auto read_string_until(auto&& pred) -> string;
 
+    template <POD T, std::endian Endianess = std::endian::native>
+    auto peek() -> T;
+
     virtual auto tell() const -> std::streamoff                 = 0;
     virtual auto seek(std::streamoff off, seek_dir way) -> bool = 0;
     virtual auto size_in_bytes() const -> std::streamsize       = 0;
