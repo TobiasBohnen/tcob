@@ -6,14 +6,13 @@
 #include "ImageCodec_pnm.hpp"
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <cctype>
-#include <cstdlib>
 #include <optional>
 #include <span>
 #include <vector>
 
+#include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
 
@@ -24,24 +23,7 @@ static auto check_supported_format(pnm::header const& h) -> bool
     return h.FormatString[0] == 'P' && (h.FormatString[1] == '1' || h.FormatString[1] == '2' || h.FormatString[1] == '3');
 }
 
-static auto read_until_space(io::istream& reader, std::span<char> buffer, i32 offset) -> i32
-{
-    i32 read {0};
-
-    char b {reader.read<char>()};
-    while (!std::isspace(b)) {
-        buffer[offset + read] = b;
-        read++;
-        if (reader.is_eof()) {
-            break;
-        }
-        b = reader.read<u8>();
-    }
-
-    return read;
-}
-
-static auto read_char(io::istream& reader) -> char
+static auto skip_space_read_char(io::istream& reader) -> char
 {
     char retValue {0};
 
@@ -54,7 +36,7 @@ static auto read_char(io::istream& reader) -> char
             retValue = reader.read<char>();
         }
 
-        return read_char(reader);
+        return skip_space_read_char(reader);
     }
 
     return retValue;
@@ -63,12 +45,9 @@ static auto read_char(io::istream& reader) -> char
 template <typename T>
 auto read_int(io::istream& reader) -> T
 {
-    std::array<char, 256> buffer {};
-    buffer[0] = read_char(reader);
-    i32 const    read {read_until_space(reader, buffer, 1) + 1};
-    string const str(buffer.begin(), buffer.begin() + read);
-
-    return static_cast<T>(std::strtol(str.data(), nullptr, 10));
+    auto const   pre {skip_space_read_char(reader)};
+    string const str {reader.read_string_until([](char c) { return std::isspace(c); })};
+    return *helper::to_number<T>(pre + str);
 }
 
 static auto read_p1_data(io::istream& reader, int width, int height) -> std::vector<u8>
@@ -77,7 +56,7 @@ static auto read_p1_data(io::istream& reader, int width, int height) -> std::vec
     std::vector<u8> retValue;
 
     for (i32 i {0}; i < width * height; ++i) {
-        char const pix {read_char(reader)};
+        char const pix {skip_space_read_char(reader)};
         if (pix == '0') {
             retValue.push_back(255);
             retValue.push_back(255);

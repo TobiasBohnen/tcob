@@ -49,6 +49,7 @@ public:
 
     auto read_string(std::streamsize length) -> string;
     auto read_string_until(char delim) -> string;
+    auto read_string_until(auto&& pred) -> string;
 
     virtual auto tell() const -> std::streamoff                 = 0;
     virtual auto seek(std::streamoff off, seek_dir way) -> bool = 0;

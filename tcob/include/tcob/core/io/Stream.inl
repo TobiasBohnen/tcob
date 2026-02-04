@@ -55,6 +55,18 @@ inline auto istream::read_filtered(std::streamsize n, auto&&... filters) -> std:
     return vec;
 }
 
+inline auto istream::read_string_until(auto&& pred) -> string
+{
+    string retValue;
+    while (!is_eof()) {
+        char const c {read<char>()};
+        if (pred(c)) { break; }
+        retValue += c;
+    }
+
+    return retValue;
+}
+
 template <POD T>
 inline auto istream::read_all() -> std::vector<T>
 {

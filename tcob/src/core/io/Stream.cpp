@@ -21,14 +21,7 @@ auto istream::read_string(std::streamsize length) -> string
 
 auto istream::read_string_until(char delim) -> string
 {
-    string retValue;
-    while (!is_eof()) {
-        char const c {read<char>()};
-        if (c == delim) { break; }
-        retValue += c;
-    }
-
-    return retValue;
+    return read_string_until([delim](char c) { return c == delim; });
 }
 
 istream::operator bool() const
