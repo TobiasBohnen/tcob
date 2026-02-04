@@ -18,6 +18,7 @@ namespace tcob::gfx::detail {
 namespace bsi {
     struct header {
         std::array<u8, 3> Sig {};
+        u8                Version {};
         size_i            Size {};
         image::format     Format {};
 
