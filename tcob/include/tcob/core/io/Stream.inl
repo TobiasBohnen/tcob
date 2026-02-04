@@ -36,7 +36,7 @@ template <POD T>
 inline auto istream::read_n(std::streamsize n) -> std::vector<T>
 {
     std::vector<T> retValue(static_cast<usize>(n));
-    retValue.resize(static_cast<usize>(read_bytes(retValue.data(), n)));
+    retValue.resize(static_cast<usize>(read_bytes(retValue.data(), n * sizeof(T)) / sizeof(T)));
     return retValue;
 }
 
@@ -44,7 +44,7 @@ template <POD T, std::streamsize Size>
 inline auto istream::read_n() -> std::array<T, Size>
 {
     std::array<T, Size> retValue;
-    read_bytes(retValue.data(), Size);
+    read_bytes(retValue.data(), Size * sizeof(T));
     return retValue;
 }
 
@@ -58,24 +58,8 @@ inline auto istream::read_filtered(std::streamsize n, auto&&... filters) -> std:
 template <POD T>
 inline auto istream::read_all() -> std::vector<T>
 {
-    auto constexpr size {static_cast<std::streamsize>(sizeof(T))};
-    std::vector<T> retValue {};
-    retValue.reserve(static_cast<usize>((size_in_bytes() - tell()) / size));
-
-    if constexpr (size <= 8) {
-        std::array<T, 1024> buffer {};
-        do {
-            auto constexpr bufferSize {static_cast<std::streamsize>(buffer.size() * size)};
-            auto const readItems {static_cast<std::ptrdiff_t>(read_bytes(buffer.data(), bufferSize) / size)};
-            retValue.insert(retValue.end(), buffer.begin(), buffer.begin() + readItems);
-        } while (!is_eof());
-    } else {
-        do {
-            retValue.push_back(read<T>());
-        } while (!is_eof());
-    }
-
-    return retValue;
+    auto const length {static_cast<std::streamsize>((size_in_bytes() - tell()) / sizeof(T))};
+    return read_n<T>(static_cast<std::streamsize>(length));
 }
 
 inline auto istream::read_string_until(auto&& pred) -> string
