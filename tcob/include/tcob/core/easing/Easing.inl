@@ -57,50 +57,23 @@ inline auto power<T>::operator()(f64 t) const -> type
 {
     if (Exponent <= 0 && t == 0) { return Start; }
 
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, std::pow(t, Exponent));
-    } else {
-        return static_cast<type>(Start + ((End - Start) * std::pow(t, Exponent)));
+    f64 factor {0};
+
+    switch (Mode) {
+
+    case mode::In:  factor = std::pow(t, Exponent); break;
+    case mode::Out: factor = 1.0 - std::pow(1.0 - t, Exponent); break;
+    case mode::InOut:
+        factor = t < 0.5
+            ? 0.5 * std::pow(t * 2.0, Exponent)
+            : 0.5 * (2.0 - std::pow(2.0 * (1.0 - t), Exponent));
+        break;
     }
-}
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-inline auto inverse_power<T>::operator()(f64 t) const -> type
-{
-    if (Exponent <= 0 && t == 0) { return Start; }
 
     if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, 1 - std::pow(1 - t, Exponent));
+        return type::Lerp(Start, End, factor);
     } else {
-        return static_cast<type>(Start + ((End - Start) * (1 - std::pow(1 - t, Exponent))));
-    }
-}
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-inline auto inout_power<T>::operator()(f64 t) const -> type
-{
-    if (Exponent <= 0 && t == 0) { return Start; }
-
-    auto const midpoint {Start + (End - Start) * 0.5};
-
-    if (t < 0.5) {
-        f64 const scaledT {t * 2.0};
-        if constexpr (Lerpable<type>) {
-            return type::Lerp(Start, midpoint, std::pow(scaledT, Exponent));
-        } else {
-            return static_cast<type>(Start + ((midpoint - Start) * std::pow(scaledT, Exponent)));
-        }
-    } else {
-        f64 const scaledT {(t - 0.5) * 2.0};
-        if constexpr (Lerpable<type>) {
-            return type::Lerp(midpoint, End, 1 - std::pow(1 - scaledT, Exponent));
-        } else {
-            return static_cast<type>(midpoint + ((End - midpoint) * (1 - std::pow(1 - scaledT, Exponent))));
-        }
+        return static_cast<type>(Start + ((End - Start) * factor));
     }
 }
 
@@ -110,39 +83,19 @@ template <typename T>
 inline auto exponential<T>::operator()(f64 t) const -> type
 {
     if (t <= 0.0) { return Start; }
-
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, std::pow(2.0, 10.0 * (t - 1.0)));
-    } else {
-        return static_cast<type>(Start + (End - Start) * std::pow(2.0, 10.0 * (t - 1.0)));
-    }
-}
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-inline auto inverse_exponential<T>::operator()(f64 t) const -> type
-{
     if (t >= 1.0) { return End; }
 
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, 1.0 - std::pow(2.0, -10.0 * t));
-    } else {
-        return static_cast<type>(Start + (End - Start) * (1.0 - std::pow(2.0, -10.0 * t)));
+    f64 factor {0};
+    switch (Mode) {
+    case mode::In:  factor = std::pow(2.0, 10.0 * (t - 1.0)); break;
+    case mode::Out: factor = 1.0 - std::pow(2.0, -10.0 * t); break;
+    case mode::InOut:
+        factor = t < 0.5
+            ? std::pow(2.0, (20.0 * t) - 10.0) / 2.0
+            : (2.0 - std::pow(2.0, (-20.0 * t) + 10.0)) / 2.0;
+        break;
     }
-}
 
-////////////////////////////////////////////////////////////
-
-template <typename T>
-inline auto inout_exponential<T>::operator()(f64 t) const -> type
-{
-    if (t <= 0.0) { return Start; }
-    if (t >= 1.0) { return End; }
-
-    f64 const factor {t < 0.5
-                          ? std::pow(2.0, (20.0 * t) - 10.0) / 2.0
-                          : (2.0 - std::pow(2.0, (-20.0 * t) + 10.0)) / 2.0};
     if constexpr (Lerpable<type>) {
         return type::Lerp(Start, End, factor);
     } else {
@@ -178,7 +131,7 @@ inline auto smoothstep<T>::operator()(f64 t) const -> type
 {
     if (t == 0) { return Start; }
 
-    f64 const e {t * t * (3. - 2. * t)};
+    f64 const e {t * t * (3.0 - 2.0 * t)};
     if constexpr (Lerpable<type>) {
         return type::Lerp(Start, End, e);
     } else {
@@ -191,7 +144,7 @@ inline auto smootherstep<T>::operator()(f64 t) const -> type
 {
     if (t == 0) { return Start; }
 
-    f64 const e {t * t * t * (t * (t * 6. - 15.) + 10.)};
+    f64 const e {t * t * t * (t * (t * 6.0 - 15.0) + 10.0)};
     if constexpr (Lerpable<type>) {
         return type::Lerp(Start, End, e);
     } else {
@@ -215,7 +168,7 @@ inline auto sine_wave<T>::operator()(f64 t) const -> type
 template <typename T>
 inline auto sine_wave<T>::get_wavevalue(f64 t) const -> f64
 {
-    return (std::sin((TAU * t) + (0.75 * TAU) + Phase) + 1.) / 2.;
+    return (std::sin((TAU * t) + (0.75 * TAU) + Phase) + 1.0) / 2.0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -267,7 +220,7 @@ inline auto square_wave<bool>::operator()(f64 t) const -> type
 inline auto square_wave<bool>::get_wavevalue(f64 t) const -> f64
 {
     f64 const x {std::round(t + Phase) / 2};
-    return 2. * (x - std::floor(x));
+    return 2.0 * (x - std::floor(x));
 }
 
 ////////////////////////////////////////////////////////////
@@ -293,10 +246,10 @@ inline auto sawtooth_wave<T>::get_wavevalue(f64 t) const -> f64
 
 inline auto quad_bezier_curve::operator()(f64 t) const -> type
 {
-    f64 const oneMinusT {1. - t};
+    f64 const oneMinusT {1.0 - t};
 
     f64 const exp0 {oneMinusT * oneMinusT};
-    f64 const exp1 {2. * t * oneMinusT};
+    f64 const exp1 {2.0 * t * oneMinusT};
     f64 const exp2 {t * t};
 
     f32 const x {static_cast<f32>((exp0 * StartPoint.X) + (exp1 * ControlPoint.X) + (exp2 * EndPoint.X))};
@@ -308,11 +261,11 @@ inline auto quad_bezier_curve::operator()(f64 t) const -> type
 
 inline auto cubic_bezier_curve::operator()(f64 t) const -> type
 {
-    f64 const oneMinusT {1. - t};
+    f64 const oneMinusT {1.0 - t};
 
     f64 const exp0 {oneMinusT * oneMinusT * oneMinusT};
-    f64 const exp1 {3 * t * oneMinusT * oneMinusT};
-    f64 const exp2 {3 * t * t * oneMinusT};
+    f64 const exp1 {3.0 * t * oneMinusT * oneMinusT};
+    f64 const exp2 {3.0 * t * t * oneMinusT};
     f64 const exp3 {t * t * t};
 
     f32 const x {static_cast<f32>((exp0 * StartPoint.X) + (exp1 * ControlPoint0.X) + (exp2 * ControlPoint1.X) + (exp3 * EndPoint.X))};
@@ -364,6 +317,69 @@ inline auto catmull_rom::operator()(f64 t) const -> type
     f32 const x {static_cast<f32>(0.5 * ((2 * p1.X) + (-p0.X + p2.X) * exp0 + (2 * p0.X - 5 * p1.X + 4 * p2.X - p3.X) * exp1 + (-p0.X + 3 * p1.X - 3 * p2.X + p3.X) * exp2))};
     f32 const y {static_cast<f32>(0.5 * ((2 * p1.Y) + (-p0.Y + p2.Y) * exp0 + (2 * p0.Y - 5 * p1.Y + 4 * p2.Y - p3.Y) * exp1 + (-p0.Y + 3 * p1.Y - 3 * p2.Y + p3.Y) * exp2))};
     return {x, y};
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline auto bounce<T>::operator()(f64 t) const -> type
+{
+    f64 const n1 {7.5625};
+    f64 const d1 {2.75};
+
+    f64 factor {0};
+    if (t < 1.0 / d1) {
+        factor = n1 * t * t;
+    } else if (t < 2.0 / d1) {
+        t -= 1.5 / d1;
+        factor = (n1 * t * t) + 0.75;
+    } else if (t < 2.5 / d1) {
+        t -= 2.25 / d1;
+        factor = (n1 * t * t) + 0.9375;
+    } else {
+        t -= 2.625 / d1;
+        factor = (n1 * t * t) + 0.984375;
+    }
+
+    if constexpr (Lerpable<type>) {
+        return type::Lerp(Start, End, factor);
+    } else {
+        return static_cast<type>(Start + (End - Start) * factor);
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline auto elastic<T>::operator()(f64 t) const -> type
+{
+    if (t == 0.0) { return Start; }
+    if (t == 1.0) { return End; }
+
+    f64 const p {Period};
+    f64 const a {std::max(Amplitude, 1.0)};
+    f64 const s {p / TAU * std::asin(1.0 / a)};
+
+    f64 factor {0};
+    switch (Mode) {
+    case mode::In:  factor = -(a * std::pow(2.0, 10.0 * (t - 1.0)) * std::sin((t - 1.0 - s) * TAU / p)); break;
+    case mode::Out: factor = (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p)) + 1.0; break;
+    case mode::InOut:
+        if (t < 0.5) {
+            t      = (t * 2.0) - 1.0;
+            factor = -0.5 * (a * std::pow(2.0, 10.0 * t) * std::sin((t - s) * TAU / p));
+        } else {
+            t      = (t * 2.0) - 1.0;
+            factor = (0.5 * (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p))) + 1.0;
+        }
+        break;
+    }
+
+    if constexpr (Lerpable<type>) {
+        return type::Lerp(Start, End, factor);
+    } else {
+        return static_cast<type>(Start + (End - Start) * factor);
+    }
 }
 
 ////////////////////////////////////////////////////////////

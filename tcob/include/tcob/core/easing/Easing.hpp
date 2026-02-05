@@ -17,6 +17,12 @@
 namespace tcob::easing {
 ////////////////////////////////////////////////////////////
 
+enum class mode : u8 {
+    In,
+    Out,
+    InOut
+};
+
 template <typename T>
 concept Function =
     requires(T& t, f32 time) {
@@ -64,33 +70,7 @@ public:
     type End {};
     f64  Exponent {1.0};
 
-    auto operator()(f64 t) const -> type;
-};
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-class inverse_power final {
-public:
-    using type = T;
-
-    type Start {};
-    type End {};
-    f64  Exponent {1.0};
-
-    auto operator()(f64 t) const -> type;
-};
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-class inout_power final {
-public:
-    using type = T;
-
-    type Start {};
-    type End {};
-    f64  Exponent {1.0};
+    mode Mode {mode::In};
 
     auto operator()(f64 t) const -> type;
 };
@@ -105,31 +85,7 @@ public:
     type Start {};
     type End {};
 
-    auto operator()(f64 t) const -> type;
-};
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-class inverse_exponential final {
-public:
-    using type = T;
-
-    type Start {};
-    type End {};
-
-    auto operator()(f64 t) const -> type;
-};
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-class inout_exponential final {
-public:
-    using type = T;
-
-    type Start {};
-    type End {};
+    mode Mode {mode::In};
 
     auto operator()(f64 t) const -> type;
 };
@@ -316,6 +272,37 @@ public:
     using type = point_f;
 
     std::vector<type> ControlPoints;
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+class bounce final {
+public:
+    using type = T;
+
+    type Start;
+    type End;
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+class elastic final {
+public:
+    using type = T;
+
+    type Start;
+    type End;
+
+    mode Mode {mode::Out};
+
+    f64 Amplitude {1.0};
+    f64 Period {0.6};
 
     auto operator()(f64 t) const -> type;
 };

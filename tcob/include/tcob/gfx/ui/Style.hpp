@@ -32,6 +32,10 @@ enum class easing_func : u8 {
     ExpoIn,
     ExpoOut,
     ExpoInOut,
+    Bounce,
+    ElasticIn,
+    ElasticOut,
+    ElasticInOut
 };
 
 ////////////////////////////////////////////////////////////

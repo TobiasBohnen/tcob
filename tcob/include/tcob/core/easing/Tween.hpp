@@ -104,19 +104,7 @@ template <typename T>
 using power_tween = tween<easing::power<T>>;
 
 template <typename T>
-using inverse_power_tween = tween<easing::inverse_power<T>>;
-
-template <typename T>
-using inout_power_tween = tween<easing::inout_power<T>>;
-
-template <typename T>
 using exponential_tween = tween<easing::exponential<T>>;
-
-template <typename T>
-using inverse_exponential_tween = tween<easing::inverse_exponential<T>>;
-
-template <typename T>
-using inout_exponential_tween = tween<easing::inout_exponential<T>>;
 
 template <typename T>
 using linear_tween = tween<easing::linear<T>>;
@@ -148,6 +136,12 @@ using cubic_bezier_curve_tween = tween<easing::cubic_bezier_curve>;
 using bezier_curve_tween = tween<easing::bezier_curve>;
 
 using catmull_rom_tween = tween<easing::catmull_rom>;
+
+template <typename T>
+using bounce_tween = tween<easing::bounce<T>>;
+
+template <typename T>
+using elastic_tween = tween<easing::elastic<T>>;
 
 template <auto Func>
 using function_tween = tween<easing::function<Func>>;
