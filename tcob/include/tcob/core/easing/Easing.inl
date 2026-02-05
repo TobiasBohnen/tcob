@@ -324,21 +324,16 @@ inline auto catmull_rom::operator()(f64 t) const -> type
 template <typename T>
 inline auto bounce<T>::operator()(f64 t) const -> type
 {
-    f64 const n1 {7.5625};
-    f64 const d1 {2.75};
-
     f64 factor {0};
-    if (t < 1.0 / d1) {
-        factor = n1 * t * t;
-    } else if (t < 2.0 / d1) {
-        t -= 1.5 / d1;
-        factor = (n1 * t * t) + 0.75;
-    } else if (t < 2.5 / d1) {
-        t -= 2.25 / d1;
-        factor = (n1 * t * t) + 0.9375;
-    } else {
-        t -= 2.625 / d1;
-        factor = (n1 * t * t) + 0.984375;
+
+    switch (Mode) {
+    case mode::In:  factor = 1.0 - get_bounce_out(1.0 - t); break;
+    case mode::Out: factor = get_bounce_out(t); break;
+    case mode::InOut:
+        factor = t < 0.5
+            ? (1.0 - get_bounce_out(1.0 - (t * 2.0))) * 0.5
+            : (get_bounce_out((t * 2.0) - 1.0) * 0.5) + 0.5;
+        break;
     }
 
     if constexpr (Lerpable<type>) {
@@ -346,6 +341,28 @@ inline auto bounce<T>::operator()(f64 t) const -> type
     } else {
         return static_cast<type>(Start + (End - Start) * factor);
     }
+}
+
+template <typename T>
+inline auto bounce<T>::get_bounce_out(f64 t) const -> f64
+{
+    f64 const n1 {7.5625};
+    f64 const d1 {2.75};
+
+    if (t < 1.0 / d1) {
+        return n1 * t * t;
+    }
+    if (t < 2.0 / d1) {
+        t -= 1.5 / d1;
+        return (n1 * t * t) + 0.75;
+    }
+    if (t < 2.5 / d1) {
+        t -= 2.25 / d1;
+        return (n1 * t * t) + 0.9375;
+    }
+
+    t -= 2.625 / d1;
+    return (n1 * t * t) + 0.984375;
 }
 
 ////////////////////////////////////////////////////////////

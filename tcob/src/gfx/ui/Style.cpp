@@ -34,7 +34,9 @@ auto style::ease_value(f64 t) const -> f64
     case easing_func::ExpoIn:       return easing::exponential<f64> {.Start = 0, .End = 1., .Mode = easing::mode::In}(t); break;
     case easing_func::ExpoOut:      return easing::exponential<f64> {.Start = 0, .End = 1., .Mode = easing::mode::Out}(t); break;
     case easing_func::ExpoInOut:    return easing::exponential<f64> {.Start = 0, .End = 1., .Mode = easing::mode::InOut}(t); break;
-    case easing_func::Bounce:       return easing::bounce<f64> {.Start = 0, .End = 1.}(t); break;
+    case easing_func::BounceIn:     return easing::bounce<f64> {.Start = 0, .End = 1., .Mode = easing::mode::In}(t); break;
+    case easing_func::BounceOut:    return easing::bounce<f64> {.Start = 0, .End = 1., .Mode = easing::mode::Out}(t); break;
+    case easing_func::BounceInOut:  return easing::bounce<f64> {.Start = 0, .End = 1., .Mode = easing::mode::InOut}(t); break;
     case easing_func::ElasticIn:    return easing::elastic<f64> {.Start = 0, .End = 1., .Mode = easing::mode::In}(t); break;
     case easing_func::ElasticOut:   return easing::elastic<f64> {.Start = 0, .End = 1., .Mode = easing::mode::Out}(t); break;
     case easing_func::ElasticInOut: return easing::elastic<f64> {.Start = 0, .End = 1., .Mode = easing::mode::InOut}(t); break;

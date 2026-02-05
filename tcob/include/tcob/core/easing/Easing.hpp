@@ -286,7 +286,12 @@ public:
     type Start;
     type End;
 
+    mode Mode {mode::Out};
+
     auto operator()(f64 t) const -> type;
+
+private:
+    auto get_bounce_out(f64 t) const -> f64;
 };
 
 ////////////////////////////////////////////////////////////
