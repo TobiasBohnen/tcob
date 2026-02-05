@@ -309,6 +309,23 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+template <typename T>
+class back final {
+public:
+    using type = T;
+
+    type Start;
+    type End;
+
+    mode Mode {mode::Out};
+
+    f64 Overshoot {1.70158};
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
 template <auto Func>
 class function final {
 public:

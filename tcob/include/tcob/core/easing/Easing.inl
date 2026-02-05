@@ -384,6 +384,37 @@ inline auto elastic<T>::operator()(f64 t) const -> type
 
 ////////////////////////////////////////////////////////////
 
+template <typename T>
+inline auto back<T>::operator()(f64 t) const -> type
+{
+    f64 factor {0};
+    switch (Mode) {
+    case mode::In: factor = t * t * ((Overshoot + 1.0) * t - Overshoot); break;
+    case mode::Out:
+        t -= 1.0;
+        factor = (t * t * ((Overshoot + 1.0) * t + Overshoot)) + 1.0;
+        break;
+    case mode::InOut: {
+        f64 const s {Overshoot * 1.525};
+        if (t < 0.5) {
+            t *= 2.0;
+            factor = 0.5 * (t * t * ((s + 1.0) * t - s));
+        } else {
+            t      = (t * 2.0) - 2.0;
+            factor = 0.5 * (t * t * ((s + 1.0) * t + s) + 2.0);
+        }
+    } break;
+    }
+
+    if constexpr (Lerpable<type>) {
+        return type::Lerp(Start, End, factor);
+    } else {
+        return static_cast<type>(Start + (End - Start) * factor);
+    }
+}
+
+////////////////////////////////////////////////////////////
+
 template <auto Func>
 inline auto function<Func>::operator()(f64 t) const -> type
 {

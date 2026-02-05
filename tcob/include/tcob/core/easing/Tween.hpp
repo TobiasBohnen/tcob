@@ -143,6 +143,9 @@ using bounce_tween = tween<easing::bounce<T>>;
 template <typename T>
 using elastic_tween = tween<easing::elastic<T>>;
 
+template <typename T>
+using back_tween = tween<easing::back<T>>;
+
 template <auto Func>
 using function_tween = tween<easing::function<Func>>;
 

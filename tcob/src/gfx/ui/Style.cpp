@@ -38,6 +38,9 @@ auto style::ease_value(f64 t) const -> f64
     case easing_func::ElasticIn:    return easing::elastic<f64> {.Start = 0, .End = 1., .Mode = easing::mode::In}(t); break;
     case easing_func::ElasticOut:   return easing::elastic<f64> {.Start = 0, .End = 1., .Mode = easing::mode::Out}(t); break;
     case easing_func::ElasticInOut: return easing::elastic<f64> {.Start = 0, .End = 1., .Mode = easing::mode::InOut}(t); break;
+    case easing_func::BackIn:       return easing::back<f64> {.Start = 0, .End = 1., .Mode = easing::mode::In}(t); break;
+    case easing_func::BackOut:      return easing::back<f64> {.Start = 0, .End = 1., .Mode = easing::mode::Out}(t); break;
+    case easing_func::BackInOut:    return easing::back<f64> {.Start = 0, .End = 1., .Mode = easing::mode::InOut}(t); break;
     }
 
     return t;
