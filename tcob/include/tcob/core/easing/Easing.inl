@@ -21,7 +21,8 @@ template <typename T>
 inline curve<T>::curve(std::span<point const> elements)
     : _elements {elements.begin(), elements.end()}
 {
-    // TODO: ensure positions between 0 and 1; and sorted
+    std::ranges::sort(_elements,
+                      [](point const& a, point const& b) { return a.Position < b.Position; });
 }
 
 template <typename T>
