@@ -811,7 +811,7 @@ auto widget_painter::format_text(text_element const& element, size_f size, utf8_
                                  && (textSize.Width > size.Width || textSize.Height > size.Height)};
 
         bool const shouldGrow {(element.AutoSize == auto_size_mode::Always || element.AutoSize == auto_size_mode::OnlyGrow)
-                               && (textSize.Width < size.Width && textSize.Height < size.Height)};
+                               && (textSize.Width < size.Width || textSize.Height < size.Height)};
 
         if (shouldShrink || shouldGrow) {
             scale = std::min(std::floor(size.Width) / textSize.Width, std::floor(size.Height) / textSize.Height);

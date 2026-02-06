@@ -844,7 +844,7 @@ void png_anim_encoder::start()
     _frameCount       = 0;
     _encoding         = true;
     _firstFrame       = true;
-    _accFrameDuration = milliseconds {0};
+    _accFrameDuration = milliseconds::zero();
 }
 
 auto png_anim_encoder::add_frame(image_frame const& frame) -> bool
@@ -877,7 +877,7 @@ auto png_anim_encoder::add_frame(image_frame const& frame) -> bool
     }
 
     auto const totalFrameDuration {frame.Duration + _accFrameDuration};
-    _accFrameDuration = milliseconds {0};
+    _accFrameDuration = milliseconds::zero();
 
     auto const croppedFrame {image_frame {
         .Image    = frame.Image.crop(*diff),
@@ -897,7 +897,7 @@ auto png_anim_encoder::finish() -> bool
 
     auto& str {stream()};
 
-    if (_accFrameDuration > milliseconds {0} && _frameCount > 0) {
+    if (_accFrameDuration > milliseconds::zero() && _frameCount > 0) {
         rect_i const fullRect {point_i::Zero, _prevFrame.info().Size};
         auto const   finalFrame {image_frame {
               .Image    = _prevFrame,
@@ -906,7 +906,7 @@ auto png_anim_encoder::finish() -> bool
         write_fctl(_seq++, fullRect, finalFrame, str);
         write_fdat(_seq, finalFrame.Image, str);
         _frameCount++;
-        _accFrameDuration = milliseconds {0};
+        _accFrameDuration = milliseconds::zero();
     }
 
     auto const currentPos {str.tell()};

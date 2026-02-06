@@ -404,7 +404,7 @@ void gif_decoder::clear_pixel_cache()
 auto gif_encoder::encode(image const& image, io::ostream& out) -> bool
 {
     start(out);
-    image_frame const frame {.Image = image, .Duration = milliseconds {0}};
+    image_frame const frame {.Image = image, .Duration = milliseconds::zero()};
     if (add_frame(frame, out)) { return finish(out); }
     return false;
 }

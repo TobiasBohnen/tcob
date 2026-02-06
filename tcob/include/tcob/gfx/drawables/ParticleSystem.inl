@@ -177,7 +177,7 @@ inline void particle_system<Particle>::on_draw_to(render_target& target)
 template <typename Particle>
 inline auto particle_emitter<Particle>::is_alive() const -> bool
 {
-    return _alive && (!Settings.Lifetime || _remainingLife > milliseconds {0});
+    return _alive && (!Settings.Lifetime || _remainingLife > milliseconds::zero());
 }
 
 template <typename Particle>
