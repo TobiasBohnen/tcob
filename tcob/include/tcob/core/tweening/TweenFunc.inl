@@ -18,7 +18,7 @@
 namespace tcob::tween_func {
 
 template <typename T>
-inline auto power<T>::operator()(f64 t) const -> type
+inline auto polynomial<T>::operator()(f64 t) const -> type
 {
     if (Exponent <= 0 && t == 0) { return Start; }
 

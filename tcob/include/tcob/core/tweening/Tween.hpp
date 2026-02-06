@@ -98,7 +98,7 @@ private:
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-using power_tween = tween<tween_func::power<T>>;
+using polynomial_tween = tween<tween_func::polynomial<T>>;
 
 template <typename T>
 using exponential_tween = tween<tween_func::exponential<T>>;

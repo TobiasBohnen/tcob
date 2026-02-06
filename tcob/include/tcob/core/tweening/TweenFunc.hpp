@@ -42,7 +42,7 @@ concept Lerpable =
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class power final {
+class polynomial final {
 public:
     using type = T;
 
@@ -140,7 +140,7 @@ public:
     ease_mode Mode {ease_mode::Out};
 
     f64 Amplitude {1.0};
-    f64 Period {0.6};
+    f64 Period {0.3};
 
     auto operator()(f64 t) const -> type;
 };
