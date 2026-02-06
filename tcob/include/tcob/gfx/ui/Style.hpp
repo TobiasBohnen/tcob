@@ -40,7 +40,10 @@ enum class easing_func : u8 {
     ElasticInOut,
     BackIn,
     BackOut,
-    BackInOut
+    BackInOut,
+    CircularIn,
+    CircularOut,
+    CircularInOut
 };
 
 ////////////////////////////////////////////////////////////

@@ -165,6 +165,21 @@ public:
 ////////////////////////////////////////////////////////////
 
 template <typename T>
+class circular final {
+public:
+    using type = T;
+
+    type Start;
+    type End;
+
+    ease_mode Mode {ease_mode::Out};
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
 class sine_wave final {
 public:
     using type = T;

@@ -122,6 +122,9 @@ template <typename T>
 using back_tween = tween<tween_func::back<T>>;
 
 template <typename T>
+using circular_tween = tween<tween_func::circular<T>>;
+
+template <typename T>
 using sine_wave_tween = tween<tween_func::sine_wave<T>>;
 
 template <typename T>

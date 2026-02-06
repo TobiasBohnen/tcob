@@ -226,6 +226,30 @@ inline auto back<T>::operator()(f64 t) const -> type
 ////////////////////////////////////////////////////////////
 
 template <typename T>
+inline auto circular<T>::operator()(f64 t) const -> type
+{
+    f64 factor {0};
+
+    switch (Mode) {
+    case ease_mode::In:  factor = 1.0 - std::sqrt(1.0 - (t * t)); break;
+    case ease_mode::Out: factor = std::sqrt(1.0 - ((t - 1.0) * (t - 1.0))); break;
+    case ease_mode::InOut:
+        factor = t < 0.5
+            ? (1.0 - std::sqrt(1.0 - (4.0 * t * t))) * 0.5
+            : (std::sqrt(1.0 - ((-2.0 * t + 2.0) * (-2.0 * t + 2.0))) + 1.0) * 0.5;
+        break;
+    }
+
+    if constexpr (Lerpable<type>) {
+        return type::Lerp(Start, End, factor);
+    } else {
+        return static_cast<type>(Start + (End - Start) * factor);
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
 inline auto sine_wave<T>::operator()(f64 t) const -> type
 {
     f64 const val {get_wavevalue(Frequency * t)};
