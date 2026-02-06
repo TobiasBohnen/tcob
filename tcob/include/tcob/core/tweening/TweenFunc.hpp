@@ -42,26 +42,6 @@ concept Lerpable =
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class curve final {
-public:
-    using type = T;
-
-    struct point {
-        f32  Position;
-        type Value;
-    };
-
-    curve(std::span<point const> elements);
-
-    auto operator()(f64 t) const -> type;
-
-private:
-    std::vector<point> _elements {};
-};
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
 class power final {
 public:
     using type = T;
@@ -105,18 +85,6 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class circular final {
-public:
-    using type = point_f;
-
-    degree_f Start {};
-    degree_f End {};
-
-    auto operator()(f64 t) const -> type;
-};
-
-////////////////////////////////////////////////////////////
-
 template <typename T>
 class smoothstep final {
 public:
@@ -137,6 +105,59 @@ public:
 
     type Start {};
     type End {};
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+class bounce final {
+public:
+    using type = T;
+
+    type Start;
+    type End;
+
+    ease_mode Mode {ease_mode::Out};
+
+    auto operator()(f64 t) const -> type;
+
+private:
+    auto get_bounce_out(f64 t) const -> f64;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+class elastic final {
+public:
+    using type = T;
+
+    type Start;
+    type End;
+
+    ease_mode Mode {ease_mode::Out};
+
+    f64 Amplitude {1.0};
+    f64 Period {0.6};
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+class back final {
+public:
+    using type = T;
+
+    type Start;
+    type End;
+
+    ease_mode Mode {ease_mode::Out};
+
+    f64 Overshoot {1.70158};
 
     auto operator()(f64 t) const -> type;
 };
@@ -278,55 +299,34 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+class circular_motion final {
+public:
+    using type = point_f;
+
+    degree_f Start {};
+    degree_f End {};
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
 template <typename T>
-class bounce final {
+class curve final {
 public:
     using type = T;
 
-    type Start;
-    type End;
+    struct point {
+        f32  Position;
+        type Value;
+    };
 
-    ease_mode Mode {ease_mode::Out};
+    curve(std::span<point const> elements);
 
     auto operator()(f64 t) const -> type;
 
 private:
-    auto get_bounce_out(f64 t) const -> f64;
-};
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-class elastic final {
-public:
-    using type = T;
-
-    type Start;
-    type End;
-
-    ease_mode Mode {ease_mode::Out};
-
-    f64 Amplitude {1.0};
-    f64 Period {0.6};
-
-    auto operator()(f64 t) const -> type;
-};
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-class back final {
-public:
-    using type = T;
-
-    type Start;
-    type End;
-
-    ease_mode Mode {ease_mode::Out};
-
-    f64 Overshoot {1.70158};
-
-    auto operator()(f64 t) const -> type;
+    std::vector<point> _elements {};
 };
 
 ////////////////////////////////////////////////////////////

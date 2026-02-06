@@ -18,41 +18,6 @@
 namespace tcob::tween_func {
 
 template <typename T>
-inline curve<T>::curve(std::span<point const> elements)
-    : _elements {elements.begin(), elements.end()}
-{
-    std::ranges::sort(_elements,
-                      [](point const& a, point const& b) { return a.Position < b.Position; });
-}
-
-template <typename T>
-inline auto curve<T>::operator()(f64 t) const -> type
-{
-    usize const size {_elements.size()};
-    if (size == 0) { return T {}; }
-    if (size == 1) { return _elements.back().Value; }
-
-    usize index {0};
-    for (usize i {1}; i < size; ++i) {
-        if (_elements[i].Position > t) { break; }
-        index = i;
-    }
-    if (index == size - 1) { return _elements.back().Value; }
-
-    point const& current {_elements[index]};
-    point const& next {_elements[index + 1]};
-    f64 const    pos {(t - current.Position) / (next.Position - current.Position)};
-
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(current.Value, next.Value, pos);
-    } else {
-        return static_cast<type>(current.Value + ((next.Value - current.Value) * pos));
-    }
-}
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
 inline auto power<T>::operator()(f64 t) const -> type
 {
     if (Exponent <= 0 && t == 0) { return Start; }
@@ -119,13 +84,6 @@ inline auto linear<T>::operator()(f64 t) const -> type
 
 ////////////////////////////////////////////////////////////
 
-inline auto circular::operator()(f64 t) const -> type
-{
-    return point_f::FromDirection(degree_f::Lerp(Start, End, t));
-}
-
-////////////////////////////////////////////////////////////
-
 template <typename T>
 inline auto smoothstep<T>::operator()(f64 t) const -> type
 {
@@ -139,6 +97,8 @@ inline auto smoothstep<T>::operator()(f64 t) const -> type
     }
 }
 
+////////////////////////////////////////////////////////////
+
 template <typename T>
 inline auto smootherstep<T>::operator()(f64 t) const -> type
 {
@@ -149,6 +109,117 @@ inline auto smootherstep<T>::operator()(f64 t) const -> type
         return type::Lerp(Start, End, e);
     } else {
         return static_cast<type>(Start + static_cast<f64>((End - Start) * e));
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline auto bounce<T>::operator()(f64 t) const -> type
+{
+    f64 factor {0};
+
+    switch (Mode) {
+    case ease_mode::In:  factor = 1.0 - get_bounce_out(1.0 - t); break;
+    case ease_mode::Out: factor = get_bounce_out(t); break;
+    case ease_mode::InOut:
+        factor = t < 0.5
+            ? (1.0 - get_bounce_out(1.0 - (t * 2.0))) * 0.5
+            : (get_bounce_out((t * 2.0) - 1.0) * 0.5) + 0.5;
+        break;
+    }
+
+    if constexpr (Lerpable<type>) {
+        return type::Lerp(Start, End, factor);
+    } else {
+        return static_cast<type>(Start + (End - Start) * factor);
+    }
+}
+
+template <typename T>
+inline auto bounce<T>::get_bounce_out(f64 t) const -> f64
+{
+    f64 const n1 {7.5625};
+    f64 const d1 {2.75};
+
+    if (t < 1.0 / d1) {
+        return n1 * t * t;
+    }
+    if (t < 2.0 / d1) {
+        t -= 1.5 / d1;
+        return (n1 * t * t) + 0.75;
+    }
+    if (t < 2.5 / d1) {
+        t -= 2.25 / d1;
+        return (n1 * t * t) + 0.9375;
+    }
+
+    t -= 2.625 / d1;
+    return (n1 * t * t) + 0.984375;
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline auto elastic<T>::operator()(f64 t) const -> type
+{
+    if (t == 0.0) { return Start; }
+    if (t == 1.0) { return End; }
+
+    f64 const p {Period};
+    f64 const a {std::max(Amplitude, 1.0)};
+    f64 const s {p / TAU * std::asin(1.0 / a)};
+
+    f64 factor {0};
+    switch (Mode) {
+    case ease_mode::In:  factor = -(a * std::pow(2.0, 10.0 * (t - 1.0)) * std::sin((t - 1.0 - s) * TAU / p)); break;
+    case ease_mode::Out: factor = (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p)) + 1.0; break;
+    case ease_mode::InOut:
+        if (t < 0.5) {
+            t      = (t * 2.0) - 1.0;
+            factor = -0.5 * (a * std::pow(2.0, 10.0 * t) * std::sin((t - s) * TAU / p));
+        } else {
+            t      = (t * 2.0) - 1.0;
+            factor = (0.5 * (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p))) + 1.0;
+        }
+        break;
+    }
+
+    if constexpr (Lerpable<type>) {
+        return type::Lerp(Start, End, factor);
+    } else {
+        return static_cast<type>(Start + (End - Start) * factor);
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline auto back<T>::operator()(f64 t) const -> type
+{
+    f64 factor {0};
+    switch (Mode) {
+    case ease_mode::In: factor = t * t * ((Overshoot + 1.0) * t - Overshoot); break;
+    case ease_mode::Out:
+        t -= 1.0;
+        factor = (t * t * ((Overshoot + 1.0) * t + Overshoot)) + 1.0;
+        break;
+    case ease_mode::InOut: {
+        f64 const s {Overshoot * 1.525};
+        if (t < 0.5) {
+            t *= 2.0;
+            factor = 0.5 * (t * t * ((s + 1.0) * t - s));
+        } else {
+            t      = (t * 2.0) - 2.0;
+            factor = 0.5 * (t * t * ((s + 1.0) * t + s) + 2.0);
+        }
+    } break;
+    }
+
+    if constexpr (Lerpable<type>) {
+        return type::Lerp(Start, End, factor);
+    } else {
+        return static_cast<type>(Start + (End - Start) * factor);
     }
 }
 
@@ -321,112 +392,43 @@ inline auto catmull_rom::operator()(f64 t) const -> type
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline auto bounce<T>::operator()(f64 t) const -> type
+inline auto circular_motion::operator()(f64 t) const -> type
 {
-    f64 factor {0};
-
-    switch (Mode) {
-    case ease_mode::In:  factor = 1.0 - get_bounce_out(1.0 - t); break;
-    case ease_mode::Out: factor = get_bounce_out(t); break;
-    case ease_mode::InOut:
-        factor = t < 0.5
-            ? (1.0 - get_bounce_out(1.0 - (t * 2.0))) * 0.5
-            : (get_bounce_out((t * 2.0) - 1.0) * 0.5) + 0.5;
-        break;
-    }
-
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, factor);
-    } else {
-        return static_cast<type>(Start + (End - Start) * factor);
-    }
-}
-
-template <typename T>
-inline auto bounce<T>::get_bounce_out(f64 t) const -> f64
-{
-    f64 const n1 {7.5625};
-    f64 const d1 {2.75};
-
-    if (t < 1.0 / d1) {
-        return n1 * t * t;
-    }
-    if (t < 2.0 / d1) {
-        t -= 1.5 / d1;
-        return (n1 * t * t) + 0.75;
-    }
-    if (t < 2.5 / d1) {
-        t -= 2.25 / d1;
-        return (n1 * t * t) + 0.9375;
-    }
-
-    t -= 2.625 / d1;
-    return (n1 * t * t) + 0.984375;
+    return point_f::FromDirection(degree_f::Lerp(Start, End, t));
 }
 
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline auto elastic<T>::operator()(f64 t) const -> type
+inline curve<T>::curve(std::span<point const> elements)
+    : _elements {elements.begin(), elements.end()}
 {
-    if (t == 0.0) { return Start; }
-    if (t == 1.0) { return End; }
-
-    f64 const p {Period};
-    f64 const a {std::max(Amplitude, 1.0)};
-    f64 const s {p / TAU * std::asin(1.0 / a)};
-
-    f64 factor {0};
-    switch (Mode) {
-    case ease_mode::In:  factor = -(a * std::pow(2.0, 10.0 * (t - 1.0)) * std::sin((t - 1.0 - s) * TAU / p)); break;
-    case ease_mode::Out: factor = (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p)) + 1.0; break;
-    case ease_mode::InOut:
-        if (t < 0.5) {
-            t      = (t * 2.0) - 1.0;
-            factor = -0.5 * (a * std::pow(2.0, 10.0 * t) * std::sin((t - s) * TAU / p));
-        } else {
-            t      = (t * 2.0) - 1.0;
-            factor = (0.5 * (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p))) + 1.0;
-        }
-        break;
-    }
-
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, factor);
-    } else {
-        return static_cast<type>(Start + (End - Start) * factor);
-    }
+    std::ranges::sort(_elements,
+                      [](point const& a, point const& b) { return a.Position < b.Position; });
 }
 
-////////////////////////////////////////////////////////////
-
 template <typename T>
-inline auto back<T>::operator()(f64 t) const -> type
+inline auto curve<T>::operator()(f64 t) const -> type
 {
-    f64 factor {0};
-    switch (Mode) {
-    case ease_mode::In: factor = t * t * ((Overshoot + 1.0) * t - Overshoot); break;
-    case ease_mode::Out:
-        t -= 1.0;
-        factor = (t * t * ((Overshoot + 1.0) * t + Overshoot)) + 1.0;
-        break;
-    case ease_mode::InOut: {
-        f64 const s {Overshoot * 1.525};
-        if (t < 0.5) {
-            t *= 2.0;
-            factor = 0.5 * (t * t * ((s + 1.0) * t - s));
-        } else {
-            t      = (t * 2.0) - 2.0;
-            factor = 0.5 * (t * t * ((s + 1.0) * t + s) + 2.0);
-        }
-    } break;
+    usize const size {_elements.size()};
+    if (size == 0) { return T {}; }
+    if (size == 1) { return _elements.back().Value; }
+
+    usize index {0};
+    for (usize i {1}; i < size; ++i) {
+        if (_elements[i].Position > t) { break; }
+        index = i;
     }
+    if (index == size - 1) { return _elements.back().Value; }
+
+    point const& current {_elements[index]};
+    point const& next {_elements[index + 1]};
+    f64 const    pos {(t - current.Position) / (next.Position - current.Position)};
 
     if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, factor);
+        return type::Lerp(current.Value, next.Value, pos);
     } else {
-        return static_cast<type>(Start + (End - Start) * factor);
+        return static_cast<type>(current.Value + ((next.Value - current.Value) * pos));
     }
 }
 

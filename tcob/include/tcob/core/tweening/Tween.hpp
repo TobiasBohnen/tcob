@@ -95,10 +95,7 @@ private:
     playback_mode                           _mode {};
 };
 
-template <typename T>
-using curve_tween = tween<tween_func::curve<T>>;
-template <typename T>
-using curve_point = tween_func::curve<T>::point;
+////////////////////////////////////////////////////////////
 
 template <typename T>
 using power_tween = tween<tween_func::power<T>>;
@@ -109,13 +106,20 @@ using exponential_tween = tween<tween_func::exponential<T>>;
 template <typename T>
 using linear_tween = tween<tween_func::linear<T>>;
 
-using circular_tween = tween<tween_func::circular>;
-
 template <typename T>
 using smoothstep_tween = tween<tween_func::smoothstep<T>>;
 
 template <typename T>
 using smootherstep_tween = tween<tween_func::smootherstep<T>>;
+
+template <typename T>
+using bounce_tween = tween<tween_func::bounce<T>>;
+
+template <typename T>
+using elastic_tween = tween<tween_func::elastic<T>>;
+
+template <typename T>
+using back_tween = tween<tween_func::back<T>>;
 
 template <typename T>
 using sine_wave_tween = tween<tween_func::sine_wave<T>>;
@@ -137,14 +141,12 @@ using bezier_curve_tween = tween<tween_func::bezier_curve>;
 
 using catmull_rom_tween = tween<tween_func::catmull_rom>;
 
-template <typename T>
-using bounce_tween = tween<tween_func::bounce<T>>;
+using circular_motion_tween = tween<tween_func::circular_motion>;
 
 template <typename T>
-using elastic_tween = tween<tween_func::elastic<T>>;
-
+using curve_tween = tween<tween_func::curve<T>>;
 template <typename T>
-using back_tween = tween<tween_func::back<T>>;
+using curve_point = tween_func::curve<T>::point;
 
 template <auto Func>
 using function_tween = tween<tween_func::function<Func>>;
