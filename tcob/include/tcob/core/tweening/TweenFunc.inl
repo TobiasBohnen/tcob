@@ -458,14 +458,6 @@ inline auto curve<T>::operator()(f64 t) const -> type
 
 ////////////////////////////////////////////////////////////
 
-template <auto Func>
-inline auto function<Func>::operator()(f64 t) const -> type
-{
-    return Func(t);
-}
-
-////////////////////////////////////////////////////////////
-
 template <typename T>
 inline callable<T>::callable(T obj)
     : _obj {std::move(obj)}

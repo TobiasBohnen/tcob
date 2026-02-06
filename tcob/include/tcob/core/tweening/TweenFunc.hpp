@@ -346,16 +346,6 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-template <auto Func>
-class function final {
-public:
-    using type = std::invoke_result_t<decltype(Func), f64>;
-
-    auto operator()(f64 t) const -> type;
-};
-
-////////////////////////////////////////////////////////////
-
 template <typename T>
 class callable final {
 public:

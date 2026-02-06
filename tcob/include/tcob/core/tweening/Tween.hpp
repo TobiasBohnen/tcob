@@ -151,9 +151,6 @@ using curve_tween = tween<tween_func::curve<T>>;
 template <typename T>
 using curve_point = tween_func::curve<T>::point;
 
-template <auto Func>
-using function_tween = tween<tween_func::function<Func>>;
-
 template <typename T>
 using callable_tween = tween<tween_func::callable<T>>;
 
