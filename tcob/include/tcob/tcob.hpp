@@ -45,8 +45,6 @@
 #include <tcob/core/assets/AssetLibrary.hpp>
 #include <tcob/core/assets/AssetLoader.hpp>
 #include <tcob/core/assets/Assets.hpp>
-#include <tcob/core/easing/Easing.hpp>
-#include <tcob/core/easing/Tween.hpp>
 #include <tcob/core/input/Input.hpp>
 #include <tcob/core/io/FileStream.hpp>
 #include <tcob/core/io/FileSystem.hpp>
@@ -59,6 +57,8 @@
 #include <tcob/core/random/Random.hpp>
 #include <tcob/core/spatial/KDTree.hpp>
 #include <tcob/core/spatial/Quadtree.hpp>
+#include <tcob/core/tweening/Tween.hpp>
+#include <tcob/core/tweening/TweenFunc.hpp>
 
 #include <tcob/data/CSV.hpp>
 #include <tcob/data/Config.hpp>

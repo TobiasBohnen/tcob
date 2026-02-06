@@ -11,7 +11,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/core/easing/Tween.hpp"
+#include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/animation/Animation.hpp"
 
 namespace tcob::ui {

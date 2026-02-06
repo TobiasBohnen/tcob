@@ -18,8 +18,8 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
-#include "tcob/core/easing/Tween.hpp"
 #include "tcob/core/random/Random.hpp"
+#include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 

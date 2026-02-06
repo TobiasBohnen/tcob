@@ -14,10 +14,10 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 
-namespace tcob::easing {
+namespace tcob::tween_func {
 ////////////////////////////////////////////////////////////
 
-enum class mode : u8 {
+enum class ease_mode : u8 {
     In,
     Out,
     InOut
@@ -70,7 +70,7 @@ public:
     type End {};
     f64  Exponent {1.0};
 
-    mode Mode {mode::In};
+    ease_mode Mode {ease_mode::In};
 
     auto operator()(f64 t) const -> type;
 };
@@ -85,7 +85,7 @@ public:
     type Start {};
     type End {};
 
-    mode Mode {mode::In};
+    ease_mode Mode {ease_mode::In};
 
     auto operator()(f64 t) const -> type;
 };
@@ -286,7 +286,7 @@ public:
     type Start;
     type End;
 
-    mode Mode {mode::Out};
+    ease_mode Mode {ease_mode::Out};
 
     auto operator()(f64 t) const -> type;
 
@@ -304,7 +304,7 @@ public:
     type Start;
     type End;
 
-    mode Mode {mode::Out};
+    ease_mode Mode {ease_mode::Out};
 
     f64 Amplitude {1.0};
     f64 Period {0.6};
@@ -322,7 +322,7 @@ public:
     type Start;
     type End;
 
-    mode Mode {mode::Out};
+    ease_mode Mode {ease_mode::Out};
 
     f64 Overshoot {1.70158};
 
@@ -358,4 +358,4 @@ private:
 
 }
 
-#include "Easing.inl"
+#include "TweenFunc.inl"

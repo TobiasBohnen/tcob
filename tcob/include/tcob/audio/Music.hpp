@@ -16,7 +16,7 @@
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Source.hpp"
 #include "tcob/core/Property.hpp"
-#include "tcob/core/easing/Tween.hpp"
+#include "tcob/core/tweening/Tween.hpp"
 
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////

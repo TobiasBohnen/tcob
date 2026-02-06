@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "tcob/core/Serialization.hpp"
-#include "tcob/core/easing/Tween.hpp"
+#include "tcob/core/tweening/Tween.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////

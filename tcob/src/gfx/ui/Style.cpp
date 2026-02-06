@@ -5,7 +5,7 @@
 
 #include "tcob/gfx/ui/Style.hpp"
 
-#include "tcob/core/easing/Easing.hpp"
+#include "tcob/core/tweening/TweenFunc.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -17,32 +17,32 @@ auto style::ease_value(f64 t) const -> f64
 {
     switch (EasingFunc) {
     case easing_func::Linear:       return t;
-    case easing_func::SmoothStep:   return easing::smoothstep<f64> {.Start = 0, .End = 1.}(t); break;
-    case easing_func::SmootherStep: return easing::smootherstep<f64> {.Start = 0, .End = 1.}(t); break;
-    case easing_func::QuadIn:       return easing::power<f64> {.Start = 0, .End = 1., .Exponent = 2., .Mode = easing::mode::In}(t); break;
-    case easing_func::QuadOut:      return easing::power<f64> {.Start = 0, .End = 1., .Exponent = 2., .Mode = easing::mode::Out}(t); break;
-    case easing_func::QuadInOut:    return easing::power<f64> {.Start = 0, .End = 1., .Exponent = 2., .Mode = easing::mode::InOut}(t); break;
-    case easing_func::CubicIn:      return easing::power<f64> {.Start = 0, .End = 1, .Exponent = 3., .Mode = easing::mode::In}(t); break;
-    case easing_func::CubicOut:     return easing::power<f64> {.Start = 0, .End = 1, .Exponent = 3., .Mode = easing::mode::Out}(t); break;
-    case easing_func::CubicInOut:   return easing::power<f64> {.Start = 0, .End = 1., .Exponent = 3., .Mode = easing::mode::InOut}(t); break;
-    case easing_func::QuartIn:      return easing::power<f64> {.Start = 0, .End = 1, .Exponent = 4., .Mode = easing::mode::In}(t); break;
-    case easing_func::QuartOut:     return easing::power<f64> {.Start = 0, .End = 1, .Exponent = 4., .Mode = easing::mode::Out}(t); break;
-    case easing_func::QuartInOut:   return easing::power<f64> {.Start = 0, .End = 1., .Exponent = 4., .Mode = easing::mode::InOut}(t); break;
-    case easing_func::QuintIn:      return easing::power<f64> {.Start = 0, .End = 1, .Exponent = 5., .Mode = easing::mode::In}(t); break;
-    case easing_func::QuintOut:     return easing::power<f64> {.Start = 0, .End = 1, .Exponent = 5., .Mode = easing::mode::Out}(t); break;
-    case easing_func::QuintInOut:   return easing::power<f64> {.Start = 0, .End = 1., .Exponent = .5, .Mode = easing::mode::InOut}(t); break;
-    case easing_func::ExpoIn:       return easing::exponential<f64> {.Start = 0, .End = 1., .Mode = easing::mode::In}(t); break;
-    case easing_func::ExpoOut:      return easing::exponential<f64> {.Start = 0, .End = 1., .Mode = easing::mode::Out}(t); break;
-    case easing_func::ExpoInOut:    return easing::exponential<f64> {.Start = 0, .End = 1., .Mode = easing::mode::InOut}(t); break;
-    case easing_func::BounceIn:     return easing::bounce<f64> {.Start = 0, .End = 1., .Mode = easing::mode::In}(t); break;
-    case easing_func::BounceOut:    return easing::bounce<f64> {.Start = 0, .End = 1., .Mode = easing::mode::Out}(t); break;
-    case easing_func::BounceInOut:  return easing::bounce<f64> {.Start = 0, .End = 1., .Mode = easing::mode::InOut}(t); break;
-    case easing_func::ElasticIn:    return easing::elastic<f64> {.Start = 0, .End = 1., .Mode = easing::mode::In}(t); break;
-    case easing_func::ElasticOut:   return easing::elastic<f64> {.Start = 0, .End = 1., .Mode = easing::mode::Out}(t); break;
-    case easing_func::ElasticInOut: return easing::elastic<f64> {.Start = 0, .End = 1., .Mode = easing::mode::InOut}(t); break;
-    case easing_func::BackIn:       return easing::back<f64> {.Start = 0, .End = 1., .Mode = easing::mode::In}(t); break;
-    case easing_func::BackOut:      return easing::back<f64> {.Start = 0, .End = 1., .Mode = easing::mode::Out}(t); break;
-    case easing_func::BackInOut:    return easing::back<f64> {.Start = 0, .End = 1., .Mode = easing::mode::InOut}(t); break;
+    case easing_func::SmoothStep:   return tween_func::smoothstep<f64> {.Start = 0, .End = 1.}(t); break;
+    case easing_func::SmootherStep: return tween_func::smootherstep<f64> {.Start = 0, .End = 1.}(t); break;
+    case easing_func::QuadIn:       return tween_func::power<f64> {.Start = 0, .End = 1., .Exponent = 2., .Mode = tween_func::ease_mode::In}(t); break;
+    case easing_func::QuadOut:      return tween_func::power<f64> {.Start = 0, .End = 1., .Exponent = 2., .Mode = tween_func::ease_mode::Out}(t); break;
+    case easing_func::QuadInOut:    return tween_func::power<f64> {.Start = 0, .End = 1., .Exponent = 2., .Mode = tween_func::ease_mode::InOut}(t); break;
+    case easing_func::CubicIn:      return tween_func::power<f64> {.Start = 0, .End = 1, .Exponent = 3., .Mode = tween_func::ease_mode::In}(t); break;
+    case easing_func::CubicOut:     return tween_func::power<f64> {.Start = 0, .End = 1, .Exponent = 3., .Mode = tween_func::ease_mode::Out}(t); break;
+    case easing_func::CubicInOut:   return tween_func::power<f64> {.Start = 0, .End = 1., .Exponent = 3., .Mode = tween_func::ease_mode::InOut}(t); break;
+    case easing_func::QuartIn:      return tween_func::power<f64> {.Start = 0, .End = 1, .Exponent = 4., .Mode = tween_func::ease_mode::In}(t); break;
+    case easing_func::QuartOut:     return tween_func::power<f64> {.Start = 0, .End = 1, .Exponent = 4., .Mode = tween_func::ease_mode::Out}(t); break;
+    case easing_func::QuartInOut:   return tween_func::power<f64> {.Start = 0, .End = 1., .Exponent = 4., .Mode = tween_func::ease_mode::InOut}(t); break;
+    case easing_func::QuintIn:      return tween_func::power<f64> {.Start = 0, .End = 1, .Exponent = 5., .Mode = tween_func::ease_mode::In}(t); break;
+    case easing_func::QuintOut:     return tween_func::power<f64> {.Start = 0, .End = 1, .Exponent = 5., .Mode = tween_func::ease_mode::Out}(t); break;
+    case easing_func::QuintInOut:   return tween_func::power<f64> {.Start = 0, .End = 1., .Exponent = .5, .Mode = tween_func::ease_mode::InOut}(t); break;
+    case easing_func::ExpoIn:       return tween_func::exponential<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::In}(t); break;
+    case easing_func::ExpoOut:      return tween_func::exponential<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::Out}(t); break;
+    case easing_func::ExpoInOut:    return tween_func::exponential<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::InOut}(t); break;
+    case easing_func::BounceIn:     return tween_func::bounce<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::In}(t); break;
+    case easing_func::BounceOut:    return tween_func::bounce<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::Out}(t); break;
+    case easing_func::BounceInOut:  return tween_func::bounce<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::InOut}(t); break;
+    case easing_func::ElasticIn:    return tween_func::elastic<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::In}(t); break;
+    case easing_func::ElasticOut:   return tween_func::elastic<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::Out}(t); break;
+    case easing_func::ElasticInOut: return tween_func::elastic<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::InOut}(t); break;
+    case easing_func::BackIn:       return tween_func::back<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::In}(t); break;
+    case easing_func::BackOut:      return tween_func::back<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::Out}(t); break;
+    case easing_func::BackInOut:    return tween_func::back<f64> {.Start = 0, .End = 1., .Mode = tween_func::ease_mode::InOut}(t); break;
     }
 
     return t;

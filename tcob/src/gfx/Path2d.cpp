@@ -19,7 +19,7 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/StringUtils.hpp"
-#include "tcob/core/easing/Easing.hpp"
+#include "tcob/core/tweening/TweenFunc.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Polygon.hpp"
 
@@ -336,7 +336,7 @@ auto path2d::polygonize() -> std::vector<polygon>
             idx += 3;
         } break;
         case BezierTo: {
-            easing::quad_bezier_curve func;
+            tween_func::quad_bezier_curve func;
             func.StartPoint   = {Commands[idx + 1], Commands[idx + 2]};
             func.ControlPoint = {Commands[idx + 3], Commands[idx + 4]};
             func.EndPoint     = {Commands[idx + 5], Commands[idx + 6]};
@@ -345,7 +345,7 @@ auto path2d::polygonize() -> std::vector<polygon>
             idx += 7;
         } break;
         case Close: {
-            easing::linear<point_f> func;
+            tween_func::linear<point_f> func;
             func.Start = points[0];
             func.End   = curPos;
             for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }

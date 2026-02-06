@@ -9,32 +9,32 @@
 #include <memory>
 
 #include "tcob/core/Signal.hpp"
-#include "tcob/core/easing/Easing.hpp"
+#include "tcob/core/tweening/TweenFunc.hpp"
 
 namespace tcob {
 
 ////////////////////////////////////////////////////////////
 
-template <easing::Function Func>
+template <tween_func::Function Func>
 inline tween<Func>::tween(milliseconds duration)
     : tween_base {duration}
 {
 }
 
-template <easing::Function Func>
+template <tween_func::Function Func>
 inline tween<Func>::tween(milliseconds duration, func_type&& func)
     : tween_base {duration}
     , Function {std::move(func)}
 {
 }
 
-template <easing::Function Func>
+template <tween_func::Function Func>
 inline auto tween<Func>::add_output(value_type* dest) -> connection
 {
     return Value.Changed.connect([dest](value_type const& val) { *dest = val; });
 }
 
-template <easing::Function Func>
+template <tween_func::Function Func>
 inline void tween<Func>::update_values()
 {
     Value = Function(progress());

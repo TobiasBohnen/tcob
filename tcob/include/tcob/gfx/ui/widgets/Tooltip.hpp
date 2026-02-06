@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "tcob/core/Signal.hpp"
-#include "tcob/core/easing/Tween.hpp"
+#include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Panel.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"

@@ -5,7 +5,7 @@
 
 #include "tcob/gfx/ui/widgets/Tooltip.hpp"
 
-#include "tcob/core/easing/Tween.hpp"
+#include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
 #include "tcob/gfx/ui/widgets/Panel.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"

@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "Easing.hpp"
+#include "TweenFunc.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -15,7 +15,7 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 
-namespace tcob::easing {
+namespace tcob::tween_func {
 
 template <typename T>
 inline curve<T>::curve(std::span<point const> elements)
@@ -61,9 +61,9 @@ inline auto power<T>::operator()(f64 t) const -> type
 
     switch (Mode) {
 
-    case mode::In:  factor = std::pow(t, Exponent); break;
-    case mode::Out: factor = 1.0 - std::pow(1.0 - t, Exponent); break;
-    case mode::InOut:
+    case ease_mode::In:  factor = std::pow(t, Exponent); break;
+    case ease_mode::Out: factor = 1.0 - std::pow(1.0 - t, Exponent); break;
+    case ease_mode::InOut:
         factor = t < 0.5
             ? 0.5 * std::pow(t * 2.0, Exponent)
             : 0.5 * (2.0 - std::pow(2.0 * (1.0 - t), Exponent));
@@ -87,9 +87,9 @@ inline auto exponential<T>::operator()(f64 t) const -> type
 
     f64 factor {0};
     switch (Mode) {
-    case mode::In:  factor = std::pow(2.0, 10.0 * (t - 1.0)); break;
-    case mode::Out: factor = 1.0 - std::pow(2.0, -10.0 * t); break;
-    case mode::InOut:
+    case ease_mode::In:  factor = std::pow(2.0, 10.0 * (t - 1.0)); break;
+    case ease_mode::Out: factor = 1.0 - std::pow(2.0, -10.0 * t); break;
+    case ease_mode::InOut:
         factor = t < 0.5
             ? std::pow(2.0, (20.0 * t) - 10.0) / 2.0
             : (2.0 - std::pow(2.0, (-20.0 * t) + 10.0)) / 2.0;
@@ -327,9 +327,9 @@ inline auto bounce<T>::operator()(f64 t) const -> type
     f64 factor {0};
 
     switch (Mode) {
-    case mode::In:  factor = 1.0 - get_bounce_out(1.0 - t); break;
-    case mode::Out: factor = get_bounce_out(t); break;
-    case mode::InOut:
+    case ease_mode::In:  factor = 1.0 - get_bounce_out(1.0 - t); break;
+    case ease_mode::Out: factor = get_bounce_out(t); break;
+    case ease_mode::InOut:
         factor = t < 0.5
             ? (1.0 - get_bounce_out(1.0 - (t * 2.0))) * 0.5
             : (get_bounce_out((t * 2.0) - 1.0) * 0.5) + 0.5;
@@ -379,9 +379,9 @@ inline auto elastic<T>::operator()(f64 t) const -> type
 
     f64 factor {0};
     switch (Mode) {
-    case mode::In:  factor = -(a * std::pow(2.0, 10.0 * (t - 1.0)) * std::sin((t - 1.0 - s) * TAU / p)); break;
-    case mode::Out: factor = (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p)) + 1.0; break;
-    case mode::InOut:
+    case ease_mode::In:  factor = -(a * std::pow(2.0, 10.0 * (t - 1.0)) * std::sin((t - 1.0 - s) * TAU / p)); break;
+    case ease_mode::Out: factor = (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p)) + 1.0; break;
+    case ease_mode::InOut:
         if (t < 0.5) {
             t      = (t * 2.0) - 1.0;
             factor = -0.5 * (a * std::pow(2.0, 10.0 * t) * std::sin((t - s) * TAU / p));
@@ -406,12 +406,12 @@ inline auto back<T>::operator()(f64 t) const -> type
 {
     f64 factor {0};
     switch (Mode) {
-    case mode::In: factor = t * t * ((Overshoot + 1.0) * t - Overshoot); break;
-    case mode::Out:
+    case ease_mode::In: factor = t * t * ((Overshoot + 1.0) * t - Overshoot); break;
+    case ease_mode::Out:
         t -= 1.0;
         factor = (t * t * ((Overshoot + 1.0) * t + Overshoot)) + 1.0;
         break;
-    case mode::InOut: {
+    case ease_mode::InOut: {
         f64 const s {Overshoot * 1.525};
         if (t < 0.5) {
             t *= 2.0;

@@ -16,11 +16,10 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/Transform.hpp"
-#include "tcob/core/easing/Easing.hpp"
-#include "tcob/core/easing/Tween.hpp"
+#include "tcob/core/tweening/Tween.hpp"
+#include "tcob/core/tweening/TweenFunc.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
-
 
 namespace tcob::gfx {
 using namespace std::chrono_literals;
@@ -164,8 +163,8 @@ namespace effect {
 
     void blink::operator()(f64 t, std::span<quad> quads)
     {
-        easing::square_wave<bool> wave {.Frequency = Frequency};
-        bool const                flip {wave(t)};
+        tween_func::square_wave<bool> wave {.Frequency = Frequency};
+        bool const                    flip {wave(t)};
         for (auto& q : quads) {
             geometry::set_color(q, flip ? Color0 : Color1);
         }
@@ -212,8 +211,8 @@ namespace effect {
         for (usize idx {0}; idx < quads.size(); ++idx) {
             quad& dst {quads[idx]};
 
-            easing::sine_wave<f64> wave {.Min = 0, .Max = 1, .Phase = static_cast<f64>(idx) / quads.size() * Amplitude};
-            f64 const              val {wave(t) * Height};
+            tween_func::sine_wave<f64> wave {.Min = 0, .Max = 1, .Phase = static_cast<f64>(idx) / quads.size() * Amplitude};
+            f64 const                  val {wave(t) * Height};
 
             for (u32 i {0}; i < 4; ++i) {
                 dst[i].Position.Y = static_cast<f32>(dst[i].Position.Y + val);
