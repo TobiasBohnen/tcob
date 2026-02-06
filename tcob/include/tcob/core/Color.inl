@@ -136,6 +136,7 @@ auto constexpr color::as_grayscale(f32 redFactor, f32 greenFactor, f32 blueFacto
 
 auto constexpr color::Lerp(color from, color to, f64 step) -> color
 {
+    step = std::clamp(step, 0.0, 1.0);
     u8 const nr {helper::lerp(from.R, to.R, step)};
     u8 const ng {helper::lerp(from.G, to.G, step)};
     u8 const nb {helper::lerp(from.B, to.B, step)};
