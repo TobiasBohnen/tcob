@@ -13,12 +13,14 @@ namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline void transition<T>::try_start(T const* target, milliseconds duration)
+inline void transition<T>::try_start(T const* target, milliseconds duration, milliseconds step)
 {
     if (target == _targetStyle) { return; }
 
     _currentTime = milliseconds::zero();
     _duration    = duration;
+    _accStep     = step;
+    _step        = step;
 
     _sourceStyle = _targetStyle;
     _targetStyle = target;
@@ -29,21 +31,32 @@ inline void transition<T>::reset(T const* target)
 {
     _currentTime = milliseconds::zero();
     _duration    = milliseconds::zero();
+    _accStep     = milliseconds::zero();
+    _step        = milliseconds::zero();
 
     _targetStyle = target;
     _sourceStyle = _targetStyle;
 }
 
 template <typename T>
-void transition<T>::update(milliseconds deltaTime)
-{
-    _currentTime = std::min(_currentTime + deltaTime, _duration);
-}
-
-template <typename T>
 auto transition<T>::is_active() const -> bool
 {
     return _duration.count() > 0 && _currentTime < _duration && _sourceStyle && _targetStyle;
+}
+
+template <typename T>
+auto transition<T>::update(milliseconds deltaTime) -> bool
+{
+    if (!is_active()) { return false; }
+
+    _accStep -= deltaTime;
+    if (_accStep.count() <= 0) {
+        _currentTime = std::min(_currentTime + (_step - _accStep), _duration);
+        _accStep     = _step;
+        return true;
+    }
+
+    return false;
 }
 
 template <typename T>

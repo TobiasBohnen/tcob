@@ -58,6 +58,7 @@ public:
     prop<tab_stop>     TabStop;
     prop<isize>        ZOrder;
     prop<milliseconds> TransitionDuration;
+    prop<milliseconds> TransitionStep;
 
     prop_val<rect_f> Bounds;
     prop_val<size_f> MinSize;

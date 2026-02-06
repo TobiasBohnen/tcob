@@ -63,6 +63,8 @@ widget::widget(init const& wi)
                                                                  std::clamp(Bounds->height(), MinSize->Height, val.Height)}}; });
     MaxSize({std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()});
 
+    TransitionStep(milliseconds {20});
+
     if (_parent) {
         _level = _parent->_level + 1;
     }
@@ -143,13 +145,15 @@ void widget::draw(widget_painter& painter)
 
 void widget::update(milliseconds deltaTime)
 {
-    if (_transition.is_active()) { queue_redraw(); }
-    _transition.update(deltaTime);
+    if (_transition.update(deltaTime)) {
+        queue_redraw();
+    }
 
     // item transitions
     for (auto& [_, v] : _subStyleTransitions) {
-        if (v.is_active()) { queue_redraw(); }
-        v.update(deltaTime);
+        if (v.update(deltaTime)) {
+            queue_redraw();
+        }
     }
 
     on_update(deltaTime);
@@ -255,7 +259,7 @@ void widget::prepare_redraw()
 
     if (_lastSelectors != newSelectors) {
         auto* style {dynamic_cast<widget_style*>(_form->Styles->get(newSelectors))};
-        _transition.try_start(style, TransitionDuration);
+        _transition.try_start(style, TransitionDuration, TransitionStep);
         _currentStyle = style;
 
         _lastSelectors = newSelectors;
