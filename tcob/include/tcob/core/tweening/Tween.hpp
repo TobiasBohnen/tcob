@@ -97,11 +97,11 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-using polynomial_tween = tween<tween_func::polynomial<T>>;
+template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::In>
+using polynomial_tween = tween<tween_func::polynomial<T, Mode>>;
 
-template <typename T>
-using exponential_tween = tween<tween_func::exponential<T>>;
+template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::In>
+using exponential_tween = tween<tween_func::exponential<T, Mode>>;
 
 template <typename T>
 using linear_tween = tween<tween_func::linear<T>>;
@@ -112,17 +112,17 @@ using smoothstep_tween = tween<tween_func::smoothstep<T>>;
 template <typename T>
 using smootherstep_tween = tween<tween_func::smootherstep<T>>;
 
-template <typename T>
-using bounce_tween = tween<tween_func::bounce<T>>;
+template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::Out>
+using bounce_tween = tween<tween_func::bounce<T, Mode>>;
 
-template <typename T>
-using elastic_tween = tween<tween_func::elastic<T>>;
+template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::Out>
+using elastic_tween = tween<tween_func::elastic<T, Mode>>;
 
-template <typename T>
-using back_tween = tween<tween_func::back<T>>;
+template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::Out>
+using back_tween = tween<tween_func::back<T, Mode>>;
 
-template <typename T>
-using circular_tween = tween<tween_func::circular<T>>;
+template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::Out>
+using circular_tween = tween<tween_func::circular<T, Mode>>;
 
 template <typename T>
 using sine_wave_tween = tween<tween_func::sine_wave<T>>;

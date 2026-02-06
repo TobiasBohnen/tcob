@@ -17,22 +17,21 @@
 
 namespace tcob::tween_func {
 
-template <typename T>
-inline auto polynomial<T>::operator()(f64 t) const -> type
+template <typename T, ease_mode Mode>
+inline auto polynomial<T, Mode>::operator()(f64 t) const -> type
 {
     if (Exponent <= 0 && t == 0) { return Start; }
 
     f64 factor {0};
 
-    switch (Mode) {
-
-    case ease_mode::In:  factor = std::pow(t, Exponent); break;
-    case ease_mode::Out: factor = 1.0 - std::pow(1.0 - t, Exponent); break;
-    case ease_mode::InOut:
+    if constexpr (Mode == ease_mode::In) {
+        factor = std::pow(t, Exponent);
+    } else if constexpr (Mode == ease_mode::Out) {
+        factor = 1.0 - std::pow(1.0 - t, Exponent);
+    } else {
         factor = t < 0.5
             ? 0.5 * std::pow(t * 2.0, Exponent)
             : 0.5 * (2.0 - std::pow(2.0 * (1.0 - t), Exponent));
-        break;
     }
 
     if constexpr (Lerpable<type>) {
@@ -44,21 +43,21 @@ inline auto polynomial<T>::operator()(f64 t) const -> type
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline auto exponential<T>::operator()(f64 t) const -> type
+template <typename T, ease_mode Mode>
+inline auto exponential<T, Mode>::operator()(f64 t) const -> type
 {
     if (t <= 0.0) { return Start; }
     if (t >= 1.0) { return End; }
 
     f64 factor {0};
-    switch (Mode) {
-    case ease_mode::In:  factor = std::pow(2.0, 10.0 * (t - 1.0)); break;
-    case ease_mode::Out: factor = 1.0 - std::pow(2.0, -10.0 * t); break;
-    case ease_mode::InOut:
+    if constexpr (Mode == ease_mode::In) {
+        factor = std::pow(2.0, 10.0 * (t - 1.0));
+    } else if constexpr (Mode == ease_mode::Out) {
+        factor = 1.0 - std::pow(2.0, -10.0 * t);
+    } else {
         factor = t < 0.5
             ? std::pow(2.0, (20.0 * t) - 10.0) / 2.0
             : (2.0 - std::pow(2.0, (-20.0 * t) + 10.0)) / 2.0;
-        break;
     }
 
     if constexpr (Lerpable<type>) {
@@ -114,19 +113,18 @@ inline auto smootherstep<T>::operator()(f64 t) const -> type
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline auto bounce<T>::operator()(f64 t) const -> type
+template <typename T, ease_mode Mode>
+inline auto bounce<T, Mode>::operator()(f64 t) const -> type
 {
     f64 factor {0};
-
-    switch (Mode) {
-    case ease_mode::In:  factor = 1.0 - get_bounce_out(1.0 - t); break;
-    case ease_mode::Out: factor = get_bounce_out(t); break;
-    case ease_mode::InOut:
+    if constexpr (Mode == ease_mode::In) {
+        factor = 1.0 - get_bounce_out(1.0 - t);
+    } else if constexpr (Mode == ease_mode::Out) {
+        factor = get_bounce_out(t);
+    } else {
         factor = t < 0.5
             ? (1.0 - get_bounce_out(1.0 - (t * 2.0))) * 0.5
             : (get_bounce_out((t * 2.0) - 1.0) * 0.5) + 0.5;
-        break;
     }
 
     if constexpr (Lerpable<type>) {
@@ -136,8 +134,8 @@ inline auto bounce<T>::operator()(f64 t) const -> type
     }
 }
 
-template <typename T>
-inline auto bounce<T>::get_bounce_out(f64 t) const -> f64
+template <typename T, ease_mode Mode>
+inline auto bounce<T, Mode>::get_bounce_out(f64 t) const -> f64
 {
     f64 const n1 {7.5625};
     f64 const d1 {2.75};
@@ -160,8 +158,8 @@ inline auto bounce<T>::get_bounce_out(f64 t) const -> f64
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline auto elastic<T>::operator()(f64 t) const -> type
+template <typename T, ease_mode Mode>
+inline auto elastic<T, Mode>::operator()(f64 t) const -> type
 {
     if (t == 0.0) { return Start; }
     if (t == 1.0) { return End; }
@@ -171,10 +169,11 @@ inline auto elastic<T>::operator()(f64 t) const -> type
     f64 const s {p / TAU * std::asin(1.0 / a)};
 
     f64 factor {0};
-    switch (Mode) {
-    case ease_mode::In:  factor = -(a * std::pow(2.0, 10.0 * (t - 1.0)) * std::sin((t - 1.0 - s) * TAU / p)); break;
-    case ease_mode::Out: factor = (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p)) + 1.0; break;
-    case ease_mode::InOut:
+    if constexpr (Mode == ease_mode::In) {
+        factor = -(a * std::pow(2.0, 10.0 * (t - 1.0)) * std::sin((t - 1.0 - s) * TAU / p));
+    } else if constexpr (Mode == ease_mode::Out) {
+        factor = (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p)) + 1.0;
+    } else {
         if (t < 0.5) {
             t      = (t * 2.0) - 1.0;
             factor = -0.5 * (a * std::pow(2.0, 10.0 * t) * std::sin((t - s) * TAU / p));
@@ -182,7 +181,6 @@ inline auto elastic<T>::operator()(f64 t) const -> type
             t      = (t * 2.0) - 1.0;
             factor = (0.5 * (a * std::pow(2.0, -10.0 * t) * std::sin((t - s) * TAU / p))) + 1.0;
         }
-        break;
     }
 
     if constexpr (Lerpable<type>) {
@@ -194,17 +192,16 @@ inline auto elastic<T>::operator()(f64 t) const -> type
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline auto back<T>::operator()(f64 t) const -> type
+template <typename T, ease_mode Mode>
+inline auto back<T, Mode>::operator()(f64 t) const -> type
 {
     f64 factor {0};
-    switch (Mode) {
-    case ease_mode::In: factor = t * t * ((Overshoot + 1.0) * t - Overshoot); break;
-    case ease_mode::Out:
+    if constexpr (Mode == ease_mode::In) {
+        factor = t * t * ((Overshoot + 1.0) * t - Overshoot);
+    } else if constexpr (Mode == ease_mode::Out) {
         t -= 1.0;
         factor = (t * t * ((Overshoot + 1.0) * t + Overshoot)) + 1.0;
-        break;
-    case ease_mode::InOut: {
+    } else {
         f64 const s {Overshoot * 1.525};
         if (t < 0.5) {
             t *= 2.0;
@@ -213,7 +210,6 @@ inline auto back<T>::operator()(f64 t) const -> type
             t      = (t * 2.0) - 2.0;
             factor = 0.5 * (t * t * ((s + 1.0) * t + s) + 2.0);
         }
-    } break;
     }
 
     if constexpr (Lerpable<type>) {
@@ -225,19 +221,18 @@ inline auto back<T>::operator()(f64 t) const -> type
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline auto circular<T>::operator()(f64 t) const -> type
+template <typename T, ease_mode Mode>
+inline auto circular<T, Mode>::operator()(f64 t) const -> type
 {
     f64 factor {0};
-
-    switch (Mode) {
-    case ease_mode::In:  factor = 1.0 - std::sqrt(1.0 - (t * t)); break;
-    case ease_mode::Out: factor = std::sqrt(1.0 - ((t - 1.0) * (t - 1.0))); break;
-    case ease_mode::InOut:
+    if constexpr (Mode == ease_mode::In) {
+        factor = 1.0 - std::sqrt(1.0 - (t * t));
+    } else if constexpr (Mode == ease_mode::Out) {
+        factor = std::sqrt(1.0 - ((t - 1.0) * (t - 1.0)));
+    } else {
         factor = t < 0.5
             ? (1.0 - std::sqrt(1.0 - (4.0 * t * t))) * 0.5
             : (std::sqrt(1.0 - ((-2.0 * t + 2.0) * (-2.0 * t + 2.0))) + 1.0) * 0.5;
-        break;
     }
 
     if constexpr (Lerpable<type>) {

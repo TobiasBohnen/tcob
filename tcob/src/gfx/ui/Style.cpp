@@ -15,37 +15,39 @@ namespace tcob::ui {
 
 auto style::ease_value(f64 t) const -> f64
 {
+    using namespace tween_func;
+
     switch (EasingFunc) {
     case easing_func::Linear:        return t;
-    case easing_func::SmoothStep:    return tween_func::smoothstep<f64> {.Start = 0., .End = 1.}(t); break;
-    case easing_func::SmootherStep:  return tween_func::smootherstep<f64> {.Start = 0., .End = 1.}(t); break;
-    case easing_func::QuadIn:        return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 2., .Mode = tween_func::ease_mode::In}(t); break;
-    case easing_func::QuadOut:       return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 2., .Mode = tween_func::ease_mode::Out}(t); break;
-    case easing_func::QuadInOut:     return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 2., .Mode = tween_func::ease_mode::InOut}(t); break;
-    case easing_func::CubicIn:       return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 3., .Mode = tween_func::ease_mode::In}(t); break;
-    case easing_func::CubicOut:      return tween_func::polynomial<f64> {.Start = 0, .End = 1., .Exponent = 3., .Mode = tween_func::ease_mode::Out}(t); break;
-    case easing_func::CubicInOut:    return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 3., .Mode = tween_func::ease_mode::InOut}(t); break;
-    case easing_func::QuartIn:       return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 4., .Mode = tween_func::ease_mode::In}(t); break;
-    case easing_func::QuartOut:      return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 4., .Mode = tween_func::ease_mode::Out}(t); break;
-    case easing_func::QuartInOut:    return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 4., .Mode = tween_func::ease_mode::InOut}(t); break;
-    case easing_func::QuintIn:       return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 5., .Mode = tween_func::ease_mode::In}(t); break;
-    case easing_func::QuintOut:      return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 5., .Mode = tween_func::ease_mode::Out}(t); break;
-    case easing_func::QuintInOut:    return tween_func::polynomial<f64> {.Start = 0., .End = 1., .Exponent = 5., .Mode = tween_func::ease_mode::InOut}(t); break;
-    case easing_func::ExpoIn:        return tween_func::exponential<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::In}(t); break;
-    case easing_func::ExpoOut:       return tween_func::exponential<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::Out}(t); break;
-    case easing_func::ExpoInOut:     return tween_func::exponential<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::InOut}(t); break;
-    case easing_func::BounceIn:      return tween_func::bounce<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::In}(t); break;
-    case easing_func::BounceOut:     return tween_func::bounce<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::Out}(t); break;
-    case easing_func::BounceInOut:   return tween_func::bounce<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::InOut}(t); break;
-    case easing_func::ElasticIn:     return tween_func::elastic<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::In}(t); break;
-    case easing_func::ElasticOut:    return tween_func::elastic<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::Out}(t); break;
-    case easing_func::ElasticInOut:  return tween_func::elastic<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::InOut}(t); break;
-    case easing_func::BackIn:        return tween_func::back<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::In}(t); break;
-    case easing_func::BackOut:       return tween_func::back<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::Out}(t); break;
-    case easing_func::BackInOut:     return tween_func::back<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::InOut}(t); break;
-    case easing_func::CircularIn:    return tween_func::circular<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::In}(t); break;
-    case easing_func::CircularOut:   return tween_func::circular<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::Out}(t); break;
-    case easing_func::CircularInOut: return tween_func::circular<f64> {.Start = 0., .End = 1., .Mode = tween_func::ease_mode::InOut}(t); break;
+    case easing_func::SmoothStep:    return smoothstep<f64> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::SmootherStep:  return smootherstep<f64> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::QuadIn:        return polynomial<f64, ease_mode::In> {.Start = 0., .End = 1., .Exponent = 2.}(t); break;
+    case easing_func::QuadOut:       return polynomial<f64, ease_mode::Out> {.Start = 0., .End = 1., .Exponent = 2.}(t); break;
+    case easing_func::QuadInOut:     return polynomial<f64, ease_mode::InOut> {.Start = 0., .End = 1., .Exponent = 2.}(t); break;
+    case easing_func::CubicIn:       return polynomial<f64, ease_mode::In> {.Start = 0., .End = 1., .Exponent = 3.}(t); break;
+    case easing_func::CubicOut:      return polynomial<f64, ease_mode::Out> {.Start = 0, .End = 1., .Exponent = 3.}(t); break;
+    case easing_func::CubicInOut:    return polynomial<f64, ease_mode::InOut> {.Start = 0., .End = 1., .Exponent = 3.}(t); break;
+    case easing_func::QuartIn:       return polynomial<f64, ease_mode::In> {.Start = 0., .End = 1., .Exponent = 4.}(t); break;
+    case easing_func::QuartOut:      return polynomial<f64, ease_mode::Out> {.Start = 0., .End = 1., .Exponent = 4.}(t); break;
+    case easing_func::QuartInOut:    return polynomial<f64, ease_mode::InOut> {.Start = 0., .End = 1., .Exponent = 4.}(t); break;
+    case easing_func::QuintIn:       return polynomial<f64, ease_mode::In> {.Start = 0., .End = 1., .Exponent = 5.}(t); break;
+    case easing_func::QuintOut:      return polynomial<f64, ease_mode::Out> {.Start = 0., .End = 1., .Exponent = 5.}(t); break;
+    case easing_func::QuintInOut:    return polynomial<f64, ease_mode::InOut> {.Start = 0., .End = 1., .Exponent = 5.}(t); break;
+    case easing_func::ExpoIn:        return exponential<f64, ease_mode::In> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::ExpoOut:       return exponential<f64, ease_mode::Out> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::ExpoInOut:     return exponential<f64, ease_mode::InOut> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::BounceIn:      return bounce<f64, ease_mode::In> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::BounceOut:     return bounce<f64, ease_mode::Out> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::BounceInOut:   return bounce<f64, ease_mode::InOut> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::ElasticIn:     return elastic<f64, ease_mode::In> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::ElasticOut:    return elastic<f64, ease_mode::Out> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::ElasticInOut:  return elastic<f64, ease_mode::InOut> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::BackIn:        return back<f64, ease_mode::In> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::BackOut:       return back<f64, ease_mode::Out> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::BackInOut:     return back<f64, ease_mode::InOut> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::CircularIn:    return circular<f64, ease_mode::In> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::CircularOut:   return circular<f64, ease_mode::Out> {.Start = 0., .End = 1.}(t); break;
+    case easing_func::CircularInOut: return circular<f64, ease_mode::InOut> {.Start = 0., .End = 1.}(t); break;
     }
 
     return t;

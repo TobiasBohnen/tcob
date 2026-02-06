@@ -41,7 +41,7 @@ concept Lerpable =
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+template <typename T, ease_mode Mode = ease_mode::In>
 class polynomial final {
 public:
     using type = T;
@@ -50,22 +50,18 @@ public:
     type End {};
     f64  Exponent {1.0};
 
-    ease_mode Mode {ease_mode::In};
-
     auto operator()(f64 t) const -> type;
 };
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+template <typename T, ease_mode Mode = ease_mode::In>
 class exponential final {
 public:
     using type = T;
 
     type Start {};
     type End {};
-
-    ease_mode Mode {ease_mode::In};
 
     auto operator()(f64 t) const -> type;
 };
@@ -111,15 +107,13 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+template <typename T, ease_mode Mode = ease_mode::Out>
 class bounce final {
 public:
     using type = T;
 
     type Start;
     type End;
-
-    ease_mode Mode {ease_mode::Out};
 
     auto operator()(f64 t) const -> type;
 
@@ -129,15 +123,13 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+template <typename T, ease_mode Mode = ease_mode::Out>
 class elastic final {
 public:
     using type = T;
 
     type Start;
     type End;
-
-    ease_mode Mode {ease_mode::Out};
 
     f64 Amplitude {1.0};
     f64 Period {0.3};
@@ -147,15 +139,13 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+template <typename T, ease_mode Mode = ease_mode::Out>
 class back final {
 public:
     using type = T;
 
     type Start;
     type End;
-
-    ease_mode Mode {ease_mode::Out};
 
     f64 Overshoot {1.70158};
 
@@ -164,15 +154,13 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+template <typename T, ease_mode Mode = ease_mode::Out>
 class circular final {
 public:
     using type = T;
 
     type Start;
     type End;
-
-    ease_mode Mode {ease_mode::Out};
 
     auto operator()(f64 t) const -> type;
 };
