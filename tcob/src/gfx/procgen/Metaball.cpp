@@ -19,17 +19,14 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-metaball::metaball(size_i gridSize, color_gradient const& gradient)
+metaball::metaball(size_i gridSize)
     : _gridSize {gridSize}
-    , _colors {gradient.colors(false)}
-    , _image {image::CreateEmpty(gridSize, image::format::RGBA)}
 {
 }
 
-auto metaball::image() -> gfx::image const&
+auto metaball::operator()(point_f p) const -> f32
 {
-    if (_dirty) { update_image(); }
-    return _image;
+    return calculate_field(p.X, p.Y);
 }
 
 void metaball::on_update(milliseconds deltaTime)
@@ -41,8 +38,8 @@ void metaball::on_update(milliseconds deltaTime)
             for (auto& b : balls) {
                 if (b.Velocity == point_f::Zero) { continue; }
 
-                b.Position += b.Velocity * dt;
                 _dirty = true;
+                b.Position += b.Velocity * dt;
 
                 // Bounce off bounds
                 if (b.Position.X - b.Radius < 0 || b.Position.X + b.Radius > static_cast<f32>(_gridSize.Width)) {
@@ -75,9 +72,27 @@ auto metaball::calculate_field(f32 x, f32 y) const -> f32
     return sum;
 }
 
-void metaball::update_image()
+auto metaball::is_dirty() const -> bool { return _dirty; }
+void metaball::mark_clean() { _dirty = false; }
+
+////////////////////////////////////////////////////////////
+
+metaball_image::metaball_image(size_i gridSize, color_gradient const& gradient)
+    : metaball {gridSize}
+    , _colors {gradient.colors(false)}
+    , _image {image::CreateEmpty(gridSize, image::format::RGBA)}
 {
-    _dirty = false;
+}
+
+auto metaball_image::image() -> gfx::image const&
+{
+    if (is_dirty()) { update_image(); }
+    return _image;
+}
+
+void metaball_image::update_image()
+{
+    mark_clean();
 
     auto const& imgInfo {_image.info()};
     i32 const   width {imgInfo.Size.Width};

@@ -21,7 +21,7 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-class metaball : public updatable {
+class TCOB_API metaball : public updatable {
 public:
     struct ball {
         point_f Position;
@@ -31,23 +31,37 @@ public:
         auto operator==(ball const&) const -> bool = default;
     };
 
-    explicit metaball(size_i gridSize, color_gradient const& gradient);
+    explicit metaball(size_i gridSize);
 
     prop<std::vector<ball>> Balls;
 
-    auto image() -> image const&;
+    auto operator()(point_f p) const -> f32;
 
 protected:
     void on_update(milliseconds deltaTime) override;
+    auto calculate_field(f32 x, f32 y) const -> f32;
+
+    auto is_dirty() const -> bool;
+    void mark_clean();
 
 private:
-    auto calculate_field(f32 x, f32 y) const -> f32;
+    size_i _gridSize;
+    bool   _dirty {true};
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API metaball_image : public metaball {
+public:
+    metaball_image(size_i gridSize, color_gradient const& gradient);
+
+    auto image() -> image const&;
+
+private:
     void update_image();
 
-    size_i                 _gridSize;
     std::array<color, 256> _colors;
     gfx::image             _image;
-    bool                   _dirty {true};
 };
 
 }
