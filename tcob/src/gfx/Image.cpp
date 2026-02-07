@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <cstring>
 #include <future>
 #include <memory>
 #include <optional>
@@ -133,12 +134,38 @@ void image::set_pixel(usize idx, color c)
     if (image::information::HasAlpha(_info.Format)) { _buffer[idx + 3] = c.A; }
 }
 
+void image::clear()
+{
+    std::ranges::fill(_buffer, 0);
+}
+
 void image::fill(rect_i const& rect, color c)
 {
-    for (i32 y {rect.top()}; y < rect.bottom(); ++y) {
-        for (i32 x {rect.left()}; x < rect.right(); ++x) {
-            set_pixel({x, y}, c);
-        }
+    i32 const  bpp {_info.bytes_per_pixel()};
+    bool const hasAlpha {image::information::HasAlpha(_info.Format)};
+
+    rect_i const clipped {{std::max(0, rect.left()), std::max(0, rect.top())},
+                          {std::min(rect.Size.Width, _info.Size.Width - rect.Position.X),
+                           std::min(rect.Size.Height, _info.Size.Height - rect.Position.Y)}};
+
+    if (clipped.Size.Width <= 0 || clipped.Size.Height <= 0) { return; }
+
+    // Fill first row. Then copy to other rows.
+    usize idx {static_cast<usize>((clipped.top() * _info.Size.Width) + clipped.left()) * bpp};
+    for (i32 x {0}; x < clipped.Size.Width; ++x) {
+        _buffer[idx + 0] = c.R;
+        _buffer[idx + 1] = c.G;
+        _buffer[idx + 2] = c.B;
+        if (hasAlpha) { _buffer[idx + 3] = c.A; }
+        idx += bpp;
+    }
+
+    u8*         firstRow {&_buffer[(clipped.top() * _info.Size.Width + clipped.left()) * bpp]};
+    isize const rowBytes {static_cast<isize>(clipped.Size.Width) * bpp};
+
+    for (i32 y {clipped.top() + 1}; y < clipped.bottom(); ++y) {
+        u8* destRow {&_buffer[(y * _info.Size.Width + clipped.left()) * bpp]};
+        std::memcpy(destRow, firstRow, rowBytes);
     }
 }
 

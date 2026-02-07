@@ -70,6 +70,7 @@ public:
     void set_pixel(point_i pos, color c);
     void set_pixel(usize idx, color c);
 
+    void clear();
     void fill(rect_i const& rect, color c);
     void blit(point_i offset, image const& src);
     void blend(point_i offset, image const& src);

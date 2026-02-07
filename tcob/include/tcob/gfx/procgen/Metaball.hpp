@@ -1,0 +1,53 @@
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include <array>
+#include <vector>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Image.hpp"
+
+namespace tcob::gfx {
+
+////////////////////////////////////////////////////////////
+
+class metaball : public updatable {
+public:
+    struct ball {
+        point_f Position;
+        f32     Radius {};
+        point_f Velocity;
+
+        auto operator==(ball const&) const -> bool = default;
+    };
+
+    explicit metaball(size_i gridSize, color_gradient const& gradient);
+
+    prop<std::vector<ball>> Balls;
+
+    auto image() -> image const&;
+
+protected:
+    void on_update(milliseconds deltaTime) override;
+
+private:
+    auto calculate_field(f32 x, f32 y) const -> f32;
+    void update_image();
+
+    size_i                 _gridSize;
+    std::array<color, 256> _colors;
+    gfx::image             _image;
+    bool                   _dirty {true};
+};
+
+}
