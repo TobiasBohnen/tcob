@@ -42,11 +42,11 @@ void metaball::on_update(milliseconds deltaTime)
                 b.Position += b.Velocity * dt;
 
                 // Bounce off bounds
-                if (b.Position.X - b.Radius < 0 || b.Position.X + b.Radius > static_cast<f32>(_gridSize.Width)) {
+                if (b.Position.X - b.Radius < 0 || b.Position.X + b.Radius >= static_cast<f32>(_gridSize.Width)) {
                     b.Velocity.X *= -1.0f;
                     b.Position.X = std::clamp(b.Position.X, b.Radius, static_cast<f32>(_gridSize.Width) - b.Radius);
                 }
-                if (b.Position.Y - b.Radius < 0 || b.Position.Y + b.Radius > static_cast<f32>(_gridSize.Height)) {
+                if (b.Position.Y - b.Radius < 0 || b.Position.Y + b.Radius >= static_cast<f32>(_gridSize.Height)) {
                     b.Velocity.Y *= -1.0f;
                     b.Position.Y = std::clamp(b.Position.Y, b.Radius, static_cast<f32>(_gridSize.Height) - b.Radius);
                 }
