@@ -50,8 +50,8 @@ auto perlin_noise::operator()(point_f p) const -> f32
     f32 const x {ps.X - std::floor(ps.X)};
     f32 const y {ps.Y - std::floor(ps.Y)};
 
-    i32 x0 {static_cast<i32>(x * _gridSize)};
-    i32 y0 {static_cast<i32>(y * _gridSize)};
+    i32 const x0 {static_cast<i32>(x * _gridSize)};
+    i32 const y0 {static_cast<i32>(y * _gridSize)};
 
     i32 const x1 {(x0 + 1) % _gridSize};
     i32 const y1 {(y0 + 1) % _gridSize};
