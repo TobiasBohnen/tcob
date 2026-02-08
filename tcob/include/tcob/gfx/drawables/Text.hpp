@@ -62,10 +62,8 @@ protected:
     void on_transform_changed() override;
 
 private:
-    void reshape();
     void format();
 
-    bool _needsReshape {true};
     bool _needsFormat {true};
 
     std::vector<quad> _quads {};

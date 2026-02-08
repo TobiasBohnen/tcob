@@ -22,6 +22,7 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Serialization.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -117,6 +118,8 @@ public:
     font();
     virtual ~font();
 
+    signal<> Resized;
+
     auto info() const -> information const&;
     auto texture() const -> asset_ptr<gfx::texture>;
 
@@ -141,6 +144,7 @@ private:
 
     point_i _fontTextureCursor {point_i::Zero};
     u32     _fontTextureLayer {0};
+    u32     _textureLayerCount {2};
     bool    _textureNeedsSetup {false};
 
     information            _info;

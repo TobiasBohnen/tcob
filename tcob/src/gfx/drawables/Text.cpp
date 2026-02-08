@@ -22,19 +22,20 @@ namespace tcob::gfx {
 text::text(asset_ptr<font> font)
     : _font {std::move(font)}
 {
+    _font->Resized.connect([this]() { _needsFormat = true; });
+
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
     Pivot.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
     _material->first_pass().Texture = _font->texture();
     Shader.Changed.connect([this](auto const& value) { _material->first_pass().Shader = value; });
-    Text.Changed.connect([this](auto const&) { _needsReshape = true; });
-    Style.Changed.connect([this](auto const&) { _needsReshape = true; });
+    Text.Changed.connect([this](auto const&) { _needsFormat = true; });
+    Style.Changed.connect([this](auto const&) { _needsFormat = true; });
 }
 
 void text::on_update(milliseconds deltaTime)
 {
     if (!_font.is_ready()) { return; }
-    if (_needsReshape) { reshape(); }
     if (_needsFormat) { format(); }
     if (is_visible()) { Effects.update(deltaTime); }
 }
@@ -66,7 +67,7 @@ void text::on_transform_changed()
 
 void text::force_reshape()
 {
-    _needsReshape = true;
+    _needsFormat = true;
 }
 
 void text::format()
@@ -131,9 +132,4 @@ void text::format()
     }
 }
 
-void text::reshape()
-{
-    _needsFormat  = true;
-    _needsReshape = false;
-}
 }

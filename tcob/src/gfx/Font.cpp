@@ -33,7 +33,6 @@ namespace tcob::gfx {
 
 constexpr i32 FONT_TEXTURE_SIZE {2048};
 constexpr f32 FONT_TEXTURE_SIZE_F {static_cast<f32>(FONT_TEXTURE_SIZE)};
-constexpr u32 FONT_TEXTURE_LAYERS {3};
 
 constexpr i32 GLYPH_PADDING {4};
 
@@ -78,7 +77,7 @@ auto font::load(std::span<std::byte const> fontData, u32 size) noexcept -> bool
 
 void font::setup_texture()
 {
-    _texture->resize({FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE}, FONT_TEXTURE_LAYERS, texture::format::R8);
+    _texture->resize({FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE}, _textureLayerCount, texture::format::R8);
     _texture->Filtering = texture::filtering::Linear;
     _texture->Wrapping  = texture::wrapping::ClampToBorder;
 
@@ -101,8 +100,12 @@ auto font::render_text(utf8_string_view text, bool kerning) -> std::vector<glyph
     for (u32 i {0}; i < len; ++i) {
         u32 const cp0 {u32text[i]};
         if (!cache_render_glyph(cp0)) {
-            logger::Error("TrueTypeFont: shaping of text \"{}\" failed.", text);
-            return {};
+            logger::Info("font: texture capacity exceeded, expanding to {} layers.", _textureLayerCount + 1);
+            ++_textureLayerCount;
+            _glyphCache.clear();
+            _textureNeedsSetup = true;
+            Resized();
+            return render_text(text, kerning);
         }
 
         auto& glyph {retValue.emplace_back(_glyphCache[cp0])};
@@ -199,8 +202,8 @@ auto font::cache_render_glyph(u32 cp) -> bool
 
         if (_fontTextureCursor.Y + bitmapSize.Height >= FONT_TEXTURE_SIZE) { // new level
             _fontTextureLayer++;
-            if (_fontTextureLayer >= FONT_TEXTURE_LAYERS) {
-                logger::Error("TrueTypeFont: font texture layer {} exceeds maximum.", _fontTextureLayer);
+            if (_fontTextureLayer >= _textureLayerCount) {
+                return false;
             }
             _fontTextureCursor = point_i::Zero;
         }
