@@ -62,8 +62,8 @@ auto perlin_noise::operator()(point_f p) const -> f32
 
 auto perlin_noise::random_gradient(point_i i) const -> point_f
 {
-    rng       rand {(i.X * 73856093) ^ (i.Y * 19349663) ^ _seed};
-    f32 const random {rand(0.0f, TAU_F)};
+    rng       rng {(i.X * 73856093) ^ (i.Y * 19349663) ^ _seed};
+    f32 const random {rng(0.0f, TAU_F)};
     return {std::cos(random), std::sin(random)};
 }
 
@@ -79,10 +79,9 @@ cellular_noise::cellular_noise(i32 points, f32 scale, u64 seed)
     : _scale {scale}
     , _pointCount {points}
     , _gridSize {static_cast<i32>(std::sqrt(points))}
-    , _rand {seed}
 {
     _grid.resize(_gridSize * _gridSize);
-    generate_points();
+    generate_points(seed);
 }
 
 auto cellular_noise::operator()(point_f p) const -> f32
@@ -117,10 +116,11 @@ auto cellular_noise::operator()(point_f p) const -> f32
     return static_cast<f32>(minDist);
 }
 
-void cellular_noise::generate_points()
+void cellular_noise::generate_points(u64 seed)
 {
+    rng rng {seed};
     for (i32 i {0}; i < _pointCount; ++i) {
-        point_f   p {_rand(0.0f, 1.0f), _rand(0.0f, 1.0f)};
+        point_f   p {rng(0.0f, 1.0f), rng(0.0f, 1.0f)};
         i32 const cellX {static_cast<i32>(p.X * static_cast<f32>(_gridSize))};
         i32 const cellY {static_cast<i32>(p.Y * static_cast<f32>(_gridSize))};
         i32 const idx {(cellY * _gridSize) + cellX};
@@ -133,9 +133,8 @@ void cellular_noise::generate_points()
 value_noise::value_noise(i32 gridSize, f32 scale, u64 seed)
     : _scale {scale}
     , _grid {{gridSize, gridSize}}
-    , _rand {seed}
 {
-    generate_grid(gridSize);
+    generate_grid(gridSize, seed);
 }
 
 auto value_noise::operator()(point_f p) const -> f32
@@ -161,11 +160,12 @@ auto value_noise::operator()(point_f p) const -> f32
     return interpolate(n0, n1, sy);
 }
 
-void value_noise::generate_grid(i32 gridSize)
+void value_noise::generate_grid(i32 gridSize, u64 seed)
 {
+    rng rng {seed};
     for (i32 x {0}; x < gridSize; ++x) {
         for (i32 y {0}; y < gridSize; ++y) {
-            _grid[x, y] = _rand(0.0f, 1.0f);
+            _grid[x, y] = rng(0.0f, 1.0f);
         }
     }
 }

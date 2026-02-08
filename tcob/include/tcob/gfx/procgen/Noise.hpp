@@ -10,7 +10,6 @@
 
 #include "tcob/core/Grid.hpp"
 #include "tcob/core/Point.hpp"
-#include "tcob/core/random/Random.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
@@ -40,13 +39,12 @@ public:
     auto operator()(point_f p) const -> f32;
 
 private:
-    void generate_points();
+    void generate_points(u64 seed);
 
     f32                               _scale;
     i32                               _pointCount;
     i32                               _gridSize;
     std::vector<std::vector<point_f>> _grid;
-    rng                               _rand;
 };
 
 ////////////////////////////////////////////////////////////
@@ -58,11 +56,10 @@ public:
     auto operator()(point_f p) const -> f32;
 
 private:
-    void generate_grid(i32 gridSize);
+    void generate_grid(i32 gridSize, u64 seed);
 
     f32       _scale;
     grid<f32> _grid;
-    rng       _rand;
 };
 
 }
