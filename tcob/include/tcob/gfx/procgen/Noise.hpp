@@ -15,28 +15,11 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API noise_base {
-public:
-    explicit noise_base(u64 seed);
-    virtual ~noise_base() = default;
-
-    virtual auto operator()(point_f p) const -> f32 = 0;
-
-protected:
-    auto interpolate(f32 a0, f32 a1, f32 w) const -> f32;
-    auto rand(f32 min, f32 max) -> f32;
-
-private:
-    rng _rand;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API perlin_noise final : public noise_base {
+class TCOB_API perlin_noise final {
 public:
     explicit perlin_noise(i32 gridSize, f32 scale = 1.0f, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
 
-    auto operator()(point_f p) const -> f32 override;
+    auto operator()(point_f p) const -> f32;
 
 private:
     auto random_gradient(point_i i) const -> point_f;
@@ -50,11 +33,11 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API cellular_noise final : public noise_base {
+class TCOB_API cellular_noise final {
 public:
     explicit cellular_noise(i32 points, f32 scale = 1.0f, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
 
-    auto operator()(point_f p) const -> f32 override;
+    auto operator()(point_f p) const -> f32;
 
 private:
     void generate_points();
@@ -63,21 +46,23 @@ private:
     i32                               _pointCount;
     i32                               _gridSize;
     std::vector<std::vector<point_f>> _grid;
+    rng                               _rand;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API value_noise final : public noise_base {
+class TCOB_API value_noise final {
 public:
     value_noise(i32 gridSize, f32 scale = 1.0f, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
 
-    auto operator()(point_f p) const -> f32 override;
+    auto operator()(point_f p) const -> f32;
 
 private:
     void generate_grid(i32 gridSize);
 
     f32       _scale;
     grid<f32> _grid;
+    rng       _rand;
 };
 
 }

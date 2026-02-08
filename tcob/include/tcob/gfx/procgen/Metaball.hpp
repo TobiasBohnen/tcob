@@ -18,7 +18,6 @@
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx {
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API metaball : public updatable {

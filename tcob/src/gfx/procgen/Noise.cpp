@@ -17,27 +17,16 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-noise_base::noise_base(u64 seed)
-    : _rand {seed}
-{
-}
-
-auto noise_base::interpolate(f32 a0, f32 a1, f32 w) const -> f32
+static auto interpolate(f32 a0, f32 a1, f32 w) -> f32
 {
     f32 const e {w * w * w * (w * (w * 6.0f - 15.0f) + 10.0f)};
     return ((a1 - a0) * e) + a0;
 }
 
-auto noise_base::rand(f32 min, f32 max) -> f32
-{
-    return _rand(min, max);
-}
-
 ////////////////////////////////////////////////////////////
 
 perlin_noise::perlin_noise(i32 gridSize, f32 scale, u64 seed)
-    : noise_base {seed}
-    , _scale {scale}
+    : _scale {scale}
     , _seed {seed}
     , _gridSize {gridSize}
 {
@@ -87,10 +76,10 @@ auto perlin_noise::dot_grid_gradient(point_i i, point_f f) const -> f32
 ////////////////////////////////////////////////////////////
 
 cellular_noise::cellular_noise(i32 points, f32 scale, u64 seed)
-    : noise_base {seed}
-    , _scale {scale}
+    : _scale {scale}
     , _pointCount {points}
     , _gridSize {static_cast<i32>(std::sqrt(points))}
+    , _rand {seed}
 {
     _grid.resize(_gridSize * _gridSize);
     generate_points();
@@ -131,7 +120,7 @@ auto cellular_noise::operator()(point_f p) const -> f32
 void cellular_noise::generate_points()
 {
     for (i32 i {0}; i < _pointCount; ++i) {
-        point_f   p {rand(0.0f, 1.0f), rand(0.0f, 1.0f)};
+        point_f   p {_rand(0.0f, 1.0f), _rand(0.0f, 1.0f)};
         i32 const cellX {static_cast<i32>(p.X * static_cast<f32>(_gridSize))};
         i32 const cellY {static_cast<i32>(p.Y * static_cast<f32>(_gridSize))};
         i32 const idx {(cellY * _gridSize) + cellX};
@@ -142,9 +131,9 @@ void cellular_noise::generate_points()
 ////////////////////////////////////////////////////////////
 
 value_noise::value_noise(i32 gridSize, f32 scale, u64 seed)
-    : noise_base {seed}
-    , _scale {scale}
+    : _scale {scale}
     , _grid {{gridSize, gridSize}}
+    , _rand {seed}
 {
     generate_grid(gridSize);
 }
@@ -176,7 +165,7 @@ void value_noise::generate_grid(i32 gridSize)
 {
     for (i32 x {0}; x < gridSize; ++x) {
         for (i32 y {0}; y < gridSize; ++y) {
-            _grid[x, y] = rand(0.0f, 1.0f);
+            _grid[x, y] = _rand(0.0f, 1.0f);
         }
     }
 }
