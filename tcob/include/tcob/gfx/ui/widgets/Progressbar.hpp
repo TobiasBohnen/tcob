@@ -27,9 +27,9 @@ public:
 
     explicit progress_bar(init const& wi);
 
-    prop_val<i32> Min;
-    prop_val<i32> Max;
-    prop_val<i32> Value;
+    prop_chk<i32> Min;
+    prop_chk<i32> Max;
+    prop_chk<i32> Value;
 
 protected:
     void on_draw(widget_painter& painter) override;

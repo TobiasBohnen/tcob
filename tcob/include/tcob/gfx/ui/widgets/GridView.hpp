@@ -41,8 +41,8 @@ public:
     prop<std::vector<item>> Header;
     prop<grid<item>>        Grid;
 
-    prop<point_i>          SelectedCellIndex; // TODO: change to prop_val
-    prop<point_i>          HoveredCellIndex;  // TODO: change to prop_val
+    prop<point_i>          SelectedCellIndex; // TODO: change to prop_chk
+    prop<point_i>          HoveredCellIndex;  // TODO: change to prop_chk
     prop<grid_select_mode> SelectMode;
     prop<bool>             HeaderSelectable;
 

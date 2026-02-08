@@ -38,8 +38,8 @@ public:
 
     explicit accordion(init const& wi);
 
-    prop_val<isize> ActiveSectionIndex;
-    prop_val<isize> HoveredSectionIndex;
+    prop_chk<isize> ActiveSectionIndex;
+    prop_chk<isize> HoveredSectionIndex;
     prop<bool>      MaximizeActiveSection;
 
     template <std::derived_from<widget_container> T>

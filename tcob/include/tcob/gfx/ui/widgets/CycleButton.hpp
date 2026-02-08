@@ -34,7 +34,7 @@ public:
 
     explicit cycle_button(init const& wi);
 
-    prop_val<isize> SelectedItemIndex;
+    prop_chk<isize> SelectedItemIndex;
 
     prop<std::vector<item>> Items;
 

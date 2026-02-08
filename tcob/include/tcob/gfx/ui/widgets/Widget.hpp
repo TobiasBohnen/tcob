@@ -60,9 +60,9 @@ public:
     prop<milliseconds> TransitionDuration;
     prop<milliseconds> TransitionStep;
 
-    prop_val<rect_f> Bounds;
-    prop_val<size_f> MinSize;
-    prop_val<size_f> MaxSize;
+    prop_chk<rect_f> Bounds;
+    prop_chk<size_f> MinSize;
+    prop_chk<size_f> MaxSize;
     prop<dimensions> Flex;
 
     cursor_mode Cursor {cursor_mode::Default};

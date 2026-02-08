@@ -43,27 +43,27 @@ inline auto field_source<T>::set(type const& value, bool force) -> bool
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline validating_field_source<T>::validating_field_source(validate_func val)
-    : _validate {std::move(val)}
+inline checked_field_source<T>::checked_field_source(chk_func func)
+    : _check {std::move(func)}
 {
 }
 
 template <typename T>
-inline auto validating_field_source<T>::get() noexcept -> return_type
+inline auto checked_field_source<T>::get() noexcept -> return_type
 {
     return _value;
 }
 
 template <typename T>
-inline auto validating_field_source<T>::get() const noexcept -> const_return_type
+inline auto checked_field_source<T>::get() const noexcept -> const_return_type
 {
     return _value;
 }
 
 template <typename T>
-inline auto validating_field_source<T>::set(type const& value, bool force) -> bool
+inline auto checked_field_source<T>::set(type const& value, bool force) -> bool
 {
-    T const newValue {_validate(value)};
+    T const newValue {_check(value)};
     if constexpr (Equatable<T>) {
         if (!force && _value == newValue) { return false; }
     }

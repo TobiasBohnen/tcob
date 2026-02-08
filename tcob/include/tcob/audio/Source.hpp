@@ -27,7 +27,7 @@ public:
     std::any DecoderContext;
 
     prop<f32> Volume;
-    prop<f32> Panning; // TODO: prop_val
+    prop<f32> Panning; // TODO: prop_chk
 
     virtual auto info() const -> std::optional<specification> = 0;
     virtual auto duration() const -> milliseconds             = 0;

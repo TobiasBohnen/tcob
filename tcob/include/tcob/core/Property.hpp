@@ -40,23 +40,23 @@ namespace detail {
     ////////////////////////////////////////////////////////////
 
     template <typename T>
-    class validating_field_source final {
+    class checked_field_source final {
     public:
         using type              = std::remove_const_t<T>;
         using return_type       = type&;
         using const_return_type = type const&;
 
-        using validate_func = std::function<type(type const&)>;
+        using chk_func = std::function<type(type const&)>;
 
-        validating_field_source(validate_func val);
+        checked_field_source(chk_func func);
 
         auto get() noexcept -> return_type;
         auto get() const noexcept -> const_return_type;
         auto set(type const& value, bool force) -> bool;
 
     private:
-        validate_func _validate;
-        type          _value {};
+        chk_func _check;
+        type     _value {};
     };
 
     ////////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@ using prop = detail::prop_base<T, detail::field_source<T>>;
 
 // validating field-backed property.
 template <typename T>
-using prop_val = detail::prop_base<T, detail::validating_field_source<T>>;
+using prop_chk = detail::prop_base<T, detail::checked_field_source<T>>;
 
 // function-backed property.
 template <typename T>

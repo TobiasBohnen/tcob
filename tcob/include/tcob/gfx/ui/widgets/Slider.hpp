@@ -36,10 +36,10 @@ public:
 
     explicit slider(init const& wi);
 
-    prop_val<f32> Min;
-    prop_val<f32> Max;
+    prop_chk<f32> Min;
+    prop_chk<f32> Max;
     prop<f32>     Step;
-    prop_val<f32> Value;
+    prop_chk<f32> Value;
 
 protected:
     void on_draw(widget_painter& painter) override;
@@ -84,12 +84,12 @@ public:
 
     explicit range_slider(init const& wi);
 
-    prop_val<f32>                 Min;
-    prop_val<f32>                 Max;
-    prop_val<f32>                 MinRange;
-    prop_val<f32>                 MaxRange;
+    prop_chk<f32>                 Min;
+    prop_chk<f32>                 Max;
+    prop_chk<f32>                 MinRange;
+    prop_chk<f32>                 MaxRange;
     prop<f32>                     Step;
-    prop_val<std::pair<f32, f32>> Values;
+    prop_chk<std::pair<f32, f32>> Values;
 
 protected:
     void on_draw(widget_painter& painter) override;

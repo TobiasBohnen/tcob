@@ -44,8 +44,8 @@ public:
 
     explicit tab_container(init const& wi);
 
-    prop_val<isize> ActiveTabIndex;
-    prop_val<isize> HoveredTabIndex;
+    prop_chk<isize> ActiveTabIndex;
+    prop_chk<isize> HoveredTabIndex;
 
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name) -> T&;

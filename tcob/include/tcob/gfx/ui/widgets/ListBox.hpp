@@ -31,8 +31,8 @@ public:
 
     explicit list_box(init const& wi);
 
-    prop_val<isize> SelectedItemIndex;
-    prop_val<isize> HoveredItemIndex;
+    prop_chk<isize> SelectedItemIndex;
+    prop_chk<isize> HoveredItemIndex;
 
     prop<std::vector<item>> Items;
     prop<utf8_string>       Filter;

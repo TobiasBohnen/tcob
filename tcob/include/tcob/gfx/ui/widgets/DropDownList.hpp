@@ -41,8 +41,8 @@ public:
 
     explicit drop_down_list(init const& wi);
 
-    prop_val<isize> SelectedItemIndex;
-    prop_val<isize> HoveredItemIndex;
+    prop_chk<isize> SelectedItemIndex;
+    prop_chk<isize> HoveredItemIndex;
 
     prop<std::vector<item>> Items;
 
