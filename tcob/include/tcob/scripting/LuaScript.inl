@@ -58,7 +58,7 @@ inline auto script::run(string_view script, string const& name) const -> std::ex
     }
 }
 template <typename T>
-inline auto script::create_wrapper(string const& name, bool autoMeta)
+inline auto script::create_wrapper(string const& name, bool autoMeta) -> std::shared_ptr<wrapper<T>>
 {
     auto retValue {std::make_shared<wrapper<T>>(_view, &_globalTable, name, autoMeta)};
     _wrappers.push_back(retValue);

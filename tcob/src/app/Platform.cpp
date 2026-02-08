@@ -97,12 +97,12 @@ platform::~platform()
     _configFile = nullptr;
     remove_services();
 
-    //  file system
+    // file system
     logger::Info("exiting");
     remove_service<logger>();
     io::detail::done();
 
-    //  FreeType
+    // FreeType
     gfx::truetype_font_engine::Done();
 }
 
