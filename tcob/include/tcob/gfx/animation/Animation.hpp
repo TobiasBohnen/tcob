@@ -34,16 +34,21 @@ public:
 
 class TCOB_API frame_animation final {
 public:
-    std::vector<frame> Frames {};
-
-    auto operator()(f64 t) const -> string;
+    explicit frame_animation(std::vector<frame> const& frames);
 
     auto get_frame_at(milliseconds time) const -> string;
     auto duration() const -> milliseconds;
+    auto is_empty() const -> bool;
+
+    auto operator()(f64 t) const -> string;
 
     static inline char const* AssetName {"frame_animation"};
 
     auto operator==(frame_animation const& other) const -> bool = default;
+
+private:
+    std::vector<frame> _frames;
+    milliseconds       _duration {};
 };
 
 using frame_animation_tween = callable_tween<frame_animation>;

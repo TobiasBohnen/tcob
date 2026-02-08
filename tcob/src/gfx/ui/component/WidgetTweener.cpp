@@ -58,7 +58,7 @@ void widget_tweener::set_value(f32 value)
 
 void animation_tweener::start(gfx::frame_animation const& ani, playback_mode mode)
 {
-    if (ani.Frames.empty()) { stop(); }
+    if (ani.is_empty()) { stop(); }
 
     _tween = std::make_unique<gfx::frame_animation_tween>(ani.duration(), ani);
     _tween->Value.Changed.connect([this](auto const& str) { Changed(str); });

@@ -245,8 +245,12 @@ void cfg_frame_animation_loader::declare()
 
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
-            auto* asset {default_new<frame_animation, asset_def>(k, bucket(), _cache)};
-            assetSection.try_get(asset->assetPtr->Frames, API::Animation::frames);
+            std::vector<frame> frames;
+            assetSection.try_get(frames, API::Animation::frames);
+
+            auto def {std::make_unique<asset_def>()};
+            def->assetPtr = bucket()->template create<frame_animation>(k, frames);
+            _cache.push_back(std::move(def));
         }
     }
 }

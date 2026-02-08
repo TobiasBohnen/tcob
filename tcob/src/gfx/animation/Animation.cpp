@@ -5,7 +5,17 @@
 
 #include "tcob/gfx/animation/Animation.hpp"
 
+#include <vector>
+
 namespace tcob::gfx {
+
+frame_animation::frame_animation(std::vector<frame> const& frames)
+    : _frames {frames}
+{
+    for (auto const& frame : _frames) {
+        _duration += frame.Duration;
+    }
+}
 
 auto frame_animation::operator()(f64 t) const -> string
 {
@@ -14,24 +24,23 @@ auto frame_animation::operator()(f64 t) const -> string
 
 auto frame_animation::get_frame_at(milliseconds time) const -> string
 {
-    if (Frames.empty()) { return ""; }
+    if (_frames.empty()) { return ""; }
 
-    for (auto const& frame : Frames) {
+    for (auto const& frame : _frames) {
         if (time <= frame.Duration) { return frame.Name; }
         time -= frame.Duration;
     }
 
-    return Frames[Frames.size() - 1].Name;
+    return _frames[_frames.size() - 1].Name;
 }
 
 auto frame_animation::duration() const -> milliseconds
 {
-    milliseconds retValue {0};
-    for (auto const& frame : Frames) {
-        retValue += frame.Duration;
-    }
-
-    return retValue;
+    return _duration;
 }
 
+auto frame_animation::is_empty() const -> bool
+{
+    return _frames.empty();
+}
 }
