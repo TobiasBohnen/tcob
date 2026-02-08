@@ -23,24 +23,25 @@ namespace tcob::gfx {
 
 static auto IndexToPosition(i32 i, render_direction direction, size_i layerSize) -> point_i
 {
-    i32 row {}, col {};
+    i32 col {};
+    i32 row {};
 
     switch (direction) {
     case render_direction::RightDown:
-        row = i / layerSize.Width;
         col = i % layerSize.Width;
+        row = i / layerSize.Width;
         break;
     case render_direction::RightUp:
-        row = i / layerSize.Width;
         col = (layerSize.Width - 1) - (i % layerSize.Width);
+        row = i / layerSize.Width;
         break;
     case render_direction::LeftDown:
-        row = (layerSize.Height - 1) - (i / layerSize.Width);
         col = i % layerSize.Width;
+        row = (layerSize.Height - 1) - (i / layerSize.Width);
         break;
     case render_direction::LeftUp:
-        row = (layerSize.Height - 1) - (i / layerSize.Width);
         col = (layerSize.Width - 1) - (i % layerSize.Width);
+        row = (layerSize.Height - 1) - (i / layerSize.Width);
         break;
     }
 
@@ -112,12 +113,14 @@ void tilemap_base::on_update(milliseconds /* deltaTime */)
         if (!layer->Visible) { continue; }
 
         auto const& tiles {*layer->Tiles};
-        for (i32 i {0}; i < tiles.width() * tiles.height(); ++i) {
-            auto const tilePos {IndexToPosition(i, layer->RenderDirection, tiles.size())};
-            for (isize p {0}; p < Material->pass_count(); ++p) {
-                setup_quad(Material->get_pass(p), _quads[p].emplace_back(), tilePos + *layer->Offset, tiles[tilePos]);
-                _inds[p] = geometry::get_indices(_quads[p].size());
+        for (isize p {0}; p < Material->pass_count(); ++p) {
+            auto&      quads {_quads[p]};
+            auto const tilesSize {tiles.size()};
+            for (i32 i {0}; i < tilesSize.area(); ++i) {
+                auto const tilePos {IndexToPosition(i, layer->RenderDirection, tilesSize)};
+                setup_quad(Material->get_pass(p), quads.emplace_back(), tilePos + *layer->Offset, tiles[tilePos]);
             }
+            _inds[p] = geometry::get_indices(quads.size());
         }
     }
 }
