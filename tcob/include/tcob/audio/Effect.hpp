@@ -11,21 +11,11 @@
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API effect_base {
-public:
-    effect_base()          = default;
-    virtual ~effect_base() = default;
-
-    virtual auto operator()(buffer const& img) const -> buffer = 0;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API delay_effect : public effect_base {
+class TCOB_API delay_effect {
 public:
     delay_effect(seconds delayTime, f32 feedback, f32 mix);
 
-    auto operator()(buffer const& buf) const -> buffer override;
+    auto operator()(buffer const& buf) const -> buffer;
 
 private:
     seconds _delayTime;
@@ -35,11 +25,11 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API pitch_shift_effect : public effect_base {
+class TCOB_API pitch_shift_effect {
 public:
     explicit pitch_shift_effect(f32 pitchFactor);
 
-    auto operator()(buffer const& buf) const -> buffer override;
+    auto operator()(buffer const& buf) const -> buffer;
 
 private:
     f32 _pitchFactor;

@@ -76,6 +76,5 @@ public:
 class buffer;
 class decoder;
 class source;
-class effect_base;
 
 }
