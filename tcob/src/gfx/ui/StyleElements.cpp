@@ -88,7 +88,8 @@ auto border_element::thickness() const -> ui::thickness
 
 auto text_element::calc_font_size(f32 height) const -> u32
 {
-    return static_cast<u32>(std::floor(Size.calc(1.0f, height)));
+    f32 const size {std::floor(Size.calc(1.0f, height))};
+    return std::clamp(helper::round_to_multiple(static_cast<u32>(size), 4u), 4u, 128u); // TODO: customize?
 }
 
 ////////////////////////////////////////////////////////////
