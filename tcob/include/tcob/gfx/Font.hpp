@@ -115,7 +115,7 @@ public:
 
     ////////////////////////////////////////////////////////////
 
-    font();
+    explicit font(string name = "");
     virtual ~font();
 
     signal<> Resized;
@@ -131,6 +131,8 @@ public:
     void decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs);
 
     auto get_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>;
+
+    auto name() const -> string const&;
 
     static inline char const* AssetName {"font"};
 
@@ -149,6 +151,7 @@ private:
 
     information            _info;
     std::vector<std::byte> _fontData {};
+    string                 _name;
 
     std::unique_ptr<truetype_font_engine> _engine;
 

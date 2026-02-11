@@ -6,6 +6,7 @@
 #include "tcob/gfx/FontFamily.hpp"
 
 #include <cstddef>
+#include <format>
 #include <optional>
 #include <span>
 #include <utility>
@@ -103,9 +104,7 @@ auto font_family::get_font(font::style style, u32 size) -> asset_ptr<font>
 {
     auto fallbackStyle {get_style(style)};
     if (!fallbackStyle) {
-#if !defined(__EMSCRIPTEN__) // TODO: fixed in llvm 19
         logger::Error("FontFamily {}: no sources for font style: style {}, size {}.", _name, style, size);
-#endif
         return {};
     }
 
@@ -126,14 +125,14 @@ auto font_family::get_font(font::style style, u32 size) -> asset_ptr<font>
         entry.Data = fs.read_all<std::byte>();
     }
 
-#if !defined(__EMSCRIPTEN__) // TODO: fixed in llvm 19
     logger::Info("FontFamily {}: created new font: style {}, size {}.", _name, fontStyle, size);
-#endif
 
     // load font
-    auto const& asset {entry.Fonts[size]};
-    if (asset->load(entry.Data, size)) {
-        return asset;
+    auto const            fontName {std::format("{}-{}-{}", _name, fontStyle, size)};
+    asset_owner_ptr<font> font {fontName, fontName};
+    entry.Fonts[size] = font;
+    if (font->load(entry.Data, size)) {
+        return font;
     }
 
     return {};

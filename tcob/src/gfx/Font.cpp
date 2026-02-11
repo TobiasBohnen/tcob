@@ -36,8 +36,9 @@ constexpr f32 FONT_TEXTURE_SIZE_F {static_cast<f32>(FONT_TEXTURE_SIZE)};
 
 constexpr i32 GLYPH_PADDING {4};
 
-font::font()
-    : _engine {std::make_unique<truetype_font_engine>()}
+font::font(string name)
+    : _name {std::move(name)}
+    , _engine {std::make_unique<truetype_font_engine>()}
 {
 }
 
@@ -100,7 +101,7 @@ auto font::render_text(utf8_string_view text, bool kerning) -> std::vector<glyph
     for (u32 i {0}; i < len; ++i) {
         u32 const cp0 {u32text[i]};
         if (!cache_render_glyph(cp0)) {
-            logger::Info("font: texture capacity exceeded, expanding to {} layers.", _textureLayerCount + 1);
+            logger::Info("Font {}: texture capacity exceeded, expanding to {} layers.", _name, _textureLayerCount + 1);
             ++_textureLayerCount;
             _glyphCache.clear();
             _textureNeedsSetup = true;
@@ -180,6 +181,11 @@ auto font::get_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>
     }
 
     return retValue;
+}
+
+auto font::name() const -> string const&
+{
+    return _name;
 }
 
 auto font::info() const -> font::information const&
