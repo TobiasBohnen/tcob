@@ -42,7 +42,7 @@ auto file_hasher::crc32() const -> u32
 static auto check(string const& msg, i32 c) -> bool
 {
     if (c == 0) {
-        logger::Error(std::format("{}: {}", msg, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())));
+        logger::Error("{}: {}", msg, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     }
 
     return c != 0;
