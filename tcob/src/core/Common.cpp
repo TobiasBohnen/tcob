@@ -21,6 +21,14 @@ auto round_to_multiple(i32 num, i32 step) -> i32
     return num < 0 ? num - adjustment : num + adjustment;
 }
 
+auto round_to_multiple(u32 num, u32 step) -> u32
+{
+    if (step <= 1) { return num; }
+    u32 const rem {num % step};
+    if (rem == 0) { return num; }
+    return rem > step / 2 ? num + (step - rem) : num - rem;
+}
+
 auto round_to_multiple(f32 num, f32 step) -> f32
 {
     if (step <= 0.0f) { return num; }
