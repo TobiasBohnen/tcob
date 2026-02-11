@@ -15,6 +15,13 @@ inline void logger::Debug([[maybe_unused]] string const& message, [[maybe_unused
 #endif
 }
 
+inline void logger::Debug([[maybe_unused]] string const& message)
+{
+#if defined(TCOB_DEBUG)
+    Log(message, level::Debug);
+#endif
+}
+
 inline void logger::Info(string const& message, auto&&... args)
 {
     FormatInfo(message, std::make_format_args(args...));

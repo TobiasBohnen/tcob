@@ -34,13 +34,6 @@ void logger::FormatDebug(string const& message, std::format_args const& args)
     Debug(std::vformat(message, args));
 }
 
-void logger::Debug([[maybe_unused]] string const& message)
-{
-#if defined(TCOB_DEBUG)
-    Log(message, level::Debug);
-#endif
-}
-
 void logger::FormatInfo(string const& message, std::format_args const& args)
 {
     Info(std::vformat(message, args));
