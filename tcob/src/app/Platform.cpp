@@ -65,7 +65,7 @@ platform::platform(bool headless, game::init const& ginit)
     io::detail::init(ginit.Name, ginit.OrgName);
 
     //  logger
-    if (ginit.LogFile.empty()) {
+    if (ginit.LogFile.empty() || ginit.LogFile == "null") {
         register_service<logger>(std::make_shared<null_logger>());
     } else if (ginit.LogFile == "stdout") {
         register_service<logger>(std::make_shared<stdout_logger>());
