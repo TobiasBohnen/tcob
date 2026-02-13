@@ -382,8 +382,10 @@ void widget_painter::draw_item(item_element const& element, rect_f const& rect, 
 void widget_painter::draw_caret(caret_element const& element, rect_f const& rect, point_f offset)
 {
     rect_f r {rect};
-    r.Size.Width = element.Width.calc(rect.Size.Width);
     r.Position += offset;
+    r.Size.Height = element.Height.calc(rect.Size.Height);
+    r.Position.Y += (rect.Size.Height - r.Size.Height) / 2;
+    r.Size.Width = element.Width.calc(rect.Size.Width);
     do_bordered_rect(r, element.Color, {});
 }
 
@@ -814,7 +816,11 @@ auto widget_painter::format_text(text_element const& element, size_f size, utf8_
                                && (textSize.Width < size.Width || textSize.Height < size.Height)};
 
         if (shouldShrink || shouldGrow) {
-            scale = std::min(std::floor(size.Width) / textSize.Width, std::floor(size.Height) / textSize.Height);
+            if (textSize.Height == 0 || textSize.Width == 0) {
+                scale = 0;
+            } else {
+                scale = std::min(std::floor(size.Width) / textSize.Width, std::floor(size.Height) / textSize.Height);
+            }
         }
     }
 
@@ -823,15 +829,14 @@ auto widget_painter::format_text(text_element const& element, size_f size, utf8_
 
 auto widget_painter::transform_text(text_transform xform, utf8_string_view text) const -> utf8_string
 {
-    utf8_string retValue {text};
     switch (xform) {
-    case text_transform::Capitalize: retValue = utf8::capitalize(text); break;
-    case text_transform::Lowercase:  retValue = utf8::to_lower(text); break;
-    case text_transform::Uppercase:  retValue = utf8::to_upper(text); break;
+    case text_transform::Capitalize: return utf8::capitalize(text); break;
+    case text_transform::Lowercase:  return utf8::to_lower(text); break;
+    case text_transform::Uppercase:  return utf8::to_upper(text); break;
     default:
         break;
     }
-    return retValue;
+    return utf8_string {text};
 }
 
 ////////////////////////////////////////////////////////////

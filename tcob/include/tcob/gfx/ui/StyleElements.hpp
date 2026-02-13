@@ -105,6 +105,7 @@ class TCOB_API caret_element {
 public:
     color        Color {colors::Transparent};
     length       Width {3, length::type::Absolute};
+    length       Height {0.8f, length::type::Relative};
     milliseconds BlinkRate {500};
 
     void lerp(caret_element const& from, caret_element const& to, f64 step);
