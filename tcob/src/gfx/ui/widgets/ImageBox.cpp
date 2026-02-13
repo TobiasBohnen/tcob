@@ -180,7 +180,8 @@ auto image_box::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
 
-    retValue["fit"] = *Fit;
+    retValue["fit"]       = *Fit;
+    retValue["alignment"] = *Alignment;
 
     return retValue;
 }

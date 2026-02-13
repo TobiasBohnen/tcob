@@ -15,6 +15,7 @@
 #include "tcob/core/Serialization.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/core/input/Input_Codes.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::ui {
 
@@ -321,7 +322,7 @@ enum class cursor_mode : u8 {
 
 ////////////////////////////////////////////////////////////
 
-using widget_attribute_types = std::variant<isize, f64, bool, string, point_i, orientation, fit_mode, grid_select_mode>;
+using widget_attribute_types = std::variant<isize, f64, bool, string, point_i, orientation, fit_mode, grid_select_mode, gfx::alignment>;
 using widget_attributes      = std::unordered_map<string, widget_attribute_types>;
 
 ////////////////////////////////////////////////////////////

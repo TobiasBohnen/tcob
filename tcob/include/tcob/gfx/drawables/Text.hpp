@@ -33,9 +33,9 @@ namespace tcob::gfx {
 class TCOB_API text final : public transformable, public drawable, public updatable {
 public:
     struct style {
-        color      Color {colors::White};
-        alignments Alignment {};
-        bool       KerningEnabled {true};
+        color     Color {colors::White};
+        alignment Alignment {};
+        bool      KerningEnabled {true};
 
         auto operator==(style const& other) const -> bool = default;
     };

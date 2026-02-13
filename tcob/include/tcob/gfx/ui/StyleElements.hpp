@@ -159,7 +159,7 @@ public:
     deco_element                Decoration {};
     gfx::font::style            Style {};
     length                      Size {16, length::type::Absolute};
-    gfx::alignments             Alignment {.Horizontal = gfx::horizontal_alignment::Centered, .Vertical = gfx::vertical_alignment::Middle};
+    gfx::alignment              Alignment {.Horizontal = gfx::horizontal_alignment::Centered, .Vertical = gfx::vertical_alignment::Middle};
     text_transform              Transform {text_transform::None};
     auto_size_mode              AutoSize {auto_size_mode::Never};
 

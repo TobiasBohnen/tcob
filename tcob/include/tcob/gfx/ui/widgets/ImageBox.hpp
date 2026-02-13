@@ -37,9 +37,9 @@ public:
 
     signal<drop_event const> Dropped;
 
-    prop<icon>            Image;
-    prop<fit_mode>        Fit;
-    prop<gfx::alignments> Alignment;
+    prop<icon>           Image;
+    prop<fit_mode>       Fit;
+    prop<gfx::alignment> Alignment;
 
     bool Draggable {false};
 

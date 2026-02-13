@@ -169,18 +169,18 @@ enum class vertical_alignment : u8 {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API alignments {
+class TCOB_API alignment {
 public:
     horizontal_alignment Horizontal {horizontal_alignment::Left};
     vertical_alignment   Vertical {vertical_alignment::Top};
 
-    auto operator==(alignments const& other) const -> bool = default;
+    auto operator==(alignment const& other) const -> bool = default;
 
     static auto constexpr Members()
     {
         return std::tuple {
-            member<&alignments::Horizontal> {"horizontal"},
-            member<&alignments::Vertical> {"vertical"}};
+            member<&alignment::Horizontal> {"horizontal"},
+            member<&alignment::Vertical> {"vertical"}};
     }
 };
 

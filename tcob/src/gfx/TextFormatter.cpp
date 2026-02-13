@@ -239,7 +239,7 @@ static auto Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> 
     return retValue;
 }
 
-static auto Layout(std::vector<line_definition> const& lines, font& font, alignments align, f32 availableHeight, f32 scale) -> result
+static auto Layout(std::vector<line_definition> const& lines, font& font, alignment align, f32 availableHeight, f32 scale) -> result
 {
     availableHeight = availableHeight < 0 ? std::numeric_limits<f32>::max() : availableHeight;
 
@@ -307,7 +307,7 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
     return retValue;
 }
 
-auto format(utf8_string_view text, font& font, alignments align, size_f availableSize, f32 scale, bool kerning, bool parseCommands) -> result
+auto format(utf8_string_view text, font& font, alignment align, size_f availableSize, f32 scale, bool kerning, bool parseCommands) -> result
 {
     auto shaperTokens {Shape(text, font, kerning, false, parseCommands)};
     auto lines {Wrap(shaperTokens, availableSize.Width, scale)};

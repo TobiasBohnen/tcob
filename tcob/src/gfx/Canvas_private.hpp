@@ -79,7 +79,7 @@ struct state {
     f32              Alpha {1};
     transform        XForm {transform::Identity};
     canvas::scissor  Scissor {};
-    alignments       TextAlign {};
+    alignment        TextAlign {};
     font*            Font {nullptr};
     std::vector<f32> Dash;
     f32              DashOffset {0};

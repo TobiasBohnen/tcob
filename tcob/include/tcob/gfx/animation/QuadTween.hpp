@@ -166,7 +166,7 @@ namespace effect {
         f32 HeightStart {0};
         f32 HeightEnd {1.0f};
 
-        alignments Anchor {};
+        alignment Anchor {};
 
         void operator()(f64 t, std::span<quad> quads) const;
     };
