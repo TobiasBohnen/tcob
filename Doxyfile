@@ -2355,7 +2355,6 @@ PREDEFINED             = TCOB_ENABLE_RENDERER_OPENGL45 \
                         TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS \
                         TCOB_ENABLE_FILETYPES_AUDIO_VORBIS \
                         TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP \
-                        TCOB_ENABLE_FILETYPES_GFX_WEBP \
                         TCOB_ENABLE_FILETYPES_GFX_THEORA \
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this

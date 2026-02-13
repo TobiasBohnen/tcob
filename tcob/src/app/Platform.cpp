@@ -262,9 +262,6 @@ void platform::InitImageCodecs()
     idFactory.add(".gif", &MakeUnique<gfx::detail::gif_decoder>);
     idFactory.add(".png", &MakeUnique<gfx::detail::png_decoder>);
     idFactory.add(".qoi", &MakeUnique<gfx::detail::qoi_decoder>);
-#if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
-    idFactory.add(".webp", &MakeUnique<gfx::detail::webp_decoder>);
-#endif
 
     // encoders
     auto& ieFactory {register_service<gfx::image_encoder::factory>()};
@@ -275,18 +272,12 @@ void platform::InitImageCodecs()
     ieFactory.add(".gif", &MakeUnique<gfx::detail::gif_encoder>);
     ieFactory.add(".png", &MakeUnique<gfx::detail::png_encoder>);
     ieFactory.add(".qoi", &MakeUnique<gfx::detail::qoi_encoder>);
-#if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
-    ieFactory.add(".webp", &MakeUnique<gfx::detail::webp_encoder>);
-#endif
 
     // animated
     // decoders
     auto& iadFactory {register_service<gfx::animated_image_decoder::factory>()};
     iadFactory.add(".gif", &MakeUnique<gfx::detail::gif_decoder>);
     iadFactory.add(".png", &MakeUnique<gfx::detail::png_anim_decoder>);
-#if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
-    iadFactory.add(".webp", &MakeUnique<gfx::detail::webp_anim_decoder>);
-#endif
 #if defined(TCOB_ENABLE_FILETYPES_GFX_THEORA)
     iadFactory.add(".ogv", &MakeUnique<gfx::detail::theora_decoder>);
 #endif
@@ -295,9 +286,6 @@ void platform::InitImageCodecs()
     auto& iaeFactory {register_service<gfx::animated_image_encoder::factory>()};
     iaeFactory.add(".gif", &MakeUnique<gfx::detail::gif_encoder>);
     iaeFactory.add(".png", &MakeUnique<gfx::detail::png_anim_encoder>);
-#if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
-    iaeFactory.add(".webp", &MakeUnique<gfx::detail::webp_anim_encoder>);
-#endif
 }
 
 void platform::InitAudioCodecs()

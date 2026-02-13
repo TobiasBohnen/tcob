@@ -205,12 +205,6 @@ if(TCOB_ENABLE_ADDON_GFX_LITEHTML)
     )
 endif()
 
-if(TCOB_ENABLE_FILETYPES_GFX_WEBP)
-    list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_webp.cpp
-    )
-endif()
-
 if(TCOB_ENABLE_FILETYPES_GFX_THEORA)
     list(APPEND SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_theora.cpp

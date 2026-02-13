@@ -15,5 +15,4 @@
 #include "ImageCodec_qoi.hpp"
 #include "ImageCodec_tga.hpp"
 #include "ImageCodec_theora.hpp"
-#include "ImageCodec_webp.hpp"
 // IWYU pragma: end_exports
