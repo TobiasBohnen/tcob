@@ -39,7 +39,6 @@ protected:
 
     void on_click() override;
 
-    auto attributes() const -> widget_attributes override;
     auto flags() -> widget_flags override;
 
 private:

@@ -70,15 +70,6 @@ void radio_button::on_click()
     }
 }
 
-auto radio_button::attributes() const -> widget_attributes
-{
-    auto retValue {widget::attributes()};
-
-    retValue["checked"] = *Checked;
-
-    return retValue;
-}
-
 auto radio_button::flags() -> widget_flags
 {
     auto retValue {widget::flags()};
