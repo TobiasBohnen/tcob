@@ -154,8 +154,9 @@ void text_element::lerp(text_element const& from, text_element const& to, f64 st
 
 void caret_element::lerp(caret_element const& from, caret_element const& to, f64 step)
 {
-    Color = color::Lerp(from.Color, to.Color, step);
-    Width = length::Lerp(from.Width, to.Width, step);
+    Color  = color::Lerp(from.Color, to.Color, step);
+    Height = length::Lerp(from.Height, to.Height, step);
+    Width  = length::Lerp(from.Width, to.Width, step);
 }
 
 void shadow_element::lerp(shadow_element const& from, shadow_element const& to, f64 step)
