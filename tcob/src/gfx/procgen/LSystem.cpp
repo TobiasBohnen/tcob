@@ -24,15 +24,15 @@ l_system::l_system(u64 seed)
 void l_system::add_rule(char c, l_rule const& rule)
 {
     _rules[c].push_back(rule);
+
+    // sort by priority
+    for (auto& [_, rules] : _rules) {
+        std::ranges::sort(rules, [](auto& a, auto& b) { return a.Priority > b.Priority; });
+    }
 }
 
 auto l_system::generate(string_view axiom, i32 iterations) -> string
 {
-    // sort by priority
-    for (auto& [c, rules] : _rules) {
-        std::ranges::sort(rules, [](auto& a, auto& b) { return a.Priority > b.Priority; });
-    }
-
     string current {axiom};
     for (i32 i {0}; i < iterations; ++i) {
         string next;
@@ -44,7 +44,7 @@ auto l_system::generate(string_view axiom, i32 iterations) -> string
     return current;
 }
 
-auto l_system::get_replacement(i32 iteration, char c, string const& prev, usize pos) -> string
+auto l_system::get_replacement(i32 iteration, char c, string_view prev, usize pos) -> string
 {
     auto it {_rules.find(c)};
     if (it == _rules.end()) { return {c}; }

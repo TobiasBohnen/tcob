@@ -51,7 +51,7 @@ public:
     auto generate(string_view axiom, i32 iterations) -> string;
 
 private:
-    auto get_replacement(i32 iteration, char c, string const& prev, usize pos) -> string;
+    auto get_replacement(i32 iteration, char c, string_view prev, usize pos) -> string;
 
     rng                                           _rng;
     std::unordered_map<char, std::vector<l_rule>> _rules;
