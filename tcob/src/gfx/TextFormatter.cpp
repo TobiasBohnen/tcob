@@ -309,6 +309,8 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
 
 auto format(utf8_string_view text, font& font, alignment align, size_f availableSize, f32 scale, bool kerning, bool parseCommands) -> result
 {
+    if (scale == 0) { return {}; }
+
     auto shaperTokens {Shape(text, font, kerning, false, parseCommands)};
     auto lines {Wrap(shaperTokens, availableSize.Width, scale)};
     return Layout(lines, font, align, availableSize.Height, scale);

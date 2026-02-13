@@ -20,19 +20,19 @@
 namespace tcob::db {
 
 extern "C" {
-static auto commit(void* ptr) -> i32
+static auto Commit(void* ptr) -> i32
 {
     auto* db {static_cast<database*>(ptr)};
     return db->call_commit_hook();
 }
 
-static void rollback(void* ptr)
+static void Rollback(void* ptr)
 {
     auto* db {static_cast<database*>(ptr)};
     db->call_rollback_hook();
 }
 
-static void update(void* ptr, i32 mode, char const* dbName, char const* table, long long int rowid)
+static void Update(void* ptr, i32 mode, char const* dbName, char const* table, long long int rowid)
 {
     auto*       db {static_cast<database*>(ptr)};
     update_mode upMode {};
@@ -177,7 +177,7 @@ auto database::drop_view(utf8_string const& viewName) const -> bool
 void database::set_commit_hook(std::function<i32(database*)>&& func)
 {
     _commitHookFunc = std::move(func);
-    _db.commit_hook(&commit, this);
+    _db.commit_hook(&Commit, this);
 }
 
 auto database::call_commit_hook() -> i32
@@ -188,7 +188,7 @@ auto database::call_commit_hook() -> i32
 void database::set_rollback_hook(std::function<void(database*)>&& func)
 {
     _rbHookFunc = std::move(func);
-    _db.rollback_hook(&rollback, this);
+    _db.rollback_hook(&Rollback, this);
 }
 
 void database::call_rollback_hook()
@@ -199,7 +199,7 @@ void database::call_rollback_hook()
 void database::set_update_hook(std::function<void(database*, update_mode, utf8_string, utf8_string, i64)>&& func)
 {
     _updateHookFunc = std::move(func);
-    _db.update_hook(&update, this);
+    _db.update_hook(&Update, this);
 }
 
 void database::call_update_hook(update_mode mode, utf8_string const& dbName, utf8_string const& table, i64 rowId)

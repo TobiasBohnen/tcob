@@ -60,7 +60,7 @@ void states::reset()
 
 ////////////////////////////////////////////////////////////
 
-static auto hypot(f32 x, f32 y) -> f32
+static auto Hypot(f32 x, f32 y) -> f32
 {
     return std::sqrt((x * x) + (y * y));
 }
@@ -350,7 +350,7 @@ static auto DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
     accumLengths.push_back(0.0f);
 
     for (usize i {1}; i < pts.size(); ++i) {
-        f32 const segLen {hypot(pts[i].X - pts[i - 1].X, pts[i].Y - pts[i - 1].Y)};
+        f32 const segLen {Hypot(pts[i].X - pts[i - 1].X, pts[i].Y - pts[i - 1].Y)};
         accumLengths.push_back(accumLengths.back() + segLen);
     }
 
@@ -456,7 +456,7 @@ static auto PolylineLength(std::span<canvas_point const> pts) -> f32
 {
     f32 length {0.0f};
     for (usize i {1}; i < pts.size(); ++i) {
-        length += hypot(pts[i].X - pts[i - 1].X, pts[i].Y - pts[i - 1].Y);
+        length += Hypot(pts[i].X - pts[i - 1].X, pts[i].Y - pts[i - 1].Y);
     }
     return length;
 }

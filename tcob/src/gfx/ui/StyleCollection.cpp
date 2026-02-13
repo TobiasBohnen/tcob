@@ -24,7 +24,7 @@ namespace tcob::ui {
 
 constexpr i32 FAIL_SCORE {std::numeric_limits<i32>::min()};
 
-static auto variant_compare(auto const& lhs, auto const& rhs) -> op
+static auto VariantCompare(auto const& lhs, auto const& rhs) -> op
 {
     return std::visit([]<typename A, typename B>(A const& a, B const& b) -> op {
         if constexpr (!std::is_same_v<A, B>) {
@@ -44,21 +44,21 @@ using comparator_fn = bool (*)(widget_attribute_types const&, widget_attribute_t
 
 constexpr std::array<comparator_fn, 6> op_table {
     /* op::Equal */
-    [](auto const& lhs, auto const& rhs) -> bool { return variant_compare(lhs, rhs) == op::Equal; },
+    [](auto const& lhs, auto const& rhs) -> bool { return VariantCompare(lhs, rhs) == op::Equal; },
     /* op::NotEqual */
-    [](auto const& lhs, auto const& rhs) -> bool { return variant_compare(lhs, rhs) != op::Equal; },
+    [](auto const& lhs, auto const& rhs) -> bool { return VariantCompare(lhs, rhs) != op::Equal; },
     /* op::Greater */
-    [](auto const& lhs, auto const& rhs) -> bool { return variant_compare(lhs, rhs) == op::Greater; },
+    [](auto const& lhs, auto const& rhs) -> bool { return VariantCompare(lhs, rhs) == op::Greater; },
     /* op::GreaterEqual */
     [](auto const& lhs, auto const& rhs) -> bool {
-        auto const cmp {variant_compare(lhs, rhs)};
+        auto const cmp {VariantCompare(lhs, rhs)};
         return cmp == op::Greater || cmp == op::Equal;
     },
     /* op::Less */
-    [](auto const& lhs, auto const& rhs) -> bool { return variant_compare(lhs, rhs) == op::Less; },
+    [](auto const& lhs, auto const& rhs) -> bool { return VariantCompare(lhs, rhs) == op::Less; },
     /* op::LessEqual */
     [](auto const& lhs, auto const& rhs) -> bool {
-        auto const cmp {variant_compare(lhs, rhs)};
+        auto const cmp {VariantCompare(lhs, rhs)};
         return cmp == op::Less || cmp == op::Equal;
     }};
 

@@ -30,13 +30,13 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-static auto read_vorbis(void* ptr, size_t size, size_t nmemb, void* datasource) -> size_t
+static auto Read(void* ptr, size_t size, size_t nmemb, void* datasource) -> size_t
 {
     auto* stream {static_cast<io::istream*>(datasource)};
     return static_cast<size_t>(stream->read_to<std::byte>({reinterpret_cast<std::byte*>(ptr), static_cast<usize>(size * nmemb)}));
 }
 
-static auto seek_vorbis(void* datasource, ogg_int64_t offset, int whence) -> int
+static auto Seek(void* datasource, ogg_int64_t offset, int whence) -> int
 {
     auto*      stream {static_cast<io::istream*>(datasource)};
     auto const dir {static_cast<io::seek_dir>(whence)};
@@ -44,17 +44,17 @@ static auto seek_vorbis(void* datasource, ogg_int64_t offset, int whence) -> int
     return 0;
 }
 
-static auto tell_vorbis(void* datasource) -> long
+static auto Tell(void* datasource) -> long
 {
     io::istream* stream {static_cast<io::istream*>(datasource)};
     return static_cast<long>(stream->tell());
 }
 
 static ov_callbacks vorbisCallbacks {
-    .read_func  = &read_vorbis,
-    .seek_func  = &seek_vorbis,
+    .read_func  = &Read,
+    .seek_func  = &Seek,
     .close_func = nullptr,
-    .tell_func  = &tell_vorbis};
+    .tell_func  = &Tell};
 }
 
 vorbis_decoder::~vorbis_decoder()

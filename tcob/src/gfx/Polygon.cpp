@@ -29,7 +29,7 @@
 
 namespace tcob::gfx {
 
-static auto get_poly_info(polyline_span points) -> polygon::information
+static auto GetPolyInfo(polyline_span points) -> polygon::information
 {
     polygon::information retValue;
 
@@ -67,7 +67,7 @@ auto polygon::info() const -> information
 {
     std::vector<point_f> points;
     points.insert(points.end(), Outline.begin(), Outline.end());
-    return get_poly_info(points);
+    return GetPolyInfo(points);
 }
 
 auto polygon::earcut() const -> std::vector<u32>
@@ -145,12 +145,12 @@ auto polygons::info(std::span<polygon const> polygons) -> polygon::information
         points.insert(points.end(), polygon.Outline.begin(), polygon.Outline.end());
     }
 
-    return get_poly_info(points);
+    return GetPolyInfo(points);
 }
 
 auto polygons::info(polyline_span polyline) -> polygon::information
 {
-    return get_poly_info(polyline);
+    return GetPolyInfo(polyline);
 }
 
 void polygons::move_by(std::span<polygon> polygons, point_f offset)

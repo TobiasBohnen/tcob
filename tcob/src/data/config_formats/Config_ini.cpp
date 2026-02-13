@@ -18,7 +18,7 @@
 
 namespace tcob::data::detail {
 
-static auto find_unquoted(utf8_string_view source, char needle) -> utf8_string_view::size_type
+static auto FindUnquoted(utf8_string_view source, char needle) -> utf8_string_view::size_type
 {
     char const quote {source[0]};
     if (quote != '"' && quote != '\'') {
@@ -39,7 +39,7 @@ static auto find_unquoted(utf8_string_view source, char needle) -> utf8_string_v
     return utf8_string_view::npos;
 }
 
-static auto check_brackets(utf8_string_view str, char openBr, char closeBr) -> bool
+static auto CheckBrackets(utf8_string_view str, char openBr, char closeBr) -> bool
 {
     assert(str[str.size() - 1] == closeBr);
     i32 b {0};
@@ -54,11 +54,11 @@ static auto check_brackets(utf8_string_view str, char openBr, char closeBr) -> b
     return b == 0;
 }
 
-static auto check_incomplete(utf8_string_view str, char openBr, char closeBr) -> bool
+static auto CheckIncomplete(utf8_string_view str, char openBr, char closeBr) -> bool
 {
     return (str.size() <= 1
             || str[str.size() - 1] != closeBr
-            || !check_brackets(str, openBr, closeBr));
+            || !CheckBrackets(str, openBr, closeBr));
 }
 
 auto ini_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
@@ -196,7 +196,7 @@ auto ini_reader::read_key_value_pair(object& targetObject, utf8_string_view line
 
 auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool
 {
-    auto const separatorPos {find_unquoted(line, _settings.KeyValueDelim)};
+    auto const separatorPos {FindUnquoted(line, _settings.KeyValueDelim)};
     if (separatorPos == utf8_string_view::npos) { return false; } // ERROR:  invalid pair
 
     auto const keyStr {helper::trim(line.substr(0, separatorPos))};
@@ -283,7 +283,7 @@ auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -
     if (line[0] != _settings.Array.first) { return false; }
 
     utf8_string arrayLine {line};
-    while (!is_eof() && check_incomplete(arrayLine, _settings.Array.first, _settings.Array.second)) {
+    while (!is_eof() && CheckIncomplete(arrayLine, _settings.Array.first, _settings.Array.second)) {
         arrayLine += get_trimmed_next_line();
     }
 
@@ -315,7 +315,7 @@ auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line)
     if (line[0] != _settings.Object.first) { return false; }
 
     utf8_string sectionLine {line};
-    while (!is_eof() && check_incomplete(sectionLine, _settings.Object.first, _settings.Object.second)) {
+    while (!is_eof() && CheckIncomplete(sectionLine, _settings.Object.first, _settings.Object.second)) {
         sectionLine += get_trimmed_next_line();
     }
 

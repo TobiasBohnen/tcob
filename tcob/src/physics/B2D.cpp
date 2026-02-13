@@ -41,12 +41,12 @@ static auto to_point_f(b2Vec2 val) -> point_f
     return {val.x, val.y};
 }
 
-static auto get_body(b2BodyId id) -> body*
+static auto GetBody(b2BodyId id) -> body*
 {
     return reinterpret_cast<body*>(b2Body_GetUserData(id));
 }
 
-static auto get_shape(b2ShapeId id) -> shape*
+static auto GetShape(b2ShapeId id) -> shape*
 {
     return reinterpret_cast<shape*>(b2Shape_GetUserData(id));
 }
@@ -166,7 +166,7 @@ auto b2d_world::get_body_events() const -> body_events
     std::span<b2BodyMoveEvent> const move {events.moveEvents, static_cast<usize>(events.moveCount)};
     for (auto& event : move) {
         body_move_event ev;
-        ev.Body       = get_body(event.bodyId);
+        ev.Body       = GetBody(event.bodyId);
         ev.Transform  = {.Center = {event.transform.p.x, event.transform.p.y}, .Angle = radian_f {b2Rot_GetAngle(event.transform.q)}};
         ev.FellAsleep = event.fellAsleep;
         retValue.Move.push_back(ev);
@@ -186,23 +186,23 @@ auto b2d_world::get_contact_events() const -> contact_events
     std::span<b2ContactBeginTouchEvent> const begin {events.beginEvents, static_cast<usize>(events.beginCount)};
     for (auto& event : begin) {
         contact_begin_touch_event ev;
-        ev.ShapeA = get_shape(event.shapeIdA);
-        ev.ShapeB = get_shape(event.shapeIdB);
+        ev.ShapeA = GetShape(event.shapeIdA);
+        ev.ShapeB = GetShape(event.shapeIdB);
         retValue.BeginTouch.push_back(ev);
     }
     std::span<b2ContactEndTouchEvent> const end {events.endEvents, static_cast<usize>(events.endCount)};
     for (auto& event : end) {
         contact_end_touch_event ev;
-        ev.ShapeA = get_shape(event.shapeIdA);
-        ev.ShapeB = get_shape(event.shapeIdB);
+        ev.ShapeA = GetShape(event.shapeIdA);
+        ev.ShapeB = GetShape(event.shapeIdB);
         retValue.EndTouch.push_back(ev);
     }
 
     std::span<b2ContactHitEvent> const hit {events.hitEvents, static_cast<usize>(events.hitCount)};
     for (auto& event : hit) {
         contact_hit_event ev;
-        ev.ShapeA        = get_shape(event.shapeIdA);
-        ev.ShapeB        = get_shape(event.shapeIdB);
+        ev.ShapeA        = GetShape(event.shapeIdA);
+        ev.ShapeB        = GetShape(event.shapeIdB);
         ev.ApproachSpeed = event.approachSpeed;
         ev.Normal        = {event.normal.x, event.normal.y};
         ev.Point         = {event.point.x, event.point.y};
@@ -221,11 +221,11 @@ auto b2d_world::get_sensor_events() const -> sensor_events
 
     std::span<b2SensorBeginTouchEvent> const begin {events.beginEvents, static_cast<usize>(events.beginCount)};
     for (auto& event : begin) {
-        retValue.BeginTouch.emplace_back(get_shape(event.sensorShapeId), get_shape(event.visitorShapeId));
+        retValue.BeginTouch.emplace_back(GetShape(event.sensorShapeId), GetShape(event.visitorShapeId));
     }
     std::span<b2SensorEndTouchEvent> const end {events.endEvents, static_cast<usize>(events.endCount)};
     for (auto& event : end) {
-        retValue.EndTouch.emplace_back(get_shape(event.sensorShapeId), get_shape(event.visitorShapeId));
+        retValue.EndTouch.emplace_back(GetShape(event.sensorShapeId), GetShape(event.visitorShapeId));
     }
     return retValue;
 }
@@ -715,12 +715,12 @@ void b2d_joint::set_user_data(void* ptr) const
 
 auto b2d_joint::get_body_a() const -> body*
 {
-    return get_body(b2Joint_GetBodyA(ID));
+    return GetBody(b2Joint_GetBodyA(ID));
 }
 
 auto b2d_joint::get_body_b() const -> body*
 {
-    return get_body(b2Joint_GetBodyB(ID));
+    return GetBody(b2Joint_GetBodyB(ID));
 }
 
 void b2d_joint::wake_bodies() const
@@ -1512,7 +1512,7 @@ auto b2d_shape::get_sensor_overlaps() const -> std::vector<shape*>
     for (i32 i {0}; i < ret; ++i) {
         auto const& id {shapes[i]};
         if (b2Shape_IsValid(id)) {
-            retValue.push_back(get_shape(id));
+            retValue.push_back(GetShape(id));
         }
     }
     return retValue;

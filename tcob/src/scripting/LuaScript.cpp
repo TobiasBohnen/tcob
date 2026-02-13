@@ -16,10 +16,28 @@
 
 namespace tcob::scripting {
 
-static void warn(void* ud, char const* msg, int toCont)
+extern "C" {
+static void Warn(void* ud, char const* msg, int toCont)
 {
     auto* scr {static_cast<script*>(ud)};
     scr->Warning({.Message = msg, .ToCont = toCont != 0});
+}
+
+static void Hook(lua_State* l, lua_Debug* ar)
+{
+    state_view ls {l};
+    auto const guard {ls.create_scoped_stack()};
+
+    ls.get_metatable("_tcob");
+    table lt {table::Acquire(ls, -1)};
+    if (lt.has("_hook")) {
+        ls.get_info(ar);
+        debug dbg {&ls, ar};
+
+        auto* hook {reinterpret_cast<script::HookFunc*>(lt["_hook"].as<void*>())};
+        (*hook)(dbg);
+    }
+}
 }
 
 script::script()
@@ -32,7 +50,7 @@ script::script()
     _globalTable.acquire(_view, -1);
     _view.pop(1);
 
-    _view.set_warnf(&warn, this);
+    _view.set_warnf(&Warn, this);
 }
 
 script::~script()
@@ -111,22 +129,6 @@ void script::register_searcher()
     tab[tab.raw_length() + 1] = &_searcher;
 }
 
-static void hook(lua_State* l, lua_Debug* ar)
-{
-    state_view ls {l};
-    auto const guard {ls.create_scoped_stack()};
-
-    ls.get_metatable("_tcob");
-    table lt {table::Acquire(ls, -1)};
-    if (lt.has("_hook")) {
-        ls.get_info(ar);
-        debug dbg {&ls, ar};
-
-        auto* hook {reinterpret_cast<script::HookFunc*>(lt["_hook"].as<void*>())};
-        (*hook)(dbg);
-    }
-}
-
 void script::set_hook(HookFunc&& func, debug_mask mask)
 {
     auto const guard {_view.create_scoped_stack()};
@@ -138,7 +140,7 @@ void script::set_hook(HookFunc&& func, debug_mask mask)
     _hookFunc = std::move(func);
     _view.push_convert(reinterpret_cast<void*>(&_hookFunc));
     _view.set_table(tableIdx);
-    _view.set_hook(&hook, debug::GetMask(mask), 1);
+    _view.set_hook(&Hook, debug::GetMask(mask), 1);
 }
 
 void script::remove_hook()

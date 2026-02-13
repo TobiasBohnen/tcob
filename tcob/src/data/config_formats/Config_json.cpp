@@ -16,7 +16,7 @@
 
 namespace tcob::data::detail {
 
-static auto find_unquoted(string_view source, char needle) -> string_view::size_type
+static auto FindUnquoted(string_view source, char needle) -> string_view::size_type
 {
     char const quote {source[0]};
     if (quote != '"' && quote != '\'') {
@@ -55,7 +55,7 @@ auto json_reader::ReadKeyValuePair(object& obj, entry& currentEntry, utf8_string
 {
     if (line.empty()) { return false; }
 
-    auto const separatorPos {find_unquoted(line, ':')};
+    auto const separatorPos {FindUnquoted(line, ':')};
     if (separatorPos == utf8_string::npos) { return false; } // ERROR: invalid pair
 
     auto const keyStr {helper::trim(line.substr(0, separatorPos))};
@@ -207,7 +207,7 @@ auto json_reader::ReadScalar(entry& currentEntry, utf8_string_view line) -> bool
 
 constexpr usize MAX_DEPTH {1000};
 
-static auto escape_json_string(utf8_string_view str) -> utf8_string
+static auto EscapeJsonString(utf8_string_view str) -> utf8_string
 {
     utf8_string result;
     result.reserve(str.size());
@@ -249,7 +249,7 @@ auto json_writer::write_object(io::ostream& stream, usize indent, object const& 
     bool first {true};
     for (auto const& [k, v] : obj) {
         if (!first) { stream << ", \n"; }
-        stream << indentEntry << "\"" << escape_json_string(k) << "\": ";
+        stream << indentEntry << "\"" << EscapeJsonString(k) << "\": ";
 
         if (!write_entry(stream, indent + INDENT_SPACES, v, maxDepth - 1)) { return false; }
 
@@ -295,7 +295,7 @@ auto json_writer::write_entry(io::ostream& stream, usize indent, entry const& en
     } else if (ent.is<f64>()) {
         stream << std::to_string(ent.as<f64>());
     } else if (ent.is<utf8_string>()) {
-        stream << "\"" << escape_json_string(ent.as<utf8_string>()) << "\"";
+        stream << "\"" << EscapeJsonString(ent.as<utf8_string>()) << "\"";
     } else if (ent.is<array>()) {
         return write_array(stream, indent, ent.as<array>(), maxDepth);
     } else if (ent.is<object>()) {

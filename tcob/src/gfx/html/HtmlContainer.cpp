@@ -60,7 +60,7 @@ auto to_color(litehtml::web_color const& col) -> color
     return {col.red, col.green, col.blue, col.alpha};
 }
 
-static auto to_border_style(litehtml::border_style style) -> border_style
+static auto ToBorderStyle(litehtml::border_style style) -> border_style
 {
     // TODO:add styles
     switch (style) {
@@ -288,10 +288,10 @@ void container::init_borders(borders& brds, litehtml::borders const& b, litehtml
     brds.Left.Color              = to_color(b.left.color);
     brds.Right.Color             = to_color(b.right.color);
     brds.Top.Color               = to_color(b.top.color);
-    brds.Bottom.Style            = to_border_style(b.bottom.style);
-    brds.Left.Style              = to_border_style(b.left.style);
-    brds.Right.Style             = to_border_style(b.right.style);
-    brds.Top.Style               = to_border_style(b.top.style);
+    brds.Bottom.Style            = ToBorderStyle(b.bottom.style);
+    brds.Left.Style              = ToBorderStyle(b.left.style);
+    brds.Right.Style             = ToBorderStyle(b.right.style);
+    brds.Top.Style               = ToBorderStyle(b.top.style);
     brds.Bottom.Width            = static_cast<f32>(b.bottom.width);
     brds.Left.Width              = static_cast<f32>(b.left.width);
     brds.Right.Width             = static_cast<f32>(b.right.width);

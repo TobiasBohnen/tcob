@@ -433,7 +433,7 @@ auto png_decoder::read_image(std::span<std::byte const> idat, i32 width, i32 hei
 auto png_decoder::ihdr() const -> png::IHDR_chunk const& { return _ihdr; }
 auto png_decoder::data() const -> std::vector<u8> const& { return _data; }
 
-static auto paeth(u8 a, u8 b, u8 c) -> u8
+static auto Paeth(u8 a, u8 b, u8 c) -> u8
 { // https://github.com/nothings/stb/blob/f4a71b13373436a2866c5d68f8f80ac6f0bc1ffe/stb_image.h#L4656C1-L4667C1
     i32 const thresh {(c * 3) - (a + b)};
     u8 const  lo {a < b ? a : b};
@@ -477,7 +477,7 @@ void png_decoder::filter_pixel()
             u8 const a {(x > 0 ? _curLine[xLength + i - _pixelSize] : u8 {0})};
             u8 const b {(_pixel.Y > 0 ? _prvLine[xLength + i] : u8 {0})};
             u8 const c {((x > 0 && _pixel.Y > 0) ? _prvLine[xLength + i - _pixelSize] : u8 {0})};
-            *(_curLineIt + i) += paeth(a, b, c);
+            *(_curLineIt + i) += Paeth(a, b, c);
         }
     } break;
     }
@@ -510,7 +510,7 @@ void png_decoder::filter_line()
             u8 const a {(i >= _pixelSize ? _curLine[i - _pixelSize] : u8 {0})};
             u8 const b {(_pixel.Y > 0 ? _prvLine[i] : u8 {0})};
             u8 const c {((i >= _pixelSize && _pixel.Y > 0) ? _prvLine[i - _pixelSize] : u8 {0})};
-            _curLine[i] += paeth(a, b, c);
+            _curLine[i] += Paeth(a, b, c);
         }
     } break;
     }
@@ -721,7 +721,7 @@ void png_encoder::write_ihdr(image::information const& info, io::ostream& out) c
     write_chunk(out, header);
 }
 
-static auto rgba_data(image const& image) -> std::vector<u8>
+static auto RgbaData(image const& image) -> std::vector<u8>
 {
     auto const  buffer {image.data()};
     auto const& info {image.info()};
@@ -761,7 +761,7 @@ static auto rgba_data(image const& image) -> std::vector<u8>
 void png_encoder::write_idat(image const& image, io::ostream& out) const
 {
     // compress
-    auto const imgD {rgba_data(image)};
+    auto const imgD {RgbaData(image)};
     auto       buf {io::zlib_filter {}.to(std::as_bytes(std::span {imgD}))};
     if (buf.empty()) { return; }
 
@@ -972,7 +972,7 @@ void png_anim_encoder::write_fctl(u32 idx, rect_i const& rect, image_frame const
 void png_anim_encoder::write_fdat(u32& idx, image const& frame, io::ostream& out) const
 {
     // compress
-    auto const imgD {rgba_data(frame)};
+    auto const imgD {RgbaData(frame)};
     auto       buf {io::zlib_filter {}.to(std::as_bytes(std::span {imgD}))};
     if (buf.empty()) { return; }
 

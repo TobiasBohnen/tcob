@@ -43,7 +43,7 @@ static auto minmax_rng(min_max<milliseconds> const& range, auto&& rng) -> millis
     return milliseconds {rng(range.first.count(), range.second.count())};
 }
 
-static void setup_particle_base(particle_base& particle, auto&& tmpl, auto&& rng)
+static void SetupParticleBase(particle_base& particle, auto&& tmpl, auto&& rng)
 {
     auto const dir {point_f::FromDirection(minmax_rng(tmpl.Direction, rng))};
     particle.Velocity               = dir * minmax_rng(tmpl.Speed, rng);
@@ -68,7 +68,7 @@ static void setup_particle_base(particle_base& particle, auto&& tmpl, auto&& rng
 
 ////////////////////////////////////////////////////////////
 
-static void calc_velocity(auto&& particle, point_f pos, f32 seconds)
+static void CalcVelocity(auto&& particle, point_f pos, f32 seconds)
 {
     point_f const radial {pos * particle.RadialAcceleration};
     point_f const tangential {pos.as_perpendicular() * particle.TangentialAcceleration};
@@ -94,7 +94,7 @@ void point_particle::update(milliseconds deltaTime)
 
     // move
     point_f const pos {(Position - Origin).as_normalized()};
-    calc_velocity(*this, pos, seconds);
+    CalcVelocity(*this, pos, seconds);
     Position += Velocity * seconds;
 }
 
@@ -102,7 +102,7 @@ void point_particle::init(settings const& tmpl, texture_region const& texRegion,
 {
     Region = texRegion;
 
-    setup_particle_base(*this, tmpl, randomGen);
+    SetupParticleBase(*this, tmpl, randomGen);
 
     // calculate random postion
     f32 const x {randomGen(spawnArea.left(), spawnArea.right())};
@@ -131,7 +131,7 @@ void quad_particle::update(milliseconds deltaTime)
 
     // move
     point_f const pos {(Bounds.center() - Origin).as_normalized()};
-    calc_velocity(*this, pos, seconds);
+    CalcVelocity(*this, pos, seconds);
     Bounds = {{Bounds.Position + Velocity * seconds}, Bounds.Size};
 
     // spin
@@ -148,7 +148,7 @@ void quad_particle::init(settings const& tmpl, texture_region const& texRegion, 
 {
     Region = texRegion;
 
-    setup_particle_base(*this, tmpl, randomGen);
+    SetupParticleBase(*this, tmpl, randomGen);
 
     // set scale
     f32 const scaleF {minmax_rng(tmpl.Scale, randomGen)};

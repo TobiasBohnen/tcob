@@ -37,7 +37,7 @@ static char const* defaultFontFragShader {
 
 extern "C" {
 #if defined(TCOB_DEBUG)
-static void GLAD_API_PTR debugCallback(GLenum /*source*/, GLenum /*type*/, GLuint /*id*/, GLenum severity, GLsizei, GLchar const* message, void const*)
+static void GLAD_API_PTR DebugCallback(GLenum /*source*/, GLenum /*type*/, GLuint /*id*/, GLenum severity, GLsizei, GLchar const* message, void const*)
 {
     if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
         logger::Error("GL: error {}", message);
@@ -46,7 +46,7 @@ static void GLAD_API_PTR debugCallback(GLenum /*source*/, GLenum /*type*/, GLuin
 
 #endif
 
-static auto load(char const* c) -> GLADapiproc
+static auto Load(char const* c) -> GLADapiproc
 {
     return reinterpret_cast<GLADapiproc>(SDL_GL_GetProcAddress(c));
 }
@@ -72,7 +72,7 @@ gl_context::gl_context(SDL_Window* window)
         throw std::runtime_error("OpenGL context creation failed");
     }
 
-    if (!gladLoadGL(&load)) {
+    if (!gladLoadGL(&Load)) {
         SDL_GL_DestroyContext(static_cast<SDL_GLContext>(_context));
         logger::Error("GLContext: OpenGL loading failed!");
         throw std::runtime_error("OpenGL loading failed");
@@ -86,7 +86,7 @@ gl_context::gl_context(SDL_Window* window)
 
 #if defined(TCOB_DEBUG)
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(&debugCallback, nullptr);
+    glDebugMessageCallback(&DebugCallback, nullptr);
 #endif
 
     // init default shaders

@@ -16,7 +16,7 @@
 
 namespace tcob::db {
 
-static auto get_column_names(auto&& select, utf8_string const& name) -> std::set<utf8_string>
+static auto GetColumnNames(auto&& select, utf8_string const& name) -> std::set<utf8_string>
 {
     std::set<utf8_string> retValue;
 
@@ -30,7 +30,7 @@ static auto get_column_names(auto&& select, utf8_string const& name) -> std::set
     return retValue;
 }
 
-static auto get_row_count(auto&& select, utf8_string const& name) -> i32
+static auto GetRowCount(auto&& select, utf8_string const& name) -> i32
 {
     // SELECT COUNT(1) FROM table
     if (select.prepare(std::format("SELECT COUNT(1) FROM {};", name))) {
@@ -82,13 +82,13 @@ auto table::info() const -> std::vector<column_info>
 auto table::column_names() const -> std::set<utf8_string>
 {
     statement select {_db};
-    return get_column_names(select, qualified_name());
+    return GetColumnNames(select, qualified_name());
 }
 
 auto table::row_count() const -> i32
 {
     statement select {_db};
-    return get_row_count(select, qualified_name());
+    return GetRowCount(select, qualified_name());
 }
 
 auto table::delete_from() const -> delete_statement
@@ -141,13 +141,13 @@ auto view::qualified_name() const -> utf8_string
 auto view::column_names() const -> std::set<utf8_string>
 {
     statement select {_db};
-    return get_column_names(select, qualified_name());
+    return GetColumnNames(select, qualified_name());
 }
 
 auto view::row_count() const -> i32
 {
     statement select {_db};
-    return get_row_count(select, qualified_name());
+    return GetRowCount(select, qualified_name());
 }
 
 }

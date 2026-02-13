@@ -275,7 +275,7 @@ namespace detail {
         acquire(view, idx);
     }
 
-    static auto writer(lua_State*, void const* p, usize sz, void* ud) -> i32
+    static auto Writer(lua_State*, void const* p, usize sz, void* ud) -> i32
     {
         auto* stream {static_cast<io::ostream*>(ud)};
         stream->write<std::byte>({static_cast<std::byte const*>(p), sz});
@@ -286,7 +286,7 @@ namespace detail {
     {
         auto const view {get_view()};
         push_self();
-        view.dump(&writer, &stream, true);
+        view.dump(&Writer, &stream, true);
         view.pop(1);
     }
 

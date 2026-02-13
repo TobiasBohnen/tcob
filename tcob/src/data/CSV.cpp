@@ -97,7 +97,7 @@ auto csv_table::parse(string const& csv, settings s) -> bool
     return true;
 }
 
-static void write_line(std::span<string const> row, io::ostream& ss, csv_table::settings const& s)
+static void WriteLine(std::span<string const> row, io::ostream& ss, csv_table::settings const& s)
 {
     for (usize i {0}; i < row.size(); ++i) {
         string const& value {row[i]};
@@ -119,9 +119,9 @@ auto csv_table::save(path const& file, settings s) const -> bool
 
 auto csv_table::save(io::ostream& out, settings s) const -> bool
 {
-    if (!Header.empty()) { write_line(Header, out, s); }
+    if (!Header.empty()) { WriteLine(Header, out, s); }
     for (i32 j {0}; j < Rows.size().Height; ++j) {
-        write_line(Rows.row(j), out, s);
+        WriteLine(Rows.row(j), out, s);
     }
 
     return true;

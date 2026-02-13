@@ -23,7 +23,7 @@
 
 namespace tcob::gfx {
 
-static auto check(string const& msg, bool c) -> bool
+static auto Check(string const& msg, bool c) -> bool
 {
     if (!c) {
         logger::Error(msg + ": " + SDL_GetError());
@@ -54,7 +54,7 @@ void sdl_window::load_icon(path const& file)
                 img->ptr(),
                 info.stride())};
 
-        check("SDL_SetWindowIcon", SDL_SetWindowIcon(_handle, surface));
+        Check("SDL_SetWindowIcon", SDL_SetWindowIcon(_handle, surface));
         SDL_DestroySurface(surface);
     }
 }
@@ -67,8 +67,8 @@ auto sdl_window::has_focus() const -> bool
 
 void sdl_window::grab_input(bool grab)
 {
-    check("SDL_SetWindowMouseGrab", SDL_SetWindowMouseGrab(_handle, grab));
-    check("SDL_SetWindowKeyboardGrab", SDL_SetWindowKeyboardGrab(_handle, grab));
+    Check("SDL_SetWindowMouseGrab", SDL_SetWindowMouseGrab(_handle, grab));
+    Check("SDL_SetWindowKeyboardGrab", SDL_SetWindowKeyboardGrab(_handle, grab));
 }
 
 void sdl_window::set_size(size_i newSize)
@@ -76,12 +76,12 @@ void sdl_window::set_size(size_i newSize)
     if (newSize != get_size()) {
         if (get_fullscreen()) {
             SDL_DisplayMode mode {};
-            check("SDL_GetClosestFullscreenDisplayMode",
+            Check("SDL_GetClosestFullscreenDisplayMode",
                   SDL_GetClosestFullscreenDisplayMode(SDL_GetDisplayForWindow(_handle), newSize.Width, newSize.Height, 0.0f, true, &mode));
-            check("SDL_SetWindowFullscreenMode",
+            Check("SDL_SetWindowFullscreenMode",
                   SDL_SetWindowFullscreenMode(_handle, &mode));
         } else {
-            check("SDL_SetWindowSize",
+            Check("SDL_SetWindowSize",
                   SDL_SetWindowSize(_handle, newSize.Width, newSize.Height));
         }
 

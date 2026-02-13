@@ -21,21 +21,21 @@
 namespace tcob::gfx {
 
 extern "C" {
-static auto move_to(FT_Vector const* to, void* user) -> i32
+static auto MoveTo(FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
     funcs->MoveTo({(static_cast<f32>(to->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(to->y) / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 
-static auto line_to(FT_Vector const* to, void* user) -> i32
+static auto LineTo(FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
     funcs->LineTo({(static_cast<f32>(to->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(to->y) / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 
-static auto conic_to(FT_Vector const* control, FT_Vector const* to, void* user) -> i32
+static auto ConicTo(FT_Vector const* control, FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
     funcs->ConicTo({(static_cast<f32>(control->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(control->y) / 64.0f) + funcs->Offset.Y},
@@ -43,7 +43,7 @@ static auto conic_to(FT_Vector const* control, FT_Vector const* to, void* user) 
     return 0;
 }
 
-static auto cubic_to(FT_Vector const* control1, FT_Vector const* control2, FT_Vector const* to, void* user) -> i32
+static auto CubicTo(FT_Vector const* control1, FT_Vector const* control2, FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
     funcs->CubicTo({(static_cast<f32>(control1->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(control1->y) / 64.0f) + funcs->Offset.Y},
@@ -59,9 +59,7 @@ truetype_font_engine::truetype_font_engine() = default;
 
 truetype_font_engine::~truetype_font_engine()
 {
-    if (_face) {
-        FT_Done_Face(_face);
-    }
+    if (_face) { FT_Done_Face(_face); }
 }
 
 auto truetype_font_engine::Init() -> bool
@@ -132,10 +130,10 @@ auto truetype_font_engine::decompose_glyph(u32 cp, decompose_callbacks& funcs) -
     auto const retValue {load_glyph(cp)};
 
     FT_Outline_Funcs ftFuncs = {
-        .move_to  = &move_to,
-        .line_to  = &line_to,
-        .conic_to = &conic_to,
-        .cubic_to = &cubic_to,
+        .move_to  = &MoveTo,
+        .line_to  = &LineTo,
+        .conic_to = &ConicTo,
+        .cubic_to = &CubicTo,
         .shift    = 0,
         .delta    = 0,
     };

@@ -481,7 +481,7 @@ void state_view::call(i32 nargs) const
     lua_call(_state, nargs, LUA_MULTRET);
 }
 
-static auto error_handler(lua_State* l) -> i32
+static auto ErrorHandler(lua_State* l) -> i32
 {
     if (lua_isstring(l, -1) != 0) {
         luaL_traceback(l, l, lua_tostring(l, -1), 1);
@@ -495,7 +495,7 @@ auto state_view::pcall(i32 nargs) const -> std::optional<error_code>
 {
     i32 const hpos {get_top() - nargs};
 
-    push_cfunction(&error_handler);
+    push_cfunction(&ErrorHandler);
     insert(hpos);
     i32 const err {lua_pcall(_state, nargs, LUA_MULTRET, hpos)};
     remove(hpos);

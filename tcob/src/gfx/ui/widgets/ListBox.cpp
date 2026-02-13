@@ -22,7 +22,7 @@
 
 namespace tcob::ui {
 
-static auto case_insensitive_contains(string_view lhs, string_view rhs) -> bool
+static auto CaseInsensitiveContains(string_view lhs, string_view rhs) -> bool
 {
     return std::search( // NOLINT(modernize-use-ranges)
                lhs.begin(), lhs.end(),
@@ -279,7 +279,7 @@ void list_box::apply_filter()
     if (!Filter->empty()) {
         _filteredItems.reserve(Items->size());
         for (i32 i {0}; i < std::ssize(*Items); ++i) {
-            if (case_insensitive_contains(Items[i].Text, *Filter)) {
+            if (CaseInsensitiveContains(Items[i].Text, *Filter)) {
                 _filteredItems.push_back(Items[i]);
             }
         }

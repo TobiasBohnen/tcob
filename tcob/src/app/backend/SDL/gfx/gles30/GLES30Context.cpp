@@ -36,7 +36,7 @@ static char const* defaultFontFragShader {
 };
 
 extern "C" {
-static auto load(char const* c) -> GLADapiproc
+static auto Load(char const* c) -> GLADapiproc
 {
     return reinterpret_cast<GLADapiproc>(SDL_GL_GetProcAddress(c));
 }
@@ -62,7 +62,7 @@ gl_context::gl_context(SDL_Window* window)
         throw std::runtime_error("OpenGL context creation failed");
     }
 
-    if (!gladLoadGLES2(&load)) {
+    if (!gladLoadGLES2(&Load)) {
         SDL_GL_DestroyContext(static_cast<SDL_GLContext>(_context));
         logger::Error("GLESContext: OpenGL loading failed!");
         throw std::runtime_error("OpenGL loading failed");

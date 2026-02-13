@@ -21,20 +21,20 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-static auto read_wav(void* userdata, void* buffer, usize bytesToRead) -> usize
+static auto Read(void* userdata, void* buffer, usize bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
     return static_cast<usize>(stream->read_to<std::byte>({static_cast<std::byte*>(buffer), bytesToRead}));
 }
 
-static auto write_wav(void* userdata, void const* buffer, usize bytesToWrite) -> usize
+static auto Write(void* userdata, void const* buffer, usize bytesToWrite) -> usize
 {
     auto*      stream {static_cast<io::ostream*>(userdata)};
     auto const retValue {stream->write<std::byte>({static_cast<std::byte const*>(buffer), bytesToWrite})};
     return static_cast<usize>(std::max<isize>(0, retValue));
 }
 
-static auto seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> drwav_bool32
+static auto Seek(void* userdata, i32 offset, drwav_seek_origin origin) -> drwav_bool32
 {
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
@@ -46,7 +46,7 @@ static auto seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> dr
     return stream->seek(offset, dir);
 }
 
-static auto tell_wav(void* userdata, drwav_int64* pCursor) -> drwav_bool32
+static auto Tell(void* userdata, drwav_int64* pCursor) -> drwav_bool32
 {
     io::istream* stream {static_cast<io::istream*>(userdata)};
     *pCursor = static_cast<drwav_int64>(stream->tell());
@@ -69,7 +69,7 @@ void wav_decoder::seek_from_start(milliseconds pos)
 
 auto wav_decoder::open() -> std::optional<buffer::information>
 {
-    if (drwav_init(&_wav, &read_wav, &seek_wav, &tell_wav, &stream(), nullptr)) {
+    if (drwav_init(&_wav, &Read, &Seek, &Tell, &stream(), nullptr)) {
         _info.Specs.Channels   = _wav.channels;
         _info.Specs.SampleRate = static_cast<i32>(_wav.sampleRate);
         _info.FrameCount       = static_cast<i64>(_wav.totalPCMFrameCount);
@@ -100,7 +100,7 @@ auto wav_encoder::encode(std::span<f32 const> samples, buffer::information const
     drwav_f32_to_s16(pcms.data(), samples.data(), samples.size());
 
     drwav wav;
-    drwav_init_write_sequential_pcm_frames(&wav, &format, static_cast<u64>(info.FrameCount), &write_wav, &out, nullptr);
+    drwav_init_write_sequential_pcm_frames(&wav, &format, static_cast<u64>(info.FrameCount), &Write, &out, nullptr);
     drwav_write_pcm_frames(&wav, static_cast<u64>(info.FrameCount), pcms.data());
     drwav_uninit(&wav);
     return true;

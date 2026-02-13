@@ -20,25 +20,25 @@
 namespace tcob::gfx::detail {
 
 extern "C" {
-static auto read(THEORAPLAY_Io* io, void* buf, long buflen) -> long
+static auto Read(THEORAPLAY_Io* io, void* buf, long buflen) -> long
 {
     auto* stream {static_cast<io::istream*>(io->userdata)};
     return static_cast<long>(stream->read_to<std::byte>({static_cast<std::byte*>(buf), static_cast<usize>(buflen)}));
 }
 
-static auto streamlen(THEORAPLAY_Io* io) -> long
+static auto Streamlen(THEORAPLAY_Io* io) -> long
 {
     auto* stream {static_cast<io::istream*>(io->userdata)};
     return static_cast<long>(stream->size_in_bytes());
 }
 
-static auto seek(THEORAPLAY_Io* io, long absolute_offset) -> int
+static auto Seek(THEORAPLAY_Io* io, long absolute_offset) -> int
 {
     auto* stream {static_cast<io::istream*>(io->userdata)};
     return stream->seek(absolute_offset, io::seek_dir::Begin) ? 0 : -1;
 }
 
-static void close(THEORAPLAY_Io*)
+static void Close(THEORAPLAY_Io*)
 {
     // stream is closed in theora_anim_decoder destructor
 }
@@ -46,10 +46,10 @@ static void close(THEORAPLAY_Io*)
 
 theora_decoder::theora_decoder()
 {
-    _io.read      = &read;
-    _io.streamlen = &streamlen;
-    _io.seek      = &seek;
-    _io.close     = &close;
+    _io.read      = &Read;
+    _io.streamlen = &Streamlen;
+    _io.seek      = &Seek;
+    _io.close     = &Close;
 }
 
 theora_decoder::~theora_decoder()

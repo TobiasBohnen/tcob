@@ -230,26 +230,26 @@ auto bsbd_reader::read_string_pool(io::istream& stream) -> bool
 //////////////////////////////////////////////////////////////////////
 
 template <typename T>
-static auto is_within_limits(i64 value) -> bool
+static auto IsWithinLimits(i64 value) -> bool
 {
     return value >= std::numeric_limits<T>::min() && value <= std::numeric_limits<T>::max();
 }
 
-static auto fit_int(i64 value) -> bsbd::marker_type
+static auto FitInt(i64 value) -> bsbd::marker_type
 {
     if (value >= 0 && value <= std::numeric_limits<u8>::max() - LitIntVal) { return static_cast<bsbd::marker_type>(value + LitIntVal); }
 
-    if (is_within_limits<i8>(value)) { return bsbd::marker_type::Int8; }
-    if (is_within_limits<u8>(value)) { return bsbd::marker_type::UInt8; }
-    if (is_within_limits<i16>(value)) { return bsbd::marker_type::Int16; }
-    if (is_within_limits<u16>(value)) { return bsbd::marker_type::UInt16; }
-    if (is_within_limits<i32>(value)) { return bsbd::marker_type::Int32; }
-    if (is_within_limits<u32>(value)) { return bsbd::marker_type::UInt32; }
+    if (IsWithinLimits<i8>(value)) { return bsbd::marker_type::Int8; }
+    if (IsWithinLimits<u8>(value)) { return bsbd::marker_type::UInt8; }
+    if (IsWithinLimits<i16>(value)) { return bsbd::marker_type::Int16; }
+    if (IsWithinLimits<u16>(value)) { return bsbd::marker_type::UInt16; }
+    if (IsWithinLimits<i32>(value)) { return bsbd::marker_type::Int32; }
+    if (IsWithinLimits<u32>(value)) { return bsbd::marker_type::UInt32; }
 
     return bsbd::marker_type::Int64;
 }
 
-static auto fit_float(f64 value) -> bsbd::marker_type
+static auto FitFloat(f64 value) -> bsbd::marker_type
 {
     return std::fabs(static_cast<f32>(value) - value) > std::numeric_limits<f32>::epsilon() ? bsbd::marker_type::Float64 : bsbd::marker_type::Float32;
 }
@@ -296,7 +296,7 @@ void bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
         write_key(stream, ent.as<bool>() ? bsbd::marker_type::BoolTrue : bsbd::marker_type::BoolFalse, name);
     } else if (ent.is<i64>()) {
         i64 const  val {ent.as<i64>()};
-        auto const type {fit_int(val)};
+        auto const type {FitInt(val)};
         write_key(stream, type, name);
         switch (type) {
         case bsbd::marker_type::Int8:   stream.write(static_cast<i8>(val)); break;
@@ -310,7 +310,7 @@ void bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
         }
     } else if (ent.is<f64>()) {
         f64 const  val {ent.as<f64>()};
-        auto const type {fit_float(val)};
+        auto const type {FitFloat(val)};
         write_key(stream, type, name);
         switch (type) {
         case bsbd::marker_type::Float32: stream.write<f32, std::endian::little>(static_cast<f32>(val)); break;

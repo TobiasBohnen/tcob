@@ -19,13 +19,13 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-static auto read_mp3(void* userdata, void* buffer, usize bytesToRead) -> usize
+static auto Read(void* userdata, void* buffer, usize bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
     return static_cast<usize>(stream->read_to<std::byte>({static_cast<std::byte*>(buffer), bytesToRead}));
 }
 
-static auto seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> drmp3_bool32
+static auto Seek(void* userdata, i32 offset, drmp3_seek_origin origin) -> drmp3_bool32
 {
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
@@ -37,7 +37,7 @@ static auto seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> dr
     return stream->seek(offset, dir);
 }
 
-static auto tell_mp3(void* userdata, drmp3_int64* pCursor) -> drmp3_bool32
+static auto Tell(void* userdata, drmp3_int64* pCursor) -> drmp3_bool32
 {
     io::istream* stream {static_cast<io::istream*>(userdata)};
     *pCursor = static_cast<drmp3_int64>(stream->tell());
@@ -60,7 +60,7 @@ void mp3_decoder::seek_from_start(milliseconds pos)
 
 auto mp3_decoder::open() -> std::optional<buffer::information>
 {
-    if (drmp3_init(&_mp3, &read_mp3, &seek_mp3, &tell_mp3, nullptr, &stream(), nullptr)) {
+    if (drmp3_init(&_mp3, &Read, &Seek, &Tell, nullptr, &stream(), nullptr)) {
         _info.Specs.Channels   = static_cast<i32>(_mp3.channels);
         _info.Specs.SampleRate = static_cast<i32>(_mp3.sampleRate);
         _info.FrameCount       = static_cast<i64>(drmp3_get_pcm_frame_count(&_mp3));

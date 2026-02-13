@@ -17,7 +17,7 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-static auto interpolate(f32 a0, f32 a1, f32 w) -> f32
+static auto Interpolate(f32 a0, f32 a1, f32 w) -> f32
 {
     f32 const e {w * w * w * (w * (w * 6.0f - 15.0f) + 10.0f)};
     return ((a1 - a0) * e) + a0;
@@ -50,13 +50,13 @@ auto perlin_noise::operator()(point_f p) const -> f32
 
     f32 const n0 {dot_grid_gradient({x0, y0}, {sx, sy})};
     f32 const n1 {dot_grid_gradient({x1, y0}, {sx - 1.0f, sy})};
-    f32 const ix0 {interpolate(n0, n1, sx)};
+    f32 const ix0 {Interpolate(n0, n1, sx)};
 
     f32 const n2 {dot_grid_gradient({x0, y1}, {sx, sy - 1.0f})};
     f32 const n3 {dot_grid_gradient({x1, y1}, {sx - 1.0f, sy - 1.0f})};
-    f32 const ix1 {interpolate(n2, n3, sx)};
+    f32 const ix1 {Interpolate(n2, n3, sx)};
 
-    f32 const result {interpolate(ix0, ix1, sy) * std::numbers::sqrt2_v<f32>};
+    f32 const result {Interpolate(ix0, ix1, sy) * std::numbers::sqrt2_v<f32>};
     return (result + 1.0f) * 0.5f;
 }
 
@@ -154,10 +154,10 @@ auto value_noise::operator()(point_f p) const -> f32
     f32 const sx {(x * gridSize) - std::floor(x * gridSize)};
     f32 const sy {(y * gridSize) - std::floor(y * gridSize)};
 
-    f32 const n0 {interpolate(_grid[x0, y0], _grid[x1, y0], sx)};
-    f32 const n1 {interpolate(_grid[x0, y1], _grid[x1, y1], sx)};
+    f32 const n0 {Interpolate(_grid[x0, y0], _grid[x1, y0], sx)};
+    f32 const n1 {Interpolate(_grid[x0, y1], _grid[x1, y1], sx)};
 
-    return interpolate(n0, n1, sy);
+    return Interpolate(n0, n1, sy);
 }
 
 void value_noise::generate_grid(i32 gridSize, u64 seed)

@@ -39,7 +39,7 @@ auto file_hasher::crc32() const -> u32
     return static_cast<u32>(mz_crc32(MZ_CRC32_INIT, fileData.data(), fileData.size()));
 }
 
-static auto check(string const& msg, i32 c) -> bool
+static auto Check(string const& msg, i32 c) -> bool
 {
     if (c == 0) {
         logger::Error("{}: {}", msg, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -92,11 +92,11 @@ static auto EmptyEnumCallback(void* data, char const*, char const*) -> PHYSFS_En
 void detail::init(string const& name, string const& orgName)
 {
     auto const cp {std::filesystem::current_path()};
-    check("init", PHYSFS_init(reinterpret_cast<char const*>(cp.c_str())));
+    Check("init", PHYSFS_init(reinterpret_cast<char const*>(cp.c_str())));
     if (!orgName.empty() && !name.empty()) {
-        check("setSaneConfig", PHYSFS_setSaneConfig(orgName.c_str(), name.c_str(), "", 0, 0));
+        Check("setSaneConfig", PHYSFS_setSaneConfig(orgName.c_str(), name.c_str(), "", 0, 0));
     } else {
-        check("setWriteDir", PHYSFS_setWriteDir("."));
+        Check("setWriteDir", PHYSFS_setWriteDir("."));
     }
     mount(".", "/");
 }
@@ -108,14 +108,14 @@ void detail::done()
 
 ////////////////////////////////////////////////////////////
 extern "C" {
-static auto mz_read(void* pOpaque, mz_uint64 file_ofs, void* pBuf, size_t n) -> size_t
+static auto Read(void* pOpaque, mz_uint64 file_ofs, void* pBuf, size_t n) -> size_t
 {
     auto* fs {static_cast<ifstream*>(pOpaque)};
     fs->seek(static_cast<std::streamoff>(file_ofs), seek_dir::Begin);
     return static_cast<size_t>(fs->read_to<std::byte>({static_cast<std::byte*>(pBuf), n}));
 }
 
-static auto mz_write(void* pOpaque, mz_uint64 file_ofs, void const* pBuf, size_t n) -> size_t
+static auto Write(void* pOpaque, mz_uint64 file_ofs, void const* pBuf, size_t n) -> size_t
 {
     auto* fs {static_cast<ofstream*>(pOpaque)};
     fs->seek(static_cast<std::streamoff>(file_ofs), seek_dir::Begin);
@@ -129,7 +129,7 @@ auto zip(path const& srcFileOrFolder, ofstream& dstStream, bool relative, i32 le
 {
     mz_zip_archive zip;
     mz_zip_zero_struct(&zip);
-    zip.m_pWrite     = &mz_write;
+    zip.m_pWrite     = &Write;
     zip.m_pIO_opaque = &dstStream;
 
     if (!mz_zip_writer_init(&zip, 0)) { return false; }
@@ -139,14 +139,14 @@ auto zip(path const& srcFileOrFolder, ofstream& dstStream, bool relative, i32 le
         for (auto const& file : files) {
             ifstream istream {file};
             string   name {relative ? file.substr(srcFileOrFolder.size()) : file};
-            if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &mz_read, &istream, static_cast<u64>(istream.size_in_bytes()), nullptr, nullptr, 0, static_cast<u32>(level), nullptr, 0, nullptr, 0)) {
+            if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &Read, &istream, static_cast<u64>(istream.size_in_bytes()), nullptr, nullptr, 0, static_cast<u32>(level), nullptr, 0, nullptr, 0)) {
                 return false;
             }
         }
     } else if (is_file(srcFileOrFolder)) {
         ifstream istream {srcFileOrFolder};
         string   name {relative ? std::filesystem::path {srcFileOrFolder}.filename().string() : srcFileOrFolder};
-        if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &mz_read, &istream, static_cast<u64>(istream.size_in_bytes()), nullptr, nullptr, 0, static_cast<u32>(level), nullptr, 0, nullptr, 0)) {
+        if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &Read, &istream, static_cast<u64>(istream.size_in_bytes()), nullptr, nullptr, 0, static_cast<u32>(level), nullptr, 0, nullptr, 0)) {
             return false;
         }
     } else {
@@ -162,7 +162,7 @@ auto unzip(ifstream& srcStream, path const& dstFolder) -> bool
 {
     mz_zip_archive zip;
     mz_zip_zero_struct(&zip);
-    zip.m_pRead      = &mz_read;
+    zip.m_pRead      = &Read;
     zip.m_pIO_opaque = &srcStream;
 
     if (!mz_zip_reader_init(&zip, static_cast<u64>(srcStream.size_in_bytes()), 0)) { return false; }
@@ -174,7 +174,7 @@ auto unzip(ifstream& srcStream, path const& dstFolder) -> bool
         string const file {dstFolder.empty() ? string {buf.data()} : dstFolder + "/" + string {buf.data()}};
         create_file(file);
         ofstream ostream {file};
-        mz_zip_reader_extract_to_callback(&zip, i, &mz_write, &ostream, 0);
+        mz_zip_reader_extract_to_callback(&zip, i, &Write, &ostream, 0);
     }
 
     return mz_zip_reader_end(&zip);
@@ -182,12 +182,12 @@ auto unzip(ifstream& srcStream, path const& dstFolder) -> bool
 
 auto mount(path const& folderOrArchive, string const& mp) -> bool
 {
-    return check(std::format("mount (mount point: {}, folder: {})", mp, folderOrArchive), PHYSFS_mount(folderOrArchive.c_str(), mp.c_str(), true));
+    return Check(std::format("mount (mount point: {}, folder: {})", mp, folderOrArchive), PHYSFS_mount(folderOrArchive.c_str(), mp.c_str(), true));
 }
 
 auto unmount(path const& folderOrArchive) -> bool
 {
-    return check("ummount", PHYSFS_unmount(folderOrArchive.c_str()));
+    return Check("ummount", PHYSFS_unmount(folderOrArchive.c_str()));
 }
 
 auto get_file_size(path const& file) -> i64
@@ -212,7 +212,7 @@ auto read_as_string(path const& file) -> string
         retValue.append(buffer.data(), static_cast<usize>(read));
     } while (read != 0);
 
-    check("close", PHYSFS_close(handle));
+    Check("close", PHYSFS_close(handle));
     return retValue;
 }
 
@@ -262,7 +262,7 @@ auto is_folder_empty(path const& folder) -> bool
 auto get_stat(path const& fileOrFolder) -> stat
 {
     PHYSFS_Stat stat;
-    if (check("stat", PHYSFS_stat(fileOrFolder.c_str(), &stat))) {
+    if (Check("stat", PHYSFS_stat(fileOrFolder.c_str(), &stat))) {
         file_type type {};
         switch (stat.filetype) {
         case PHYSFS_FILETYPE_REGULAR:
@@ -300,7 +300,7 @@ auto delete_file(path const& file) -> bool
 {
     if (!is_file(file)) { return false; }
 
-    return check(std::format("delete file ({})", file), PHYSFS_delete(file.c_str()));
+    return Check(std::format("delete file ({})", file), PHYSFS_delete(file.c_str()));
 }
 
 auto delete_folder(path const& folder) -> bool
@@ -318,7 +318,7 @@ auto delete_folder(path const& folder) -> bool
     }
 
     PHYSFS_freeList(items);
-    return check(std::format("delete folder ({})", folder), PHYSFS_delete(folder.c_str()));
+    return Check(std::format("delete folder ({})", folder), PHYSFS_delete(folder.c_str()));
 }
 
 auto create_file(path const& file) -> bool
@@ -338,7 +338,7 @@ auto create_file(path const& file) -> bool
 
 auto create_folder(path const& folder) -> bool
 {
-    return check(std::format("create folder ({})", folder), PHYSFS_mkdir(folder.c_str()));
+    return Check(std::format("create folder ({})", folder), PHYSFS_mkdir(folder.c_str()));
 }
 
 auto enumerate(path const& folder, pattern const& pattern, bool recursive) -> std::unordered_set<string>

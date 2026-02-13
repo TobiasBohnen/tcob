@@ -19,13 +19,13 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-static auto read_flac(void* userdata, void* buffer, size_t bytesToRead) -> usize
+static auto Read(void* userdata, void* buffer, size_t bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
     return static_cast<size_t>(stream->read_to<unsigned char>({static_cast<unsigned char*>(buffer), bytesToRead}));
 }
 
-static auto seek_flac(void* userdata, int offset, drflac_seek_origin origin) -> drflac_bool32
+static auto Seek(void* userdata, int offset, drflac_seek_origin origin) -> drflac_bool32
 {
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
@@ -37,7 +37,7 @@ static auto seek_flac(void* userdata, int offset, drflac_seek_origin origin) -> 
     return stream->seek(offset, dir);
 }
 
-static auto tell_flac(void* userdata, drflac_int64* pCursor) -> drflac_bool32
+static auto Tell(void* userdata, drflac_int64* pCursor) -> drflac_bool32
 {
     io::istream* stream {static_cast<io::istream*>(userdata)};
     *pCursor = static_cast<drflac_int64>(stream->tell());
@@ -60,7 +60,7 @@ void flac_decoder::seek_from_start(milliseconds pos)
 
 auto flac_decoder::open() -> std::optional<buffer::information>
 {
-    _flac = drflac_open(&read_flac, &seek_flac, &tell_flac, &stream(), nullptr);
+    _flac = drflac_open(&Read, &Seek, &Tell, &stream(), nullptr);
     if (_flac) {
         _info.Specs.Channels   = _flac->channels;
         _info.Specs.SampleRate = static_cast<i32>(_flac->sampleRate);

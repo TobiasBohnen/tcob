@@ -150,7 +150,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
 
 constexpr f32 angleTolerance {0.05f}; // 0.0005f
 
-static auto is_in_shadowcaster(light_source& light, auto const& casterPoints) -> bool
+static auto IsInShadowcaster(light_source& light, auto const& casterPoints) -> bool
 {
     for (usize i {0}; i < casterPoints.size() - 1; ++i) {
         if (casterPoints[i].Points.empty()) { continue; }
@@ -182,7 +182,7 @@ void lighting_system::cast_ray(light_source& light, f32 lightRange)
     std::array<point_f, 4> const boundPoints {{Bounds->top_left(), Bounds->bottom_left(), Bounds->bottom_right(), Bounds->top_right()}};
     casterPoints.emplace_back(boundPoints, nullptr);
 
-    bool const             lightInsideShadowCaster {is_in_shadowcaster(light, casterPoints)};
+    bool const             lightInsideShadowCaster {IsInShadowcaster(light, casterPoints)};
     std::vector<f64> const angles {collect_angles(light, lightInsideShadowCaster, casterPoints)};
 
     std::vector<std::pair<f64, light_collision>> collisionResult;

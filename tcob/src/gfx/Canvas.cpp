@@ -41,7 +41,7 @@ using namespace detail;
 
 auto constexpr NVG_KAPPA90 {0.5522847493f}; // Length proportional to radius of a cubic bezier handle for 90deg arcs.;
 
-static auto signf(f32 a) -> f32 { return a >= 0.0f ? 1.0f : -1.0f; }
+static auto SignF(f32 a) -> f32 { return a >= 0.0f ? 1.0f : -1.0f; }
 
 static auto CompositeOperationState(composite_operation op) -> blend_funcs
 {
@@ -271,10 +271,10 @@ void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 
 
     f32 const halfw {std::abs(w) * 0.5f};
     f32 const halfh {std::abs(h) * 0.5f};
-    f32 const rxBL {std::min(radBL, halfw) * signf(w)}, ryBL {std::min(radBL, halfh) * signf(h)};
-    f32 const rxBR {std::min(radBR, halfw) * signf(w)}, ryBR {std::min(radBR, halfh) * signf(h)};
-    f32 const rxTR {std::min(radTR, halfw) * signf(w)}, ryTR {std::min(radTR, halfh) * signf(h)};
-    f32 const rxTL {std::min(radTL, halfw) * signf(w)}, ryTL {std::min(radTL, halfh) * signf(h)};
+    f32 const rxBL {std::min(radBL, halfw) * SignF(w)}, ryBL {std::min(radBL, halfh) * SignF(h)};
+    f32 const rxBR {std::min(radBR, halfw) * SignF(w)}, ryBR {std::min(radBR, halfh) * SignF(h)};
+    f32 const rxTR {std::min(radTR, halfw) * SignF(w)}, ryTR {std::min(radTR, halfh) * SignF(h)};
+    f32 const rxTL {std::min(radTL, halfw) * SignF(w)}, ryTL {std::min(radTL, halfh) * SignF(h)};
 
     _cache->append_commands(std::vector<f32> {
                                 MoveTo, x, y + ryTL,
@@ -418,7 +418,7 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
     f32      cx {0}, cy {0};
     radian_f a0 {0}, a1 {0};
 
-    static auto cross {[](f32 x0, f32 y0, f32 x1, f32 y1) -> f32 { return (x1 * y0) - (x0 * y1); }};
+    static auto const cross {[](f32 x0, f32 y0, f32 x1, f32 y1) -> f32 { return (x1 * y0) - (x0 * y1); }};
 
     if (cross(dx0, dy0, dx1, dy1) > 0.0f) {
         cx  = pos1.X + (dx0 * d) + (dy0 * radius);

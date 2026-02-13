@@ -24,13 +24,13 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-static auto read_xmp(void* dest, unsigned long len, unsigned long nmemb, void* priv) -> unsigned long
+static auto Read(void* dest, unsigned long len, unsigned long nmemb, void* priv) -> unsigned long
 {
     auto* stream {static_cast<io::istream*>(priv)};
     return static_cast<unsigned long>(stream->read_to<std::byte>({static_cast<std::byte*>(dest), len * nmemb}) / len);
 }
 
-static auto seek_xmp(void* priv, long offset, int whence) -> int
+static auto Seek(void* priv, long offset, int whence) -> int
 {
     auto*      stream {static_cast<io::istream*>(priv)};
     auto const dir {static_cast<io::seek_dir>(whence)};
@@ -38,16 +38,16 @@ static auto seek_xmp(void* priv, long offset, int whence) -> int
     return 0;
 }
 
-static auto tell_xmp(void* priv) -> long
+static auto Tell(void* priv) -> long
 {
     io::istream* stream {static_cast<io::istream*>(priv)};
     return static_cast<long>(stream->tell());
 }
 
 static xmp_callbacks xmpCallbacks {
-    .read_func  = &read_xmp,
-    .seek_func  = &seek_xmp,
-    .tell_func  = &tell_xmp,
+    .read_func  = &Read,
+    .seek_func  = &Seek,
+    .tell_func  = &Tell,
     .close_func = nullptr};
 }
 

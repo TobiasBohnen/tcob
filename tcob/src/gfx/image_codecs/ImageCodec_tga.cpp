@@ -24,35 +24,35 @@ namespace tcob::gfx::detail {
 
 constexpr std::array<u8, 18> SIGNATURE {'T', 'R', 'U', 'E', 'V', 'I', 'S', 'I', 'O', 'N', '-', 'X', 'F', 'I', 'L', 'E', '.', '\0'};
 
-static auto is_rle(tga::header const& h) -> bool
+static auto IsRle(tga::header const& h) -> bool
 {
     return h.ImageType == tga::image_type::RLEBlackAndWhiteImage
         || h.ImageType == tga::image_type::RLEColorMappedImage
         || h.ImageType == tga::image_type::RLETrueColorImage;
 }
 
-static auto is_truecolor(tga::header const& h) -> bool
+static auto IsTruecolor(tga::header const& h) -> bool
 {
     return h.ImageType == tga::image_type::RLETrueColorImage || h.ImageType == tga::image_type::UncompressedTrueColorImage;
 }
 
-static auto is_colormapped(tga::header const& h) -> bool
+static auto IsColormapped(tga::header const& h) -> bool
 {
     return h.ColorMapIncluded && (h.ImageType == tga::image_type::RLEColorMappedImage || h.ImageType == tga::image_type::UncompressedColorMappedImage);
 }
 
-static auto is_blackandwhite(tga::header const& h) -> bool
+static auto IsBlackandwhite(tga::header const& h) -> bool
 {
     return h.ImageType == tga::image_type::RLEBlackAndWhiteImage || h.ImageType == tga::image_type::UncompressedBlackAndWhiteImage;
 }
 
-static auto check_supported_format(tga::header const& h) -> bool
+static auto CheckSupported(tga::header const& h) -> bool
 {
     if (!h.ColorMapIncluded) {
-        if (is_truecolor(h)) {
+        if (IsTruecolor(h)) {
             return h.ImageSpecs.BytesPerPixel == 3 || h.ImageSpecs.BytesPerPixel == 4;
         }
-        if (is_blackandwhite(h)) {
+        if (IsBlackandwhite(h)) {
             return h.ImageSpecs.BytesPerPixel == 1;
         }
     } else {
@@ -62,7 +62,7 @@ static auto check_supported_format(tga::header const& h) -> bool
     return false;
 }
 
-static auto get_padding_bytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
+static auto GetPaddingBytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
 {
     if (bitsPerPixel < 8) {
         return stride - static_cast<i32>(std::ceil(static_cast<f32>(width) * (static_cast<f32>(bitsPerPixel) / 8.0f)));
@@ -71,7 +71,7 @@ static auto get_padding_bytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
     return stride - (width * (bitsPerPixel / 8));
 }
 
-static auto get_color(u8 one, u8 two) -> color
+static auto GetColor(u8 one, u8 two) -> color
 {
     u32 const r1 {helper::extract_bits(one, 2, 5)};
     u8 const  r {static_cast<u8>(r1 << 3)};
@@ -103,7 +103,7 @@ auto tga::read_color_map(io::istream& reader, i32 colorMapLength, i32 colorMapEn
         case 16: {
             std::array<u8, 2> color16 {};
             reader.read_to<u8>(color16);
-            retValue.push_back(get_color(color16[1], color16[0]));
+            retValue.push_back(GetColor(color16[1], color16[0]));
         } break;
         case 24: {
             u8 const b {reader.read<u8>()};
@@ -132,7 +132,7 @@ auto tga::read_data(io::istream& reader, header const& h) -> std::vector<u8>
     std::vector<std::vector<u8>> rows;
     std::vector<u8>              row;
 
-    if (is_rle(h)) {
+    if (IsRle(h)) {
         u8              rlePacket {};
         std::vector<u8> rlePixel;
 
@@ -227,12 +227,12 @@ auto tga::read_data(io::istream& reader, header const& h) -> std::vector<u8>
         retValue.insert(retValue.end(), r.begin(), r.end());
     }
 
-    if (is_truecolor(h)) {
+    if (IsTruecolor(h)) {
         // BGRA -> RGBA
         for (i32 i {0}; i < std::ssize(retValue); i += h.ImageSpecs.BytesPerPixel) {
             std::swap(retValue[i], retValue[i + 2]);
         }
-    } else if (is_colormapped(h)) {
+    } else if (IsColormapped(h)) {
         for (i32 i {0}; i < std::ssize(retValue); ++i) {
             if (retValue[i] >= h.ColorMapSpecs.ColorMapLength) {
                 retValue[i] = 0;
@@ -329,10 +329,10 @@ auto tga_decoder::decode(io::istream& in) -> std::optional<image>
         auto const   imgData {tga::read_data(in, _header)};
         size_i const imgSize {_header.ImageSpecs.Width, _header.ImageSpecs.Height};
         if (std::ssize(imgData) != imgSize.Width * imgSize.Height * _header.ImageSpecs.BytesPerPixel) {
-            return {};               // invalid image data
+            return {};              // invalid image data
         }
 
-        if (is_truecolor(_header)) { // RGBA
+        if (IsTruecolor(_header)) { // RGBA
             if (_header.ImageSpecs.BytesPerPixel == 4) {
                 return image::Create(imgSize, image::format::RGBA, imgData);
             }
@@ -345,7 +345,7 @@ auto tga_decoder::decode(io::istream& in) -> std::optional<image>
         std::vector<u8> pixels(imgSize.Width * imgSize.Height * 4);
         u8*             pixPtr {pixels.data()};
 
-        if (is_colormapped(_header) && !colorMap.empty()) {
+        if (IsColormapped(_header) && !colorMap.empty()) {
             // indexed
             for (u8 ind : imgData) {
                 auto [r, g, b, a] {colorMap[ind]};
@@ -354,7 +354,7 @@ auto tga_decoder::decode(io::istream& in) -> std::optional<image>
                 *pixPtr++ = b;
                 *pixPtr++ = a;
             }
-        } else if (is_blackandwhite(_header)) {
+        } else if (IsBlackandwhite(_header)) {
             // grayscale
             for (u8 ind : imgData) {
                 *pixPtr++ = ind;
@@ -376,11 +376,11 @@ auto tga_decoder::decode_info(io::istream& in) -> std::optional<image::informati
     _header.read(in);
 
     i32 bpp {_header.ImageSpecs.BytesPerPixel};
-    if (!is_truecolor(_header)) {
+    if (!IsTruecolor(_header)) {
         bpp = 4;
     }
 
-    return _footer.Format == tga::format::New && check_supported_format(_header)
+    return _footer.Format == tga::format::New && CheckSupported(_header)
         ? std::optional {image::information {
               .Size   = {_header.ImageSpecs.Width, _header.ImageSpecs.Height},
               .Format = bpp == 4 ? image::format::RGBA : image::format::RGB}}
@@ -427,7 +427,7 @@ void tga_encoder::write_image_data(image const& img, io::ostream& out) const
 
     auto const& imgInfo {img.info()};
     i32 const   bytesPerPixel {imgInfo.bytes_per_pixel()};
-    i32 const   paddingByteCount {get_padding_bytes(bytesPerPixel * 8, imgInfo.stride(), imgInfo.Size.Width)};
+    i32 const   paddingByteCount {GetPaddingBytes(bytesPerPixel * 8, imgInfo.stride(), imgInfo.Size.Width)};
     i32 const   sizeInBytes {static_cast<i32>(imgInfo.size_in_bytes())};
 
     // RGBA -> BGRA

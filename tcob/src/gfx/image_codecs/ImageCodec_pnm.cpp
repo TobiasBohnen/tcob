@@ -18,12 +18,12 @@
 
 namespace tcob::gfx::detail {
 
-static auto check_supported_format(pnm::header const& h) -> bool
+static auto CheckSupported(pnm::header const& h) -> bool
 {
     return h.FormatString[0] == 'P' && (h.FormatString[1] == '1' || h.FormatString[1] == '2' || h.FormatString[1] == '3');
 }
 
-static auto skip_space_read_char(io::istream& reader) -> char
+static auto SkipSpaceReadChar(io::istream& reader) -> char
 {
     char retValue {0};
 
@@ -36,7 +36,7 @@ static auto skip_space_read_char(io::istream& reader) -> char
             retValue = reader.read<char>();
         }
 
-        return skip_space_read_char(reader);
+        return SkipSpaceReadChar(reader);
     }
 
     return retValue;
@@ -45,18 +45,18 @@ static auto skip_space_read_char(io::istream& reader) -> char
 template <typename T>
 auto read_int(io::istream& reader) -> T
 {
-    auto const   pre {skip_space_read_char(reader)};
+    auto const   pre {SkipSpaceReadChar(reader)};
     string const str {reader.read_string_until([](char c) { return std::isspace(c); })};
     return *helper::to_number<T>(pre + str);
 }
 
-static auto read_p1_data(io::istream& reader, int width, int height) -> std::vector<u8>
+static auto P1(io::istream& reader, int width, int height) -> std::vector<u8>
 {
     // black and white
     std::vector<u8> retValue;
 
     for (i32 i {0}; i < width * height; ++i) {
-        char const pix {skip_space_read_char(reader)};
+        char const pix {SkipSpaceReadChar(reader)};
         if (pix == '0') {
             retValue.push_back(255);
             retValue.push_back(255);
@@ -71,7 +71,7 @@ static auto read_p1_data(io::istream& reader, int width, int height) -> std::vec
     return retValue;
 }
 
-static auto read_p2_data(io::istream& reader, pnm::header const& h) -> std::vector<u8>
+static auto P2(io::istream& reader, pnm::header const& h) -> std::vector<u8>
 {
     // grayscale
     std::vector<u8> retValue;
@@ -87,7 +87,7 @@ static auto read_p2_data(io::istream& reader, pnm::header const& h) -> std::vect
     return retValue;
 }
 
-static auto read_p3_data(io::istream& reader, pnm::header const& h) -> std::vector<u8>
+static auto P3(io::istream& reader, pnm::header const& h) -> std::vector<u8>
 {
     // RGB
     std::vector<u8> retValue;
@@ -128,13 +128,13 @@ auto pnm_decoder::decode(io::istream& in) -> std::optional<image>
         std::vector<u8> imgData;
         switch (_header.Format) {
         case pnm::format::P1:
-            imgData = read_p1_data(in, _header.Width, _header.Height);
+            imgData = P1(in, _header.Width, _header.Height);
             break;
         case pnm::format::P2:
-            imgData = read_p2_data(in, _header);
+            imgData = P2(in, _header);
             break;
         case pnm::format::P3:
-            imgData = read_p3_data(in, _header);
+            imgData = P3(in, _header);
             break;
         default:
             break;
@@ -150,7 +150,7 @@ auto pnm_decoder::decode(io::istream& in) -> std::optional<image>
 auto pnm_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     _header.read(in);
-    return check_supported_format(_header)
+    return CheckSupported(_header)
         ? std::optional {image::information {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGB}}
         : std::nullopt;
 }
