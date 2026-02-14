@@ -4,7 +4,7 @@
         <DisplayString>{{X={X};Y={Y}}}</DisplayString>
     </Type>
     <Type Name="tcob::rect&lt;*&gt;">
-        <DisplayString>{{X={X};Y={Y};W={Width};H={Height}}}</DisplayString>
+        <DisplayString>{{X={Position.X};Y={Position.Y};W={Size.Width};H={Size.Height}}}</DisplayString>
     </Type>
     <Type Name="tcob::size&lt;*&gt;">
         <DisplayString>{{W={Width};H={Height}}}</DisplayString>
@@ -21,10 +21,7 @@
     <Type Name="tcob::detail::prop_base&lt;*, tcob::detail::field_source&lt;*&gt;&gt;">
         <DisplayString>{_source._value}</DisplayString>
     </Type>
-    <Type Name="tcob::detail::prop_base&lt;*, tcob::detail::validating_field_source&lt;*&gt;&gt;">
+    <Type Name="tcob::detail::prop_base&lt;*, tcob::detail::checked_field_source&lt;*&gt;&gt;">
         <DisplayString>{_source._value}</DisplayString>
-    </Type>
-    <Type Name="solitaire::card">
-        <DisplayString>{{Suit={_suit};Rank={_rank}}}</DisplayString>
     </Type>
 </AutoVisualizer>
