@@ -72,52 +72,43 @@ void text::force_reshape()
 
 void text::format()
 {
-    // clear quads
     _quads.clear();
-    Effects.clear();
+    Effects.clear_quads();
 
     _needsFormat = false;
 
     if (Text->empty()) { return; }
 
-    // format text
     auto const size {Bounds->Size};
     auto const formatResult {text_formatter::format(*Text, *_font, Style->Alignment, size, 1.0f, Style->KerningEnabled, true)};
     _quads.reserve(formatResult.QuadCount);
 
-    color c {Style->Color};
-    u8    alpha {c.A};
+    color col {Style->Color};
+    u8    alpha {col.A};
     u8    currentEffectIdx {0};
 
     auto const [x, y] {Bounds->Position};
     auto const& xform {transform()};
     for (auto const& token : formatResult.Tokens) {
-        // handle text commands
-        if (token.Command.Type != text_formatter::command_type::None) {
+        if (token.Command.Type != text_formatter::command_type::None) { // handle text commands
             switch (token.Command.Type) {
-            case text_formatter::command_type::Alpha:
-                alpha = std::get<u8>(token.Command.Value);
-                break;
-            case text_formatter::command_type::Color:
-                c = std::get<color>(token.Command.Value);
-                break;
+            case text_formatter::command_type::Alpha:  alpha = std::get<u8>(token.Command.Value); break;
+            case text_formatter::command_type::Color:  col = std::get<color>(token.Command.Value); break;
             case text_formatter::command_type::Effect: {
                 currentEffectIdx = std::get<u8>(token.Command.Value);
-                if (!Effects.has(currentEffectIdx)) {
-                    currentEffectIdx = 0;
-                }
+                if (!Effects.has(currentEffectIdx)) { currentEffectIdx = 0; }
             } break;
             default:
                 break;
             }
         }
 
-        // fill quads
+        // setup quads
         for (usize i {0}; i < token.Quads.size(); ++i) {
             quad& q {_quads.emplace_back()};
 
-            c.A = alpha;
-            geometry::set_color(q, c);
+            col.A = alpha;
+            geometry::set_color(q, col);
 
             geometry::set_texcoords(q, token.Quads[i].TextureRegion);
 

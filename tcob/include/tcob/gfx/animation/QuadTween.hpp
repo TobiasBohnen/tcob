@@ -42,7 +42,7 @@ namespace detail {
 
         void add_quad(std::reference_wrapper<quad> q);
 
-        void clear();
+        void clear_quads();
 
     protected:
         auto source_quads() const -> std::vector<quad> const&;
@@ -82,7 +82,7 @@ public:
     void stop_all();
 
     void add_quad(u8 id, std::reference_wrapper<quad> q) const; // FIXME: better API
-    void clear();
+    void clear_quads();
 
 private:
     void on_update(milliseconds deltaTime) override;
