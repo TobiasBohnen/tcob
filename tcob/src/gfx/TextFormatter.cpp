@@ -245,8 +245,9 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
 
     auto const& fontInfo {font.info()};
 
-    f32    x {0}, y {0};
-    result retValue {};
+    f32 const baseline {fontInfo.Ascender * scale};
+    f32       x {0}, y {baseline};
+    result    retValue {};
     retValue.Font = &font;
 
     for (auto const& line : lines) {
@@ -284,17 +285,17 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
         f32 const lineContentWidth {x - lineStartX};
         retValue.UsedSize.Width = std::max(lineContentWidth, retValue.UsedSize.Width);
 
-        if (y + (fontInfo.LineHeight * scale) > availableHeight) { break; }
+        if (y + (fontInfo.LineHeight * scale) > availableHeight + baseline) { break; }
     }
 
-    retValue.UsedSize.Height = y;
+    retValue.UsedSize.Height = y - (fontInfo.LineHeight * scale) - (fontInfo.Descender * scale);
 
     if (align.Vertical != vertical_alignment::Top) {
         f32 offset {0.0f};
         if (align.Vertical == vertical_alignment::Middle) {
-            offset = (availableHeight - y) / 2;
+            offset = (availableHeight - retValue.UsedSize.Height) / 2;
         } else if (align.Vertical == vertical_alignment::Bottom) {
-            offset = (availableHeight - y);
+            offset = (availableHeight - retValue.UsedSize.Height);
         }
 
         for (auto& token : retValue.Tokens) {

@@ -163,7 +163,7 @@ auto truetype_font_engine::load_glyph(u32 cp) -> glyph
     retValue.Size.Width  = static_cast<i32>(_face->glyph->metrics.width / 64);
     retValue.Size.Height = static_cast<i32>(_face->glyph->metrics.height / 64);
     retValue.Offset.X    = static_cast<f32>(_face->glyph->metrics.horiBearingX) / 64.0f;
-    retValue.Offset.Y    = (static_cast<f32>(-_face->glyph->metrics.horiBearingY) / 64.0f) + _info.Ascender;
+    retValue.Offset.Y    = -static_cast<f32>(_face->glyph->metrics.horiBearingY) / 64.0f;
     retValue.AdvanceX    = static_cast<f32>(_face->glyph->metrics.horiAdvance) / 64.0f;
 
     return retValue;
