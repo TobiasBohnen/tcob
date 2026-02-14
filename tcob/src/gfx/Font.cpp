@@ -105,7 +105,7 @@ auto font::render_text(utf8_string_view text, bool kerning) -> std::vector<glyph
             ++_textureLayerCount;
             _glyphCache.clear();
             _textureNeedsSetup = true;
-            Resized();
+            TextureResized(*this);
             return render_text(text, kerning);
         }
 

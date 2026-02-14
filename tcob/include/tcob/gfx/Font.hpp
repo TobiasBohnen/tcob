@@ -118,7 +118,7 @@ public:
     explicit font(string name = "");
     virtual ~font();
 
-    signal<> Resized;
+    signal<font const&> TextureResized;
 
     auto info() const -> information const&;
     auto texture() const -> asset_ptr<gfx::texture>;

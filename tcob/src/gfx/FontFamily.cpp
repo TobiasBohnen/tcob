@@ -129,10 +129,11 @@ auto font_family::get_font(font::style style, u32 size) -> asset_ptr<font>
 
     // load font
     auto const            fontName {std::format("{}-{}-{}", _name, fontStyle, size)};
-    asset_owner_ptr<font> font {fontName, fontName};
-    entry.Fonts[size] = font;
-    if (font->load(entry.Data, size)) {
-        return font;
+    asset_owner_ptr<font> newFont {fontName, fontName};
+    entry.Fonts[size] = newFont;
+    if (newFont->load(entry.Data, size)) {
+        newFont->TextureResized.connect([this](font const& f) { TextureResized(f); });
+        return newFont;
     }
 
     return {};

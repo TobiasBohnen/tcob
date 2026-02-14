@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Font.hpp"
 
@@ -21,6 +22,8 @@ namespace tcob::gfx {
 class TCOB_API font_family final {
 public:
     explicit font_family(string name);
+
+    signal<font const&> TextureResized;
 
     auto name() const -> string const&;
     auto get_font(font::style style, u32 size) -> asset_ptr<font>;
