@@ -86,14 +86,10 @@ auto convert_enum(primitive_type type) -> u32
         return GL_POINTS;
     case primitive_type::LineStrip:
         return GL_LINE_STRIP;
-    case primitive_type::LineLoop:
-        return GL_LINE_LOOP;
     case primitive_type::Lines:
         return GL_LINES;
     case primitive_type::TriangleStrip:
         return GL_TRIANGLE_STRIP;
-    case primitive_type::TriangleFan:
-        return GL_TRIANGLE_FAN;
     case primitive_type::Triangles:
         return GL_TRIANGLES;
     }

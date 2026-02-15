@@ -34,6 +34,7 @@ public:
 
     void draw_elements(primitive_type mode, usize count, u32 offset) const override;
     void draw_arrays(primitive_type mode, i32 first, usize count) const override;
+    void draw_arrays_tf(i32 first, usize count) const;
 
 protected:
     void do_destroy() override;

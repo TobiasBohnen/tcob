@@ -407,7 +407,7 @@ void gl_canvas::fill(nvg_call const& call)
     set_uniforms(call.UniformOffset);
 
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        _vertexArray.draw_arrays(primitive_type::TriangleFan, static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
+        _vertexArray.draw_arrays_tf(static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
     }
 
     glEnable(GL_CULL_FACE);
@@ -444,7 +444,7 @@ void gl_canvas::convex_fill(nvg_call const& call)
     set_uniforms(call.UniformOffset, call.Image);
 
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        _vertexArray.draw_arrays(primitive_type::TriangleFan, static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
+        _vertexArray.draw_arrays_tf(static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
         // Draw fringes
         if (_paths[i].StrokeCount > 0) {
             _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
@@ -518,7 +518,7 @@ void gl_canvas::clip(nvg_call const& call)
     glClear(GL_STENCIL_BUFFER_BIT);
 
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        _vertexArray.draw_arrays(primitive_type::TriangleFan, static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
+        _vertexArray.draw_arrays_tf(static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
     }
 
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

@@ -147,4 +147,10 @@ void gl_vertex_array::draw_arrays(primitive_type mode, i32 first, usize count) c
     unbind();
 }
 
+void gl_vertex_array::draw_arrays_tf(i32 first, usize count) const
+{
+    bind();
+    GLCHECK(glDrawArrays(GL_TRIANGLE_FAN, static_cast<GLint>(first), static_cast<GLsizei>(count)));
+    unbind();
+}
 }

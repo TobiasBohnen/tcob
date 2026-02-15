@@ -108,12 +108,10 @@ enum class stencil_op : u8 {
 };
 
 enum class primitive_type : u8 {
-    Points,
+    Points, // TODO: remove
     LineStrip,
-    LineLoop,
     Lines,
     TriangleStrip,
-    TriangleFan,
     Triangles
 };
 
