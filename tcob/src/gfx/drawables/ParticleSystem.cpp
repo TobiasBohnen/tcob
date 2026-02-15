@@ -5,15 +5,24 @@
 
 #include "tcob/gfx/drawables/ParticleSystem.hpp"
 
+#include <cassert>
 #include <chrono>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <set>
 #include <span>
+#include <utility>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/TaskManager.hpp"
 #include "tcob/core/random/Random.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -22,6 +31,179 @@
 namespace tcob::gfx {
 
 using namespace std::chrono_literals;
+
+particle_system::particle_system(bool multiThreaded, isize reservedParticleCount)
+    : _multiThreaded {multiThreaded}
+{
+    if (reservedParticleCount > 0) {
+        _particles.reserve(reservedParticleCount);
+    }
+}
+
+auto particle_system::is_running() const -> bool
+{
+    return _isRunning;
+}
+
+void particle_system::start()
+{
+    if (_isRunning) { return; }
+
+    _isRunning = true;
+    for (auto& emitter : _emitters) { emitter->reset(); }
+
+    _particles.clear();
+    _aliveParticleCount = 0;
+}
+
+void particle_system::restart()
+{
+    stop();
+    start();
+}
+
+void particle_system::stop()
+{
+    _isRunning = false;
+
+    _renderer.reset_geometry();
+    _particles.clear();
+    _aliveParticleCount = 0;
+    _geometry.clear();
+}
+
+auto particle_system::create_emitter() -> particle_emitter&
+{
+    return *_emitters.emplace_back(std::make_unique<particle_emitter>());
+}
+
+auto particle_system::remove_emitter(particle_emitter const& emitter) -> bool
+{
+    return helper::erase_first(_emitters, [&emitter](auto const& val) { return val.get() == &emitter; });
+}
+
+void particle_system::clear()
+{
+    _emitters.clear();
+    stop();
+}
+
+auto particle_system::particle_count() const -> isize
+{
+    return _aliveParticleCount;
+}
+
+auto particle_system::activate_particle() -> particle&
+{
+    if (_aliveParticleCount == std::ssize(_particles)) {
+        _aliveParticleCount++;
+        return _particles.emplace_back();
+    }
+
+    return _particles[_aliveParticleCount++];
+}
+
+void particle_system::deactivate_particle(particle& particle)
+{
+    assert(_aliveParticleCount > 0);
+    std::swap(particle, _particles[--_aliveParticleCount]);
+}
+
+void particle_system::on_update(milliseconds deltaTime)
+{
+    if (!_isRunning || !Material) { return; }
+
+    for (auto& emitter : _emitters) {
+        emitter->emit(*this, deltaTime);
+    }
+
+    std::set<isize, std::greater<>> toBeDeactivated;
+
+    locate_service<task_manager>().run_parallel(
+        [&](par_task const& ctx) {
+            for (isize i {ctx.Start}; i < ctx.End; ++i) {
+                auto& particle {_particles[i]};
+                if (particle.is_alive()) {
+                    ParticleUpdate({.Particle = particle, .DeltaTime = deltaTime});
+                    particle.update(deltaTime);
+                } else {
+                    std::scoped_lock lock {_mutex};
+                    toBeDeactivated.insert(i);
+                }
+            }
+        },
+        _aliveParticleCount, _multiThreaded ? 64 : _aliveParticleCount);
+
+    for (auto const& i : toBeDeactivated) {
+        deactivate_particle(_particles[i]);
+    }
+}
+
+auto particle_system::can_draw() const -> bool
+{
+    return _isRunning && _aliveParticleCount != 0 && !(*Material).is_expired();
+}
+
+void particle_system::on_draw_to(render_target& target)
+{
+    _geometry.resize(_aliveParticleCount);
+
+    locate_service<task_manager>().run_parallel(
+        [&](par_task const& ctx) {
+            for (isize i {ctx.Start}; i < ctx.End; ++i) {
+                _particles[i].convert_to(&_geometry[i]);
+            }
+        },
+        _aliveParticleCount,
+        _multiThreaded ? 64 : _aliveParticleCount);
+
+    for (isize i {0}; i < Material->pass_count(); ++i) {
+        auto const& pass {Material->get_pass(i)};
+        _renderer.set_geometry({.Vertices = geometry::flatten({_geometry.data(), static_cast<usize>(_aliveParticleCount)}),
+                                .Indices  = geometry::get_indices(_aliveParticleCount),
+                                .Type     = primitive_type::Triangles},
+                               &pass);
+        _renderer.render_to_target(target);
+    }
+}
+
+////////////////////////////////////////////////////////
+
+auto particle_emitter::is_alive() const -> bool
+{
+    return _alive && (!Settings.Lifetime || _remainingLife > milliseconds::zero());
+}
+
+void particle_emitter::reset()
+{
+    if (Settings.Lifetime) { _remainingLife = *Settings.Lifetime; }
+    _alive = true;
+}
+
+void particle_emitter::emit(particle_system& system, milliseconds deltaTime)
+{
+    if (!is_alive()) { return; }
+
+    _remainingLife -= deltaTime;
+
+    i32 particleCount {0};
+    if (Settings.IsExplosion) {
+        particleCount = static_cast<i32>(Settings.SpawnRate);
+        _alive        = false;
+    } else {
+        f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};
+        particleCount = static_cast<i32>(particleAmount);
+        _emissionDiff = particleAmount - particleCount;
+    }
+
+    auto const& tmpl {Settings.Template};
+    auto const& texRegion {system.Material->first_pass().Texture->regions()[tmpl.TextureRegion]}; // TODO texRegion pass
+
+    for (i32 i {0}; i < particleCount; ++i) {
+        auto& particle {system.activate_particle()};
+        particle.init(tmpl, texRegion, Settings.SpawnArea, _rng);
+    }
+}
 
 ////////////////////////////////////////////////////////////
 
@@ -45,7 +227,7 @@ static auto minmax_rng(min_max<milliseconds> const& range, auto&& rng) -> millis
     return milliseconds {rng(range.first.count(), range.second.count())};
 }
 
-static void SetupParticleBase(particle_base& particle, auto&& tmpl, auto&& rng)
+static void SetupParticleBase(particle& particle, auto&& tmpl, auto&& rng)
 {
     auto const dir {point_f::FromDirection(minmax_rng(tmpl.Direction, rng))};
     particle.Velocity               = dir * minmax_rng(tmpl.Speed, rng);
@@ -80,49 +262,7 @@ static void CalcVelocity(auto&& particle, point_f pos, f32 seconds)
 
 ////////////////////////////////////////////////////////////
 
-void point_particle::update(milliseconds deltaTime)
-{
-    f32 const seconds {static_cast<f32>(deltaTime.count() / 1000)};
-
-    // age
-    RemainingLife -= std::chrono::abs(deltaTime);
-
-    // move
-    point_f const pos {(Position - Origin).as_normalized()};
-    CalcVelocity(*this, pos, seconds);
-    Position += Velocity * seconds;
-}
-
-void point_particle::init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen)
-{
-    Region = texRegion;
-
-    SetupParticleBase(*this, tmpl, randomGen);
-
-    // calculate random postion
-    f32 const x {randomGen(spawnArea.left(), spawnArea.right())};
-    f32 const y {randomGen(spawnArea.top(), spawnArea.bottom())};
-
-    // set position
-    Position = {x, y};
-    Origin   = Position;
-}
-
-void point_particle::convert_to(geometry_type* vertex) const
-{
-    vertex->Position  = Position;
-    vertex->Color     = Color;
-    vertex->TexCoords = {.U = Region.UVRect.left(), .V = Region.UVRect.top(), .Level = static_cast<f32>(Region.Level)};
-}
-
-void point_particle::SetGeometry(renderer& renderer, std::span<geometry_type const> vertices, pass const* pass)
-{
-    renderer.set_geometry({.Vertices = vertices, .Indices = {}, .Type = primitive_type::Points}, pass);
-}
-
-////////////////////////////////////////////////////////////
-
-void quad_particle::update(milliseconds deltaTime)
+void particle::update(milliseconds deltaTime)
 {
     f32 const seconds {static_cast<f32>(deltaTime.count() / 1000)};
 
@@ -144,7 +284,7 @@ void quad_particle::update(milliseconds deltaTime)
     if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation, origin); }
 }
 
-void quad_particle::init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen)
+void particle::init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen)
 {
     Region = texRegion;
 
@@ -167,24 +307,14 @@ void quad_particle::init(settings const& tmpl, texture_region const& texRegion, 
     Origin = Bounds.center();
 }
 
-void quad_particle::convert_to(geometry_type* quad) const
+void particle::convert_to(quad* quad) const
 {
     geometry::set_position(*quad, Bounds, _transform);
     geometry::set_color(*quad, Color);
     geometry::set_texcoords(*quad, Region);
 }
 
-void quad_particle::SetGeometry(renderer& renderer, std::span<geometry_type const> quads, pass const* pass)
-{
-    renderer.set_geometry({.Vertices = geometry::flatten(quads),
-                           .Indices  = geometry::get_indices(quads.size()),
-                           .Type     = primitive_type::Triangles},
-                          pass);
-}
-
-////////////////////////////////////////////////////////////
-
-auto particle_base::is_alive() const -> bool
+auto particle::is_alive() const -> bool
 {
     return RemainingLife.count() > 0;
 }
