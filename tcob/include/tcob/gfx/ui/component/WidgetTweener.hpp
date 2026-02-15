@@ -45,7 +45,7 @@ class TCOB_API animation_tweener {
 public:
     animation_tweener() = default;
 
-    signal<string const> Changed;
+    signal<string_view const> Changed;
 
     void start(gfx::frame_animation const& ani, playback_mode mode);
     void stop();

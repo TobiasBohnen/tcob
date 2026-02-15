@@ -17,12 +17,12 @@ frame_animation::frame_animation(std::vector<frame> const& frames)
     }
 }
 
-auto frame_animation::operator()(f64 t) const -> string
+auto frame_animation::operator()(f64 t) const -> string_view
 {
     return get_frame_at(duration() * t);
 }
 
-auto frame_animation::get_frame_at(milliseconds time) const -> string
+auto frame_animation::get_frame_at(milliseconds time) const -> string_view
 {
     if (_frames.empty()) { return ""; }
 
@@ -31,7 +31,7 @@ auto frame_animation::get_frame_at(milliseconds time) const -> string
         time -= frame.Duration;
     }
 
-    return _frames[_frames.size() - 1].Name;
+    return _frames.back().Name;
 }
 
 auto frame_animation::duration() const -> milliseconds

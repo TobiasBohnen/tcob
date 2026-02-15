@@ -36,11 +36,11 @@ class TCOB_API frame_animation final {
 public:
     explicit frame_animation(std::vector<frame> const& frames);
 
-    auto get_frame_at(milliseconds time) const -> string;
+    auto get_frame_at(milliseconds time) const -> string_view;
     auto duration() const -> milliseconds;
     auto is_empty() const -> bool;
 
-    auto operator()(f64 t) const -> string;
+    auto operator()(f64 t) const -> string_view;
 
     static inline char const* AssetName {"frame_animation"};
 
