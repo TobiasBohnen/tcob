@@ -59,19 +59,6 @@ renderer::renderer(buffer_usage_hint usage)
 {
 }
 
-void renderer::set_geometry(std::span<vertex const> vertices, pass const* pass)
-{
-    set_geometry(geometry_view {.Vertices = vertices, .Indices = {}, .Type = primitive_type::Points}, pass);
-}
-
-void renderer::set_geometry(std::span<quad const> quads, pass const* pass)
-{
-    set_geometry(geometry_view {.Vertices = geometry::flatten(quads),
-                                .Indices  = geometry::get_indices(quads.size()),
-                                .Type     = primitive_type::Triangles},
-                 pass);
-}
-
 void renderer::set_geometry(geometry_view const& gd, pass const* pass)
 {
     usize const vCount {gd.Vertices.size()};

@@ -67,6 +67,7 @@ private:
     bool _needsFormat {true};
 
     std::vector<quad> _quads {};
+    std::vector<u32>  _inds {};
 
     renderer                  _renderer {buffer_usage_hint::DynamicDraw};
     asset_owner_ptr<material> _material {};

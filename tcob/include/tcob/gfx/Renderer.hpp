@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <span>
 #include <vector>
 
 #include "tcob/core/Interfaces.hpp"
@@ -44,8 +43,6 @@ class TCOB_API renderer final : public renderer_base {
 public:
     explicit renderer(buffer_usage_hint usage);
 
-    void set_geometry(std::span<vertex const> vertices, pass const* pass);
-    void set_geometry(std::span<quad const> quads, pass const* pass);
     void set_geometry(geometry_view const& gd, pass const* pass);
     void reset_geometry();
 

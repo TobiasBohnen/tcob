@@ -162,12 +162,13 @@ inline void particle_system<Particle>::on_draw_to(render_target& target)
                 _particles[i].convert_to(&_geometry[i]);
             }
         },
-        _aliveParticleCount, _multiThreaded ? 64 : _aliveParticleCount);
+        _aliveParticleCount,
+        _multiThreaded ? 64 : _aliveParticleCount);
 
     for (isize i {0}; i < Material->pass_count(); ++i) {
         auto const& pass {Material->get_pass(i)};
 
-        _renderer.set_geometry({_geometry.data(), static_cast<usize>(_aliveParticleCount)}, &pass);
+        Particle::SetGeometry(_renderer, {_geometry.data(), static_cast<usize>(_aliveParticleCount)}, &pass);
         _renderer.render_to_target(target);
     }
 }

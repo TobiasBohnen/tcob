@@ -47,7 +47,9 @@ auto text::can_draw() const -> bool
 
 void text::on_draw_to(render_target& target)
 {
-    _renderer.set_geometry(_quads, &_material->first_pass());
+    _renderer.set_geometry(
+        {.Vertices = geometry::flatten(_quads), .Indices = _inds, .Type = primitive_type::Triangles},
+        &_material->first_pass());
     _renderer.render_to_target(target);
 }
 
@@ -73,6 +75,7 @@ void text::force_reshape()
 void text::format()
 {
     _quads.clear();
+    _inds.clear();
     Effects.clear_quads();
 
     _needsFormat = false;
@@ -121,6 +124,8 @@ void text::format()
             }
         }
     }
+
+    _inds = geometry::get_indices(_quads.size());
 }
 
 }

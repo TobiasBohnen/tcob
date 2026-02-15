@@ -141,18 +141,17 @@ void scroll_texcoords(quad& q, point_f offset)
 
 auto get_indices(usize quadCount) -> std::vector<u32>
 {
-    usize const      indCount {quadCount * 6};
-    std::vector<u32> retValue(indCount);
-    for (u32 i {0}; i < quadCount; ++i) {
-        u32 const vertexOffset {i * 4};
-        u32 const indexOffset {i * 6};
+    std::vector<u32> retValue(quadCount * 6);
+    u32*             ptr {retValue.data()};
 
-        retValue[indexOffset + 0] = vertexOffset + 3;
-        retValue[indexOffset + 1] = vertexOffset + 1;
-        retValue[indexOffset + 2] = vertexOffset + 0;
-        retValue[indexOffset + 3] = vertexOffset + 3;
-        retValue[indexOffset + 4] = vertexOffset + 2;
-        retValue[indexOffset + 5] = vertexOffset + 1;
+    for (u32 i {0}; i < quadCount; ++i) {
+        u32 const v {i * 4};
+        *ptr++ = v + 3;
+        *ptr++ = v + 1;
+        *ptr++ = v + 0;
+        *ptr++ = v + 3;
+        *ptr++ = v + 2;
+        *ptr++ = v + 1;
     }
     return retValue;
 }

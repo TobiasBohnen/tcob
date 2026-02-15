@@ -10,6 +10,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <span>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -192,11 +193,13 @@ public:
     point_f Position {point_f::Zero};
     point_f Origin {point_f::Zero};
 
-    void convert_to(vertex* vertex) const;
-
     void update(milliseconds deltaTime);
 
     void init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen);
+
+    void convert_to(geometry_type* vertex) const;
+
+    static void SetGeometry(renderer& renderer, std::span<geometry_type const> vertices, pass const* pass);
 };
 
 ////////////////////////////////////////////////////////////
@@ -245,11 +248,13 @@ public:
     degree_f Spin {0.0f};
     degree_f Rotation {0.0f};
 
-    void convert_to(quad* quad) const;
-
     void update(milliseconds deltaTime);
 
     void init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen);
+
+    void convert_to(geometry_type* quad) const;
+
+    static void SetGeometry(renderer& renderer, std::span<geometry_type const> quads, pass const* pass);
 
 private:
     transform _transform {};

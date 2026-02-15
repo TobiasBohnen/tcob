@@ -6,6 +6,7 @@
 #include "tcob/gfx/drawables/ParticleSystem.hpp"
 
 #include <chrono>
+#include <span>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
@@ -16,6 +17,7 @@
 #include "tcob/core/random/Random.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Renderer.hpp"
 
 namespace tcob::gfx {
 
@@ -78,13 +80,6 @@ static void CalcVelocity(auto&& particle, point_f pos, f32 seconds)
 
 ////////////////////////////////////////////////////////////
 
-void point_particle::convert_to(vertex* vertex) const
-{
-    vertex->Position  = Position;
-    vertex->Color     = Color;
-    vertex->TexCoords = {.U = Region.UVRect.left(), .V = Region.UVRect.top(), .Level = static_cast<f32>(Region.Level)};
-}
-
 void point_particle::update(milliseconds deltaTime)
 {
     f32 const seconds {static_cast<f32>(deltaTime.count() / 1000)};
@@ -113,14 +108,19 @@ void point_particle::init(settings const& tmpl, texture_region const& texRegion,
     Origin   = Position;
 }
 
-////////////////////////////////////////////////////////////
-
-void quad_particle::convert_to(quad* quad) const
+void point_particle::convert_to(geometry_type* vertex) const
 {
-    geometry::set_position(*quad, Bounds, _transform);
-    geometry::set_color(*quad, Color);
-    geometry::set_texcoords(*quad, Region);
+    vertex->Position  = Position;
+    vertex->Color     = Color;
+    vertex->TexCoords = {.U = Region.UVRect.left(), .V = Region.UVRect.top(), .Level = static_cast<f32>(Region.Level)};
 }
+
+void point_particle::SetGeometry(renderer& renderer, std::span<geometry_type const> vertices, pass const* pass)
+{
+    renderer.set_geometry({.Vertices = vertices, .Indices = {}, .Type = primitive_type::Points}, pass);
+}
+
+////////////////////////////////////////////////////////////
 
 void quad_particle::update(milliseconds deltaTime)
 {
@@ -167,6 +167,21 @@ void quad_particle::init(settings const& tmpl, texture_region const& texRegion, 
     Origin = Bounds.center();
 }
 
+void quad_particle::convert_to(geometry_type* quad) const
+{
+    geometry::set_position(*quad, Bounds, _transform);
+    geometry::set_color(*quad, Color);
+    geometry::set_texcoords(*quad, Region);
+}
+
+void quad_particle::SetGeometry(renderer& renderer, std::span<geometry_type const> quads, pass const* pass)
+{
+    renderer.set_geometry({.Vertices = geometry::flatten(quads),
+                           .Indices  = geometry::get_indices(quads.size()),
+                           .Type     = primitive_type::Triangles},
+                          pass);
+}
+
 ////////////////////////////////////////////////////////////
 
 auto particle_base::is_alive() const -> bool
@@ -175,4 +190,5 @@ auto particle_base::is_alive() const -> bool
 }
 
 ////////////////////////////////////////////////////////////
+
 }
