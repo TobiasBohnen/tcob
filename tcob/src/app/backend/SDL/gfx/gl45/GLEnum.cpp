@@ -82,8 +82,6 @@ auto convert_enum(blend_equation equ) -> u32
 auto convert_enum(primitive_type type) -> u32
 {
     switch (type) {
-    case primitive_type::Points:
-        return GL_POINTS;
     case primitive_type::LineStrip:
         return GL_LINE_STRIP;
     case primitive_type::Lines:

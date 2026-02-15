@@ -39,6 +39,7 @@
 #include <tcob/core/StringUtils.hpp>
 #include <tcob/core/TaskManager.hpp>
 #include <tcob/core/Timer.hpp>
+#include <tcob/core/Transform.hpp>
 #include <tcob/core/TypeFactory.hpp>
 #include <tcob/core/assets/Asset.hpp>
 #include <tcob/core/assets/AssetGroup.hpp>
@@ -75,7 +76,6 @@
 #include <tcob/data/SqliteStatement.hpp>
 #include <tcob/data/SqliteTable.hpp>
 
-#include <tcob/core/Transform.hpp>
 #include <tcob/gfx/Camera.hpp>
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/gfx/ColorGradient.hpp>
@@ -109,7 +109,6 @@
 #include <tcob/gfx/drawables/Drawable.hpp>
 #include <tcob/gfx/drawables/LightingSystem.hpp>
 #include <tcob/gfx/drawables/ParticleSystem.hpp>
-#include <tcob/gfx/drawables/PointCloud.hpp>
 #include <tcob/gfx/drawables/Shape.hpp>
 #include <tcob/gfx/drawables/Text.hpp>
 #include <tcob/gfx/drawables/TileMap.hpp>
