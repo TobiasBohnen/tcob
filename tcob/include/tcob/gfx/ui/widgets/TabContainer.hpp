@@ -30,14 +30,18 @@ public:
         Compact
     };
 
+    struct bar {
+        position    Position {position::Top};
+        length      Size;
+        header_mode Mode {header_mode::Fill};
+        f32         Rows {1};
+    };
+
     class TCOB_API style : public widget_style {
     public:
         utf8_string TabItemClass {"tab_items"};
 
-        position    TabBarPosition {position::Top};
-        length      TabBarSize;
-        header_mode TabBarMode {header_mode::Fill};
-        f32         TabBarRows {1};
+        bar Bar;
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
