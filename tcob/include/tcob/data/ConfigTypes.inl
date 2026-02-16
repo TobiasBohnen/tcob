@@ -315,9 +315,9 @@ inline auto object::is(index_type key, Keys const&... keys) const
                 return sub.is<T>(keys...);
             }
         }
-    }
 
-    return false;
+        return false;
+    }
 }
 
 inline auto object::has(index_type key, auto&&... keys) const -> bool

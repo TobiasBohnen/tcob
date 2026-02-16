@@ -105,7 +105,7 @@ void metaball_image::update_image()
             for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
                 isize const x {pixIdx % width};
                 isize const y {pixIdx / width};
-                f32 const   fieldValue {calculate_field(x, y)};
+                f32 const   fieldValue {calculate_field(static_cast<f32>(x), static_cast<f32>(y))};
 
                 if (fieldValue >= 1) {
                     f32 const   t {std::clamp(1.0f - (1.0f / fieldValue), 0.0f, 1.0f)};
