@@ -100,7 +100,7 @@ auto ref::is_valid() const -> bool
     return _ref != NO_REF() && _view.is_valid();
 }
 
-auto ref::operator==(ref const& other) -> bool
+auto ref::operator==(ref const& other) const -> bool
 {
     if (!is_valid() || !other.is_valid()) { return false; }
 
