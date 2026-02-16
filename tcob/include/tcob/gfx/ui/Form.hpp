@@ -41,6 +41,8 @@ public:
     prop<nav_map>                NavMap;
     prop<asset_ptr<gfx::shader>> Shader;
 
+    signal<widget_painter> DrawOverlay;
+
     asset_ptr<gfx::cursor> Cursor;
 
     point_f TooltipOffset {point_f::Zero};
@@ -133,7 +135,6 @@ private:
 
     bool _redrawWidgets {true};
     bool _prepareWidgets {true};
-    bool _drawOverlay {false};
 
     bool         _isLButtonDown {false};
     bool         _isRButtonDown {false};

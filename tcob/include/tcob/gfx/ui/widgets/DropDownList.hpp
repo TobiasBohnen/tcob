@@ -86,6 +86,7 @@ private:
     isize                             _visibleItems {0};
 
     bool _isExtended {false};
+    f32  _itemHeight {0};
     bool _mouseOverBox {false};
     bool _mouseOverChevron {false};
 

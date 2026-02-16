@@ -44,6 +44,20 @@ image_box::image_box(init const& wi)
     Class("image_box");
 
     _animationTween.Changed.connect([this](auto const& val) { Image.mutate([&val](icon& icon) { icon.TextureRegion = val; }); });
+
+    form().DrawOverlay.connect([&](widget_painter& painter) {
+        if (!_dragPosition) { return; }
+
+        auto&     myCanvas {painter.canvas()};
+        transform xform;
+        xform.translate(form_offset());
+        painter.begin(Alpha, xform);
+
+        auto targetRect {image_bounds()};
+        myCanvas.set_global_alpha(_style.DragAlpha);
+        myCanvas.draw_image(Image->Texture.ptr(), Image->TextureRegion,
+                            {*_dragPosition - _dragStart + targetRect.Position, targetRect.Size});
+    });
 }
 
 void image_box::start_animation(gfx::frame_animation const& ani, playback_mode mode)
@@ -125,20 +139,6 @@ void image_box::on_draw(widget_painter& painter)
     auto& canvas {painter.canvas()};
     canvas.set_fill_style(colors::White);
     canvas.draw_image(tex.ptr(), Image->TextureRegion, targetRect);
-
-    if (_dragPosition) {
-        painter.set_overlay([this, targetRect](widget_painter& that) -> void {
-            auto& myCanvas {that.canvas()};
-
-            transform xform;
-            xform.translate(form_offset());
-            that.begin(Alpha, xform);
-
-            myCanvas.set_global_alpha(_style.DragAlpha);
-            myCanvas.draw_image(Image->Texture.ptr(), Image->TextureRegion,
-                                {*_dragPosition - _dragStart + targetRect.Position, targetRect.Size});
-        });
-    }
 }
 
 void image_box::on_update(milliseconds deltaTime)

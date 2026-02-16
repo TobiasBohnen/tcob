@@ -72,26 +72,6 @@ void widget_painter::pop_scissor()
 
 ////////////////////////////////////////////////////////////
 
-void widget_painter::set_overlay(overlay_func const& func)
-{
-    _overlay = func;
-}
-
-auto widget_painter::draw_overlay() -> bool
-{
-    if (!_overlay) { return false; }
-
-    _canvas.reset();
-
-    _overlay(*this);
-    _overlay = nullptr;
-
-    _canvas.reset();
-    return true;
-}
-
-////////////////////////////////////////////////////////////
-
 static auto Fill(gfx::canvas& canvas, auto&& paint, auto&& func)
 {
     canvas.set_fill_style(paint);

@@ -303,8 +303,9 @@ void form_base::on_draw_to(gfx::render_target& target)
         }
 
         _canvas.begin_frame(size, 1.0f, overlayLayer);
-        _drawOverlay = _painter->draw_overlay();
+        DrawOverlay(*_painter);
         _canvas.end_frame();
+
         _redrawWidgets = false;
     }
 
@@ -314,9 +315,7 @@ void form_base::on_draw_to(gfx::render_target& target)
     }
 
     // overlay
-    if (_drawOverlay) {
-        _renderer.queue_layer(overlayLayer);
-    }
+    _renderer.queue_layer(overlayLayer);
 
     // tooltip
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
