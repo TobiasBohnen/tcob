@@ -14,7 +14,7 @@
 namespace tcob::random {
 ////////////////////////////////////////////////////////////
 
-auto NextFloat(auto&& rng) -> f64;
+auto next_float(auto&& rng) -> f64;
 
 class core_uniform_distribution {
 public:
@@ -231,9 +231,9 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class bag_distribution {
+class shuffled_range_distribution {
 public:
-    bag_distribution(i64 min, i64 max, isize period);
+    shuffled_range_distribution(i64 min, i64 max, isize period);
 
     auto operator()(auto&& rng) -> i64;
 

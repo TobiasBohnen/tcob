@@ -47,7 +47,7 @@ inline auto core_uniform_distribution::operator()(R& rng, T min, T max) -> T
     }
 }
 
-inline auto NextFloat(auto&& rng) -> f64
+inline auto next_float(auto&& rng) -> f64
 {
     return core_uniform_distribution {}(rng, 0.0, 1.0);
 }
@@ -79,7 +79,7 @@ inline auto binomial_distribution::operator()(auto&& rng) -> i32
 {
     i32 retValue {0};
     for (i32 i {0}; i < _trials; ++i) {
-        if (NextFloat(rng) < _p) {
+        if (next_float(rng) < _p) {
             retValue++;
         }
     }
@@ -95,7 +95,7 @@ inline bernoulli_distribution::bernoulli_distribution(f64 p)
 
 inline auto bernoulli_distribution::operator()(auto&& rng) -> bool
 {
-    return NextFloat(rng) < _p;
+    return next_float(rng) < _p;
 }
 
 ////////////////////////////////////////////////////////////
@@ -127,7 +127,7 @@ inline cauchy_distribution::cauchy_distribution(f64 x0, f64 gamma)
 
 inline auto cauchy_distribution::operator()(auto&& rng) -> f64
 {
-    f64 const u {NextFloat(rng)};
+    f64 const u {next_float(rng)};
     return _x0 + (_gamma * std::tan(TAU / 2.0 * (u - 0.5)));
 }
 
@@ -145,7 +145,7 @@ inline discrete_distribution::discrete_distribution(std::span<f64 const> probabi
 
 inline auto discrete_distribution::operator()(auto&& rng) -> i32
 {
-    f64 const u {NextFloat(rng)};
+    f64 const u {next_float(rng)};
 
     for (usize i {0}; i < _probs.size(); ++i) {
         if (u < _probs[i]) {
@@ -161,10 +161,17 @@ inline gamma_distribution::gamma_distribution(f64 shape, f64 scale)
     : _shape {shape}
     , _scale {scale}
 {
+    assert(_scale > 0.0);
 }
 
 inline auto gamma_distribution::operator()(auto&& rng) -> f64
 {
+    if (_shape < 1.0) {
+        gamma_distribution plusOne {_shape + 1.0, _scale};
+        f64 const          u {next_float(rng)};
+        return plusOne(rng) * std::pow(u, 1.0 / _shape);
+    }
+
     f64 const d {_shape - (1.0 / 3.0)};
     f64 const c {1.0 / sqrt(9.0 * d)};
 
@@ -178,7 +185,7 @@ inline auto gamma_distribution::operator()(auto&& rng) -> f64
         } while (v <= 0.0);
 
         v = v * v * v;
-        f64 const u {NextFloat(rng)};
+        f64 const u {next_float(rng)};
 
         if (u < 1.0 - (0.0331 * (x * x) * (x * x))) {
             return _scale * d * v;
@@ -199,7 +206,7 @@ inline exponential_distribution::exponential_distribution(f64 lambda)
 
 inline auto exponential_distribution::operator()(auto&& rng) -> f64
 {
-    f64 const u {NextFloat(rng)};
+    f64 const u {next_float(rng)};
     return -std::log(1 - u) / _lambda;
 }
 
@@ -235,8 +242,8 @@ inline auto normal_distribution::operator()(auto&& rng) -> f64
 
     f64 v1 {}, v2 {}, s {0};
     do {
-        v1 = (2 * NextFloat(rng)) - 1;
-        v2 = (2 * NextFloat(rng)) - 1;
+        v1 = (2 * next_float(rng)) - 1;
+        v2 = (2 * next_float(rng)) - 1;
         s  = (v1 * v1) + (v2 * v2);
     } while (s >= 1 || s == 0);
 
@@ -268,7 +275,7 @@ inline pareto_distribution::pareto_distribution(f64 alpha, f64 xm)
 
 inline auto pareto_distribution::operator()(auto&& rng) -> f64
 {
-    f64 const u {NextFloat(rng)};
+    f64 const u {next_float(rng)};
     return _xm / std::pow(u, 1.0 / _alpha);
 }
 
@@ -277,6 +284,8 @@ inline auto pareto_distribution::operator()(auto&& rng) -> f64
 inline piecewise_constant_distribution::piecewise_constant_distribution(std::span<f64 const> intervals, std::span<f64 const> weights)
     : _intervals {intervals.begin(), intervals.end()}
 {
+    assert(intervals.size() == weights.size() + 1);
+
     _cumulativeWeights.resize(weights.size());
     std::partial_sum(weights.begin(), weights.end(), _cumulativeWeights.begin());
 }
@@ -308,7 +317,7 @@ inline auto poisson_distribution::operator()(auto&& rng) -> i32
 
     do {
         ++k;
-        p *= NextFloat(rng);
+        p *= next_float(rng);
     } while (p > L);
 
     return k - 1;
@@ -325,7 +334,7 @@ inline triangular_distribution::triangular_distribution(f64 min, f64 max, f64 pe
 
 inline auto triangular_distribution::operator()(auto&& rng) -> f64
 {
-    f64 const u {NextFloat(rng)};
+    f64 const u {next_float(rng)};
     f64 const F {(_peak - _min) / (_max - _min)};
     return u < F ? _min + std::sqrt(u * (_max - _min) * (_peak - _min))
                  : _max - std::sqrt((1 - u) * (_max - _min) * (_max - _peak));
@@ -341,20 +350,20 @@ inline weibull_distribution::weibull_distribution(f64 shape, f64 scale)
 
 inline auto weibull_distribution::operator()(auto&& rng) -> f64
 {
-    f64 const u {NextFloat(rng)};
+    f64 const u {next_float(rng)};
     return _scale * std::pow(-std::log(1 - u), 1 / _shape);
 }
 
 ////////////////////////////////////////////////////////////
 
-inline bag_distribution::bag_distribution(i64 min, i64 max, isize period)
+inline shuffled_range_distribution::shuffled_range_distribution(i64 min, i64 max, isize period)
     : _min {min}
     , _max {max}
     , _period {period}
 {
 }
 
-inline auto bag_distribution::operator()(auto&& rng) -> i64
+inline auto shuffled_range_distribution::operator()(auto&& rng) -> i64
 {
     if (_seq.empty()) { gen_seq(rng); }
 
@@ -363,13 +372,15 @@ inline auto bag_distribution::operator()(auto&& rng) -> i64
     return retValue;
 }
 
-inline void bag_distribution::gen_seq(auto&& rng)
+inline void shuffled_range_distribution::gen_seq(auto&& rng)
 {
     std::vector<i64> sequence;
+    sequence.reserve(_max - _min + 1);
     for (i64 i {_min}; i <= _max; ++i) { sequence.push_back(i); }
+    _seq.reserve(sequence.size() * _period);
     for (isize i {0}; i < _period; ++i) { _seq.insert(_seq.end(), sequence.begin(), sequence.end()); }
 
     auto const range {_seq.size()};
-    for (usize i {range - 1}; i > 0; --i) { std::swap(_seq[i], _seq[rng.next() % range]); }
+    for (usize i {range - 1}; i > 0; --i) { std::swap(_seq[i], _seq[rng.next() % (i + 1)]); }
 }
 }
