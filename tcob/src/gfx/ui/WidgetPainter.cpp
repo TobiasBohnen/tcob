@@ -72,21 +72,19 @@ void widget_painter::pop_scissor()
 
 ////////////////////////////////////////////////////////////
 
-void widget_painter::add_overlay(overlay_func const& func)
+void widget_painter::set_overlay(overlay_func const& func)
 {
-    _overlays.push_back(func);
+    _overlay = func;
 }
 
-auto widget_painter::draw_overlays() -> bool
+auto widget_painter::draw_overlay() -> bool
 {
-    if (_overlays.empty()) { return false; }
+    if (!_overlay) { return false; }
 
     _canvas.reset();
 
-    for (auto& func : _overlays) {
-        func(*this);
-    }
-    _overlays.clear();
+    _overlay(*this);
+    _overlay = nullptr;
 
     _canvas.reset();
     return true;

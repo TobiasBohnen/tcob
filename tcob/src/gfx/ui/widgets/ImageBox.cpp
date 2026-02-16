@@ -127,7 +127,7 @@ void image_box::on_draw(widget_painter& painter)
     canvas.draw_image(tex.ptr(), Image->TextureRegion, targetRect);
 
     if (_dragPosition) {
-        painter.add_overlay([this, targetRect](widget_painter& that) -> void {
+        painter.set_overlay([this, targetRect](widget_painter& that) -> void {
             auto& myCanvas {that.canvas()};
 
             transform xform;

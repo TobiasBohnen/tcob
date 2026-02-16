@@ -8,7 +8,6 @@
 
 #include <functional>
 #include <stack>
-#include <vector>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
@@ -39,8 +38,8 @@ public:
     void push_scissor(rect_f const& globalScissor);
     void pop_scissor();
 
-    void add_overlay(overlay_func const& func);
-    auto draw_overlays() -> bool;
+    void set_overlay(overlay_func const& func);
+    auto draw_overlay() -> bool;
 
     auto draw_background_and_border(widget_style const& style, rect_f const& rect, bool isCircle) -> rect_f;
 
@@ -72,9 +71,9 @@ private:
     auto format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result;
     auto transform_text(text_transform xform, utf8_string_view text) const -> utf8_string;
 
-    gfx::canvas&              _canvas;
-    std::stack<rect_f>        _scissorStack;
-    std::vector<overlay_func> _overlays;
+    gfx::canvas&       _canvas;
+    std::stack<rect_f> _scissorStack;
+    overlay_func       _overlay;
 };
 
 ////////////////////////////////////////////////////////////

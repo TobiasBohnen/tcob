@@ -28,46 +28,45 @@ legend::legend(init const& wi)
     : widget {wi}
 {
     Class("legend");
-    For.Changed.connect([&](auto const& val) -> void {
-        _con = val->Drawn.connect([&] { queue_redraw(); });
+    For.Changed.connect([&](auto const& /* val */) -> void {
         queue_redraw();
     });
 }
-
 void legend::on_draw(widget_painter& painter)
 {
-    rect_f const rect {draw_background(_style, painter)};
-
+    rect_f const         rect {draw_background(_style, painter)};
     scoped_scissor const guard {painter, this};
-
     if (!For) { return; }
     if (!_style.Text.Font) { return; }
-
     auto&      canvas {painter.canvas()};
     auto const legendDefs {(*For)->legend()};
     if (legendDefs.empty()) { return; }
 
-    f32 const lineHeight {rect.height() / static_cast<f32>(legendDefs.size())};
-    f32 const markerSize {std::min(rect.width() / 2, lineHeight * 0.6f)};
-
-    point_f pos {rect.top_left()};
+    bool const isVertical {get_orientation() == orientation::Vertical};
+    f32 const  itemSize {(isVertical ? rect.height() : rect.width()) / static_cast<f32>(legendDefs.size())};
+    f32 const  markerSize {std::min(isVertical ? rect.width() / 2 : itemSize / 2,
+                                   (isVertical ? itemSize : rect.height()) * 0.6f)};
+    point_f    pos {rect.top_left()};
 
     for (auto const& [name, color] : legendDefs) {
         canvas.set_fill_style(color);
         canvas.begin_path();
-        canvas.rect({{pos.X, pos.Y + ((lineHeight - markerSize) * 0.5f)},
+        canvas.rect({{pos.X, pos.Y + (((isVertical ? itemSize : rect.height()) - markerSize) * 0.5f)},
                      {markerSize, markerSize}});
         canvas.fill();
 
         rect_f const textBounds {
             pos.X + markerSize,
             pos.Y,
-            rect.width() - markerSize,
-            lineHeight};
-
+            (isVertical ? rect.width() : itemSize) - markerSize,
+            isVertical ? itemSize : rect.height()};
         painter.draw_text(_style.Text, textBounds, name);
 
-        pos.Y += lineHeight;
+        if (isVertical) {
+            pos.Y += itemSize;
+        } else {
+            pos.X += itemSize;
+        }
     }
 }
 

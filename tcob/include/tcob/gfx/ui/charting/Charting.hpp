@@ -11,7 +11,6 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -49,8 +48,6 @@ public:
 class TCOB_API chart_base : public widget {
 public:
     virtual ~chart_base() = default;
-
-    signal<> Drawn;
 
     virtual auto legend() const -> std::vector<legend_def> = 0;
 

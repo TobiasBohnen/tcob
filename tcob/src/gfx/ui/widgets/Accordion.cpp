@@ -16,6 +16,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -39,20 +40,16 @@ accordion::accordion(init const& wi)
     }}}
     , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
 {
-    _expandTween.Changed.connect([&] {
-        queue_redraw();
-    });
+    _expandTween.Changed.connect([&] { queue_redraw(); });
 
     ActiveSectionIndex.Changed.connect([this](auto const& val) {
-        if (MaximizeActiveSection) {
-            _expandTween.reset(1);
-        } else {
-            _expandTween.reset(0);
-            auto const duration {val != INVALID_INDEX && _oldActiveSectionIndex != INVALID_INDEX
-                                     ? _style.ExpandDuration * 2
-                                     : _style.ExpandDuration};
-            _expandTween.start(1, duration);
-        }
+        _expandTween.reset(0);
+        auto const duration {val != INVALID_INDEX && _oldActiveSectionIndex != INVALID_INDEX
+                                 ? _style.ExpandDuration * 2
+                                 : _style.ExpandDuration};
+        _expandTween.start(1, duration);
+
+        form().refresh_hover(this);
         queue_redraw();
     });
     ActiveSectionIndex(INVALID_INDEX);
@@ -262,14 +259,17 @@ void accordion::offset_section_content(rect_f& bounds, style const& style) const
 {
     auto const [secIdx, _] {section_expand()};
     f32 const barHeight {style.SectionBarHeight.calc(bounds.height())};
-    bounds.Size.Height -= barHeight * (MaximizeActiveSection ? 1 : static_cast<f32>(_sections.size()));
-    bounds.Position.Y += barHeight * (MaximizeActiveSection ? 1 : static_cast<f32>(secIdx + 1));
+    bounds.Size.Height -= barHeight * (MaximizeActiveSection ? 1.0f : static_cast<f32>(_sections.size()));
+    bounds.Position.Y += barHeight * (MaximizeActiveSection ? 1.0f : static_cast<f32>(secIdx + 1));
 }
 
 auto accordion::section_expand() const -> std::pair<isize, f32>
 {
+    f32 const val {_expandTween.current_value()};
+    if (MaximizeActiveSection) { return {ActiveSectionIndex, val}; }
+
     std::pair<isize, f32> retValue;
-    f32 const             val {_expandTween.current_value()};
+
     if (_oldActiveSectionIndex == INVALID_INDEX) {
         retValue.first  = ActiveSectionIndex;
         retValue.second = val;

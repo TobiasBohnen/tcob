@@ -88,6 +88,8 @@ namespace charts {
     class pie_chart;
     class scatter_chart;
     class radar_chart;
+
+    class legend;
 }
 
 ////////////////////////////////////////////////////////////

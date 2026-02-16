@@ -113,7 +113,7 @@ void drop_down_list::on_draw(widget_painter& painter)
 
     if (_isExtended) {
         f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
-        painter.add_overlay([this, itemHeight](widget_painter& that) -> void {
+        painter.set_overlay([this, itemHeight](widget_painter& that) -> void {
             transform xform;
             xform.translate(form_offset());
             that.begin(Alpha, xform);

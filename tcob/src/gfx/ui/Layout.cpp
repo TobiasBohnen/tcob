@@ -256,17 +256,20 @@ box_layout::box_layout(parent parent, size_i boxSize)
 void box_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
-
-    f32 const horiSize {size.Width / _box.Width};
-    f32 const vertSize {size.Height / _box.Height};
-
+    f32 const   horiSize {size.Width / _box.Width};
+    f32 const   vertSize {size.Height / _box.Height};
     for (i32 i {0}; i < std::ssize(w); ++i) {
         auto const& widget {w[i]};
         if (i < _box.Width * _box.Height) {
-            widget->Bounds = {static_cast<f32>(i % _box.Width) * horiSize,
-                              static_cast<f32>(i / _box.Width) * vertSize,
-                              widget->Flex->Width.calc(horiSize),
-                              widget->Flex->Height.calc(vertSize)};
+            f32 const cellX {static_cast<f32>(i % _box.Width) * horiSize};
+            f32 const cellY {static_cast<f32>(i / _box.Width) * vertSize};
+            f32 const widgetWidth {widget->Flex->Width.calc(horiSize)};
+            f32 const widgetHeight {widget->Flex->Height.calc(vertSize)};
+
+            widget->Bounds = {cellX + ((horiSize - widgetWidth) * 0.5f),
+                              cellY + ((vertSize - widgetHeight) * 0.5f),
+                              widgetWidth,
+                              widgetHeight};
         } else {
             widget->Bounds = rect_f::Zero;
         }

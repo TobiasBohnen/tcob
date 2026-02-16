@@ -251,6 +251,8 @@ void widget::on_styles_changed()
 
 void widget::prepare_redraw()
 {
+    if (!needs_redraw()) { return; }
+
     widget_style_selectors const newSelectors {
         .Class      = Class,
         .Flags      = flags(),
@@ -270,11 +272,12 @@ void widget::prepare_redraw()
 
 void widget::queue_redraw()
 {
-    _form->notify_redraw();
     if (needs_redraw()) { return; }
 
     auto* tlw {top_level_widget()};
     tlw->set_redraw(true);
+
+    _form->notify_redraw();
 }
 
 void widget::set_redraw(bool val)

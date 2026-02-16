@@ -52,7 +52,6 @@ inline void chart<T>::on_draw(widget_painter& painter)
     if (style && style->Colors.empty()) { return; }
 
     on_draw_chart(painter);
-    Drawn();
 }
 
 template <typename T>

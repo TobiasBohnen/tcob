@@ -35,6 +35,11 @@ namespace tcob::ui {
 
 using namespace std::chrono_literals;
 
+constexpr static i32 overlayLayer {0};
+constexpr static i32 tooltipLayer {1};
+constexpr static i32 modalLayer {2};
+constexpr static i32 firstUILayer {modalLayer + 1};
+
 ////////////////////////////////////////////////////////////
 
 form_base::form_base(string name, rect_f const& bounds)
@@ -279,11 +284,6 @@ auto form_base::can_draw() const -> bool
 
 void form_base::on_draw_to(gfx::render_target& target)
 {
-    constexpr static i32 overlayLayer {0};
-    constexpr static i32 tooltipLayer {1};
-    constexpr static i32 modalLayer {2};
-    constexpr static i32 firstUILayer {modalLayer + 1};
-
     size_i const size {size_i {Bounds->Size}};
 
     auto const widgets {get_layout()->widgets()};
@@ -303,7 +303,7 @@ void form_base::on_draw_to(gfx::render_target& target)
         }
 
         _canvas.begin_frame(size, 1.0f, overlayLayer);
-        _drawOverlay = _painter->draw_overlays();
+        _drawOverlay = _painter->draw_overlay();
         _canvas.end_frame();
         _redrawWidgets = false;
     }
@@ -390,7 +390,7 @@ void form_base::refresh_hover(widget* widget)
     input::mouse::motion_event ev {};
     ev.Position = mp;
 
-    _topWidget = nullptr;
+    //_topWidget = nullptr;
     on_mouse_hover(ev);
 }
 
