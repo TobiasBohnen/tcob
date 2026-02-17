@@ -69,7 +69,7 @@ public:
     virtual void clear_containers()                                             = 0;
 
     void queue_redraw();
-    void notify_redraw();
+    void invalidate_layout();
 
     template <SubmitTarget Target>
     void submit(Target& target);
@@ -133,8 +133,8 @@ private:
     std::vector<std::weak_ptr<tooltip>> _tooltips;
     std::vector<modal_dialog*>          _modals {};
 
-    bool _redrawWidgets {true};
-    bool _prepareWidgets {true};
+    bool _canvasDirty {true};
+    bool _layoutDirty {true};
 
     bool         _isLButtonDown {false};
     bool         _isRButtonDown {false};

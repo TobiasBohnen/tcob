@@ -135,12 +135,12 @@ void form_base::queue_redraw()
     for (auto const& widget : containers()) {
         widget->set_redraw(true);
     }
-    notify_redraw();
+    invalidate_layout();
 }
 
-void form_base::notify_redraw()
+void form_base::invalidate_layout()
 {
-    _prepareWidgets = true;
+    _layoutDirty = true;
 }
 
 void form_base::push_modal(modal_dialog* dlg)
@@ -213,11 +213,11 @@ void form_base::change_cursor_mode(cursor_mode mode)
     case cursor_mode::Grabbing: newMode = "grabbing"; break;
     case cursor_mode::Text:     newMode = "text"; break;
     case cursor_mode::Cell:     newMode = "cell"; break;
-    case cursor_mode::User1:
-    case cursor_mode::User2:
-    case cursor_mode::User3:
-    case cursor_mode::User4:
-    case cursor_mode::User5:    newMode = "cursor2"; break;
+    case cursor_mode::User1:    newMode = "user1"; break;
+    case cursor_mode::User2:    newMode = "user2"; break;
+    case cursor_mode::User3:    newMode = "user3"; break;
+    case cursor_mode::User4:    newMode = "user4"; break;
+    case cursor_mode::User5:    newMode = "user5"; break;
     }
 
     if (Cursor->ActiveMode == newMode) { return; }
@@ -242,7 +242,7 @@ void form_base::on_update(milliseconds deltaTime)
     handle_tooltip(deltaTime);
 
     // update styles
-    if (_prepareWidgets) {
+    if (_layoutDirty) {
         // layout
         apply_layout();
 
@@ -262,8 +262,8 @@ void form_base::on_update(milliseconds deltaTime)
             modal->prepare_redraw();
         }
 
-        _prepareWidgets = false;
-        _redrawWidgets  = true;
+        _layoutDirty = false;
+        _canvasDirty = true;
     }
 
     // update widgets
@@ -291,7 +291,7 @@ void form_base::on_draw_to(gfx::render_target& target)
 
     // ui
     // redraw
-    if (_redrawWidgets) {
+    if (_canvasDirty) {
         i32 i {0};
         for (auto const& container : widgets | std::views::reverse) { // ZORDER
             if (container->needs_redraw()) {
@@ -306,7 +306,7 @@ void form_base::on_draw_to(gfx::render_target& target)
         DrawOverlay(*_painter);
         _canvas.end_frame();
 
-        _redrawWidgets = false;
+        _canvasDirty = false;
     }
 
     // render
@@ -457,13 +457,13 @@ void form_base::on_mouse_button_down(input::mouse::button_event const& ev)
     hide_tooltip();
 
     focus_widget(_topWidget);
-    if (_topWidget) {
-        _injector.on_mouse_button_down(_topWidget, ev);
-        if (ev.Button == Controls->PrimaryMouseButton) {
-            _isLButtonDown = true;
-        } else if (ev.Button == Controls->SecondaryMouseButton) {
-            _isRButtonDown = true;
-        }
+    if (!_focusWidget) { return; }
+    _injector.on_mouse_button_down(_focusWidget, ev);
+
+    if (ev.Button == Controls->PrimaryMouseButton) {
+        _isLButtonDown = true;
+    } else if (ev.Button == Controls->SecondaryMouseButton) {
+        _isRButtonDown = true;
     }
 }
 
@@ -648,7 +648,7 @@ auto form_base::focus_nav_target(string const& widget, direction dir) -> bool
 
 void form_base::on_styles_changed()
 {
-    _prepareWidgets = true;
+    _layoutDirty = true;
     for (auto const& container : containers()) {
         container->on_styles_changed();
     }

@@ -94,7 +94,7 @@ void widget::hide()
 
 auto widget::is_visible() const -> bool
 {
-    return _visible && Alpha > 0.01f
+    return _visible && Alpha > 0.01f && Bounds->width() > 0 && Bounds->height() > 0
         && (_parent ? _parent->is_visible()
                     : _form->is_visible());
 }
@@ -136,7 +136,7 @@ void widget::draw(widget_painter& painter)
     if (!needs_redraw()) { return; }
     set_redraw(false);
 
-    if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
+    if (!is_visible()) { return; }
 
     painter.begin(Alpha);
     on_draw(painter);
@@ -272,7 +272,7 @@ void widget::prepare_redraw()
 
 void widget::queue_redraw()
 {
-    _form->notify_redraw();
+    _form->invalidate_layout();
     if (needs_redraw()) { return; }
 
     auto* tlw {top_level_widget()};
