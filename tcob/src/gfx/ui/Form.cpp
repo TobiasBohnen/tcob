@@ -262,6 +262,9 @@ void form_base::on_update(milliseconds deltaTime)
             modal->prepare_redraw();
         }
 
+        // re-hover
+        on_mouse_hover({.Position = locate_service<input::system>().mouse().get_position()});
+
         _layoutDirty = false;
         _canvasDirty = true;
     }
@@ -377,20 +380,6 @@ void form_base::focus_widget(widget* newFocus)
         _currentTabIndex = _focusWidget->TabStop->Index;
         _injector.on_focus_gained(_focusWidget);
     }
-}
-
-void form_base::refresh_hover(widget* widget)
-{
-    point_i const mp {locate_service<input::system>().mouse().get_position()};
-    if (!widget->hit_test(mp)) { return; }
-
-    widget->prepare_redraw();
-
-    input::mouse::motion_event ev {};
-    ev.Position = mp;
-
-    //_topWidget = nullptr;
-    on_mouse_hover(ev);
 }
 
 void form_base::on_key_down(input::keyboard::event const& ev)
@@ -704,4 +693,5 @@ void form_base::hide_tooltip()
     _mouseOverTime    = 0ms;
     _isTooltipVisible = false;
 }
+
 }

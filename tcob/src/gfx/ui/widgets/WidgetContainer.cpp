@@ -29,7 +29,7 @@ void widget_container::update(milliseconds deltaTime)
 
 void widget_container::draw(widget_painter& painter)
 {
-    if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
+    if (!is_visible()) { return; }
 
     if (needs_redraw()) {
         painter.begin(Alpha);

@@ -16,7 +16,6 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -49,7 +48,6 @@ accordion::accordion(init const& wi)
                                  : _style.ExpandDuration};
         _expandTween.start(1, duration);
 
-        form().refresh_hover(this);
         queue_redraw();
     });
     ActiveSectionIndex(INVALID_INDEX);

@@ -62,8 +62,6 @@ public:
     auto focused_widget() const -> widget*;
     void focus_widget(widget* newFocus);
 
-    void refresh_hover(widget* widget);
-
     virtual auto containers() const -> std::span<std::unique_ptr<widget> const> = 0;
     virtual void remove_container(widget* widget)                               = 0;
     virtual void clear_containers()                                             = 0;
@@ -97,6 +95,7 @@ protected:
     void on_text_input(input::keyboard::text_input_event const& ev) override;
 
     void on_mouse_motion(input::mouse::motion_event const& ev) override;
+    void on_mouse_hover(input::mouse::motion_event const& ev);
     void on_mouse_button_down(input::mouse::button_event const& ev) override;
     void on_mouse_button_up(input::mouse::button_event const& ev) override;
     void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
@@ -113,8 +112,6 @@ protected:
     virtual auto get_layout() const -> layout const* = 0;
 
 private:
-    void on_mouse_hover(input::mouse::motion_event const& ev);
-
     void handle_tab(input::keyboard::event const& ev);
     void handle_nav(input::keyboard::event const& ev);
     auto focus_nav_target(string const& widget, direction dir) -> bool;
