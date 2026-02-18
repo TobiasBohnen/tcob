@@ -96,7 +96,7 @@ private:
 
     renderer                                     _renderer;
     std::unordered_map<isize, std::vector<quad>> _quads {};
-    std::unordered_map<isize, std::vector<u32>>  _inds {};
+    std::vector<u32>                             _inds {};
     bool                                         _isDirty {true};
 };
 

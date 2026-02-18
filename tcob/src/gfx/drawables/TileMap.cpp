@@ -103,26 +103,29 @@ void tilemap_base::notify_layer_changed(tilemap_layer* /* layer */)
 
 void tilemap_base::on_update(milliseconds /* deltaTime */)
 {
-    if (_layers.empty() || !Material) { return; }
     if (!_isDirty) { return; }
+    if (_layers.empty() || !Material || Material->pass_count() == 0) { return; }
 
     _quads.clear();
     _isDirty = false;
 
-    for (auto const& layer : _layers) {
-        if (!layer->Visible) { continue; }
+    for (isize p {0}; p < Material->pass_count(); ++p) {
+        auto& quads {_quads[p]};
+        auto& pass {Material->get_pass(p)};
 
-        auto const& tiles {*layer->Tiles};
-        for (isize p {0}; p < Material->pass_count(); ++p) {
-            auto&      quads {_quads[p]};
-            auto const tilesSize {tiles.size()};
+        for (auto const& layer : _layers) {
+            if (!layer->Visible) { continue; }
+
+            auto const& tiles {*layer->Tiles};
+            auto const  tilesSize {tiles.size()};
             for (i32 i {0}; i < tilesSize.area(); ++i) {
                 auto const tilePos {IndexToPosition(i, layer->RenderDirection, tilesSize)};
-                setup_quad(Material->get_pass(p), quads.emplace_back(), tilePos + *layer->Offset, tiles[tilePos]);
+                setup_quad(pass, quads.emplace_back(), tilePos + *layer->Offset, tiles[tilePos]);
             }
-            _inds[p] = geometry::get_indices(quads.size());
         }
     }
+
+    _inds = geometry::get_indices(_quads[0].size()); // FIXME: only has to be rebuild when the layer count changes
 }
 
 auto tilemap_base::can_draw() const -> bool
@@ -136,7 +139,7 @@ void tilemap_base::on_draw_to(render_target& target)
         auto const& pass {Material->get_pass(p)};
 
         _renderer.set_geometry(
-            {.Vertices = geometry::flatten(_quads[p]), .Indices = _inds[p], .Type = primitive_type::Triangles},
+            {.Vertices = geometry::flatten(_quads[p]), .Indices = _inds, .Type = primitive_type::Triangles},
             &pass);
         _renderer.render_to_target(target);
     }

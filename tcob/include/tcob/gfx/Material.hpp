@@ -42,6 +42,7 @@ public:
 
     auto first_pass() -> pass&;
     auto create_pass() -> pass&;
+
     auto get_pass(isize idx) -> pass&;
     auto get_pass(isize idx) const -> pass const&;
     auto pass_count() const -> isize;
