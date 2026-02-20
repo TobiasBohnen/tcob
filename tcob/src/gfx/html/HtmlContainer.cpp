@@ -105,7 +105,7 @@ auto container::create_font(litehtml::font_description const& descr, litehtml::d
     fm->ascent      = fontInfo.Ascender;
     fm->descent     = -fontInfo.Descender;
     fm->height      = fm->ascent + fm->descent;
-    fm->x_height    = static_cast<litehtml::pixel_t>(font->get_glyphs("x", false)[0].Size.Height);
+    fm->x_height    = static_cast<litehtml::pixel_t>(font->load_glyphs("x", false)[0].Size.Height);
     fm->draw_spaces = true;
     _fonts.push_back(font.ptr());
     usize const retValue {_fonts.size() - 1};

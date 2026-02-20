@@ -127,10 +127,10 @@ public:
     auto load [[nodiscard]] (io::istream& stream, u32 size) noexcept -> bool;
     auto load [[nodiscard]] (std::span<std::byte const> fontData, u32 size) noexcept -> bool;
 
-    auto render_text(utf8_string_view text, bool kerning) -> std::vector<glyph>;
+    auto shape_text(utf8_string_view text, bool kerning) -> std::vector<glyph>;
     void decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs);
 
-    auto get_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>;
+    auto load_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>;
 
     auto name() const -> string const&;
 

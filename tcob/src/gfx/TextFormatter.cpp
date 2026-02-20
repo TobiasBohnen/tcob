@@ -176,9 +176,9 @@ static auto Shape(utf8_string_view text, font& font, bool kerning, bool measure,
         case token_type::Text:
         case token_type::Whitespace: {
             if (measure) {
-                token.Glyphs = font.get_glyphs(token.Text, kerning);
+                token.Glyphs = font.load_glyphs(token.Text, kerning);
             } else {
-                token.Glyphs = font.render_text(token.Text, kerning);
+                token.Glyphs = font.shape_text(token.Text, kerning);
             }
 
             for (auto const& glyph : token.Glyphs) { token.Width += glyph.AdvanceX; }

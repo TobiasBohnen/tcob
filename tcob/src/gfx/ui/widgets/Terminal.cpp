@@ -279,7 +279,7 @@ void terminal::dump(io::ostream& stream) const
 
 static auto GetFontWidth(gfx::font* font) -> f32
 {
-    auto qs {font->get_glyphs("m", false)};
+    auto qs {font->load_glyphs("m", false)};
     if (qs.empty()) { return 0; }
 
     return qs[0].AdvanceX;

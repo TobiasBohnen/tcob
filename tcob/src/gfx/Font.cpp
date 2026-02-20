@@ -88,7 +88,7 @@ void font::setup_texture()
     _textureNeedsSetup = false;
 }
 
-auto font::render_text(utf8_string_view text, bool kerning) -> std::vector<glyph>
+auto font::shape_text(utf8_string_view text, bool kerning) -> std::vector<glyph>
 {
     if (_textureNeedsSetup) { setup_texture(); }
 
@@ -106,7 +106,7 @@ auto font::render_text(utf8_string_view text, bool kerning) -> std::vector<glyph
             _glyphCache.clear();
             _textureNeedsSetup = true;
             TextureResized(*this);
-            return render_text(text, kerning);
+            return shape_text(text, kerning);
         }
 
         auto& glyph {retValue.emplace_back(_glyphCache[cp0])};
@@ -159,7 +159,7 @@ void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbac
     }
 }
 
-auto font::get_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>
+auto font::load_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>
 {
     auto const  u32text {utf8::to_utf32(text)};
     usize const len {u32text.size()};
