@@ -127,6 +127,11 @@ auto theora_decoder::advance(milliseconds ts) -> animated_image_decoder::status
 
 void theora_decoder::reset()
 {
+    if (_currentFrame) {
+        THEORAPLAY_freeVideo(_currentFrame);
+        _currentFrame = nullptr;
+    }
+
     _currentTimeStamp = 0;
     if (_decoder) {
         THEORAPLAY_stopDecode(_decoder);
