@@ -74,7 +74,7 @@ auto gl_texture::get_filtering() const -> texture::filtering
     return texture::filtering::Linear;
 }
 
-void gl_texture::set_filtering(texture::filtering val) const
+void gl_texture::set_filtering(texture::filtering val)
 {
     assert(ID);
     GLenum const filtering {convert_enum(val)};
@@ -104,7 +104,7 @@ auto gl_texture::get_wrapping() const -> texture::wrapping
     return convertWrap(wrapS);
 }
 
-void gl_texture::set_wrapping(texture::wrapping val) const
+void gl_texture::set_wrapping(texture::wrapping val)
 {
     glTextureParameteri(ID, GL_TEXTURE_WRAP_S, convert_enum(val));
     glTextureParameteri(ID, GL_TEXTURE_WRAP_T, convert_enum(val));
@@ -138,7 +138,7 @@ void gl_texture::resize(size_i texsize, u32 depth, texture::format format)
     logger::Debug("Texture: created ID {}: width {}, height {}, depth {}", ID, texsize.Width, texsize.Height, depth);
 }
 
-void gl_texture::update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment) const
+void gl_texture::update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment)
 {
     assert(ID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);

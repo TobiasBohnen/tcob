@@ -71,7 +71,7 @@ void gl_window::set_vsync(bool value)
           : SDL_GL_SetSwapInterval(0);
 }
 
-void gl_window::clear(color c) const
+void gl_window::clear(color c)
 {
     vec4 const color {c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f};
     glClearNamedFramebufferfv(0, GL_COLOR, 0, color.data());

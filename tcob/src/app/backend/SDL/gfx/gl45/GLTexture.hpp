@@ -22,12 +22,12 @@ public:
     ~gl_texture() override;
 
     void resize(size_i texsize, u32 depth, texture::format format = texture::format::RGBA8) override;
-    void update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const override;
+    void update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) override;
 
     auto get_filtering() const -> texture::filtering override;
-    void set_filtering(texture::filtering val) const override;
+    void set_filtering(texture::filtering val) override;
     auto get_wrapping() const -> texture::wrapping override;
-    void set_wrapping(texture::wrapping val) const override;
+    void set_wrapping(texture::wrapping val) override;
 
     auto copy_to_image(u32 depth) const -> image override;
 

@@ -33,20 +33,20 @@ void gl_uniform_buffer::do_destroy()
     GLCHECK(glDeleteBuffers(1, &ID));
 }
 
-void gl_uniform_buffer::bind_base(u32 index) const
+void gl_uniform_buffer::bind_base(u32 index)
 {
     assert(ID);
     GLCHECK(glBindBufferBase(GL_UNIFORM_BUFFER, index, ID));
 }
 
-auto gl_uniform_buffer::update(bool data, usize offset) const -> usize
+auto gl_uniform_buffer::update(bool data, usize offset) -> usize
 {
     u32 const d {data}; // bools are u32 in GLSL and HLSL
     update(&d, sizeof(d), offset);
     return sizeof(d);
 }
 
-void gl_uniform_buffer::update(void const* data, usize size, usize offset) const
+void gl_uniform_buffer::update(void const* data, usize size, usize offset)
 {
     assert(ID);
     GLCHECK(glBindBuffer(GL_UNIFORM_BUFFER, ID));

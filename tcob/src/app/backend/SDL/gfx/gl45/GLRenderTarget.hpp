@@ -28,19 +28,19 @@ public:
     gl_render_target(texture* tex);
 
     void prepare_render(render_properties const& props) override;
-    void finalize_render() const override;
+    void finalize_render() override;
 
-    void enable_scissor(rect_i const& rect) const override;
-    void disable_scissor() const override;
+    void enable_scissor(rect_i const& rect) override;
+    void disable_scissor() override;
 
-    void clear(color c) const override;
+    void clear(color c) override;
 
     void on_resize(size_i size) override;
 
     auto copy_to_image(rect_i const& rect) const -> image override;
 
-    void bind_pass(pass const& pass) const override;
-    void unbind_pass() const override;
+    void bind_pass(pass const& pass) override;
+    void unbind_pass() override;
 
 private:
     void set_viewport(rect_i const& rect);

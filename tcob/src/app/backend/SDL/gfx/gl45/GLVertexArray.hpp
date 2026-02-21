@@ -26,8 +26,8 @@ public:
 
     void resize(usize vertCount, usize indCount) override;
 
-    void update_data(std::span<vertex const> verts, usize vertOffset) const override;
-    void update_data(std::span<u32 const> inds, usize indOffset) const override;
+    void update_data(std::span<vertex const> verts, usize vertOffset) override;
+    void update_data(std::span<u32 const> inds, usize indOffset) override;
 
     void draw_elements(primitive_type mode, usize count, u32 offset) const override;
     void draw_arrays(primitive_type mode, i32 first, usize count) const override;

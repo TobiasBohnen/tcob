@@ -48,19 +48,19 @@ public:
 class null_render_target : public tcob::gfx::render_backend::render_target_base {
 public:
     void prepare_render(render_properties const& props) override;
-    void finalize_render() const override;
+    void finalize_render() override;
 
-    void enable_scissor(rect_i const& rect) const override;
-    void disable_scissor() const override;
+    void enable_scissor(rect_i const& rect) override;
+    void disable_scissor() override;
 
-    void clear(color c) const override;
+    void clear(color c) override;
 
     void on_resize(size_i size) override;
 
     auto copy_to_image(rect_i const& rect) const -> image override;
 
-    void bind_pass(pass const& pass) const override;
-    void unbind_pass() const override;
+    void bind_pass(pass const& pass) override;
+    void unbind_pass() override;
 };
 
 ////////////////////////////////////////////////////////////
@@ -77,12 +77,12 @@ public:
 class null_texture : public tcob::gfx::render_backend::texture_base {
 public:
     void resize(size_i texsize, u32 depth, texture::format format = texture::format::RGBA8) override;
-    void update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const override;
+    void update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) override;
 
     auto get_filtering() const -> texture::filtering override;
-    void set_filtering(texture::filtering val) const override;
+    void set_filtering(texture::filtering val) override;
     auto get_wrapping() const -> texture::wrapping override;
-    void set_wrapping(texture::wrapping val) const override;
+    void set_wrapping(texture::wrapping val) override;
 
     auto copy_to_image(u32 depth) const -> image override;
 
@@ -93,9 +93,9 @@ public:
 
 class null_uniform_buffer final : public tcob::gfx::render_backend::uniform_buffer_base {
 public:
-    void update(void const* data, usize size, usize offset) const override;
+    void update(void const* data, usize size, usize offset) override;
 
-    void bind_base(u32 index) const override;
+    void bind_base(u32 index) override;
 };
 
 ////////////////////////////////////////////////////////////
@@ -104,8 +104,8 @@ class null_vertex_array final : public tcob::gfx::render_backend::vertex_array_b
 public:
     void resize(usize vertCount, usize indCount) override;
 
-    void update_data(std::span<vertex const> verts, usize vertOffset) const override;
-    void update_data(std::span<u32 const> inds, usize indOffset) const override;
+    void update_data(std::span<vertex const> verts, usize vertOffset) override;
+    void update_data(std::span<u32 const> inds, usize indOffset) override;
 
     void draw_elements(primitive_type mode, usize count, u32 offset) const override;
     void draw_arrays(primitive_type mode, i32 first, usize count) const override;
@@ -120,7 +120,7 @@ public:
 
     void swap_buffer() const override;
 
-    void clear(color c) const override;
+    void clear(color c) override;
 
     void set_viewport(rect_i const& rect) override;
 

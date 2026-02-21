@@ -30,7 +30,7 @@ public:
 
     void swap_buffer() const override;
 
-    void clear(color c) const override;
+    void clear(color c) override;
 
     void set_viewport(rect_i const& rect) override;
 

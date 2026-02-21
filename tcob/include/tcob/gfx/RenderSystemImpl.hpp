@@ -44,13 +44,13 @@ public:
     virtual ~render_target_base() = default;
 
     virtual void prepare_render(render_properties const& props) = 0;
-    virtual void finalize_render() const                        = 0;
-    virtual void bind_pass(pass const& pass) const              = 0;
-    virtual void unbind_pass() const                            = 0;
+    virtual void finalize_render()                              = 0;
+    virtual void bind_pass(pass const& pass)                    = 0;
+    virtual void unbind_pass()                                  = 0;
 
-    virtual void enable_scissor(rect_i const& rect) const = 0; // TODO: move to render_properties
-    virtual void disable_scissor() const                  = 0; // TODO: move to render_properties
-    virtual void clear(color c) const                     = 0;
+    virtual void enable_scissor(rect_i const& rect) = 0; // TODO: move to render_properties
+    virtual void disable_scissor()                  = 0; // TODO: move to render_properties
+    virtual void clear(color c)                     = 0;
 
     virtual void on_resize(size_i size) = 0;
 
@@ -76,13 +76,13 @@ public:
 
     virtual void resize(size_i texsize, u32 depth, texture::format format = texture::format::RGBA8) = 0;
 
-    virtual void update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment) const = 0;
+    virtual void update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment) = 0;
 
-    virtual auto get_filtering() const -> texture::filtering   = 0;
-    virtual void set_filtering(texture::filtering props) const = 0;
+    virtual auto get_filtering() const -> texture::filtering = 0;
+    virtual void set_filtering(texture::filtering props)     = 0;
 
-    virtual auto get_wrapping() const -> texture::wrapping   = 0;
-    virtual void set_wrapping(texture::wrapping props) const = 0;
+    virtual auto get_wrapping() const -> texture::wrapping = 0;
+    virtual void set_wrapping(texture::wrapping props)     = 0;
 
     virtual auto copy_to_image(u32 depth) const -> image = 0;
 
@@ -95,9 +95,9 @@ class uniform_buffer_base {
 public:
     virtual ~uniform_buffer_base() = default;
 
-    virtual void update(void const* data, usize size, usize offset) const = 0;
+    virtual void update(void const* data, usize size, usize offset) = 0;
 
-    virtual void bind_base(u32 index) const = 0;
+    virtual void bind_base(u32 index) = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -108,8 +108,8 @@ public:
 
     virtual void resize(usize vertCount, usize indCount) = 0;
 
-    virtual void update_data(std::span<vertex const> verts, usize vertOffset) const = 0;
-    virtual void update_data(std::span<u32 const> inds, usize indOffset) const      = 0;
+    virtual void update_data(std::span<vertex const> verts, usize vertOffset) = 0;
+    virtual void update_data(std::span<u32 const> inds, usize indOffset)      = 0;
 
     virtual void draw_elements(primitive_type mode, usize count, u32 offset) const = 0;
     virtual void draw_arrays(primitive_type mode, i32 first, usize count) const    = 0;
@@ -124,7 +124,7 @@ public:
     virtual auto get_vsync() const -> bool = 0;
     virtual void set_vsync(bool value)     = 0;
 
-    virtual void clear(color c) const = 0;
+    virtual void clear(color c) = 0;
 
     virtual void swap_buffer() const = 0;
 

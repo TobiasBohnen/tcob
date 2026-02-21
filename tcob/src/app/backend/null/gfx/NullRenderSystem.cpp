@@ -38,37 +38,37 @@ auto null_render_system::create_vertex_array(buffer_usage_hint) -> std::unique_p
 auto null_render_system::create_window(size_i) -> std::unique_ptr<gfx::window> { return std::make_unique<null_window>(); }
 
 void null_render_target::prepare_render(render_properties const&) { }
-void null_render_target::finalize_render() const { }
-void null_render_target::enable_scissor(rect_i const&) const { }
-void null_render_target::disable_scissor() const { }
-void null_render_target::clear(color) const { }
+void null_render_target::finalize_render() { }
+void null_render_target::enable_scissor(rect_i const&) { }
+void null_render_target::disable_scissor() { }
+void null_render_target::clear(color) { }
 void null_render_target::on_resize(size_i) { }
 auto null_render_target::copy_to_image(rect_i const&) const -> image { return {}; }
-void null_render_target::bind_pass(pass const&) const { }
-void null_render_target::unbind_pass() const { }
+void null_render_target::bind_pass(pass const&) { }
+void null_render_target::unbind_pass() { }
 
 auto null_shader::compile(string const&, string const&) -> bool { return true; }
 auto null_shader::is_valid() const -> bool { return true; }
 
 void null_texture::resize(size_i, u32, texture::format) { }
-void null_texture::update(point_i, size_i, void const*, u32, i32, i32) const { }
+void null_texture::update(point_i, size_i, void const*, u32, i32, i32) { }
 auto null_texture::get_filtering() const -> texture::filtering { return texture::filtering::Linear; }
-void null_texture::set_filtering(texture::filtering) const { }
+void null_texture::set_filtering(texture::filtering) { }
 auto null_texture::get_wrapping() const -> texture::wrapping { return texture::wrapping::Repeat; }
-void null_texture::set_wrapping(texture::wrapping) const { }
+void null_texture::set_wrapping(texture::wrapping) { }
 auto null_texture::copy_to_image(u32) const -> image { return {}; }
 auto null_texture::is_valid() const -> bool { return true; }
 
 void null_vertex_array::resize(usize, usize) { }
-void null_vertex_array::update_data(std::span<vertex const>, usize) const { }
-void null_vertex_array::update_data(std::span<u32 const>, usize) const { }
+void null_vertex_array::update_data(std::span<vertex const>, usize) { }
+void null_vertex_array::update_data(std::span<u32 const>, usize) { }
 void null_vertex_array::draw_elements(primitive_type, usize, u32) const { }
 void null_vertex_array::draw_arrays(primitive_type, i32, usize) const { }
 
 auto null_window_impl::get_vsync() const -> bool { return true; }
 void null_window_impl::set_vsync(bool) { }
 void null_window_impl::swap_buffer() const { }
-void null_window_impl::clear(color) const { }
+void null_window_impl::clear(color) { }
 void null_window_impl::set_viewport(rect_i const&) { }
 
 null_window::null_window()
@@ -94,7 +94,7 @@ void null_canvas::render_triangles(canvas::paint const&, blend_funcs const&, can
 void null_canvas::render_clip(canvas::scissor const&, f32, std::vector<canvas::path> const&) { }
 void null_canvas::add_gradient(i32, color_gradient const&) { }
 
-void null_uniform_buffer::update(void const*, usize, usize) const { }
-void null_uniform_buffer::bind_base(u32) const { }
+void null_uniform_buffer::update(void const*, usize, usize) { }
+void null_uniform_buffer::bind_base(u32) { }
 
 }

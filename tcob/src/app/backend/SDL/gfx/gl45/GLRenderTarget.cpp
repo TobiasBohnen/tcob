@@ -77,7 +77,7 @@ void gl_render_target::prepare_render(render_properties const& props)
     glEnable(GL_LINE_SMOOTH);
 }
 
-void gl_render_target::finalize_render() const
+void gl_render_target::finalize_render()
 {
     _frameBuffer->bind_default();
 
@@ -94,7 +94,7 @@ void gl_render_target::set_viewport(rect_i const& rect)
     }
 }
 
-void gl_render_target::enable_scissor(rect_i const& rect) const
+void gl_render_target::enable_scissor(rect_i const& rect)
 {
     if (rect.width() < 0 || rect.height() < 0) {
         return;
@@ -105,12 +105,12 @@ void gl_render_target::enable_scissor(rect_i const& rect) const
     glScissor(rect.left(), height - rect.top() - rect.height(), rect.width(), rect.height());
 }
 
-void gl_render_target::disable_scissor() const
+void gl_render_target::disable_scissor()
 {
     glDisable(GL_SCISSOR_TEST);
 }
 
-void gl_render_target::clear(color c) const
+void gl_render_target::clear(color c)
 {
     _frameBuffer->clear(c);
 }
@@ -130,7 +130,7 @@ auto gl_render_target::copy_to_image(rect_i const& rect) const -> image
     return retValue;
 }
 
-void gl_render_target::bind_pass(pass const& pass) const
+void gl_render_target::bind_pass(pass const& pass)
 {
     if (pass.Texture.is_ready()) {
         glBindTextureUnit(0, pass.Texture->get_impl<gl_texture>()->ID);
@@ -201,7 +201,7 @@ void gl_render_target::bind_pass(pass const& pass) const
     }
 }
 
-void gl_render_target::unbind_pass() const
+void gl_render_target::unbind_pass()
 {
     glBindTextureUnit(0, 0);
     glUseProgram(0);

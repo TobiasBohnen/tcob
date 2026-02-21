@@ -1,0 +1,2613 @@
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLCanvas.hpp"
+
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstring>
+#include <span>
+#include <stdexcept>
+#include <variant>
+#include <vector>
+
+#include "GLEnum.hpp"
+#include "GLTexture.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Texture.hpp"
+
+namespace tcob::gfx::gl45 {
+
+static char const* fillVertShader {
+#include "./shaders/nanovg.vert"
+};
+static char const* fillFragShader {
+#include "./shaders/nanovg.frag"
+};
+
+static u32 const GLNVG_FRAG_BINDING {0};
+
+gl_canvas::gl_canvas()
+{
+    if (!_shader.compile(fillVertShader, fillFragShader)) {
+        throw std::runtime_error("Failed to compile nanovg shader");
+    }
+    _shader.set_uniform(_shader.get_uniform_location("texture0"), 0);
+
+    // gradient
+    _gradientTexture.resize({color_gradient::Size, 1024}, 1, texture::format::RGBA8);
+    _gradientTexture.set_wrapping(texture::wrapping::ClampToEdge);
+    _shader.set_uniform(_shader.get_uniform_location("gradientTexture"), 1);
+
+    // Create UBOs
+    glCreateBuffers(1, &_fragBuf);
+
+    i32 align {0};
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &align);
+    _fragSize = sizeof(nvg_frag_uniforms) + static_cast<u32>(align) - (sizeof(nvg_frag_uniforms) % static_cast<u32>(align));
+}
+
+gl_canvas::~gl_canvas()
+{
+    if (_fragBuf != 0) {
+        glDeleteBuffers(1, &_fragBuf);
+    }
+}
+
+void gl_canvas::flush(size_f size)
+{
+    if (!_calls.empty()) {
+        auto const clearStencil {[] {
+            glStencilMask(0xFF);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+            glStencilFunc(GL_ALWAYS, 0, 0xFF);
+            glClearStencil(0x80);
+            glClear(GL_STENCIL_BUFFER_BIT);
+        }};
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
+        glEnable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_SCISSOR_TEST);
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        clearStencil();
+
+        glUseProgram(_shader.ID);
+
+        // Upload ubo for frag shaders
+        glNamedBufferData(_fragBuf, _nuniforms * _fragSize, _uniforms.data(), GL_STREAM_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, _fragBuf);
+
+        // Upload vertex data
+        _vertexArray.resize(_nverts, 0);
+        _vertexArray.update_data({_verts.data(), _nverts}, 0);
+
+        // Set view and texture just once per frame.
+        _shader.set_uniform(_shader.get_uniform_location("viewSize"), size);
+
+        glBindVertexArray(_vertexArray.ID);
+
+        for (auto& call : _calls) {
+            glBlendFuncSeparate(convert_enum(call.BlendFunc.SourceColorBlendFunc),
+                                convert_enum(call.BlendFunc.DestinationColorBlendFunc),
+                                convert_enum(call.BlendFunc.SourceAlphaBlendFunc),
+                                convert_enum(call.BlendFunc.DestinationAlphaBlendFunc));
+
+            switch (call.Type) {
+            case nvg_call_type::Fill:       fill(call); break;
+            case nvg_call_type::ConvexFill: convex_fill(call); break;
+            case nvg_call_type::Stroke:     stroke(call); break;
+            case nvg_call_type::Triangles:  triangles(call); break;
+            case nvg_call_type::Clip:       clip(call); break;
+            case nvg_call_type::ClearClip:  clearStencil(); break;
+            default:
+                break;
+            }
+        }
+
+        glBindVertexArray(0);
+        glDisable(GL_CULL_FACE);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glUseProgram(0);
+    }
+
+    // Reset calls
+    _nverts = 0;
+
+    _paths.clear();
+    _calls.clear();
+
+    _nuniforms = 0;
+}
+
+void gl_canvas::cancel()
+{
+    _nverts = 0;
+    _paths.clear();
+    _calls.clear();
+}
+
+void gl_canvas::render_fill(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe,
+                            vec4 const& bounds, std::vector<canvas::path> const& paths)
+{
+    auto& call {_calls.emplace_back()};
+    usize pathCount {paths.size()};
+
+    call.PathOffset = _paths.size();
+    call.PathCount  = pathCount;
+    call.Image      = paint.Image;
+    call.BlendFunc  = blend;
+
+    if (pathCount == 1 && paths[0].Convex) {
+        call.Type          = nvg_call_type::ConvexFill;
+        call.TriangleCount = 0; // Bounding box fill quad not needed for convex fill
+    } else {
+        call.Type          = nvg_call_type::Fill;
+        call.TriangleCount = 4;
+    }
+
+    // Allocate vertices for all the paths.
+    usize maxverts {get_max_vertcount(paths) + call.TriangleCount};
+    usize offset {alloc_verts(maxverts)};
+
+    for (auto const& path : paths) {
+        nvg_path& copy {_paths.emplace_back()};
+        if (path.FillCount > 0) {
+            copy.FillOffset = offset;
+            copy.FillCount  = path.FillCount;
+            memcpy(&_verts[offset], path.Fill, sizeof(vertex) * path.FillCount);
+            offset += path.FillCount;
+        }
+        if (path.StrokeCount > 0) {
+            copy.StrokeOffset = offset;
+            copy.StrokeCount  = path.StrokeCount;
+            memcpy(&_verts[offset], path.Stroke, sizeof(vertex) * path.StrokeCount);
+            offset += path.StrokeCount;
+        }
+    }
+
+    // Setup uniforms for draw calls
+    if (call.Type == nvg_call_type::Fill) {
+        // Quad
+        call.TriangleOffset = offset;
+        vertex* quad {&_verts[call.TriangleOffset]};
+        quad[0].Position  = {bounds[2], bounds[3]};
+        quad[0].TexCoords = {.U = 0.5f, .V = 1.0f, .Level = 0};
+        quad[1].Position  = {bounds[2], bounds[1]};
+        quad[1].TexCoords = {.U = 0.5f, .V = 1.0f, .Level = 0};
+        quad[2].Position  = {bounds[0], bounds[3]};
+        quad[2].TexCoords = {.U = 0.5f, .V = 1.0f, .Level = 0};
+        quad[3].Position  = {bounds[0], bounds[1]};
+        quad[3].TexCoords = {.U = 0.5f, .V = 1.0f, .Level = 0};
+
+        call.UniformOffset = alloc_frag_uniforms(2);
+
+        // Simple shader for stencil
+        auto* frag {get_frag_uniformptr(call.UniformOffset)};
+        *frag           = {};
+        frag->StrokeThr = -1.0f;
+        frag->Type      = nvg_shader_type::StencilFill;
+
+        // Fill shader
+        *get_frag_uniformptr(call.UniformOffset + _fragSize) = convert_paint(paint, scissor, fringe, fringe, -1.0f);
+    } else {
+        call.UniformOffset = alloc_frag_uniforms(1);
+
+        // Fill shader
+        *get_frag_uniformptr(call.UniformOffset) = convert_paint(paint, scissor, fringe, fringe, -1.0f);
+    }
+}
+
+void gl_canvas::render_stroke(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe,
+                              f32 strokeWidth, std::vector<canvas::path> const& paths)
+{
+    auto& call {_calls.emplace_back()};
+
+    call.Type       = nvg_call_type::Stroke;
+    call.PathOffset = _paths.size();
+
+    call.PathCount = paths.size();
+    call.Image     = paint.Image;
+    call.BlendFunc = blend;
+
+    // Allocate vertices for all the paths.
+    usize const maxverts {get_max_vertcount(paths)};
+    usize       offset {alloc_verts(maxverts)};
+
+    for (auto const& path : paths) {
+        auto& copy {_paths.emplace_back()};
+
+        if (path.StrokeCount > 0) {
+            copy.StrokeOffset = offset;
+            copy.StrokeCount  = path.StrokeCount;
+            memcpy(_verts.data() + offset, path.Stroke, sizeof(vertex) * path.StrokeCount);
+            offset += path.StrokeCount;
+        }
+    }
+
+    // Fill shader
+    call.UniformOffset = alloc_frag_uniforms(2);
+
+    *get_frag_uniformptr(call.UniformOffset)             = convert_paint(paint, scissor, strokeWidth, fringe, -1.0f);
+    *get_frag_uniformptr(call.UniformOffset + _fragSize) = convert_paint(paint, scissor, strokeWidth, fringe, 1.0f - (0.5f / 255.0f));
+}
+
+void gl_canvas::render_triangles(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe,
+                                 std::span<vertex const> verts)
+{
+    auto& call {_calls.emplace_back()};
+
+    call.Type      = nvg_call_type::Triangles;
+    call.Image     = paint.Image;
+    call.BlendFunc = blend;
+
+    // Allocate vertices for all the paths.
+    call.TriangleOffset = alloc_verts(verts.size());
+    call.TriangleCount  = verts.size();
+
+    memcpy(&_verts[call.TriangleOffset], verts.data(), verts.size_bytes());
+
+    // Fill shader
+    call.UniformOffset = alloc_frag_uniforms(1);
+
+    auto* frag {get_frag_uniformptr(call.UniformOffset)};
+    *frag      = convert_paint(paint, scissor, 1.0f, fringe, -1.0f);
+    frag->Type = nvg_shader_type::Triangles;
+}
+
+void gl_canvas::render_clip(canvas::scissor const& scissor, f32 fringe, std::vector<canvas::path> const& paths)
+{
+    auto& call {_calls.emplace_back()};
+    if (paths.empty()) {
+        call.Type = nvg_call_type::ClearClip;
+        return;
+    }
+
+    usize const pathCount {paths.size()};
+
+    call.PathOffset    = _paths.size();
+    call.PathCount     = pathCount;
+    call.Image         = nullptr;
+    call.Type          = nvg_call_type::Clip;
+    call.TriangleCount = 0;
+
+    // Allocate vertices.
+    usize const maxverts {get_max_vertcount(paths) + call.TriangleCount};
+    usize       offset {alloc_verts(maxverts)};
+
+    for (auto const& path : paths) {
+        nvg_path& copy {_paths.emplace_back()};
+        if (path.FillCount > 0) {
+            copy.FillOffset = offset;
+            copy.FillCount  = path.FillCount;
+            memcpy(&_verts[offset], path.Fill, sizeof(vertex) * path.FillCount);
+            offset += path.FillCount;
+        }
+    }
+
+    call.UniformOffset = alloc_frag_uniforms(1);
+    auto* frag {get_frag_uniformptr(call.UniformOffset)};
+    *frag           = convert_paint({}, scissor, 1.0f, fringe, -1.0f);
+    frag->StrokeThr = -1.0f;
+    frag->Type      = nvg_shader_type::StencilFill;
+}
+
+void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)
+{
+    i32 const size {_gradientTexture.get_size().Height};
+    if (idx >= size) { // grow texture
+        logger::Info("GLCanvas: gradient texture resize from {} to {}", size, size * 2);
+        auto const img {_gradientTexture.copy_to_image(0)};
+        _gradientTexture.resize({color_gradient::Size, size * 2}, 1, texture::format::RGBA8);
+        _gradientTexture.set_wrapping(texture::wrapping::ClampToEdge);
+        _gradientTexture.update(point_i::Zero, img.info().Size, img.data().data(), 0, color_gradient::Size, 1);
+    }
+
+    auto const colors {gradient.colors(true)};
+    _gradientTexture.update({0, idx}, {color_gradient::Size, 1}, colors.data(), 0, color_gradient::Size, 1);
+}
+
+void gl_canvas::set_uniforms(usize uniformOffset, texture* image) const
+{
+    glBindBufferRange(GL_UNIFORM_BUFFER, GLNVG_FRAG_BINDING, _fragBuf, uniformOffset, sizeof(nvg_frag_uniforms));
+
+    if (image) {
+        glBindTextureUnit(0, image->get_impl<gl_texture>()->ID);
+    } else {
+        glBindTextureUnit(0, 0);
+    }
+
+    glBindTextureUnit(1, _gradientTexture.ID);
+}
+
+auto gl_canvas::convert_paint(canvas::paint const& paint, canvas::scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms
+{
+    nvg_frag_uniforms retValue {};
+
+    if (auto const* arg0 {std::get_if<color>(&paint.Color)}) {
+        auto const c {arg0->as_alpha_premultiplied()};
+        retValue.GradientIndex = -1;
+        retValue.GradientAlpha = 1;
+        retValue.GradientColor = {c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f};
+    } else if (auto const* arg1 {std::get_if<paint_gradient>(&paint.Color)}) {
+        retValue.GradientIndex = static_cast<f32>(arg1->second) / static_cast<f32>(_gradientTexture.get_size().Height - 1);
+        retValue.GradientAlpha = arg1->first;
+        retValue.GradientColor = {1, 1, 1, 1};
+    }
+
+    if (scissor.Extent.Width < -0.5f || scissor.Extent.Height < -0.5f) {
+        retValue.ScissorMatrix.fill(0);
+        retValue.ScissorExtent[0] = 1.0f;
+        retValue.ScissorExtent[1] = 1.0f;
+        retValue.ScissorScale[0]  = 1.0f;
+        retValue.ScissorScale[1]  = 1.0f;
+    } else {
+        retValue.ScissorMatrix = scissor.XForm.as_inverted().as_matrix4();
+        retValue.ScissorExtent = scissor.Extent.to_array();
+        auto const& mat {scissor.XForm.Matrix};
+        retValue.ScissorScale[0] = std::sqrt((mat[0] * mat[0]) + (mat[3] * mat[3])) / fringe;
+        retValue.ScissorScale[1] = std::sqrt((mat[1] * mat[1]) + (mat[4] * mat[4])) / fringe;
+    }
+
+    retValue.Extent     = paint.Extent.to_array();
+    retValue.StrokeMult = (width * 0.5f + fringe * 0.5f) / fringe;
+    retValue.StrokeThr  = strokeThr;
+
+    if (paint.Image) {
+        retValue.Type = nvg_shader_type::Image;
+
+        if (paint.Image->info().Format == texture::format::R8) {
+            retValue.TexType = 2;
+        } else {
+            retValue.TexType = 1;
+        }
+    } else {
+        retValue.Type    = paint.IsConical ? nvg_shader_type::Conical : nvg_shader_type::Gradient;
+        retValue.Radius  = paint.Radius;
+        retValue.Feather = paint.Feather;
+    }
+
+    retValue.PaintMatrix = paint.XForm.as_inverted().as_matrix4();
+
+    return retValue;
+}
+
+void gl_canvas::fill(nvg_call const& call)
+{
+    glEnable(GL_STENCIL_TEST);
+
+    // --- Pass 1: Mark winding regions in stencil buffer ---
+    // Use lower 7 bits for winding count (0x7F mask), keep high bit (0x80) for clip.
+    glStencilMask(0x7F);
+    glStencilFunc(GL_EQUAL, 0x80, 0x80); // Only affect pixels already inside clip (0x80).
+    // Increment winding for front faces, decrement for back faces.
+    glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
+    glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
+
+    // No color output during stencil fill.
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glDisable(GL_CULL_FACE);
+
+    // Draw filled paths into stencil buffer to count coverage.
+    set_uniforms(call.UniformOffset);
+    {
+        std::vector<GLint> fillFirsts, fillCounts;
+        fillFirsts.reserve(call.PathCount);
+        fillCounts.reserve(call.PathCount);
+        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+            fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
+            fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
+        }
+        glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
+                          static_cast<GLsizei>(fillFirsts.size()));
+    }
+
+    glEnable(GL_CULL_FACE);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+    // --- Pass 2: Stroke shapes (while stencil == clip bit) ---
+    // Lock stencil writes for color pass.
+    glStencilMask(0x00);
+    glStencilFunc(GL_EQUAL, 0x80, 0xFF); // Clip bit must match; ignore winding bits.
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+    // Draw strokes over the filled shapes.
+    set_uniforms(call.UniformOffset + _fragSize, call.Image);
+    {
+        std::vector<GLint> strokeFirsts, strokeCounts;
+        strokeFirsts.reserve(call.PathCount);
+        strokeCounts.reserve(call.PathCount);
+        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+            strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
+            strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
+        }
+        glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
+                          static_cast<GLsizei>(strokeFirsts.size()));
+    }
+
+    // --- Pass 3: Fill actual pixels where winding != 0 ---
+    glStencilMask(0x7F);
+    glStencilFunc(GL_NOTEQUAL, 0x00, 0x7F); // Inside shape (non-zero winding count).
+    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO); // Clear winding after drawing.
+    glDrawArrays(GL_TRIANGLE_STRIP,
+                 static_cast<GLint>(call.TriangleOffset),
+                 static_cast<GLsizei>(call.TriangleCount));
+
+    glDisable(GL_STENCIL_TEST);
+}
+
+void gl_canvas::convex_fill(nvg_call const& call)
+{
+    glEnable(GL_STENCIL_TEST);
+
+    // No stencil writes; just test against clip bit.
+    glStencilMask(0x00);
+    glStencilFunc(GL_EQUAL, 0x80, 0x80);
+
+    // Directly draw colors (convex fill doesn't require winding).
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+    set_uniforms(call.UniformOffset, call.Image);
+
+    // Fill convex polygons.
+    {
+        std::vector<GLint> fillFirsts, fillCounts;
+        fillFirsts.reserve(call.PathCount);
+        fillCounts.reserve(call.PathCount);
+        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+            fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
+            fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
+        }
+        glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
+                          static_cast<GLsizei>(fillFirsts.size()));
+    }
+
+    // Optional stroke pass (if present).
+    {
+        std::vector<GLint> strokeFirsts, strokeCounts;
+        strokeFirsts.reserve(call.PathCount);
+        strokeCounts.reserve(call.PathCount);
+        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+            if (_paths[i].StrokeCount > 0) {
+                strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
+                strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
+            }
+        }
+        if (!strokeFirsts.empty()) {
+            glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
+                              static_cast<GLsizei>(strokeFirsts.size()));
+        }
+    }
+
+    glDisable(GL_STENCIL_TEST);
+}
+
+void gl_canvas::stroke(nvg_call const& call)
+{
+    glEnable(GL_STENCIL_TEST);
+
+    // Use lower 7 bits for stroke mask; preserve clip in high bit.
+    glStencilMask(0x7F);
+
+    // Collect stroke geometry.
+    std::vector<GLint> strokeFirsts, strokeCounts;
+    strokeFirsts.reserve(call.PathCount);
+    strokeCounts.reserve(call.PathCount);
+    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+        strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
+        strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
+    }
+
+    // --- Pass 1: Mark stroke coverage in stencil ---
+    glStencilFunc(GL_EQUAL, 0x80, 0x80);    // Only inside clip.
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR); // Increase coverage count in stencil.
+    set_uniforms(call.UniformOffset + _fragSize, call.Image);
+    glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
+                      static_cast<GLsizei>(strokeFirsts.size()));
+
+    // --- Pass 2: Draw stroke color (still respecting clip) ---
+    glStencilFunc(GL_EQUAL, 0x80, 0x80);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Don't modify stencil during color draw.
+    set_uniforms(call.UniformOffset, call.Image);
+    glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
+                      static_cast<GLsizei>(strokeFirsts.size()));
+
+    // --- Pass 3: Cleanup stencil (erase stroke mask) ---
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // No color output.
+    glStencilFunc(GL_GREATER, 0x80, 0xFF);               // Any coverage count above clip-only.
+    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);              // Reset stencil to 0 in these areas.
+    glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
+                      static_cast<GLsizei>(strokeFirsts.size()));
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+    glDisable(GL_STENCIL_TEST);
+}
+
+void gl_canvas::triangles(nvg_call const& call)
+{
+    set_uniforms(call.UniformOffset, call.Image);
+
+    // Enable stencil test so triangles are rasterized only where clip wrote 0x80
+    glEnable(GL_STENCIL_TEST);
+
+    // Pass only where stencil == 0x80 (mask 0xFF). Do not write to stencil.
+    glStencilFunc(GL_EQUAL, 0x80, 0xFF);
+    glStencilMask(0x00); // prevent modifications of stencil
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+    glDrawArrays(GL_TRIANGLES,
+                 static_cast<GLint>(call.TriangleOffset),
+                 static_cast<GLsizei>(call.TriangleCount));
+
+    // Restore stencil state (disable if you don't need it afterwards)
+    glDisable(GL_STENCIL_TEST);
+}
+
+void gl_canvas::clip(nvg_call const& call)
+{
+    glEnable(GL_STENCIL_TEST);
+
+    // Allow writing to all stencil bits.
+    glStencilMask(0xFF);
+
+    // Always pass stencil test; write reference value 0x80 (clip bit set).
+    // Mask = 0xFF means all bits are affected.
+    glStencilFunc(GL_ALWAYS, 0x80, 0xFF);
+    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE); // Replace stencil with ref on any pass/fail.
+
+    // Clear stencil to 0 before defining clip region.
+    glClearStencil(0);
+    glClear(GL_STENCIL_BUFFER_BIT);
+
+    // Disable color writes; we only want to update stencil here.
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+    // Disable face culling to ensure clip path is drawn regardless of winding.
+    glDisable(GL_CULL_FACE);
+
+    // Use uniforms for this draw (no image — just clip path).
+    set_uniforms(call.UniformOffset);
+
+    // Draw filled paths to set stencil = 0x80 inside clip region.
+    {
+        std::vector<GLint> fillFirsts, fillCounts;
+        fillFirsts.reserve(call.PathCount);
+        fillCounts.reserve(call.PathCount);
+        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+            fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
+            fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
+        }
+        glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
+                          static_cast<GLsizei>(fillFirsts.size()));
+    }
+
+    // Restore normal raster state.
+    glEnable(GL_CULL_FACE);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+    // Disable stencil test for subsequent draws unless explicitly needed.
+    glDisable(GL_STENCIL_TEST);
+}
+
+auto gl_canvas::get_max_vertcount(std::vector<canvas::path> const& paths) -> usize
+{
+    usize count {0};
+    for (auto const& path : paths) {
+        count += path.FillCount;
+        count += path.StrokeCount;
+    }
+    return count;
+}
+
+auto gl_canvas::alloc_verts(usize n) -> usize
+{
+    if (_nverts + n > _verts.capacity()) {
+        usize cverts {std::max<usize>(_nverts + n, 4096) + (_verts.capacity() / 2)};
+        _verts.resize(cverts);
+    }
+    usize ret {_nverts};
+    _nverts += n;
+    return ret;
+}
+
+auto gl_canvas::alloc_frag_uniforms(usize n) -> usize
+{
+    usize ret {0}, structSize {_fragSize};
+    if ((_nuniforms + n) * structSize > _uniforms.capacity()) {
+        usize cuniforms {std::max<usize>(_nuniforms + n, 128) + (_uniforms.capacity() / structSize / 2)};
+        _uniforms.resize(structSize * cuniforms);
+    }
+    ret = _nuniforms * structSize;
+    _nuniforms += n;
+    return ret;
+}
+
+auto gl_canvas::get_frag_uniformptr(usize i) -> nvg_frag_uniforms*
+{
+    std::byte* data {_uniforms.data()};
+    return reinterpret_cast<nvg_frag_uniforms*>(&data[i]);
+}
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLContext.hpp"
+
+#include <memory>
+#include <stdexcept>
+
+#include "GLObject.hpp"
+#include "GLShaderProgram.hpp"
+
+#include <SDL3/SDL.h>
+#include <glad/gl45.h>
+
+#include "tcob/core/Logger.hpp"
+
+namespace tcob::gfx::gl45 {
+
+u32 gl_context::DefaultShader {0};
+u32 gl_context::DefaultTexturedShader {0};
+u32 gl_context::DefaultFontShader {0};
+
+static char const* defaultVertShader {
+#include "shaders/default.vert"
+};
+static char const* defaultFragShader {
+#include "shaders/default.frag"
+};
+static char const* defaultTexturedFragShader {
+#include "shaders/default-textured.frag"
+};
+static char const* defaultFontFragShader {
+#include "shaders/default-font.frag"
+};
+
+extern "C" {
+#if defined(TCOB_DEBUG)
+static void GLAD_API_PTR DebugCallback(GLenum /*source*/, GLenum /*type*/, GLuint /*id*/, GLenum severity, GLsizei, GLchar const* message, void const*)
+{
+    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
+        logger::Error("GL: error {}", message);
+    }
+}
+
+#endif
+
+static auto Load(char const* c) -> GLADapiproc
+{
+    return reinterpret_cast<GLADapiproc>(SDL_GL_GetProcAddress(c));
+}
+}
+
+gl_context::gl_context(SDL_Window* window)
+{
+    // Create OpenGL context
+    i32 const glMajor {4}, glMinor {5};
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glMajor);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glMinor);
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#if defined(TCOB_DEBUG)
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
+
+    logger::Info("GLContext: want OpenGL version: {}.{}", glMajor, glMinor);
+
+    _context = SDL_GL_CreateContext(window); // NOLINT(cppcoreguidelines-prefer-member-initializer)
+    if (!_context) {
+        logger::Error("GLContext: OpenGL context creation failed!");
+        throw std::runtime_error("OpenGL context creation failed");
+    }
+
+    if (!gladLoadGL(&Load)) {
+        SDL_GL_DestroyContext(static_cast<SDL_GLContext>(_context));
+        logger::Error("GLContext: OpenGL loading failed!");
+        throw std::runtime_error("OpenGL loading failed");
+    }
+
+    i32 checkMajor {}, checkMinor {};
+    glGetIntegerv(GL_MAJOR_VERSION, &checkMajor);
+    glGetIntegerv(GL_MINOR_VERSION, &checkMinor);
+
+    logger::Info("GLContext: have OpenGL version: {}.{}", checkMajor, checkMinor);
+
+#if defined(TCOB_DEBUG)
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(&DebugCallback, nullptr);
+#endif
+
+    // init default shaders
+    _defaultShader = std::make_shared<gl_shader>();
+    _defaultShader->compile(defaultVertShader, defaultFragShader);
+    DefaultShader = _defaultShader->ID;
+
+    _defaultTexShader = std::make_shared<gl_shader>();
+    _defaultTexShader->compile(defaultVertShader, defaultTexturedFragShader);
+    DefaultTexturedShader = _defaultTexShader->ID;
+
+    _defaultFontShader = std::make_shared<gl_shader>();
+    _defaultFontShader->compile(defaultVertShader, defaultFontFragShader);
+    DefaultFontShader = _defaultFontShader->ID;
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+gl_context::~gl_context()
+{
+    gl_object::DestroyAll();
+    SDL_GL_DestroyContext(static_cast<SDL_GLContext>(_context));
+}
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLEnum.hpp"
+
+#include <glad/gl45.h>
+
+#include "tcob/gfx/Gfx.hpp"
+
+namespace tcob::gfx::gl45 {
+
+auto convert_enum(buffer_usage_hint usage) -> u32
+{
+    switch (usage) {
+    case buffer_usage_hint::DynamicDraw:
+        return GL_DYNAMIC_DRAW;
+    case buffer_usage_hint::StaticDraw:
+        return GL_STATIC_DRAW;
+    case buffer_usage_hint::StreamDraw:
+        return GL_STREAM_DRAW;
+    }
+
+    return GL_INVALID_ENUM;
+}
+
+auto convert_enum(blend_func blendfunc) -> u32
+{
+    switch (blendfunc) {
+    case blend_func::Zero:
+        return GL_ZERO;
+    case blend_func::One:
+        return GL_ONE;
+    case blend_func::SrcColor:
+        return GL_SRC_COLOR;
+    case blend_func::OneMinusSrcColor:
+        return GL_ONE_MINUS_SRC_COLOR;
+    case blend_func::DstColor:
+        return GL_DST_COLOR;
+    case blend_func::OneMinusDstColor:
+        return GL_ONE_MINUS_DST_COLOR;
+    case blend_func::SrcAlpha:
+        return GL_SRC_ALPHA;
+    case blend_func::OneMinusSrcAlpha:
+        return GL_ONE_MINUS_SRC_ALPHA;
+    case blend_func::DstAlpha:
+        return GL_DST_ALPHA;
+    case blend_func::OneMinusDstAlpha:
+        return GL_ONE_MINUS_DST_ALPHA;
+    case blend_func::ConstantColor:
+        return GL_CONSTANT_COLOR;
+    case blend_func::OneMinusConstantColor:
+        return GL_ONE_MINUS_CONSTANT_COLOR;
+    case blend_func::ConstantAlpha:
+        return GL_CONSTANT_ALPHA;
+    case blend_func::OneMinusConstantAlpha:
+        return GL_ONE_MINUS_CONSTANT_ALPHA;
+    default:
+        return GL_INVALID_ENUM;
+    }
+}
+
+auto convert_enum(blend_equation equ) -> u32
+{
+    switch (equ) {
+    case blend_equation::Add:
+        return GL_FUNC_ADD;
+    case blend_equation::Subtract:
+        return GL_FUNC_SUBTRACT;
+    case blend_equation::ReverseSubtract:
+        return GL_FUNC_REVERSE_SUBTRACT;
+    case blend_equation::Min:
+        return GL_MIN;
+    case blend_equation::Max:
+        return GL_MAX;
+    }
+
+    return GL_INVALID_ENUM;
+}
+
+auto convert_enum(primitive_type type) -> u32
+{
+    switch (type) {
+    case primitive_type::LineStrip:
+        return GL_LINE_STRIP;
+    case primitive_type::Lines:
+        return GL_LINES;
+    case primitive_type::TriangleStrip:
+        return GL_TRIANGLE_STRIP;
+    case primitive_type::Triangles:
+        return GL_TRIANGLES;
+    }
+
+    return GL_INVALID_ENUM;
+}
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLFramebuffer.hpp"
+
+#include <array>
+#include <cassert>
+#include <span>
+
+#include <glad/gl45.h>
+
+#include "GLTexture.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Texture.hpp"
+
+namespace tcob::gfx::gl45 {
+gl_framebuffer::gl_framebuffer()
+{
+    glCreateFramebuffers(1, &ID);
+    glCreateRenderbuffers(1, &_rbo);
+}
+
+gl_framebuffer::~gl_framebuffer()
+{
+    destroy();
+}
+
+void gl_framebuffer::do_destroy()
+{
+    glDeleteFramebuffers(1, &ID);
+    glDeleteRenderbuffers(1, &_rbo);
+    _rbo = 0;
+}
+
+void gl_framebuffer::bind() const
+{
+    assert(ID);
+    glBindFramebuffer(GL_FRAMEBUFFER, ID);
+}
+
+void gl_framebuffer::bind_default() const
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void gl_framebuffer::attach_texture(texture const* tex)
+{
+    assert(ID);
+
+    auto const size {tex->info().Size};
+    _texID = tex->get_impl<gl_texture>()->ID;
+    glNamedFramebufferTextureLayer(ID, GL_COLOR_ATTACHMENT0, _texID, 0, 0);
+
+    glNamedFramebufferRenderbuffer(ID, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _rbo);
+    glNamedRenderbufferStorage(_rbo, GL_DEPTH24_STENCIL8, size.Width, size.Height);
+
+    // Set the list of draw buffers.
+    std::array<GLenum, 1> const buffers {GL_COLOR_ATTACHMENT0};
+    glNamedFramebufferDrawBuffers(ID, static_cast<GLsizei>(buffers.size()), buffers.data());
+
+    [[maybe_unused]] GLenum const complete {glCheckNamedFramebufferStatus(ID, GL_FRAMEBUFFER)};
+    assert(complete == GL_FRAMEBUFFER_COMPLETE);
+}
+
+void gl_framebuffer::get_subimage(rect_i const& rect, std::span<u8> pixels)
+{
+    assert(ID);
+    glGetTextureSubImage(
+        _texID,
+        0,
+        rect.left(), rect.top(), 0, rect.width(), rect.height(),
+        1,
+        GL_RGBA, GL_UNSIGNED_BYTE,
+        static_cast<i32>(pixels.size_bytes()), pixels.data());
+}
+
+auto gl_framebuffer::read_pixel(point_i pos) const -> color
+{
+    bind();
+    std::array<u8, 4> data {};
+    glReadPixels(pos.X, pos.Y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+    bind_default();
+    return color {data[0], data[1], data[2], data[3]};
+}
+
+void gl_framebuffer::clear(color c) const
+{
+    assert(ID);
+    vec4 color {c.to_float_array()};
+    glClearNamedFramebufferfv(ID, GL_COLOR, 0, color.data());
+    glClearNamedFramebufferfi(ID, GL_DEPTH_STENCIL, 0, 1, 0);
+}
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLObject.hpp"
+
+#include <utility>
+#include <vector>
+
+namespace tcob::gfx::gl45 {
+
+void gl_object_registry::destroy_all_objects()
+{
+    while (!_objects.empty()) {
+        _objects[0]->destroy();
+    }
+}
+
+void gl_object_registry::register_object(gl_object* res)
+{
+    _objects.push_back(res);
+}
+
+void gl_object_registry::unregister_object(gl_object const* res) noexcept
+{
+    std::erase(_objects, res);
+}
+
+////////////////////////////////////////////////////////////
+
+static auto GetRegistry() -> gl_object_registry&
+{
+    static gl_object_registry registry;
+    return registry;
+}
+
+gl_object::gl_object()
+{
+    GetRegistry().register_object(this);
+}
+
+gl_object::gl_object(gl_object&& other) noexcept
+    : ID {std::exchange(other.ID, 0)}
+{
+    GetRegistry().unregister_object(&other);
+}
+
+auto gl_object::operator=(gl_object&& other) noexcept -> gl_object&
+{
+    std::swap(ID, other.ID);
+    GetRegistry().unregister_object(&other);
+    return *this;
+}
+
+void gl_object::DestroyAll()
+{
+    GetRegistry().destroy_all_objects();
+}
+
+void gl_object::destroy()
+{
+    GetRegistry().unregister_object(this);
+
+    if (ID) {
+        do_destroy();
+        ID = 0;
+    }
+}
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLRenderSystem.hpp"
+
+#include <array>
+#include <memory>
+
+#include <glad/gl45.h>
+
+#include "../SDLWindow.hpp"
+#include "GLCanvas.hpp"
+#include "GLRenderTarget.hpp"
+#include "GLShaderProgram.hpp"
+#include "GLTexture.hpp"
+#include "GLUniformBuffer.hpp"
+#include "GLVertexArray.hpp"
+#include "GLWindow.hpp"
+
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
+
+namespace tcob::gfx::gl45 {
+
+auto gl_render_system::name() const -> string
+{
+    return "OPENGL45";
+}
+
+auto gl_render_system::device_name() const -> string
+{
+    auto const* str {glGetString(GL_RENDERER)};
+    return str ? reinterpret_cast<char const*>(str) : "";
+}
+
+auto gl_render_system::info() const -> render_system_information
+{
+    render_system_information retValue;
+
+    std::array<f32, 2> val0 {};
+    glGetFloatv(GL_POINT_SIZE_RANGE, val0.data());
+    retValue.PointSize.Range = {val0[0], val0[1]};
+    glGetFloatv(GL_POINT_SIZE_GRANULARITY, &retValue.PointSize.Granularity);
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &retValue.Texture.MaxSize);
+    glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &retValue.Texture.MaxLayers);
+
+    retValue.RenderTextureUVRect = {0, 0, 1, -1};
+
+    return retValue;
+}
+
+auto gl_render_system::create_canvas() -> std::unique_ptr<render_backend::canvas_base>
+{
+    return std::make_unique<gl_canvas>();
+}
+
+auto gl_render_system::create_render_target(texture* tex) -> std::unique_ptr<render_backend::render_target_base>
+{
+    return std::make_unique<gl_render_target>(tex);
+}
+
+auto gl_render_system::create_shader() -> std::unique_ptr<render_backend::shader_base>
+{
+    return std::make_unique<gl_shader>();
+}
+
+auto gl_render_system::create_texture() -> std::unique_ptr<render_backend::texture_base>
+{
+    return std::make_unique<gl_texture>();
+}
+
+auto gl_render_system::create_uniform_buffer(usize size) -> std::unique_ptr<render_backend::uniform_buffer_base>
+{
+    return std::make_unique<gl_uniform_buffer>(size);
+}
+
+auto gl_render_system::create_vertex_array(buffer_usage_hint usage) -> std::unique_ptr<render_backend::vertex_array_base>
+{
+    return std::make_unique<gl_vertex_array>(usage);
+}
+
+auto gl_render_system::create_window(size_i size) -> std::unique_ptr<gfx::window>
+{
+    return std::make_unique<sdl_window>(std::make_unique<gl_window>(size));
+}
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLRenderTarget.hpp"
+
+#include <memory>
+#include <vector>
+
+#include <glad/gl45.h>
+
+#include "GLContext.hpp"
+#include "GLEnum.hpp"
+#include "GLFramebuffer.hpp"
+#include "GLShaderProgram.hpp"
+#include "GLTexture.hpp"
+#include "GLUniformBuffer.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Texture.hpp"
+
+namespace tcob::gfx::gl45 {
+
+static auto GlobalUBO() -> gl_uniform_buffer&
+{
+    /*
+    layout(std140, binding = 0)uniform Globals
+    {
+        mat4 camera;
+        uvec2 view_size;
+        ivec2 mouse_pos;
+        float time;
+        bool debug;
+    };
+    */
+
+    static gl_uniform_buffer globalUniformBuffer {sizeof(mat4) + sizeof(uvec2) + sizeof(ivec2) + sizeof(f32) + sizeof(u32)};
+    return globalUniformBuffer;
+}
+
+gl_render_target::gl_render_target(texture* tex)
+    : _tex {tex}
+    , _frameBuffer {std::make_unique<gl_framebuffer>()}
+{
+}
+
+void gl_render_target::prepare_render(render_properties const& props)
+{
+    if (props.UseDefaultFramebuffer) {
+        _frameBuffer->bind_default();
+    } else {
+        _frameBuffer->bind();
+    }
+
+    set_viewport(props.Viewport);
+
+    // setup UBO
+    auto& buffer {GlobalUBO()};
+    usize offset {0};
+
+    offset += buffer.update(props.ViewMatrix, offset);
+    offset += buffer.update(props.Viewport.Size, offset);
+    offset += buffer.update(props.MousePosition, offset);
+    offset += buffer.update(props.Time, offset);
+    offset += buffer.update(props.Debug, offset);
+
+    buffer.bind_base(0);
+
+    // set polygon mode
+    glEnable(GL_LINE_SMOOTH);
+}
+
+void gl_render_target::finalize_render()
+{
+    _frameBuffer->bind_default();
+
+    glDisable(GL_BLEND);
+    glDisable(GL_STENCIL_TEST);
+}
+
+void gl_render_target::set_viewport(rect_i const& rect)
+{
+    if (_tex) {
+        glViewport(rect.left(), _tex->info().Size.Height - rect.height() - rect.top(), rect.width(), rect.height());
+    } else {
+        glViewport(rect.left(), rect.top(), rect.width(), rect.height());
+    }
+}
+
+void gl_render_target::enable_scissor(rect_i const& rect)
+{
+    if (rect.width() < 0 || rect.height() < 0) {
+        return;
+    }
+
+    glEnable(GL_SCISSOR_TEST);
+    i32 const height {_tex->info().Size.Height};
+    glScissor(rect.left(), height - rect.top() - rect.height(), rect.width(), rect.height());
+}
+
+void gl_render_target::disable_scissor()
+{
+    glDisable(GL_SCISSOR_TEST);
+}
+
+void gl_render_target::clear(color c)
+{
+    _frameBuffer->clear(c);
+}
+
+void gl_render_target::on_resize(size_i size)
+{
+    _tex->resize(size, 1, texture::format::RGBA8);
+    _frameBuffer->attach_texture(_tex);
+}
+
+auto gl_render_target::copy_to_image(rect_i const& rect) const -> image
+{
+    std::vector<u8> pixels(static_cast<usize>(rect.width() * rect.height() * 4));
+    _frameBuffer->get_subimage(rect, pixels);
+    auto retValue {image::Create(rect.Size, image::format::RGBA, pixels)};
+    retValue.flip_vertically();
+    return retValue;
+}
+
+void gl_render_target::bind_pass(pass const& pass)
+{
+    if (pass.Texture.is_ready()) {
+        glBindTextureUnit(0, pass.Texture->get_impl<gl_texture>()->ID);
+    }
+
+    if (pass.Shader.is_ready()) {
+        glUseProgram(pass.Shader->get_impl<gl_shader>()->ID);
+    } else {
+        if (pass.Texture.is_ready()) {
+            if (pass.Texture->info().Format == texture::format::R8) {
+                glUseProgram(gl_context::DefaultFontShader);
+            } else {
+                glUseProgram(gl_context::DefaultTexturedShader);
+            }
+        } else {
+            glUseProgram(gl_context::DefaultShader);
+        }
+    }
+
+    usize offset {0};
+    offset += _matUniformBuffer.update(pass.Color.to_float_array(), offset);
+    offset += _matUniformBuffer.update(pass.PointSize, offset);
+    _matUniformBuffer.bind_base(1);
+
+    // set blend mode
+    glEnable(GL_BLEND);
+    glBlendFuncSeparate(
+        convert_enum(pass.BlendFuncs.SourceColorBlendFunc), convert_enum(pass.BlendFuncs.DestinationColorBlendFunc),
+        convert_enum(pass.BlendFuncs.SourceAlphaBlendFunc), convert_enum(pass.BlendFuncs.DestinationAlphaBlendFunc));
+    glBlendEquation(convert_enum(pass.BlendEquation));
+
+    glPointSize(pass.PointSize);
+
+    // set stencil mode
+    bool const needsStencil {(pass.StencilFunc != stencil_func::Always) || (pass.StencilOp != stencil_op::Keep)};
+    if (needsStencil) {
+        glEnable(GL_STENCIL_TEST);
+
+        GLenum stencilFunc {};
+        switch (pass.StencilFunc) {
+        case stencil_func::Never:        stencilFunc = GL_NEVER; break;
+        case stencil_func::Less:         stencilFunc = GL_LESS; break;
+        case stencil_func::Equal:        stencilFunc = GL_EQUAL; break;
+        case stencil_func::LessEqual:    stencilFunc = GL_LEQUAL; break;
+        case stencil_func::Greater:      stencilFunc = GL_GREATER; break;
+        case stencil_func::NotEqual:     stencilFunc = GL_NOTEQUAL; break;
+        case stencil_func::GreaterEqual: stencilFunc = GL_GEQUAL; break;
+        case stencil_func::Always:       stencilFunc = GL_ALWAYS; break;
+        }
+
+        GLenum stencilOp {};
+        switch (pass.StencilOp) {
+        case stencil_op::Keep:         stencilOp = GL_KEEP; break;
+        case stencil_op::Zero:         stencilOp = GL_ZERO; break;
+        case stencil_op::Replace:      stencilOp = GL_REPLACE; break;
+        case stencil_op::Increase:     stencilOp = GL_INCR; break;
+        case stencil_op::Decrease:     stencilOp = GL_DECR; break;
+        case stencil_op::Invert:       stencilOp = GL_INVERT; break;
+        case stencil_op::IncreaseWrap: stencilOp = GL_INCR_WRAP; break;
+        case stencil_op::DecreaseWrap: stencilOp = GL_DECR_WRAP; break;
+        }
+
+        glStencilMask(0xFF);
+        glStencilFunc(stencilFunc, pass.StencilRef, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, stencilOp);
+    } else {
+        glDisable(GL_STENCIL_TEST);
+    }
+}
+
+void gl_render_target::unbind_pass()
+{
+    glBindTextureUnit(0, 0);
+    glUseProgram(0);
+    glPointSize(1);
+}
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLShaderProgram.hpp"
+
+#include <array>
+#include <cassert>
+
+#include <glad/gl45.h>
+
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+
+namespace tcob::gfx::gl45 {
+gl_shader::gl_shader()
+{
+    ID = glCreateProgram();
+}
+
+gl_shader::~gl_shader()
+{
+    destroy();
+}
+
+auto gl_shader::compile(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool
+{
+    if (vertexShaderSource.empty() || fragmentShaderSource.empty()) {
+        return false;
+    }
+
+    GLint success {};
+
+    char const* cstr {nullptr};
+
+    // Build compile VERTEX_SHADER
+    GLuint const vertexShader {glCreateShader(GL_VERTEX_SHADER)};
+    cstr = vertexShaderSource.c_str();
+    glShaderSource(vertexShader, 1, &cstr, nullptr);
+    glCompileShader(vertexShader);
+
+    // Check for compile errors VERTEX_SHADER
+    std::array<GLchar, 512> infoLog {};
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, sizeof(infoLog), nullptr, infoLog.data());
+        logger::Error("Shader: vertex shader compilation error: {}", infoLog.data());
+        return false;
+    }
+
+    // Build compile FRAGMENT_SHADER
+    GLuint const fragmentShader {glCreateShader(GL_FRAGMENT_SHADER)};
+    cstr = fragmentShaderSource.c_str();
+    glShaderSource(fragmentShader, 1, &cstr, nullptr);
+    glCompileShader(fragmentShader);
+
+    // Check for compile errors FRAGMENT_SHADER
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, sizeof(infoLog), nullptr, infoLog.data());
+        logger::Error("Shader: fragment shader compilation error: {}", infoLog.data());
+        return false;
+    }
+
+    // Link shaders
+    glAttachShader(ID, vertexShader);
+    glAttachShader(ID, fragmentShader);
+    glLinkProgram(ID);
+
+    // Check the linking errors
+    glGetProgramiv(ID, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(ID, sizeof(infoLog), nullptr, infoLog.data());
+        logger::Error("Shader: linking error: {}", infoLog.data());
+        return false;
+    }
+
+    logger::Debug("Shader: linked ID {}", ID);
+
+    // Delete shaders
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    return true;
+}
+
+void gl_shader::do_destroy()
+{
+    assert(ID);
+    glDeleteProgram(ID);
+}
+
+void gl_shader::set_uniform(i32 loc, i32 x) const
+{
+    assert(ID);
+    glProgramUniform1i(ID, loc, x);
+}
+
+void gl_shader::set_uniform(i32 loc, u32 x) const
+{
+    assert(ID);
+    glProgramUniform1ui(ID, loc, x);
+}
+
+void gl_shader::set_uniform(i32 loc, f32 x) const
+{
+    assert(ID);
+    glProgramUniform1f(ID, loc, x);
+}
+
+void gl_shader::set_uniform(i32 loc, ivec2 const& x) const
+{
+    assert(ID);
+    glProgramUniform2i(ID, loc, x[0], x[1]);
+}
+
+void gl_shader::set_uniform(i32 loc, uvec2 const& x) const
+{
+    assert(ID);
+    glProgramUniform2ui(ID, loc, x[0], x[1]);
+}
+
+void gl_shader::set_uniform(i32 loc, vec2 const& x) const
+{
+    assert(ID);
+    glProgramUniform2f(ID, loc, x[0], x[1]);
+}
+
+void gl_shader::set_uniform(i32 loc, ivec3 const& x) const
+{
+    assert(ID);
+    glProgramUniform3i(ID, loc, x[0], x[1], x[2]);
+}
+
+void gl_shader::set_uniform(i32 loc, uvec3 const& x) const
+{
+    assert(ID);
+    glProgramUniform3ui(ID, loc, x[0], x[1], x[2]);
+}
+
+void gl_shader::set_uniform(i32 loc, vec3 const& x) const
+{
+    assert(ID);
+    glProgramUniform3f(ID, loc, x[0], x[1], x[2]);
+}
+
+void gl_shader::set_uniform(i32 loc, ivec4 const& x) const
+{
+    assert(ID);
+    glProgramUniform4i(ID, loc, x[0], x[1], x[2], x[3]);
+}
+
+void gl_shader::set_uniform(i32 loc, uvec4 const& x) const
+{
+    assert(ID);
+    glProgramUniform4ui(ID, loc, x[0], x[1], x[2], x[3]);
+}
+
+void gl_shader::set_uniform(i32 loc, vec4 const& x) const
+{
+    assert(ID);
+    glProgramUniform4f(ID, loc, x[0], x[1], x[2], x[3]);
+}
+
+void gl_shader::set_uniform(i32 loc, size_f x) const
+{
+    assert(ID);
+    glProgramUniform2f(ID, loc, x.Width, x.Height);
+}
+
+void gl_shader::set_uniform(i32 loc, point_f x) const
+{
+    assert(ID);
+    glProgramUniform2f(ID, loc, x.X, x.Y);
+}
+
+void gl_shader::set_uniform(i32 loc, size_i x) const
+{
+    assert(ID);
+    glProgramUniform2i(ID, loc, x.Width, x.Height);
+}
+
+void gl_shader::set_uniform(i32 loc, point_i x) const
+{
+    assert(ID);
+    glProgramUniform2i(ID, loc, x.X, x.Y);
+}
+
+void gl_shader::set_uniform(i32 loc, size_u x) const
+{
+    assert(ID);
+    glProgramUniform2ui(ID, loc, x.Width, x.Height);
+}
+
+void gl_shader::set_uniform(i32 loc, point_u x) const
+{
+    assert(ID);
+    glProgramUniform2ui(ID, loc, x.X, x.Y);
+}
+
+void gl_shader::set_uniform(i32 loc, mat4 const& x) const
+{
+    assert(ID);
+    glProgramUniformMatrix4fv(ID, loc, 1, GL_FALSE, x.data());
+}
+
+auto gl_shader::is_valid() const -> bool
+{
+    return ID != 0;
+}
+
+auto gl_shader::get_uniform_location(string const& name) const -> i32
+{
+    assert(ID);
+    return glGetUniformLocation(ID, name.c_str());
+}
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLTexture.hpp"
+
+#include <cassert>
+#include <utility>
+#include <vector>
+
+#include <glad/gl45.h>
+
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Texture.hpp"
+
+namespace tcob::gfx::gl45 {
+auto constexpr convert_enum(texture::format format) -> std::pair<GLenum, GLenum>
+{
+    switch (format) {
+    case texture::format::R8:    return {GL_R8, GL_RED};
+    case texture::format::RGB8:  return {GL_RGB8, GL_RGB};
+    case texture::format::RGBA8: return {GL_RGBA8, GL_RGBA};
+    }
+
+    return {};
+}
+
+auto constexpr convert_enum(texture::filtering filtering) -> GLenum
+{
+    switch (filtering) {
+    case texture::filtering::Linear:          return GL_LINEAR;
+    case texture::filtering::NearestNeighbor: return GL_NEAREST;
+    }
+
+    return {};
+}
+
+auto constexpr convert_enum(texture::wrapping wrap) -> GLenum
+{
+    switch (wrap) {
+    case texture::wrapping::ClampToEdge:       return GL_CLAMP_TO_EDGE;
+    case texture::wrapping::ClampToBorder:     return GL_CLAMP_TO_BORDER;
+    case texture::wrapping::MirroredRepeat:    return GL_MIRRORED_REPEAT;
+    case texture::wrapping::Repeat:            return GL_REPEAT;
+    case texture::wrapping::MirrorClampToEdge: return GL_MIRROR_CLAMP_TO_EDGE;
+    }
+
+    return {};
+}
+
+////////////////////////////////////////////////////////////
+
+gl_texture::~gl_texture()
+{
+    destroy();
+}
+
+auto gl_texture::get_filtering() const -> texture::filtering
+{
+    assert(ID);
+
+    GLint filtering {0};
+    glGetTextureParameterIiv(ID, GL_TEXTURE_MAG_FILTER, &filtering);
+
+    switch (filtering) {
+    case GL_LINEAR:  return texture::filtering::Linear;
+    case GL_NEAREST: return texture::filtering::NearestNeighbor;
+    }
+
+    return texture::filtering::Linear;
+}
+
+void gl_texture::set_filtering(texture::filtering val)
+{
+    assert(ID);
+    GLenum const filtering {convert_enum(val)};
+
+    glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, filtering);
+    glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, filtering);
+}
+
+auto gl_texture::get_wrapping() const -> texture::wrapping
+{
+    assert(ID);
+
+    GLint wrapS {0};
+    glGetTextureParameterIiv(ID, GL_TEXTURE_WRAP_S, &wrapS);
+
+    auto const convertWrap {[](GLint wrap) {
+        switch (wrap) {
+        case GL_CLAMP_TO_EDGE:        return texture::wrapping::ClampToEdge;
+        case GL_CLAMP_TO_BORDER:      return texture::wrapping::ClampToBorder;
+        case GL_MIRRORED_REPEAT:      return texture::wrapping::MirroredRepeat;
+        case GL_REPEAT:               return texture::wrapping::Repeat;
+        case GL_MIRROR_CLAMP_TO_EDGE: return texture::wrapping::MirrorClampToEdge;
+        }
+        return texture::wrapping::Repeat;
+    }};
+
+    return convertWrap(wrapS);
+}
+
+void gl_texture::set_wrapping(texture::wrapping val)
+{
+    glTextureParameteri(ID, GL_TEXTURE_WRAP_S, convert_enum(val));
+    glTextureParameteri(ID, GL_TEXTURE_WRAP_T, convert_enum(val));
+}
+
+auto gl_texture::copy_to_image(u32 depth) const -> image
+{
+    std::vector<u8> buffer(static_cast<usize>(_size.Width * _size.Height * 4));
+
+    glGetTextureSubImage(ID, 0, 0, 0, depth, _size.Width, _size.Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<GLsizei>(buffer.capacity()), buffer.data());
+
+    return image::Create(_size, image::format::RGBA, buffer);
+}
+
+void gl_texture::resize(size_i texsize, u32 depth, texture::format format)
+{
+    _size   = texsize;
+    _format = format;
+
+    if (ID) {
+        do_destroy();
+    }
+
+    glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &ID);
+    set_filtering(texture::filtering::NearestNeighbor);
+    set_wrapping(texture::wrapping::Repeat);
+
+    auto const [iform, _] {convert_enum(format)};
+    glTextureStorage3D(ID, 1, iform, texsize.Width, texsize.Height, depth);
+
+    logger::Debug("Texture: created ID {}: width {}, height {}, depth {}", ID, texsize.Width, texsize.Height, depth);
+}
+
+void gl_texture::update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment)
+{
+    assert(ID);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, rowLength);
+    auto const [_, form] {convert_enum(_format)};
+    glTextureSubImage3D(ID, 0, origin.X, origin.Y, depth, size.Width, size.Height, 1, form, GL_UNSIGNED_BYTE, data);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+}
+
+auto gl_texture::is_valid() const -> bool
+{
+    return ID != 0;
+}
+
+auto gl_texture::get_size() const -> size_i
+{
+    return _size;
+}
+
+void gl_texture::do_destroy()
+{
+    glDeleteTextures(1, &ID);
+}
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLUniformBuffer.hpp"
+
+#include <cassert>
+
+#include <glad/gl45.h>
+
+#include "tcob/core/Logger.hpp"
+
+namespace tcob::gfx::gl45 {
+gl_uniform_buffer::gl_uniform_buffer(usize size)
+{
+    glCreateBuffers(1, &ID);
+    glNamedBufferStorage(ID, size, nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+    logger::Debug("UniformBuffer: created ID {}: size {}", ID, size);
+}
+
+gl_uniform_buffer::~gl_uniform_buffer()
+{
+    destroy();
+}
+
+void gl_uniform_buffer::do_destroy()
+{
+    glDeleteBuffers(1, &ID);
+}
+
+void gl_uniform_buffer::bind_base(u32 index)
+{
+    assert(ID);
+    glBindBufferBase(GL_UNIFORM_BUFFER, index, ID);
+}
+
+auto gl_uniform_buffer::update(bool data, usize offset) -> usize
+{
+    u32 const d {data}; // bools are u32 in GLSL and HLSL
+    update(&d, sizeof(d), offset);
+    return sizeof(d);
+}
+
+void gl_uniform_buffer::update(void const* data, usize size, usize offset)
+{
+    assert(ID);
+    glNamedBufferSubData(ID, offset, size, data);
+}
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLVertexArray.hpp"
+
+#include <algorithm>
+#include <cassert>
+#include <span>
+
+#include "GLEnum.hpp"
+
+#include "tcob/core/Logger.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+
+namespace tcob::gfx::gl45 {
+
+gl_vertex_array::gl_vertex_array(buffer_usage_hint usage)
+    : _usage {convert_enum(usage)}
+{
+    glCreateVertexArrays(1, &ID);
+    setup_attributes();
+
+    glCreateBuffers(1, &_vbo);
+    glCreateBuffers(1, &_ebo);
+
+    glVertexArrayVertexBuffer(ID, 0, _vbo, 0, sizeof(vertex));
+    glVertexArrayElementBuffer(ID, _ebo);
+}
+
+gl_vertex_array::~gl_vertex_array()
+{
+    destroy();
+}
+
+void gl_vertex_array::setup_attributes() const
+{
+    assert(ID);
+    u32 offset {0};
+    u32 index {0};
+
+    // position attribute
+    glVertexArrayAttribBinding(ID, index, 0);
+    glVertexArrayAttribFormat(ID, index, sizeof(decltype(vertex::Position)) / sizeof(f32), GL_FLOAT, GL_FALSE, offset);
+    glEnableVertexArrayAttrib(ID, index);
+    offset += sizeof(vertex::Position);
+    index++;
+
+    // color attribute
+    glVertexArrayAttribBinding(ID, index, 0);
+    glVertexArrayAttribFormat(ID, index, sizeof(decltype(vertex::Color)) / sizeof(u8), GL_UNSIGNED_BYTE, GL_TRUE, offset);
+    glEnableVertexArrayAttrib(ID, index);
+    offset += sizeof(vertex::Color);
+    index++;
+
+    // texture coord attribute
+    glVertexArrayAttribBinding(ID, index, 0);
+    glVertexArrayAttribFormat(ID, index, sizeof(decltype(vertex::TexCoords)) / sizeof(f32), GL_FLOAT, GL_FALSE, offset);
+    glEnableVertexArrayAttrib(ID, index);
+    offset += sizeof(vertex::TexCoords);
+    index++;
+
+    static_assert(sizeof(vertex) == sizeof(vertex::Position) + sizeof(vertex::Color) + sizeof(vertex::TexCoords));
+    static_assert(sizeof(vertex) == 24);
+}
+
+void gl_vertex_array::do_destroy()
+{
+    glDeleteVertexArrays(1, &ID);
+    glDeleteBuffers(1, &_vbo);
+    _vbo = 0;
+    glDeleteBuffers(1, &_ebo);
+    _ebo = 0;
+}
+
+void gl_vertex_array::resize(usize vertCount, usize indCount)
+{
+    assert(ID);
+
+    usize const newVboSize {vertCount * sizeof(vertex)};
+    usize const newEboSize {indCount * sizeof(GLuint)};
+    if (newVboSize > _vboSize || newEboSize > _eboSize) {
+        bool creating {_vboSize == 0};
+        _vboSize = std::max(newVboSize, _vboSize * 2);
+        _eboSize = std::max(newEboSize, _eboSize * 2);
+
+        if (creating) {
+            logger::Debug("VertexArray: created ID {}: {} vertices, {} indices",
+                          ID, _vboSize / sizeof(vertex), _eboSize / sizeof(GLuint));
+        } else {
+            logger::Debug("VertexArray: resized ID {}: {} vertices, {} indices",
+                          ID, _vboSize / sizeof(vertex), _eboSize / sizeof(GLuint));
+        }
+
+        glNamedBufferData(_vbo, _vboSize, nullptr, _usage);
+        glNamedBufferData(_ebo, _eboSize, nullptr, _usage);
+    }
+}
+
+void gl_vertex_array::update_data(std::span<vertex const> verts, usize vertOffset)
+{
+    assert(ID);
+    assert(_vboSize >= verts.size_bytes() + (vertOffset * sizeof(vertex)));
+    glNamedBufferSubData(_vbo, vertOffset * sizeof(vertex), verts.size_bytes(), verts.data());
+}
+
+void gl_vertex_array::update_data(std::span<u32 const> inds, usize indOffset)
+{
+    assert(ID);
+    assert(_eboSize >= inds.size_bytes() + (indOffset * sizeof(GLuint)));
+    glNamedBufferSubData(_ebo, indOffset * sizeof(GLuint), inds.size_bytes(), inds.data());
+}
+
+void gl_vertex_array::draw_elements(primitive_type mode, usize count, u32 offset) const
+{
+    assert(ID);
+    glBindVertexArray(ID);
+    glDrawElements(convert_enum(mode), static_cast<GLsizei>(count), GL_UNSIGNED_INT, reinterpret_cast<void*>(offset * sizeof(GLuint))); // NOLINT(performance-no-int-to-ptr)
+    glBindVertexArray(0);
+}
+
+void gl_vertex_array::draw_arrays(primitive_type mode, i32 first, usize count) const
+{
+    assert(ID);
+    glBindVertexArray(ID);
+    glDrawArrays(convert_enum(mode), static_cast<GLint>(first), static_cast<GLsizei>(count));
+    glBindVertexArray(0);
+}
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "GLWindow.hpp"
+
+#include <memory>
+#include <stdexcept>
+
+#include <SDL3/SDL.h>
+#include <glad/gl45.h>
+
+#include "GLContext.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+
+namespace tcob::gfx::gl45 {
+
+gl_window::gl_window(size_i size)
+{
+    // Set attributes
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+
+    i32 const flags {SDL_WINDOW_OPENGL};
+
+    // Create window
+    logger::Info("GLWindow: creating window");
+    _window = SDL_CreateWindow("", size.Width, size.Height, flags);
+    SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
+    if (!_window) {
+        logger::Error("GLWindow: Window creation failed!");
+        throw std::runtime_error("Window creation failed");
+    }
+
+    _context = std::make_unique<gl_context>(_window);
+}
+
+gl_window::~gl_window()
+{
+    _context = nullptr;
+    if (_window) {
+        SDL_DestroyWindow(_window);
+    }
+}
+
+auto gl_window::get_vsync() const -> bool
+{
+    i32 i {};
+    SDL_GL_GetSwapInterval(&i);
+    return i == 1;
+}
+
+void gl_window::set_vsync(bool value)
+{
+    value ? SDL_GL_SetSwapInterval(1)
+          : SDL_GL_SetSwapInterval(0);
+}
+
+void gl_window::clear(color c)
+{
+    vec4 const color {c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f};
+    glClearNamedFramebufferfv(0, GL_COLOR, 0, color.data());
+    glClearNamedFramebufferfi(0, GL_DEPTH_STENCIL, 0, 1, 0);
+}
+
+void gl_window::set_viewport(rect_i const& rect)
+{
+    glViewport(rect.left(), rect.top(), rect.width(), rect.height());
+}
+
+void gl_window::swap_buffer() const
+{
+    SDL_GL_SwapWindow(_window);
+}
+
+auto gl_window::get_handle() const -> void*
+{
+    return _window;
+}
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+// based on:
+// Copyright (c) 2013 Mikko Mononen memon@inside.org
+//
+// This software is provided 'as-is', without any express or implied
+// warranty.  In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 1. The origin of this software must not be misrepresented; you must not
+//    claim that you wrote the original software. If you use this software
+//    in a product, an acknowledgment in the product documentation would be
+//    appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//    misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
+//
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include <cstddef>
+#include <span>
+#include <vector>
+
+#include <glad/gl45.h>
+
+#include "GLShaderProgram.hpp"
+#include "GLTexture.hpp"
+#include "GLVertexArray.hpp"
+
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
+
+namespace tcob::gfx::gl45 {
+
+enum class nvg_shader_type : i32 { // NOLINT(performance-enum-size) part of frag shader
+    Gradient    = 0,
+    Image       = 1,
+    StencilFill = 2,
+    Triangles   = 3,
+    Conical     = 4
+};
+
+enum class nvg_call_type : u8 {
+    None = 0,
+    Fill,
+    ConvexFill,
+    Stroke,
+    Triangles,
+    Clip,
+    ClearClip
+};
+
+struct nvg_call {
+    nvg_call_type Type {0};
+    blend_funcs   BlendFunc {};
+    texture*      Image {};
+    usize         PathOffset {0};
+    usize         PathCount {0};
+    usize         TriangleOffset {0};
+    usize         TriangleCount {0};
+    usize         UniformOffset {0};
+};
+
+struct nvg_path {
+    usize FillOffset {0};
+    usize FillCount {0};
+    usize StrokeOffset {0};
+    usize StrokeCount {0};
+};
+
+struct nvg_frag_uniforms {
+    mat4 ScissorMatrix {};
+    mat4 PaintMatrix {};
+
+    vec2 ScissorExtent {0};
+    vec2 ScissorScale {0};
+
+    vec2 Extent {0};
+    f32  Radius {0};
+    f32  Feather {0};
+
+    f32 StrokeMult {0};
+    f32 StrokeThr {0};
+
+    i32             TexType {0};
+    nvg_shader_type Type {};
+
+    vec4 GradientColor {0};
+    f32  GradientIndex {0};
+    f32  GradientAlpha {0};
+
+    vec2 padding {};
+};
+
+class gl_canvas final : public tcob::gfx::render_backend::canvas_base {
+public:
+    gl_canvas();
+    ~gl_canvas() override;
+
+    void flush(size_f size) override;
+    void cancel() override;
+    void render_fill(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe,
+                     vec4 const& bounds, std::vector<canvas::path> const& paths) override;
+    void render_stroke(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe,
+                       f32 strokeWidth, std::vector<canvas::path> const& paths) override;
+    void render_triangles(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe,
+                          std::span<vertex const> verts) override;
+    void render_clip(canvas::scissor const& scissor, f32 fringe, std::vector<canvas::path> const& paths) override;
+    void add_gradient(i32 idx, color_gradient const& gradient) override;
+
+private:
+    void set_uniforms(usize uniformOffset, texture* image = nullptr) const;
+    auto convert_paint(canvas::paint const& paint, canvas::scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms;
+
+    void fill(nvg_call const& call);
+    void convex_fill(nvg_call const& call);
+    void stroke(nvg_call const& call);
+    void triangles(nvg_call const& call);
+    void clip(nvg_call const& call);
+
+    auto get_max_vertcount(std::vector<canvas::path> const& paths) -> usize;
+    auto alloc_verts(usize n) -> usize;
+    auto alloc_frag_uniforms(usize n) -> usize;
+    auto get_frag_uniformptr(usize i) -> nvg_frag_uniforms*;
+
+    gl_shader              _shader;
+    gl_vertex_array        _vertexArray {buffer_usage_hint::StreamDraw};
+    GLuint                 _fragBuf {0};
+    usize                  _fragSize {0};
+    // Per frame buffers
+    std::vector<nvg_call>  _calls;
+    std::vector<nvg_path>  _paths;
+    std::vector<vertex>    _verts;
+    usize                  _nverts {0};
+    std::vector<std::byte> _uniforms;
+    usize                  _nuniforms {0};
+
+    gl_texture _gradientTexture;
+};
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include <memory>
+
+#include "tcob/core/Interfaces.hpp"
+
+struct SDL_Window;
+
+namespace tcob::gfx::gl45 {
+
+////////////////////////////////////////////////////////////
+
+class gl_shader;
+
+////////////////////////////////////////////////////////////
+
+class gl_context final : public non_copyable {
+public:
+    explicit gl_context(SDL_Window* window);
+    ~gl_context();
+
+    static u32 DefaultShader;
+    static u32 DefaultTexturedShader;
+    static u32 DefaultFontShader;
+
+private:
+    void* _context {nullptr};
+
+    std::shared_ptr<gl_shader> _defaultShader;
+    std::shared_ptr<gl_shader> _defaultTexShader;
+    std::shared_ptr<gl_shader> _defaultFontShader;
+};
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include "tcob/gfx/Gfx.hpp"
+
+namespace tcob::gfx::gl45 {
+
+auto convert_enum(buffer_usage_hint usage) -> u32;
+auto convert_enum(blend_func blendfunc) -> u32;
+auto convert_enum(blend_equation equ) -> u32;
+auto convert_enum(primitive_type type) -> u32;
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include <span>
+
+#include "GLObject.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Texture.hpp"
+
+namespace tcob::gfx::gl45 {
+////////////////////////////////////////////////////////////
+
+class gl_framebuffer final : public gl_object {
+public:
+    gl_framebuffer();
+    ~gl_framebuffer() override;
+
+    void bind() const;
+    void bind_default() const;
+
+    void clear(color c) const;
+
+    void attach_texture(texture const* tex);
+
+    void get_subimage(rect_i const& rect, std::span<u8> pixels);
+    auto read_pixel(point_i pos) const -> color;
+
+protected:
+    void do_destroy() override;
+
+private:
+    u32 _rbo {0};
+    u32 _texID {0};
+};
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include <vector>
+
+#include "tcob/core/Interfaces.hpp"
+
+namespace tcob::gfx::gl45 {
+////////////////////////////////////////////////////////////
+
+class gl_object;
+
+class gl_object_registry final : public non_copyable { // TODO: move to GLContext
+public:
+    void register_object(gl_object* res);
+    void unregister_object(gl_object const* res) noexcept;
+    void destroy_all_objects();
+
+private:
+    std::vector<gl_object*> _objects;
+};
+
+////////////////////////////////////////////////////////////
+
+class gl_object : public non_copyable {
+    friend void gl_object_registry::destroy_all_objects();
+
+public:
+    gl_object();
+    gl_object(gl_object&& other) noexcept;
+    auto operator=(gl_object&& other) noexcept -> gl_object&;
+    virtual ~gl_object() = default;
+
+    u32 ID {0};
+
+    static void DestroyAll();
+
+protected:
+    void         destroy();
+    virtual void do_destroy() = 0;
+};
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include <memory>
+
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
+
+namespace tcob::gfx::gl45 {
+
+class gl_render_system final : public render_system {
+public:
+    auto name() const -> string override;
+    auto device_name() const -> string override;
+    auto info() const -> render_system_information override;
+
+    auto create_canvas() -> std::unique_ptr<render_backend::canvas_base> override;
+    auto create_render_target(texture* tex) -> std::unique_ptr<render_backend::render_target_base> override;
+    auto create_shader() -> std::unique_ptr<render_backend::shader_base> override;
+    auto create_texture() -> std::unique_ptr<render_backend::texture_base> override;
+    auto create_uniform_buffer(usize size) -> std::unique_ptr<render_backend::uniform_buffer_base> override;
+    auto create_vertex_array(buffer_usage_hint usage) -> std::unique_ptr<render_backend::vertex_array_base> override;
+    auto create_window(size_i size) -> std::unique_ptr<gfx::window> override;
+};
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include <memory>
+
+#include "GLFramebuffer.hpp"
+#include "GLUniformBuffer.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Texture.hpp"
+
+namespace tcob::gfx::gl45 {
+////////////////////////////////////////////////////////////
+
+class gl_render_target : public tcob::gfx::render_backend::render_target_base {
+public:
+    gl_render_target(texture* tex);
+
+    void prepare_render(render_properties const& props) override;
+    void finalize_render() override;
+
+    void enable_scissor(rect_i const& rect) override;
+    void disable_scissor() override;
+
+    void clear(color c) override;
+
+    void on_resize(size_i size) override;
+
+    auto copy_to_image(rect_i const& rect) const -> image override;
+
+    void bind_pass(pass const& pass) override;
+    void unbind_pass() override;
+
+private:
+    void set_viewport(rect_i const& rect);
+
+    texture*                        _tex {nullptr};
+    std::unique_ptr<gl_framebuffer> _frameBuffer;
+    gl_uniform_buffer               _matUniformBuffer {sizeof(vec4) + sizeof(f32)};
+};
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include "GLObject.hpp"
+
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+
+namespace tcob::gfx::gl45 {
+////////////////////////////////////////////////////////////
+
+class gl_shader : public gl_object, public tcob::gfx::render_backend::shader_base {
+public:
+    gl_shader();
+    ~gl_shader() override;
+
+    auto compile(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool override;
+
+    auto get_uniform_location(string const& name) const -> i32;
+
+    void set_uniform(i32 loc, i32 x) const;
+    void set_uniform(i32 loc, ivec2 const& x) const;
+    void set_uniform(i32 loc, ivec3 const& x) const;
+    void set_uniform(i32 loc, ivec4 const& x) const;
+    void set_uniform(i32 loc, size_i x) const;
+    void set_uniform(i32 loc, point_i x) const;
+
+    void set_uniform(i32 loc, u32 x) const;
+    void set_uniform(i32 loc, uvec2 const& x) const;
+    void set_uniform(i32 loc, uvec3 const& x) const;
+    void set_uniform(i32 loc, uvec4 const& x) const;
+    void set_uniform(i32 loc, size_u x) const;
+    void set_uniform(i32 loc, point_u x) const;
+
+    void set_uniform(i32 loc, f32 x) const;
+    void set_uniform(i32 loc, vec2 const& x) const;
+    void set_uniform(i32 loc, vec3 const& x) const;
+    void set_uniform(i32 loc, vec4 const& x) const;
+    void set_uniform(i32 loc, size_f x) const;
+    void set_uniform(i32 loc, point_f x) const;
+
+    void set_uniform(i32 loc, mat4 const& x) const;
+
+    auto is_valid() const -> bool override;
+
+protected:
+    void do_destroy() override;
+};
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include "GLObject.hpp"
+
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
+
+namespace tcob::gfx::gl45 {
+////////////////////////////////////////////////////////////
+
+class gl_texture : public gl_object, public tcob::gfx::render_backend::texture_base {
+public:
+    ~gl_texture() override;
+
+    void resize(size_i texsize, u32 depth, texture::format format = texture::format::RGBA8) override;
+    void update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) override;
+
+    auto get_filtering() const -> texture::filtering override;
+    void set_filtering(texture::filtering val) override;
+    auto get_wrapping() const -> texture::wrapping override;
+    void set_wrapping(texture::wrapping val) override;
+
+    auto copy_to_image(u32 depth) const -> image override;
+
+    auto is_valid() const -> bool override;
+
+    auto get_size() const -> size_i;
+
+private:
+    void do_destroy() override;
+
+    size_i          _size {size_i::Zero};
+    texture::format _format {};
+};
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include "GLObject.hpp"
+
+#include "tcob/gfx/RenderSystemImpl.hpp"
+
+namespace tcob::gfx::gl45 {
+////////////////////////////////////////////////////////////
+
+class gl_uniform_buffer : public gl_object, public tcob::gfx::render_backend::uniform_buffer_base {
+public:
+    explicit gl_uniform_buffer(usize size);
+    ~gl_uniform_buffer() override;
+
+    auto update(bool data, usize offset) -> usize;
+
+    template <POD T>
+    auto update(T data, usize offset) -> usize;
+
+    void bind_base(u32 index) override;
+
+protected:
+    void do_destroy() override;
+
+private:
+    void update(void const* data, usize size, usize offset) override;
+};
+
+template <POD T>
+inline auto gl_uniform_buffer::update(T data, usize offset) -> usize
+{
+    update(&data, sizeof(data), offset);
+    return sizeof(data);
+}
+
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include <span>
+
+#include <glad/gl45.h>
+
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+
+#include "GLObject.hpp"
+
+namespace tcob::gfx::gl45 {
+////////////////////////////////////////////////////////////
+
+class gl_vertex_array final : public gl_object, public tcob::gfx::render_backend::vertex_array_base {
+public:
+    gl_vertex_array(buffer_usage_hint usage);
+    ~gl_vertex_array() override;
+
+    void resize(usize vertCount, usize indCount) override;
+
+    void update_data(std::span<vertex const> verts, usize vertOffset) override;
+    void update_data(std::span<u32 const> inds, usize indOffset) override;
+
+    void draw_elements(primitive_type mode, usize count, u32 offset) const override;
+    void draw_arrays(primitive_type mode, i32 first, usize count) const override;
+
+protected:
+    void do_destroy() override;
+
+private:
+    void setup_attributes() const;
+
+    u32    _vbo {0};
+    u32    _ebo {0};
+    usize  _vboSize {0};
+    usize  _eboSize {0};
+    GLenum _usage {};
+};
+}
+// Copyright (c) 2026 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+#include <memory>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+
+struct SDL_Window;
+
+namespace tcob::gfx::gl45 {
+////////////////////////////////////////////////////////////
+
+class gl_context;
+
+class gl_window final : public tcob::gfx::render_backend::window_base {
+public:
+    explicit gl_window(size_i size);
+    ~gl_window() override;
+
+    auto get_vsync() const -> bool override;
+    void set_vsync(bool value) override;
+
+    void swap_buffer() const override;
+
+    void clear(color c) override;
+
+    void set_viewport(rect_i const& rect) override;
+
+    auto get_handle() const -> void* override;
+
+private:
+    SDL_Window* _window {nullptr};
+
+    std::unique_ptr<gl_context> _context;
+};
+}

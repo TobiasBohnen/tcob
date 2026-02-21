@@ -99,14 +99,14 @@ void gl_vertex_array::resize(usize vertCount, usize indCount)
     }
 }
 
-void gl_vertex_array::update_data(std::span<vertex const> verts, usize vertOffset) const
+void gl_vertex_array::update_data(std::span<vertex const> verts, usize vertOffset)
 {
     assert(ID);
     assert(_vboSize >= verts.size_bytes() + (vertOffset * sizeof(vertex)));
     glNamedBufferSubData(_vbo, vertOffset * sizeof(vertex), verts.size_bytes(), verts.data());
 }
 
-void gl_vertex_array::update_data(std::span<u32 const> inds, usize indOffset) const
+void gl_vertex_array::update_data(std::span<u32 const> inds, usize indOffset)
 {
     assert(ID);
     assert(_eboSize >= inds.size_bytes() + (indOffset * sizeof(GLuint)));

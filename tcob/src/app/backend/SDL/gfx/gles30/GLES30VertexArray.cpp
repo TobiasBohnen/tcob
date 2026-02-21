@@ -117,7 +117,7 @@ void gl_vertex_array::unbind() const
     GLCHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
-void gl_vertex_array::update_data(std::span<vertex const> verts, usize vertOffset) const
+void gl_vertex_array::update_data(std::span<vertex const> verts, usize vertOffset)
 {
     bind();
     assert(_vboSize >= verts.size_bytes() + (vertOffset * sizeof(vertex)));
@@ -125,7 +125,7 @@ void gl_vertex_array::update_data(std::span<vertex const> verts, usize vertOffse
     unbind();
 }
 
-void gl_vertex_array::update_data(std::span<u32 const> inds, usize indOffset) const
+void gl_vertex_array::update_data(std::span<u32 const> inds, usize indOffset)
 {
     bind();
     assert(_eboSize >= inds.size_bytes() + (indOffset * sizeof(u32)));

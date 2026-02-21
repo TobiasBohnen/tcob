@@ -18,22 +18,22 @@ public:
     explicit gl_uniform_buffer(usize size);
     ~gl_uniform_buffer() override;
 
-    auto update(bool data, usize offset) const -> usize;
+    auto update(bool data, usize offset) -> usize;
 
     template <POD T>
-    auto update(T data, usize offset) const -> usize;
+    auto update(T data, usize offset) -> usize;
 
-    void bind_base(u32 index) const override;
+    void bind_base(u32 index) override;
 
 protected:
     void do_destroy() override;
 
 private:
-    void update(void const* data, usize size, usize offset) const override;
+    void update(void const* data, usize size, usize offset) override;
 };
 
 template <POD T>
-inline auto gl_uniform_buffer::update(T data, usize offset) const -> usize
+inline auto gl_uniform_buffer::update(T data, usize offset) -> usize
 {
     update(&data, sizeof(data), offset);
     return sizeof(data);
