@@ -90,4 +90,8 @@ void gl_window::swap_buffer() const
     SDL_GL_SwapWindow(_window);
 }
 
+auto gl_window::get_handle() const -> void*
+{
+    return _window;
+}
 }
