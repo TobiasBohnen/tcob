@@ -30,11 +30,11 @@ renderer_base::renderer_base()
 {
 }
 
-void renderer_base::render_to_target(render_target& target, bool prepare)
+void renderer_base::render_to_target(render_target& target)
 {
-    if (prepare) { prepare_render(target); }
+    prepare_render(target);
     on_render_to_target(target);
-    if (prepare) { finalize_render(target); }
+    finalize_render(target);
 }
 
 void renderer_base::prepare_render(render_target& target)

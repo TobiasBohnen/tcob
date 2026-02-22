@@ -27,7 +27,7 @@ public:
     renderer_base();
     virtual ~renderer_base() = default;
 
-    void render_to_target(render_target& target, bool prepare = true);
+    void render_to_target(render_target& target);
 
 protected:
     virtual void prepare_render(render_target& target);
