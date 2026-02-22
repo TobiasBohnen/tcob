@@ -21,6 +21,7 @@
     #include "tcob/core/Point.hpp"
     #include "tcob/core/Rect.hpp"
     #include "tcob/core/Size.hpp"
+    #include "tcob/core/Transform.hpp"
     #include "tcob/core/input/Input.hpp"
     #include "tcob/core/io/FileStream.hpp"
     #include "tcob/core/io/FileSystem.hpp"
@@ -110,7 +111,7 @@ auto document::can_draw() const -> bool
     return _lhdoc != nullptr;
 }
 
-void document::on_draw_to(render_target& target)
+void document::on_draw_to(render_target& target, transform& xform)
 {
     if (!_lhdoc) { return; }
 
@@ -131,7 +132,7 @@ void document::on_draw_to(render_target& target)
     }
 
     _renderer.set_geometry({.Vertices = _quad, .Indices = QuadIndicies, .Type = primitive_type::Triangles}, &_material->first_pass());
-    _renderer.render_to_target(target, transform());
+    _renderer.render_to_target(target, xform * get_transform());
 }
 
 auto document::pivot() const -> point_f

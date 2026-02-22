@@ -12,6 +12,7 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -32,7 +33,7 @@ public:
 
 protected:
     auto can_draw() const -> bool override;
-    void on_draw_to(render_target& target) final;
+    void on_draw_to(render_target& target, transform& xform) final;
 
 private:
     quad     _quad;
@@ -67,7 +68,7 @@ public:
 
 protected:
     auto can_draw() const -> bool override;
-    void on_draw_to(render_target& target) final;
+    void on_draw_to(render_target& target, transform& xform) final;
 
 private:
     std::vector<std::unique_ptr<parallax_background_layer>> _layers {};

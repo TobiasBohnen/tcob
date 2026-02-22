@@ -29,7 +29,7 @@ auto background::can_draw() const -> bool
     return !(*Material).is_expired();
 }
 
-void background::on_draw_to(render_target& target)
+void background::on_draw_to(render_target& target, transform& xform)
 {
     target.camera().push_state();
 
@@ -40,7 +40,7 @@ void background::on_draw_to(render_target& target)
         auto const& pass {Material->get_pass(i)};
         geometry::set_texcoords(_quad, pass, TextureRegion);
         _renderer.set_geometry({.Vertices = _quad, .Indices = QuadIndicies, .Type = primitive_type::Triangles}, &pass);
-        _renderer.render_to_target(target, transform::Identity);
+        _renderer.render_to_target(target, xform);
     }
 
     target.camera().pop_state();
@@ -70,7 +70,7 @@ auto parallax_background::can_draw() const -> bool
     return !(*Material).is_expired();
 }
 
-void parallax_background::on_draw_to(render_target& target)
+void parallax_background::on_draw_to(render_target& target, transform& xform)
 {
     auto const cameraPos {target.camera().Position};
     target.camera().push_state();
@@ -105,7 +105,7 @@ void parallax_background::on_draw_to(render_target& target)
         }
 
         _renderer.set_geometry({.Vertices = geometry::flatten(_quads), .Indices = geometry::get_indices(_quads.size()), .Type = primitive_type::Triangles}, &pass);
-        _renderer.render_to_target(target, transform::Identity);
+        _renderer.render_to_target(target, xform);
     }
 
     target.camera().pop_state();

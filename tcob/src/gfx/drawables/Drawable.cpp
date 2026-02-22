@@ -6,6 +6,7 @@
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob::gfx {
@@ -33,11 +34,11 @@ void drawable::hide()
     VisibilityChanged(false);
 }
 
-void drawable::draw_to(render_target& target)
+void drawable::draw_to(render_target& target, transform& xform)
 {
     if (target.camera().VisibilityMask & VisibilityMask) {
         if (is_visible()) {
-            on_draw_to(target);
+            on_draw_to(target, xform);
         }
     }
 }

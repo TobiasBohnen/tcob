@@ -62,7 +62,7 @@ auto cursor::can_draw() const -> bool
     return !(*Material).is_expired();
 }
 
-void cursor::on_draw_to(render_target& target)
+void cursor::on_draw_to(render_target& target, transform& xform)
 {
     for (isize i {0}; i < Material->pass_count(); ++i) {
         auto const& pass {Material->get_pass(i)};
@@ -70,7 +70,7 @@ void cursor::on_draw_to(render_target& target)
         auto const& region {pass.Texture->regions()[ActiveMode]};
         geometry::set_texcoords(_quad, region);
         _renderer.set_geometry({.Vertices = _quad, .Indices = QuadIndicies, .Type = primitive_type::Triangles}, &pass);
-        _renderer.render_to_target(target, transform::Identity);
+        _renderer.render_to_target(target, xform);
     }
 }
 

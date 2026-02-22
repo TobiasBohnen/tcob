@@ -10,6 +10,7 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Geometry.hpp"
@@ -45,12 +46,12 @@ auto text::can_draw() const -> bool
     return _font.is_ready() && !_quads.empty();
 }
 
-void text::on_draw_to(render_target& target)
+void text::on_draw_to(render_target& target, transform& xform)
 {
     _renderer.set_geometry(
         {.Vertices = geometry::flatten(_quads), .Indices = _inds, .Type = primitive_type::Triangles},
         &_material->first_pass());
-    _renderer.render_to_target(target, transform());
+    _renderer.render_to_target(target, xform * get_transform());
 }
 
 auto text::pivot() const -> point_f

@@ -138,7 +138,7 @@ auto shape_batch::can_draw() const -> bool
     return !_children.empty();
 }
 
-void shape_batch::on_draw_to(render_target& target)
+void shape_batch::on_draw_to(render_target& target, transform& xform)
 {
     if (_isDirty) {
         _isDirty = false;
@@ -162,7 +162,7 @@ void shape_batch::on_draw_to(render_target& target)
         }
     }
 
-    _renderer.render_to_target(target, transform::Identity);
+    _renderer.render_to_target(target, xform);
 }
 
 ////////////////////////////////////////////////////////////
@@ -250,12 +250,12 @@ auto rect_shape::geometry(isize pass) -> geometry_view
 
 auto rect_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
-    return ray.intersect_rect(*Bounds, transform());
+    return ray.intersect_rect(*Bounds, get_transform());
 }
 
 auto rect_shape::aabb() const -> rect_f
 {
-    auto const& xform {transform()};
+    auto const& xform {get_transform()};
     auto const& rect {*Bounds};
 
     auto const topLeft {xform * rect.top_left()};
@@ -293,7 +293,7 @@ void rect_shape::update_geometry()
 
     _quads.clear();
 
-    auto const& xform {transform()};
+    auto const& xform {get_transform()};
     for (isize p {0}; p < Material->pass_count(); ++p) {
         auto const& pass {Material->get_pass(p)};
 
@@ -328,14 +328,14 @@ auto circle_shape::geometry(isize pass) -> geometry_view
 
 auto circle_shape::aabb() const -> rect_f
 {
-    auto const worldCenter {transform() * Center};
+    auto const worldCenter {get_transform() * Center};
     return {worldCenter - point_f {Radius, Radius},
             {Radius * 2.0f, Radius * 2.0f}};
 }
 
 auto circle_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
-    return ray.intersect_circle(transform() * Center, Radius);
+    return ray.intersect_circle(get_transform() * Center, Radius);
 }
 
 void circle_shape::on_update(milliseconds /* deltaTime */)
@@ -350,7 +350,7 @@ void circle_shape::update_geometry()
     mark_clean();
 
     _store.clear();
-    auto const& xform {transform()};
+    auto const& xform {get_transform()};
 
     if (Segments < 3 || Radius < 1.0f) { return; }
 
@@ -428,7 +428,7 @@ auto poly_shape::geometry(isize pass) -> geometry_view
 
 auto poly_shape::aabb() const -> rect_f
 {
-    auto const& xform {transform()};
+    auto const& xform {get_transform()};
 
     point_f max {std::numeric_limits<f32>::lowest(), std::numeric_limits<f32>::lowest()};
     point_f min {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
@@ -448,7 +448,7 @@ auto poly_shape::aabb() const -> rect_f
 
 auto poly_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
-    auto const& xform {transform()};
+    auto const& xform {get_transform()};
 
     std::vector<ray::result> retValue;
     for (auto const& polygon : *Polygons) {
@@ -496,7 +496,7 @@ void poly_shape::update_geometry()
     _centroid    = info.Centroid;
 
     _store.clear();
-    auto const& xform {transform()};
+    auto const& xform {get_transform()};
 
     for (isize p {0}; p < Material->pass_count(); ++p) {
         u32 indOffset {0};
@@ -613,7 +613,7 @@ auto mesh_shape::aabb() const -> rect_f
 {
     if (_verts.empty()) { return rect_f::Zero; }
 
-    auto const& xform {transform()};
+    auto const& xform {get_transform()};
 
     auto const topLeft {xform * _localBounds.top_left()};
     auto const topRight {xform * _localBounds.top_right()};
@@ -672,7 +672,7 @@ void mesh_shape::update_geometry()
 {
     mark_clean();
 
-    auto const xform {transform()};
+    auto const xform {get_transform()};
 
     _xformVerts.clear();
     _xformVerts.reserve(_verts.size());

@@ -134,7 +134,7 @@ auto tilemap_base::can_draw() const -> bool
     return !_layers.empty() && !(*Material).is_expired();
 }
 
-void tilemap_base::on_draw_to(render_target& target)
+void tilemap_base::on_draw_to(render_target& target, transform& xform)
 {
     for (isize p {0}; p < Material->pass_count(); ++p) {
         auto const& pass {Material->get_pass(p)};
@@ -142,7 +142,7 @@ void tilemap_base::on_draw_to(render_target& target)
         _renderer.set_geometry(
             {.Vertices = geometry::flatten(_quads[p]), .Indices = _inds, .Type = primitive_type::Triangles},
             &pass);
-        _renderer.render_to_target(target, transform::Identity);
+        _renderer.render_to_target(target, xform);
     }
 }
 

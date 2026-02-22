@@ -20,6 +20,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/TypeFactory.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
@@ -237,7 +238,7 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;
-    void on_draw_to(render_target& target) override;
+    void on_draw_to(render_target& target, transform& xform) override;
 
 private:
     bool                                _isDirty {false};

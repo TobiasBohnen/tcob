@@ -8,6 +8,7 @@
 
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
@@ -26,11 +27,11 @@ public:
     void hide();
     auto is_visible() const -> bool;
 
-    void draw_to(render_target& target);
+    void draw_to(render_target& target, transform& xform);
 
 protected:
-    virtual void on_draw_to(render_target& target) = 0;
-    virtual auto can_draw() const -> bool          = 0;
+    virtual void on_draw_to(render_target& target, transform& xform) = 0;
+    virtual auto can_draw() const -> bool                            = 0;
 
     virtual void on_visibility_changed();
 
@@ -50,7 +51,7 @@ public:
 protected:
     entity(update_mode mode = update_mode::Normal);
 
-    void on_draw_to(render_target&) override { }
+    void on_draw_to(render_target&, transform&) override { }
     auto can_draw() const -> bool override;
 
     void on_key_down(input::keyboard::event const&) override { }

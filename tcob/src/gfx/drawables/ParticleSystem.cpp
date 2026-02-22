@@ -145,7 +145,7 @@ auto particle_system::can_draw() const -> bool
     return _isRunning && _aliveParticleCount != 0 && !(*Material).is_expired();
 }
 
-void particle_system::on_draw_to(render_target& target)
+void particle_system::on_draw_to(render_target& target, transform& xform)
 {
     _geometry.resize(_aliveParticleCount);
 
@@ -164,7 +164,7 @@ void particle_system::on_draw_to(render_target& target)
                                 .Indices  = geometry::get_indices(_aliveParticleCount),
                                 .Type     = primitive_type::Triangles},
                                &pass);
-        _renderer.render_to_target(target, transform::Identity);
+        _renderer.render_to_target(target, xform);
     }
 }
 

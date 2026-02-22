@@ -12,6 +12,7 @@
 #include "tcob/app/Game.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/AssetLibrary.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
@@ -52,11 +53,12 @@ void scene::sleep()
 
 void scene::draw_to(gfx::render_target& target)
 {
+    transform xform;
     if (_rootNode) {
-        _rootNode->draw_to(target);
+        _rootNode->draw_to(target, xform);
     }
 
-    on_draw_to(target);
+    on_draw_to(target, xform);
 }
 
 void scene::update(milliseconds deltaTime)
@@ -226,20 +228,20 @@ void scene_node::on_fixed_update(milliseconds deltaTime)
     }
 }
 
-void scene_node::on_draw_to(gfx::render_target& target)
-{
-    if (*Entity) {
-        Entity->draw_to(target);
-    }
-
-    for (auto& child : _children) {
-        child->draw_to(target);
-    }
-}
-
 auto scene_node::can_draw() const -> bool
 {
     return !_children.empty() || (*Entity && Entity->is_visible());
+}
+
+void scene_node::on_draw_to(gfx::render_target& target, transform& xform)
+{
+    if (*Entity) {
+        Entity->draw_to(target, xform);
+    }
+
+    for (auto& child : _children) {
+        child->draw_to(target, xform);
+    }
 }
 
 }

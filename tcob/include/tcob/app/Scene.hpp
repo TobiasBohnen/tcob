@@ -12,6 +12,7 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Assets.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
@@ -49,8 +50,8 @@ protected:
     void on_update(milliseconds deltaTime) override;
     void on_fixed_update(milliseconds deltaTime) override;
 
-    void on_draw_to(gfx::render_target& target) override;
     auto can_draw() const -> bool override;
+    void on_draw_to(gfx::render_target& target, transform& xform) override;
 
 private:
     void move_child_to_front(scene_node* node);
@@ -91,7 +92,7 @@ protected:
     virtual void on_wake_up();
     virtual void on_sleep();
 
-    virtual void on_draw_to(gfx::render_target& target) = 0;
+    virtual void on_draw_to(gfx::render_target& target, transform& xform) = 0;
 
     void on_key_down(input::keyboard::event const&) override { }
     void on_key_up(input::keyboard::event const&) override { }

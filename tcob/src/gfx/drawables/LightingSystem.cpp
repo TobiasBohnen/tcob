@@ -365,7 +365,7 @@ auto lighting_system::can_draw() const -> bool
     return !_store.is_empty();
 }
 
-void lighting_system::on_draw_to(render_target& target)
+void lighting_system::on_draw_to(render_target& target, transform& xform)
 {
     if (_updateGeometry) {
         geometry_view const data {.Vertices = _store.get_vertices(0),
@@ -375,7 +375,7 @@ void lighting_system::on_draw_to(render_target& target)
         _updateGeometry = false;
     }
 
-    _renderer.render_to_target(target, transform::Identity);
+    _renderer.render_to_target(target, xform);
 }
 
 ////////////////////////////////////////////////////////////

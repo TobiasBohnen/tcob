@@ -23,7 +23,7 @@ transformable::transformable()
     Skew.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
-auto transformable::transform() const -> class transform const&
+auto transformable::get_transform() const -> transform const&
 {
     update_transform();
     return _transform;

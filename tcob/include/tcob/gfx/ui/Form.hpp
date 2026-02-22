@@ -15,6 +15,7 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Canvas.hpp"
@@ -87,7 +88,7 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;
-    void on_draw_to(gfx::render_target& target) override;
+    void on_draw_to(gfx::render_target& target, transform& xform) override;
 
     void on_key_down(input::keyboard::event const& ev) override;
     void on_key_up(input::keyboard::event const& ev) override;

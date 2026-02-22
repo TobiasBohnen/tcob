@@ -19,6 +19,7 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/spatial/Quadtree.hpp"
 #include "tcob/gfx/Geometry.hpp"
@@ -131,7 +132,7 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;
-    void on_draw_to(render_target& target) override;
+    void on_draw_to(render_target& target, transform& xform) override;
 
 private:
     void notify_light_changed(light_source* light);

@@ -286,7 +286,7 @@ auto form_base::can_draw() const -> bool
     return true;
 }
 
-void form_base::on_draw_to(gfx::render_target& target)
+void form_base::on_draw_to(gfx::render_target& target, transform& xform)
 {
     size_i const size {size_i {Bounds->Size}};
 
@@ -350,7 +350,7 @@ void form_base::on_draw_to(gfx::render_target& target)
         _renderer.queue_layer(modalLayer);
     }
 
-    _renderer.render_to_target(target, transform::Identity);
+    _renderer.render_to_target(target, xform);
 }
 
 auto form_base::focused_widget() const -> widget*
