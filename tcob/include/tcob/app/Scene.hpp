@@ -34,6 +34,8 @@ public:
     prop<std::shared_ptr<gfx::entity>> Entity;
 
     auto create_child() -> scene_node&;
+    auto remove_child(scene_node const& node) -> bool;
+
     auto child_count() const -> isize;
     auto get_child_at(isize index) const -> scene_node&;
     void clear();

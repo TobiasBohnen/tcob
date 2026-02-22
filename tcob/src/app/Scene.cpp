@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "tcob/app/Game.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/assets/AssetLibrary.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -155,6 +156,11 @@ scene_node::scene_node(scene_node* parent)
 auto scene_node::create_child() -> scene_node&
 {
     return *_children.emplace_back(std::unique_ptr<scene_node>(new scene_node {this}));
+}
+
+auto scene_node::remove_child(scene_node const& node) -> bool
+{
+    return helper::erase_first(_children, [&node](auto const& val) { return val.get() == &node; });
 }
 
 auto scene_node::child_count() const -> isize
