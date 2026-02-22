@@ -135,17 +135,6 @@ inline auto to_number(string_view str) -> std::optional<T>
 #endif
 }
 
-template <Arithmetic T>
-inline auto try_to_number(string_view str, T& val) -> bool
-{
-    if (auto x {to_number<T>(str)}) {
-        val = *x;
-        return true;
-    }
-
-    return false;
-}
-
 inline auto join(auto&& container, string_view delim) -> string
 {
     auto       it {std::begin(container)};

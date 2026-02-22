@@ -124,7 +124,7 @@ public:
 
     virtual void clear(color c) = 0;
 
-    virtual void begin_frame() = 0; // TODO: Unused
+    virtual void begin_frame() = 0;
     virtual void end_frame()   = 0;
 
     virtual void set_viewport(rect_i const& rect) = 0;

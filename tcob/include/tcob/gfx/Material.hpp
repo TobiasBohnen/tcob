@@ -36,6 +36,8 @@ public:
     auto operator==(pass const& other) const -> bool = default;
 };
 
+////////////////////////////////////////////////////////////
+
 class TCOB_API material {
 public:
     material() = default;

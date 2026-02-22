@@ -18,6 +18,17 @@
 
 namespace tcob::gfx::detail {
 
+template <Arithmetic T>
+inline auto try_to_number(string_view str, T& val) -> bool
+{
+    if (auto x {helper::to_number<T>(str)}) {
+        val = *x;
+        return true;
+    }
+
+    return false;
+}
+
 auto ply_loader::load(io::istream& in) -> std::optional<geometry_store>
 {
     if (!in) { return std::nullopt; }
@@ -56,7 +67,7 @@ auto ply_loader::parse_header(io::istream& in) -> bool
 
             element& elem {_header.Elements.emplace_back()};
             elem.Name = parts[1];
-            if (!helper::try_to_number<i32>(parts[2], elem.Count)) { return false; }
+            if (!try_to_number<i32>(parts[2], elem.Count)) { return false; }
             currentElement = &elem;
         } else if (parts[0] == "property") {
             if (!currentElement || parts.size() < 3) { return false; }
@@ -157,14 +168,14 @@ auto ply_loader::read_ascii_vertex(io::istream& in, std::unordered_map<vertex_at
     if (std::ssize(parts) < std::ssize(el.Properties)) { return false; }
 
     vertex& vert {_verts.emplace_back()};
-    if (!helper::try_to_number(parts[attribs[vertex_attrib::X]], vert.Position.X)) { return false; }
-    if (!helper::try_to_number(parts[attribs[vertex_attrib::Y]], vert.Position.Y)) { return false; }
-    helper::try_to_number(parts[attribs[vertex_attrib::S]], vert.TexCoords.U);
-    helper::try_to_number(parts[attribs[vertex_attrib::T]], vert.TexCoords.V);
-    helper::try_to_number(parts[attribs[vertex_attrib::Red]], vert.Color.R);
-    helper::try_to_number(parts[attribs[vertex_attrib::Green]], vert.Color.G);
-    helper::try_to_number(parts[attribs[vertex_attrib::Blue]], vert.Color.B);
-    helper::try_to_number(parts[attribs[vertex_attrib::Alpha]], vert.Color.A);
+    if (!try_to_number(parts[attribs[vertex_attrib::X]], vert.Position.X)) { return false; }
+    if (!try_to_number(parts[attribs[vertex_attrib::Y]], vert.Position.Y)) { return false; }
+    try_to_number(parts[attribs[vertex_attrib::S]], vert.TexCoords.U);
+    try_to_number(parts[attribs[vertex_attrib::T]], vert.TexCoords.V);
+    try_to_number(parts[attribs[vertex_attrib::Red]], vert.Color.R);
+    try_to_number(parts[attribs[vertex_attrib::Green]], vert.Color.G);
+    try_to_number(parts[attribs[vertex_attrib::Blue]], vert.Color.B);
+    try_to_number(parts[attribs[vertex_attrib::Alpha]], vert.Color.A);
 
     return true;
 }
@@ -177,23 +188,23 @@ auto ply_loader::read_ascii_face(io::istream& in) -> bool
     if (parts.empty()) { return false; }
 
     i32 vertCount {0};
-    if (!helper::try_to_number<i32>(parts[0], vertCount)) { return false; }
+    if (!try_to_number<i32>(parts[0], vertCount)) { return false; }
 
     if (vertCount == 3 && parts.size() >= 4) { // Triangle
         u32 v0 {0}, v1 {0}, v2 {0};
-        if (!helper::try_to_number<u32>(parts[1], v0)) { return false; }
-        if (!helper::try_to_number<u32>(parts[2], v1)) { return false; }
-        if (!helper::try_to_number<u32>(parts[3], v2)) { return false; }
+        if (!try_to_number<u32>(parts[1], v0)) { return false; }
+        if (!try_to_number<u32>(parts[2], v1)) { return false; }
+        if (!try_to_number<u32>(parts[3], v2)) { return false; }
 
         _inds.push_back(v0);
         _inds.push_back(v1);
         _inds.push_back(v2);
     } else if (vertCount == 4 && parts.size() >= 5) { // Quad
         u32 v0 {0}, v1 {0}, v2 {0}, v3 {0};
-        if (!helper::try_to_number<u32>(parts[1], v0)) { return false; }
-        if (!helper::try_to_number<u32>(parts[2], v1)) { return false; }
-        if (!helper::try_to_number<u32>(parts[3], v2)) { return false; }
-        if (!helper::try_to_number<u32>(parts[4], v3)) { return false; }
+        if (!try_to_number<u32>(parts[1], v0)) { return false; }
+        if (!try_to_number<u32>(parts[2], v1)) { return false; }
+        if (!try_to_number<u32>(parts[3], v2)) { return false; }
+        if (!try_to_number<u32>(parts[4], v3)) { return false; }
 
         _inds.push_back(v0);
         _inds.push_back(v1);
