@@ -18,17 +18,12 @@ namespace tcob {
 class [[nodiscard]] TCOB_API transform final {
 public:
     constexpr transform();
-    constexpr transform(f32 a00, f32 a01, f32 a02,
-                        f32 a10, f32 a11, f32 a12,
-                        f32 a20, f32 a21, f32 a22);
 
     mat3 Matrix {};
 
     auto constexpr as_matrix4 [[nodiscard]] () const -> mat4;
 
     auto constexpr as_inverted() const -> transform;
-
-    auto constexpr is_translate_only() const -> bool;
 
     void constexpr to_identity();
 
@@ -47,7 +42,16 @@ public:
 
     auto constexpr transform_point(point_f point) const -> point_f;
 
+    static constexpr auto FromRows(f32 a00, f32 a01, f32 a02,
+                                   f32 a10, f32 a11, f32 a12,
+                                   f32 a20, f32 a21, f32 a22) -> transform;
+
     static transform const Identity;
+
+private:
+    constexpr transform(f32 a00, f32 a01, f32 a02,
+                        f32 a10, f32 a11, f32 a12,
+                        f32 a20, f32 a21, f32 a22);
 };
 
 auto constexpr operator==(transform const& left, transform const& right) -> bool;

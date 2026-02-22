@@ -709,9 +709,9 @@ auto canvas::create_linear_gradient(point_f s, point_f e, color_gradient const& 
     }
 
     return {
-        .XForm   = {dy, dx, s.X - (dx * large),
-                    -dx, dy, s.Y - (dy * large),
-                    0, 0, 1},
+        .XForm   = transform::FromRows(dy, dx, s.X - (dx * large),
+                                       -dx, dy, s.Y - (dy * large),
+                                       0, 0, 1),
         .Extent  = {large, large + (d * 0.5f)},
         .Radius  = 0.0f,
         .Feather = std::max(1.0f, d),
@@ -722,9 +722,9 @@ auto canvas::create_box_gradient(rect_f const& rect, f32 r, f32 f, color_gradien
 {
     auto const& c {rect.center()};
     return {
-        .XForm   = {1.0f, 0.0f, c.X,
-                    0.0f, 1.0f, c.Y,
-                    0.0f, 0.0f, 1.0f},
+        .XForm   = transform::FromRows(1.0f, 0.0f, c.X,
+                                       0.0f, 1.0f, c.Y,
+                                       0.0f, 0.0f, 1.0f),
         .Extent  = {rect.width() * 0.5f, rect.height() * 0.5f},
         .Radius  = r,
         .Feather = std::max(1.0f, f),
@@ -742,9 +742,9 @@ auto canvas::create_radial_gradient(point_f c, f32 inr, f32 outr, size_f scale, 
     f32 const f {(outr - inr)};
 
     return {
-        .XForm   = {scale.Width, 0.0f, c.X,
-                    0.0f, scale.Height, c.Y,
-                    0.0f, 0.0f, 1.0f},
+        .XForm   = transform::FromRows(scale.Width, 0.0f, c.X,
+                                       0.0f, scale.Height, c.Y,
+                                       0.0f, 0.0f, 1.0f),
         .Extent  = {r, r},
         .Radius  = r,
         .Feather = std::max(1.0f, f),
@@ -754,9 +754,9 @@ auto canvas::create_radial_gradient(point_f c, f32 inr, f32 outr, size_f scale, 
 auto canvas::create_conic_gradient(point_f center, color_gradient const& gradient) -> paint
 {
     return {
-        .XForm     = {1.0f, 0.0f, center.X,
-                      0.0f, 1.0f, center.Y,
-                      0.0f, 0.0f, 1.0f},
+        .XForm     = transform::FromRows(1.0f, 0.0f, center.X,
+                                         0.0f, 1.0f, center.Y,
+                                         0.0f, 0.0f, 1.0f),
         .Extent    = {1.0f, 1.0f},
         .Radius    = 0.0f,
         .Feather   = 1.0f,
@@ -888,7 +888,7 @@ void canvas::set_scissor(rect_f const& rect, bool transform)
 void canvas::reset_scissor()
 {
     state& s {_states->get()};
-    s.Scissor.XForm  = transform {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    s.Scissor.XForm  = transform::FromRows(0, 0, 0, 0, 0, 0, 0, 0, 0);
     s.Scissor.Extent = {-1.0f, -1.0f};
 }
 

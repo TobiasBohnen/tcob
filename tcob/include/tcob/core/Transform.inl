@@ -44,10 +44,15 @@ constexpr transform::transform()
 constexpr transform::transform(f32 a00, f32 a01, f32 a02,
                                f32 a10, f32 a11, f32 a12,
                                f32 a20, f32 a21, f32 a22)
-    : Matrix {a00, a10, a20,
-              a01, a11, a21,
-              a02, a12, a22}
+    : Matrix {a00, a10, a20, a01, a11, a21, a02, a12, a22}
 {
+}
+
+constexpr auto transform::FromRows(f32 a00, f32 a01, f32 a02,
+                                   f32 a10, f32 a11, f32 a12,
+                                   f32 a20, f32 a21, f32 a22) -> transform
+{
+    return {a00, a01, a02, a10, a11, a12, a20, a21, a22};
 }
 
 auto constexpr transform::as_matrix4() const -> mat4
@@ -66,23 +71,19 @@ auto constexpr transform::as_inverted() const -> transform
                    + (Matrix[2] * (Matrix[7] * Matrix[3] - Matrix[4] * Matrix[6]))};
 
     if (det != 0.0f) {
-        return {((Matrix[8] * Matrix[4]) - (Matrix[5] * Matrix[7])) / det,
-                -((Matrix[8] * Matrix[3]) - (Matrix[5] * Matrix[6])) / det,
-                ((Matrix[7] * Matrix[3]) - (Matrix[6] * Matrix[4])) / det,
-                -((Matrix[8] * Matrix[1]) - (Matrix[2] * Matrix[7])) / det,
-                ((Matrix[8] * Matrix[0]) - (Matrix[2] * Matrix[6])) / det,
-                -((Matrix[7] * Matrix[0]) - (Matrix[1] * Matrix[6])) / det,
-                ((Matrix[5] * Matrix[1]) - (Matrix[4] * Matrix[2])) / det,
-                -((Matrix[5] * Matrix[0]) - (Matrix[2] * Matrix[3])) / det,
-                ((Matrix[4] * Matrix[0]) - (Matrix[1] * Matrix[3])) / det};
+        f32 const invDet {1.0f / det};
+        return {((Matrix[8] * Matrix[4]) - (Matrix[5] * Matrix[7])) * invDet,
+                -((Matrix[8] * Matrix[3]) - (Matrix[5] * Matrix[6])) * invDet,
+                ((Matrix[7] * Matrix[3]) - (Matrix[6] * Matrix[4])) * invDet,
+                -((Matrix[8] * Matrix[1]) - (Matrix[2] * Matrix[7])) * invDet,
+                ((Matrix[8] * Matrix[0]) - (Matrix[2] * Matrix[6])) * invDet,
+                -((Matrix[7] * Matrix[0]) - (Matrix[1] * Matrix[6])) * invDet,
+                ((Matrix[5] * Matrix[1]) - (Matrix[4] * Matrix[2])) * invDet,
+                -((Matrix[5] * Matrix[0]) - (Matrix[2] * Matrix[3])) * invDet,
+                ((Matrix[4] * Matrix[0]) - (Matrix[1] * Matrix[3])) * invDet};
     }
 
     return Identity;
-}
-
-auto constexpr transform::is_translate_only() const -> bool
-{
-    return Matrix[0] == 1.0f && Matrix[1] == 0.0f && Matrix[2] == 0.0f && Matrix[3] == 0.0f && Matrix[4] == 1.0f && Matrix[5] == 0.0f;
 }
 
 void constexpr transform::to_identity()
