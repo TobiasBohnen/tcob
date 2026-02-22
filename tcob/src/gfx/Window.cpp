@@ -13,6 +13,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -62,7 +63,7 @@ void window::begin_frame()
 void window::draw_to(render_target& target)
 {
     _impl->set_viewport({point_i::Zero, get_size()});
-    _renderer.render_to_target(target);
+    _renderer.render_to_target(target, transform::Identity);
 
     if (*Cursor) {
         Cursor->draw_to(target);

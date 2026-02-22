@@ -50,7 +50,7 @@ void text::on_draw_to(render_target& target)
     _renderer.set_geometry(
         {.Vertices = geometry::flatten(_quads), .Indices = _inds, .Type = primitive_type::Triangles},
         &_material->first_pass());
-    _renderer.render_to_target(target);
+    _renderer.render_to_target(target, transform());
 }
 
 auto text::pivot() const -> point_f
@@ -91,7 +91,7 @@ void text::format()
     u8    currentEffectIdx {0};
 
     auto const [x, y] {Bounds->Position};
-    auto const& xform {transform()};
+
     for (auto const& token : formatResult.Tokens) {
         if (token.Command.Type != text_formatter::command_type::None) { // handle text commands
             switch (token.Command.Type) {
@@ -117,7 +117,7 @@ void text::format()
 
             auto const&  posRect {token.Quads[i].Rect};
             rect_f const quadRect {x + posRect.left(), y + posRect.top(), posRect.width(), posRect.height()};
-            geometry::set_position(q, quadRect, xform);
+            geometry::set_position(q, quadRect);
 
             if (currentEffectIdx != 0) {
                 Effects.add_quad(currentEffectIdx, q);

@@ -12,6 +12,7 @@
 
 namespace tcob {
 ////////////////////////////////////////////////////////////
+
 transform const transform::Identity;
 
 void transform::rotate(radian_f angle)

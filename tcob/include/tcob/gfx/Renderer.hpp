@@ -10,6 +10,7 @@
 
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -27,10 +28,10 @@ public:
     renderer_base();
     virtual ~renderer_base() = default;
 
-    void render_to_target(render_target& target);
+    void render_to_target(render_target& target, transform const& modelMatrix);
 
 protected:
-    virtual void prepare_render(render_target& target);
+    virtual void prepare_render(render_target& target, transform const& modelMatrix);
     virtual void on_render_to_target(render_target& target) = 0;
     virtual void finalize_render(render_target& target);
 
@@ -102,7 +103,7 @@ public:
     void set_shader(asset_ptr<shader> shader);
 
 protected:
-    void prepare_render(render_target& target) override;
+    void prepare_render(render_target& target, transform const& modelMatrix) override;
     void on_render_to_target(render_target& target) override;
     void finalize_render(render_target& target) override;
 

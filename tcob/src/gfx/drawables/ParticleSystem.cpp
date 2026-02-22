@@ -23,6 +23,7 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/TaskManager.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/random/Random.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -163,7 +164,7 @@ void particle_system::on_draw_to(render_target& target)
                                 .Indices  = geometry::get_indices(_aliveParticleCount),
                                 .Type     = primitive_type::Triangles},
                                &pass);
-        _renderer.render_to_target(target);
+        _renderer.render_to_target(target, transform::Identity);
     }
 }
 

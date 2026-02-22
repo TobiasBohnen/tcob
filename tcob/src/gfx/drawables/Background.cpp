@@ -10,6 +10,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
@@ -39,7 +40,7 @@ void background::on_draw_to(render_target& target)
         auto const& pass {Material->get_pass(i)};
         geometry::set_texcoords(_quad, pass, TextureRegion);
         _renderer.set_geometry({.Vertices = _quad, .Indices = QuadIndicies, .Type = primitive_type::Triangles}, &pass);
-        _renderer.render_to_target(target);
+        _renderer.render_to_target(target, transform::Identity);
     }
 
     target.camera().pop_state();
@@ -104,7 +105,7 @@ void parallax_background::on_draw_to(render_target& target)
         }
 
         _renderer.set_geometry({.Vertices = geometry::flatten(_quads), .Indices = geometry::get_indices(_quads.size()), .Type = primitive_type::Triangles}, &pass);
-        _renderer.render_to_target(target);
+        _renderer.render_to_target(target, transform::Identity);
     }
 
     target.camera().pop_state();

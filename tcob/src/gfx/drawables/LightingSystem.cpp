@@ -21,6 +21,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/spatial/Quadtree.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -374,7 +375,7 @@ void lighting_system::on_draw_to(render_target& target)
         _updateGeometry = false;
     }
 
-    _renderer.render_to_target(target);
+    _renderer.render_to_target(target, transform::Identity);
 }
 
 ////////////////////////////////////////////////////////////

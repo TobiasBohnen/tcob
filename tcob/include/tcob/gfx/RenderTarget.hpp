@@ -25,6 +25,7 @@ namespace tcob::gfx {
 
 struct render_properties {
     mat4    ViewMatrix {};
+    mat4    ModelMatrix {};
     rect_i  Viewport {rect_i::Zero};
     point_i MousePosition {point_i::Zero};
     f32     Time {0.0f};

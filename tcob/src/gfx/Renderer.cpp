@@ -11,6 +11,7 @@
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Canvas.hpp"
@@ -30,16 +31,17 @@ renderer_base::renderer_base()
 {
 }
 
-void renderer_base::render_to_target(render_target& target)
+void renderer_base::render_to_target(render_target& target, transform const& modelMatrix)
 {
-    prepare_render(target);
+    prepare_render(target, modelMatrix);
     on_render_to_target(target);
     finalize_render(target);
 }
 
-void renderer_base::prepare_render(render_target& target)
+void renderer_base::prepare_render(render_target& target, transform const& modelMatrix)
 {
     target.prepare_render({.ViewMatrix            = target.camera().matrix(),
+                           .ModelMatrix           = modelMatrix.as_matrix4(),
                            .Viewport              = target.camera().viewport(),
                            .MousePosition         = locate_service<input::system>().mouse().get_position(),
                            .Time                  = _stats.current_time(),
@@ -205,10 +207,10 @@ void canvas_renderer::set_shader(asset_ptr<shader> shader)
     _material->first_pass().Shader = std::move(shader);
 }
 
-void canvas_renderer::prepare_render(render_target& target)
+void canvas_renderer::prepare_render(render_target& target, transform const& modelMatrix)
 {
     target.camera().push_state();
-    renderer_base::prepare_render(target);
+    renderer_base::prepare_render(target, modelMatrix);
 }
 
 void canvas_renderer::on_render_to_target(render_target& target)

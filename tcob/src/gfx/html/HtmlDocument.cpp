@@ -99,7 +99,7 @@ void document::force_redraw()
 void document::on_update(milliseconds)
 {
     if (_isTransformDirty) {
-        geometry::set_position(_quad, Bounds, transform());
+        geometry::set_position(_quad, Bounds);
         _isTransformDirty = false;
         _needsRedraw      = true;
     }
@@ -131,7 +131,7 @@ void document::on_draw_to(render_target& target)
     }
 
     _renderer.set_geometry({.Vertices = _quad, .Indices = QuadIndicies, .Type = primitive_type::Triangles}, &_material->first_pass());
-    _renderer.render_to_target(target);
+    _renderer.render_to_target(target, transform());
 }
 
 auto document::pivot() const -> point_f

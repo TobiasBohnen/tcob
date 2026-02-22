@@ -162,7 +162,7 @@ void shape_batch::on_draw_to(render_target& target)
         }
     }
 
-    _renderer.render_to_target(target);
+    _renderer.render_to_target(target, transform::Identity);
 }
 
 ////////////////////////////////////////////////////////////

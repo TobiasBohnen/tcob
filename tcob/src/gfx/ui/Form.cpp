@@ -21,6 +21,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
@@ -349,7 +350,7 @@ void form_base::on_draw_to(gfx::render_target& target)
         _renderer.queue_layer(modalLayer);
     }
 
-    _renderer.render_to_target(target);
+    _renderer.render_to_target(target, transform::Identity);
 }
 
 auto form_base::focused_widget() const -> widget*

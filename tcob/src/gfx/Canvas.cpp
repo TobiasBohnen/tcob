@@ -144,8 +144,9 @@ void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 layer, boo
 
     auto& artt {_rtt[_activeRtt]};
     artt->Size = windowSize;
-    artt->prepare_render({.ViewMatrix = transform::Identity.as_matrix4(),
-                          .Viewport   = rect_i {point_i::Zero, windowSize}});
+    artt->prepare_render({.ViewMatrix  = transform::Identity.as_matrix4(),
+                          .ModelMatrix = transform::Identity.as_matrix4(),
+                          .Viewport    = rect_i {point_i::Zero, windowSize}});
     if (clear) {
         artt->clear({0, 0, 0, 0});
     }

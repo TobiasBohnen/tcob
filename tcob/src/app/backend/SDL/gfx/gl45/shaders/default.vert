@@ -8,6 +8,7 @@ layout(location = 2)in vec3 vertInTexCoords;
 layout(std140, binding = 0)uniform Globals
 {
 	mat4 camera;
+	mat4 model;
 	uvec2 view_size;
 	ivec2 mouse_pos;
 	float time;
@@ -28,9 +29,9 @@ layout(location = 0)out VS_OUT
 
 void main()
 {
-	vec4 pos = global.camera * vec4(vertInPos.xy, 0.0, 1.0);
-	gl_Position = vec4(((pos.x / global.view_size.x) * 2.0 - 1.0), (1.0 - 2.0 * (pos.y / global.view_size.y)), 0.0, 1.0);
-	vs_out.color = vertInColor;
-	vs_out.tex_coords = vertInTexCoords;
+    vec4 pos = global.camera * global.model * vec4(vertInPos.xy, 0.0, 1.0);
+    gl_Position = vec4(((pos.x / global.view_size.x) * 2.0 - 1.0), (1.0 - 2.0 * (pos.y / global.view_size.y)), 0.0, 1.0);
+    vs_out.color = vertInColor;
+    vs_out.tex_coords = vertInTexCoords;
 }
 )"

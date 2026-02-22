@@ -34,6 +34,7 @@ static auto GlobalUBO() -> gl_uniform_buffer&
     layout(std140, binding = 0)uniform Globals
     {
         mat4 camera;
+        mat4 model;
         uvec2 view_size;
         ivec2 mouse_pos;
         float time;
@@ -41,7 +42,7 @@ static auto GlobalUBO() -> gl_uniform_buffer&
     };
     */
 
-    static gl_uniform_buffer globalUniformBuffer {sizeof(mat4) + sizeof(uvec2) + sizeof(ivec2) + sizeof(f32) + sizeof(u32)};
+    static gl_uniform_buffer globalUniformBuffer {sizeof(mat4) + sizeof(mat4) + sizeof(uvec2) + sizeof(ivec2) + sizeof(f32) + sizeof(u32)};
     return globalUniformBuffer;
 }
 
@@ -66,6 +67,7 @@ void gl_render_target::prepare_render(render_properties const& props)
     usize offset {0};
 
     offset += buffer.update(props.ViewMatrix, offset);
+    offset += buffer.update(props.ModelMatrix, offset);
     offset += buffer.update(props.Viewport.Size, offset);
     offset += buffer.update(props.MousePosition, offset);
     offset += buffer.update(props.Time, offset);
