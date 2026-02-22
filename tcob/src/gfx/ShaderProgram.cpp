@@ -6,6 +6,7 @@
 #include "tcob/gfx/ShaderProgram.hpp"
 
 #include <cassert>
+#include <span>
 
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
@@ -13,10 +14,10 @@
 
 namespace tcob::gfx {
 
-shader::shader(string const& vertexShaderSource, string const& fragmentShaderSource)
+shader::shader(std::span<char const> vert, std::span<char const> frag)
     : _impl {locate_service<render_system>().create_shader()}
 {
-    [[maybe_unused]] bool const success {compile(vertexShaderSource, fragmentShaderSource)};
+    [[maybe_unused]] bool const success {_impl->compile(vert, frag)};
     assert(success);
 }
 
@@ -30,11 +31,6 @@ shader::operator bool() const
 auto shader::is_valid() const -> bool
 {
     return _impl->is_valid();
-}
-
-auto shader::compile(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool
-{
-    return _impl->compile(vertexShaderSource, fragmentShaderSource);
 }
 
 }

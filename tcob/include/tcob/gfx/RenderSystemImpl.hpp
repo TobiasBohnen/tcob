@@ -61,7 +61,7 @@ class shader_base {
 public:
     virtual ~shader_base() = default;
 
-    virtual auto compile(string const& vert, string const& frag) -> bool = 0; // TODO: change to streams
+    virtual auto compile(std::span<char const> vert, std::span<char const> frag) -> bool = 0;
 
     virtual auto is_valid() const -> bool = 0;
 };

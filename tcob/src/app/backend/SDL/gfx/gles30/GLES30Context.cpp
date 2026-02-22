@@ -22,16 +22,16 @@ u32 gl_context::DefaultShader {0};
 u32 gl_context::DefaultTexturedShader {0};
 u32 gl_context::DefaultFontShader {0};
 
-static char const* defaultVertShader {
+static string_view defaultVertShader {
 #include "shaders/default.vert"
 };
-static char const* defaultFragShader {
+static string_view defaultFragShader {
 #include "shaders/default.frag"
 };
-static char const* defaultTexturedFragShader {
+static string_view defaultTexturedFragShader {
 #include "shaders/default-textured.frag"
 };
-static char const* defaultFontFragShader {
+static string_view defaultFontFragShader {
 #include "shaders/default-font.frag"
 };
 

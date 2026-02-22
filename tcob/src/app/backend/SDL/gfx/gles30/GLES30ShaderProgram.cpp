@@ -7,6 +7,7 @@
 
 #include <array>
 #include <cassert>
+#include <span>
 
 #include <glad/gles30.h>
 
@@ -27,9 +28,9 @@ gl_shader::~gl_shader()
     destroy();
 }
 
-auto gl_shader::compile(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool
+auto gl_shader::compile(std::span<char const> vert, std::span<char const> frag) -> bool
 {
-    if (vertexShaderSource.empty() || fragmentShaderSource.empty()) {
+    if (vert.empty() || frag.empty()) {
         return false;
     }
 
@@ -39,7 +40,7 @@ auto gl_shader::compile(string const& vertexShaderSource, string const& fragment
 
     // Build compile VERTEX_SHADER
     GLuint const vertexShader {glCreateShader(GL_VERTEX_SHADER)};
-    cstr = vertexShaderSource.c_str();
+    cstr = vert.data();
     GLCHECK(glShaderSource(vertexShader, 1, &cstr, nullptr));
     GLCHECK(glCompileShader(vertexShader));
 
@@ -54,7 +55,7 @@ auto gl_shader::compile(string const& vertexShaderSource, string const& fragment
 
     // Build compile FRAGMENT_SHADER
     GLuint const fragmentShader {glCreateShader(GL_FRAGMENT_SHADER)};
-    cstr = fragmentShaderSource.c_str();
+    cstr = frag.data();
     GLCHECK(glShaderSource(fragmentShader, 1, &cstr, nullptr));
     GLCHECK(glCompileShader(fragmentShader));
 

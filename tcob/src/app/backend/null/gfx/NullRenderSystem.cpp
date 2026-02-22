@@ -45,7 +45,7 @@ auto null_render_target::copy_to_image(rect_i const&) const -> image { return {}
 void null_render_target::bind_pass(pass const&) { }
 void null_render_target::unbind_pass() { }
 
-auto null_shader::compile(string const&, string const&) -> bool { return true; }
+auto null_shader::compile(std::span<char const>, std::span<char const>) -> bool { return true; }
 auto null_shader::is_valid() const -> bool { return true; }
 
 void null_texture::resize(size_i, u32, texture::format) { }

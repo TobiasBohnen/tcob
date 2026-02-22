@@ -64,7 +64,7 @@ public:
 
 class null_shader : public tcob::gfx::render_backend::shader_base {
 public:
-    auto compile(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool override;
+    auto compile(std::span<char const> vert, std::span<char const> frag) -> bool override;
 
     auto is_valid() const -> bool override;
 };

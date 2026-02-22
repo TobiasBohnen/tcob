@@ -7,17 +7,17 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <span>
 
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/gfx/Gfx.hpp"
-
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API shader final : public non_copyable {
 public:
-    shader(string const& vertexShaderSource, string const& fragmentShaderSource);
+    shader(std::span<char const> vert, std::span<char const> frag);
     ~shader();
 
     explicit operator bool() const;
@@ -29,8 +29,6 @@ public:
     static inline char const* AssetName {"shader"};
 
 private:
-    auto compile(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool;
-
     std::unique_ptr<render_backend::shader_base> _impl;
 };
 

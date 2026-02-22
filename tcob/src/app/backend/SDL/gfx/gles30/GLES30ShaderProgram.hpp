@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <span>
+
 #include "GLES30Object.hpp"
 
 #include "tcob/core/Point.hpp"
@@ -20,7 +22,7 @@ public:
     gl_shader();
     ~gl_shader() override;
 
-    auto compile(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool override;
+    auto compile(std::span<char const> vert, std::span<char const> frag) -> bool override;
 
     auto get_uniform_location(string const& name) const -> i32;
 
