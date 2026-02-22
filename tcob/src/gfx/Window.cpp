@@ -54,6 +54,11 @@ void window::on_clear(color c) const
     _impl->clear(c);
 }
 
+void window::begin_frame()
+{
+    _impl->begin_frame();
+}
+
 void window::draw_to(render_target& target)
 {
     _impl->set_viewport({point_i::Zero, get_size()});
@@ -64,9 +69,9 @@ void window::draw_to(render_target& target)
     }
 }
 
-void window::swap_buffer() const
+void window::end_frame()
 {
-    _impl->swap_buffer();
+    _impl->end_frame();
 }
 
 auto window::get_impl() const -> render_backend::window_base*

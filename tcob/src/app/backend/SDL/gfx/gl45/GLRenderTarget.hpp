@@ -30,9 +30,6 @@ public:
     void prepare_render(render_properties const& props) override;
     void finalize_render() override;
 
-    void enable_scissor(rect_i const& rect) override;
-    void disable_scissor() override;
-
     void clear(color c) override;
 
     void on_resize(size_i size) override;

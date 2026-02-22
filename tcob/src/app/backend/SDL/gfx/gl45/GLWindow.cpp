@@ -83,7 +83,11 @@ void gl_window::set_viewport(rect_i const& rect)
     glViewport(rect.left(), rect.top(), rect.width(), rect.height());
 }
 
-void gl_window::swap_buffer() const
+void gl_window::begin_frame()
+{
+}
+
+void gl_window::end_frame()
 {
     SDL_GL_SwapWindow(_window);
 }

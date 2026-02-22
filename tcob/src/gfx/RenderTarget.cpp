@@ -51,22 +51,12 @@ void render_target::clear(color c) const
 
 void render_target::prepare_render(render_properties const& props)
 {
-    if (ScissorRect) {
-        _impl->enable_scissor(*ScissorRect);
-    } else {
-        _impl->disable_scissor();
-    }
-
     _impl->prepare_render(props);
 }
 
 void render_target::finalize_render() const
 {
     _impl->finalize_render();
-
-    if (ScissorRect) {
-        _impl->disable_scissor();
-    }
 }
 
 void render_target::bind_pass(pass const& pass) const

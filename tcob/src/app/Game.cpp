@@ -175,10 +175,11 @@ void game::step()
             auto& rs {locate_service<gfx::render_system>()};
             auto& window {rs.window()};
 
+            window.begin_frame();
             window.clear();
             Draw(window);
             window.draw_to(rs.default_target());
-            window.swap_buffer();
+            window.end_frame();
 
             if (*window.Cursor) {
                 window.Cursor->update(deltaUpdate);

@@ -39,8 +39,6 @@ auto null_render_system::create_window(size_i) -> std::unique_ptr<gfx::window> {
 
 void null_render_target::prepare_render(render_properties const&) { }
 void null_render_target::finalize_render() { }
-void null_render_target::enable_scissor(rect_i const&) { }
-void null_render_target::disable_scissor() { }
 void null_render_target::clear(color) { }
 void null_render_target::on_resize(size_i) { }
 auto null_render_target::copy_to_image(rect_i const&) const -> image { return {}; }
@@ -67,7 +65,8 @@ void null_vertex_array::draw_arrays(primitive_type, i32, usize) const { }
 
 auto null_window_impl::get_vsync() const -> bool { return true; }
 void null_window_impl::set_vsync(bool) { }
-void null_window_impl::swap_buffer() const { }
+void null_window_impl::begin_frame() { }
+void null_window_impl::end_frame() { }
 void null_window_impl::clear(color) { }
 void null_window_impl::set_viewport(rect_i const&) { }
 

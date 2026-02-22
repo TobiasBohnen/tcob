@@ -31,9 +31,10 @@ auto render_system::init_window(size_i resolution) -> gfx::window&
 
     _defaultTarget = std::make_unique<gfx::default_render_target>(_window.get());
 
+    _window->begin_frame();
     _window->clear();
     _window->draw_to(*_defaultTarget);
-    _window->swap_buffer();
+    _window->end_frame();
 
     return *_window;
 }

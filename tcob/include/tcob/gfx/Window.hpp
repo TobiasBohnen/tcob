@@ -66,8 +66,9 @@ public:
     virtual auto has_focus() const -> bool = 0;
     virtual void grab_input(bool grab)     = 0;
 
+    void begin_frame();
     void draw_to(render_target& target);
-    void swap_buffer() const;
+    void end_frame();
 
     virtual void process_events(void* ev) = 0;
 

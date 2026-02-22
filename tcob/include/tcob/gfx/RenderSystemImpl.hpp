@@ -48,9 +48,7 @@ public:
     virtual void bind_pass(pass const& pass)                    = 0;
     virtual void unbind_pass()                                  = 0;
 
-    virtual void enable_scissor(rect_i const& rect) = 0; // TODO: move to render_properties
-    virtual void disable_scissor()                  = 0; // TODO: move to render_properties
-    virtual void clear(color c)                     = 0;
+    virtual void clear(color c) = 0;
 
     virtual void on_resize(size_i size) = 0;
 
@@ -126,7 +124,8 @@ public:
 
     virtual void clear(color c) = 0;
 
-    virtual void swap_buffer() const = 0;
+    virtual void begin_frame() = 0; // TODO: Unused
+    virtual void end_frame()   = 0;
 
     virtual void set_viewport(rect_i const& rect) = 0;
 

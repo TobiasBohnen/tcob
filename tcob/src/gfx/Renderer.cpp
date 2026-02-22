@@ -44,6 +44,7 @@ void renderer_base::prepare_render(render_target& target)
                            .MousePosition         = locate_service<input::system>().mouse().get_position(),
                            .Time                  = _stats.current_time(),
                            .Debug                 = false, // TODO
+                           .ScissorRect           = target.ScissorRect,
                            .UseDefaultFramebuffer = false});
 }
 

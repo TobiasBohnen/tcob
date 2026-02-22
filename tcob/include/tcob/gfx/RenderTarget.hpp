@@ -30,6 +30,8 @@ struct render_properties {
     f32     Time {0.0f};
     bool    Debug {false};
 
+    std::optional<rect_i> ScissorRect {std::nullopt};
+
     bool UseDefaultFramebuffer {false};
 };
 
@@ -43,7 +45,7 @@ public:
     prop_fn<size_i> Size;
 
     color                 ClearColor {colors::DarkGray};
-    std::optional<rect_i> ScissorRect;
+    std::optional<rect_i> ScissorRect {std::nullopt};
 
     auto camera() -> gfx::camera&;
 

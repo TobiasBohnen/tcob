@@ -28,7 +28,8 @@ public:
     auto get_vsync() const -> bool override;
     void set_vsync(bool value) override;
 
-    void swap_buffer() const override;
+    void begin_frame() override;
+    void end_frame() override;
 
     void clear(color c) override;
 

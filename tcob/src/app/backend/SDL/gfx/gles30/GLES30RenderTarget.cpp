@@ -72,6 +72,13 @@ void gl_render_target::prepare_render(render_properties const& props)
     offset += buffer.update(props.Debug, offset);
 
     buffer.bind_base(0);
+
+    if (props.ScissorRect && props.ScissorRect->Size.area() > 0) {
+        GLCHECK(glEnable(GL_SCISSOR_TEST));
+        i32 const height {_tex->info().Size.Height};
+        GLCHECK(glScissor(props.ScissorRect->left(), height - props.ScissorRect->top() - props.ScissorRect->height(),
+                          props.ScissorRect->width(), props.ScissorRect->height()));
+    }
 }
 
 void gl_render_target::finalize_render()
@@ -80,6 +87,7 @@ void gl_render_target::finalize_render()
 
     GLCHECK(glDisable(GL_BLEND));
     GLCHECK(glDisable(GL_STENCIL_TEST));
+    GLCHECK(glDisable(GL_SCISSOR_TEST));
 }
 
 void gl_render_target::set_viewport(rect_i const& rect)
@@ -89,22 +97,6 @@ void gl_render_target::set_viewport(rect_i const& rect)
     } else {
         GLCHECK(glViewport(rect.left(), rect.top(), rect.width(), rect.height()));
     }
-}
-
-void gl_render_target::enable_scissor(rect_i const& rect)
-{
-    if (rect.width() < 0 || rect.height() < 0) {
-        return;
-    }
-
-    GLCHECK(glEnable(GL_SCISSOR_TEST));
-    i32 const height {_tex->info().Size.Height};
-    GLCHECK(glScissor(rect.left(), height - rect.top() - rect.height(), rect.width(), rect.height()));
-}
-
-void gl_render_target::disable_scissor()
-{
-    GLCHECK(glDisable(GL_SCISSOR_TEST));
 }
 
 void gl_render_target::clear(color c)
