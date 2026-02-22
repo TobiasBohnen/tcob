@@ -40,14 +40,16 @@ void renderer_base::render_to_target(render_target& target, transform const& mod
 
 void renderer_base::prepare_render(render_target& target, transform const& modelMatrix)
 {
-    target.prepare_render({.ViewMatrix            = target.camera().matrix(),
-                           .ModelMatrix           = modelMatrix.as_matrix4(),
-                           .Viewport              = target.camera().viewport(),
-                           .MousePosition         = locate_service<input::system>().mouse().get_position(),
-                           .Time                  = _stats.current_time(),
-                           .Debug                 = false, // TODO
-                           .ScissorRect           = target.ScissorRect,
-                           .UseDefaultFramebuffer = false});
+    target.prepare_render({
+        .ViewMatrix            = target.camera().matrix(),
+        .ModelMatrix           = modelMatrix.as_matrix4(),
+        .Viewport              = target.camera().viewport(),
+        .MousePosition         = locate_service<input::system>().mouse().get_position(),
+        .Time                  = _stats.current_time(),
+        .ScissorRect           = target.ScissorRect,
+        .Debug                 = false, // TODO
+        .UseDefaultFramebuffer = false,
+    });
 }
 
 void renderer_base::finalize_render(render_target& target)

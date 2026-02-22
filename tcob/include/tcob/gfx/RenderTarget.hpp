@@ -29,10 +29,10 @@ struct render_properties {
     rect_i  Viewport {rect_i::Zero};
     point_i MousePosition {point_i::Zero};
     f32     Time {0.0f};
-    bool    Debug {false};
 
     std::optional<rect_i> ScissorRect {std::nullopt};
 
+    bool Debug {false};
     bool UseDefaultFramebuffer {false};
 };
 
