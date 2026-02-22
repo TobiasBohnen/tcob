@@ -233,7 +233,7 @@ auto scene_node::can_draw() const -> bool
     return !_children.empty() || (*Entity && Entity->is_visible());
 }
 
-void scene_node::on_draw_to(gfx::render_target& target, transform& xform)
+void scene_node::on_draw_to(gfx::render_target& target, transform const& xform)
 {
     if (*Entity) {
         Entity->draw_to(target, xform);

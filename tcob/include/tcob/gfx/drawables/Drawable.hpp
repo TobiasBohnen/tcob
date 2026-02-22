@@ -27,11 +27,11 @@ public:
     void hide();
     auto is_visible() const -> bool;
 
-    void draw_to(render_target& target, transform& xform);
+    void draw_to(render_target& target, transform const& xform);
 
 protected:
-    virtual void on_draw_to(render_target& target, transform& xform) = 0;
-    virtual auto can_draw() const -> bool                            = 0;
+    virtual void on_draw_to(render_target& target, transform const& xform) = 0;
+    virtual auto can_draw() const -> bool                                  = 0;
 
     virtual void on_visibility_changed();
 
@@ -51,7 +51,7 @@ public:
 protected:
     entity(update_mode mode = update_mode::Normal);
 
-    void on_draw_to(render_target&, transform&) override { }
+    void on_draw_to(render_target&, transform const&) override { }
     auto can_draw() const -> bool override;
 
     void on_key_down(input::keyboard::event const&) override { }

@@ -66,8 +66,7 @@ void window::draw_to(render_target& target)
     _renderer.render_to_target(target, transform::Identity);
 
     if (*Cursor) {
-        transform xform;
-        Cursor->draw_to(target, xform);
+        Cursor->draw_to(target, transform::Identity);
     }
 }
 

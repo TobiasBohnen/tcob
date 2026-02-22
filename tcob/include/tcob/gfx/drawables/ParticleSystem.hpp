@@ -211,7 +211,7 @@ protected:
 
     auto can_draw() const -> bool override;
 
-    void on_draw_to(render_target& target, transform& xform) override;
+    void on_draw_to(render_target& target, transform const& xform) override;
 
 private:
     renderer          _renderer {buffer_usage_hint::DynamicDraw};

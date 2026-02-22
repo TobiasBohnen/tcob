@@ -62,7 +62,7 @@ auto cursor::can_draw() const -> bool
     return !(*Material).is_expired();
 }
 
-void cursor::on_draw_to(render_target& target, transform& xform)
+void cursor::on_draw_to(render_target& target, transform const& xform)
 {
     for (isize i {0}; i < Material->pass_count(); ++i) {
         auto const& pass {Material->get_pass(i)};

@@ -51,7 +51,7 @@ protected:
     void on_fixed_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;
-    void on_draw_to(gfx::render_target& target, transform& xform) override;
+    void on_draw_to(gfx::render_target& target, transform const& xform) override;
 
 private:
     void move_child_to_front(scene_node* node);
@@ -92,7 +92,7 @@ protected:
     virtual void on_wake_up();
     virtual void on_sleep();
 
-    virtual void on_draw_to(gfx::render_target& target, transform& xform) = 0;
+    virtual void on_draw_to(gfx::render_target& target, transform const& xform) = 0;
 
     void on_key_down(input::keyboard::event const&) override { }
     void on_key_up(input::keyboard::event const&) override { }

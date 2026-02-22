@@ -111,7 +111,7 @@ auto document::can_draw() const -> bool
     return _lhdoc != nullptr;
 }
 
-void document::on_draw_to(render_target& target, transform& xform)
+void document::on_draw_to(render_target& target, transform const& xform)
 {
     if (!_lhdoc) { return; }
 

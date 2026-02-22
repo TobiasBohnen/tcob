@@ -33,7 +33,7 @@ public:
 
 protected:
     auto can_draw() const -> bool override;
-    void on_draw_to(render_target& target, transform& xform) final;
+    void on_draw_to(render_target& target, transform const& xform) final;
 
 private:
     quad     _quad;
@@ -68,7 +68,7 @@ public:
 
 protected:
     auto can_draw() const -> bool override;
-    void on_draw_to(render_target& target, transform& xform) final;
+    void on_draw_to(render_target& target, transform const& xform) final;
 
 private:
     std::vector<std::unique_ptr<parallax_background_layer>> _layers {};

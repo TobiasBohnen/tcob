@@ -88,7 +88,7 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;
-    void on_draw_to(gfx::render_target& target, transform& xform) override;
+    void on_draw_to(gfx::render_target& target, transform const& xform) override;
 
     void on_key_down(input::keyboard::event const& ev) override;
     void on_key_up(input::keyboard::event const& ev) override;

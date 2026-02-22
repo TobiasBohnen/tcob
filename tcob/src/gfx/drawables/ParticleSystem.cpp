@@ -145,7 +145,7 @@ auto particle_system::can_draw() const -> bool
     return _isRunning && _aliveParticleCount != 0 && !(*Material).is_expired();
 }
 
-void particle_system::on_draw_to(render_target& target, transform& xform)
+void particle_system::on_draw_to(render_target& target, transform const& xform)
 {
     _geometry.resize(_aliveParticleCount);
 

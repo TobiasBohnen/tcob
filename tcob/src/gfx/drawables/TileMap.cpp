@@ -134,7 +134,7 @@ auto tilemap_base::can_draw() const -> bool
     return !_layers.empty() && !(*Material).is_expired();
 }
 
-void tilemap_base::on_draw_to(render_target& target, transform& xform)
+void tilemap_base::on_draw_to(render_target& target, transform const& xform)
 {
     for (isize p {0}; p < Material->pass_count(); ++p) {
         auto const& pass {Material->get_pass(p)};

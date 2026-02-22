@@ -46,7 +46,7 @@ auto text::can_draw() const -> bool
     return _font.is_ready() && !_quads.empty();
 }
 
-void text::on_draw_to(render_target& target, transform& xform)
+void text::on_draw_to(render_target& target, transform const& xform)
 {
     _renderer.set_geometry(
         {.Vertices = geometry::flatten(_quads), .Indices = _inds, .Type = primitive_type::Triangles},

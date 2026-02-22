@@ -34,7 +34,7 @@ void drawable::hide()
     VisibilityChanged(false);
 }
 
-void drawable::draw_to(render_target& target, transform& xform)
+void drawable::draw_to(render_target& target, transform const& xform)
 {
     if (target.camera().VisibilityMask & VisibilityMask) {
         if (is_visible()) {

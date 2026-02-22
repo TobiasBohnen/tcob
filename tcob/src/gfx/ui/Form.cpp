@@ -286,7 +286,7 @@ auto form_base::can_draw() const -> bool
     return true;
 }
 
-void form_base::on_draw_to(gfx::render_target& target, transform& xform)
+void form_base::on_draw_to(gfx::render_target& target, transform const& xform)
 {
     size_i const size {size_i {Bounds->Size}};
 

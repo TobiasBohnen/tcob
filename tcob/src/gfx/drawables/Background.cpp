@@ -29,7 +29,7 @@ auto background::can_draw() const -> bool
     return !(*Material).is_expired();
 }
 
-void background::on_draw_to(render_target& target, transform& xform)
+void background::on_draw_to(render_target& target, transform const& xform)
 {
     target.camera().push_state();
 
@@ -70,7 +70,7 @@ auto parallax_background::can_draw() const -> bool
     return !(*Material).is_expired();
 }
 
-void parallax_background::on_draw_to(render_target& target, transform& xform)
+void parallax_background::on_draw_to(render_target& target, transform const& xform)
 {
     auto const cameraPos {target.camera().Position};
     target.camera().push_state();

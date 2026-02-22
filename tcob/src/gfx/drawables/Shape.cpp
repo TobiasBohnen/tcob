@@ -138,7 +138,7 @@ auto shape_batch::can_draw() const -> bool
     return !_children.empty();
 }
 
-void shape_batch::on_draw_to(render_target& target, transform& xform)
+void shape_batch::on_draw_to(render_target& target, transform const& xform)
 {
     if (_isDirty) {
         _isDirty = false;

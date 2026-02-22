@@ -76,7 +76,7 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;
-    void on_draw_to(render_target& target, transform& xform) override;
+    void on_draw_to(render_target& target, transform const& xform) override;
 
     auto pivot() const -> point_f override;
     void on_transform_changed() override;
