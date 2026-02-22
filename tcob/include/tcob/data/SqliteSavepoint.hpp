@@ -12,7 +12,7 @@
 namespace tcob::db {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API savepoint : public non_copyable {
+class TCOB_API savepoint final : public non_copyable {
 public:
     savepoint(database_view db, utf8_string name);
     ~savepoint();

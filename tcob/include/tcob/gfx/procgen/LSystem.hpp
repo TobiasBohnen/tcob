@@ -17,7 +17,7 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API l_rule {
+class TCOB_API l_rule final {
 public:
     string                Replacement;
     f32                   Probability {1.0f};
@@ -42,7 +42,7 @@ public:
     }
 };
 
-class TCOB_API l_system {
+class TCOB_API l_system final {
 public:
     l_system();
     explicit l_system(u64 seed);

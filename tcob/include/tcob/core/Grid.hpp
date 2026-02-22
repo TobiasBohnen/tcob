@@ -14,7 +14,7 @@ namespace tcob {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class grid {
+class grid final {
     using iterator       = std::vector<T>::iterator;
     using const_iterator = std::vector<T>::const_iterator;
 
@@ -72,7 +72,7 @@ private:
 ////////////////////////////////////////////////////////////
 
 template <typename T, usize Width, usize Height>
-class static_grid {
+class static_grid final {
     using array_type     = std::array<T, Width * Height>;
     using iterator       = array_type::iterator;
     using const_iterator = array_type::const_iterator;

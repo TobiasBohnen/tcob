@@ -103,7 +103,7 @@ private:
 ////////////////////////////////////////////////////////////
 
 template <typename G>
-class tilemap : public tilemap_base {
+class tilemap final : public tilemap_base {
     using grid_type = G;
     using tile_type = G::tile_type;
 
@@ -122,7 +122,7 @@ private:
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-class TCOB_API orthogonal_tile {
+class TCOB_API orthogonal_tile final {
 public:
     string TextureRegion {};
     bool   FlipHorizontally {false};
@@ -136,7 +136,7 @@ public:
     auto operator==(orthogonal_tile const& other) const -> bool = default;
 };
 
-class TCOB_API orthogonal_grid {
+class TCOB_API orthogonal_grid final {
 public:
     using tile_type = orthogonal_tile;
 
@@ -149,7 +149,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API isometric_tile {
+class TCOB_API isometric_tile final {
 public:
     string TextureRegion {};
     bool   FlipHorizontally {false};
@@ -164,7 +164,7 @@ public:
     auto operator==(isometric_tile const& other) const -> bool = default;
 };
 
-class TCOB_API isometric_grid {
+class TCOB_API isometric_grid final {
 public:
     using tile_type = isometric_tile;
 
@@ -178,7 +178,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API hexagonal_tile {
+class TCOB_API hexagonal_tile final {
 public:
     string TextureRegion {};
     bool   FlipHorizontally {false};
@@ -195,7 +195,7 @@ enum hexagonal_top : u8 {
     Flat
 };
 
-class TCOB_API hexagonal_grid {
+class TCOB_API hexagonal_grid final {
 public:
     using tile_type = hexagonal_tile;
 

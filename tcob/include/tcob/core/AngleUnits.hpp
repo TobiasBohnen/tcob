@@ -22,7 +22,7 @@ enum class angle_normalize : u8 {
 ////////////////////////////////////////////////////////////
 
 template <FloatingPoint ValueType, f64 OneTurn>
-class [[nodiscard]] angle_unit {
+class [[nodiscard]] angle_unit final {
 public:
     using value_type = ValueType;
     static constexpr value_type one_turn {static_cast<ValueType>(OneTurn)};

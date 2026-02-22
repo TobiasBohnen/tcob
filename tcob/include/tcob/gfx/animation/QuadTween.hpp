@@ -58,7 +58,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////
 
 template <QuadTweenFunction... Funcs>
-class quad_tween : public detail::quad_tween_base {
+class quad_tween final : public detail::quad_tween_base {
 public:
     quad_tween(milliseconds duration, Funcs&&... ptr);
 
@@ -71,7 +71,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API quad_tweens : public updatable {
+class TCOB_API quad_tweens final : public updatable {
 public:
     template <typename... Funcs>
     auto create(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<quad_tween<Funcs...>>;

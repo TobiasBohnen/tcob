@@ -36,7 +36,7 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API path2d {
+class TCOB_API path2d final {
     friend class canvas;
 
 public:

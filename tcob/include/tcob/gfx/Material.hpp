@@ -18,7 +18,7 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 // TODO: material -> technique -> pass
 
-class TCOB_API pass {
+class TCOB_API pass final {
 public:
     asset_ptr<shader>  Shader {};
     asset_ptr<texture> Texture {};
@@ -38,7 +38,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API material {
+class TCOB_API material final {
 public:
     material() = default;
 

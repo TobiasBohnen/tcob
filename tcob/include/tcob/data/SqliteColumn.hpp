@@ -15,7 +15,7 @@
 namespace tcob::db {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API avg {
+class TCOB_API avg final {
 public:
     avg(utf8_string column);
 
@@ -24,7 +24,7 @@ public:
     auto str() const -> utf8_string;
 };
 
-class TCOB_API count {
+class TCOB_API count final {
 public:
     count(utf8_string column);
 
@@ -33,7 +33,7 @@ public:
     auto str() const -> utf8_string;
 };
 
-class TCOB_API max {
+class TCOB_API max final {
 public:
     max(utf8_string column);
 
@@ -42,7 +42,7 @@ public:
     auto str() const -> utf8_string;
 };
 
-class TCOB_API min {
+class TCOB_API min final {
 public:
     min(utf8_string column);
 
@@ -51,7 +51,7 @@ public:
     auto str() const -> utf8_string;
 };
 
-class TCOB_API sum {
+class TCOB_API sum final {
 public:
     sum(utf8_string column);
 

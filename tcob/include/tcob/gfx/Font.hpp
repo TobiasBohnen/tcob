@@ -80,7 +80,7 @@ struct decompose_result {
 ////////////////////////////////////////////////////////////
 class truetype_font_engine;
 
-class TCOB_API font : public non_copyable {
+class TCOB_API font final : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
     struct information final {
@@ -116,7 +116,7 @@ public:
     ////////////////////////////////////////////////////////////
 
     explicit font(string name = "");
-    virtual ~font();
+    ~font();
 
     signal<font const&> TextureResized;
 

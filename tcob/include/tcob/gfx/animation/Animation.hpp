@@ -15,7 +15,7 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API frame {
+class TCOB_API frame final {
 public:
     string       Name {};
     milliseconds Duration {};

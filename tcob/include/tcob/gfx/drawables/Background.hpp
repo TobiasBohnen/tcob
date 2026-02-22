@@ -23,7 +23,7 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API background : public drawable {
+class TCOB_API background final : public drawable {
 public:
     background();
 

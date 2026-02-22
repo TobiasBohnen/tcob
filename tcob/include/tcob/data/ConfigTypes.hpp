@@ -193,7 +193,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API entry {
+class TCOB_API entry final {
     friend auto operator==(entry const& left, entry const& right) -> bool;
 
 public:

@@ -51,7 +51,7 @@ using bind_func = std::function<void(i32&, statement&)>;
 ////////////////////////////////////////////////////////////
 
 template <typename... Values>
-class select_statement : public statement {
+class select_statement final : public statement {
 public:
     select_statement(database_view db, bool addDistinct, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns);
 
@@ -112,7 +112,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API update_statement : public statement {
+class TCOB_API update_statement final : public statement {
 public:
     update_statement(database_view db, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns);
 
@@ -131,7 +131,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API insert_statement : public statement {
+class TCOB_API insert_statement final : public statement {
 public:
     enum mode : u8 {
         Normal,
@@ -152,7 +152,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API delete_statement : public statement {
+class TCOB_API delete_statement final : public statement {
 public:
     delete_statement(database_view db, utf8_string const& schemaName, utf8_string const& table);
 

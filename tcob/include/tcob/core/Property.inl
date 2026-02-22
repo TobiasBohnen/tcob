@@ -104,31 +104,31 @@ inline auto func_source<T>::set(type const& value, bool force) -> bool
 ////////////////////////////////////////////////////////////
 
 template <typename T, typename Source>
-constexpr prop_base<T, Source>::prop_base(T val)
+constexpr prop<T, Source>::prop(T val)
     : _source {val}
 {
 }
 
 template <typename T, typename Source>
-constexpr prop_base<T, Source>::prop_base(Source source)
+constexpr prop<T, Source>::prop(Source source)
     : _source {std::move(source)}
 {
 }
 
 template <typename T, typename Source>
-inline prop_base<T, Source>::operator T() const
+inline prop<T, Source>::operator T() const
 {
     return _source.get();
 }
 
 template <typename T, typename Source>
-inline auto prop_base<T, Source>::operator!() const -> bool
+inline auto prop<T, Source>::operator!() const -> bool
 {
     return !_source.get();
 }
 
 template <typename T, typename Source>
-inline auto prop_base<T, Source>::operator->() const
+inline auto prop<T, Source>::operator->() const
 {
     if constexpr (OverloadsArrowOp<T> || std::is_pointer_v<T>) {
         return _source.get();
@@ -142,32 +142,32 @@ inline auto prop_base<T, Source>::operator->() const
 }
 
 template <typename T, typename Source>
-inline auto prop_base<T, Source>::operator*() const noexcept -> const_return_type
+inline auto prop<T, Source>::operator*() const noexcept -> const_return_type
 {
     return _source.get();
 }
 
 template <typename T, typename Source>
-inline void prop_base<T, Source>::operator()(T const& value)
+inline void prop<T, Source>::operator()(T const& value)
 {
     set(value, true);
 }
 
 template <typename T, typename Source>
-inline auto prop_base<T, Source>::operator=(T const& value) -> prop_base&
+inline auto prop<T, Source>::operator=(T const& value) -> prop&
 {
     set(value, false);
     return *this;
 }
 
 template <typename T, typename Source>
-inline auto prop_base<T, Source>::operator[](auto&&... idx) const noexcept -> decltype(auto)
+inline auto prop<T, Source>::operator[](auto&&... idx) const noexcept -> decltype(auto)
 {
     return _source.get()[idx...];
 }
 
 template <typename T, typename Source>
-inline void prop_base<T, Source>::mutate(auto&& func) noexcept
+inline void prop<T, Source>::mutate(auto&& func) noexcept
 {
     static_assert(std::is_reference_v<return_type>);
 
@@ -184,14 +184,14 @@ inline void prop_base<T, Source>::mutate(auto&& func) noexcept
 }
 
 template <typename T, typename Source>
-inline void prop_base<T, Source>::bind(auto&... others)
+inline void prop<T, Source>::bind(auto&... others)
 {
     Changed.connect([&others...](T const& v) { ((others = v), ...); });
     ((others.Changed.connect([this](T const& v) { *this = v; })), ...);
 }
 
 template <typename T, typename Source>
-inline void prop_base<T, Source>::set(T const& value, bool force)
+inline void prop<T, Source>::set(T const& value, bool force)
 {
     if (_source.set(value, force) && Changed.slot_count() > 0) {
         Changed(_source.get());
@@ -201,55 +201,55 @@ inline void prop_base<T, Source>::set(T const& value, bool force)
 ////////////////////////////////////////////////////////////
 
 template <typename T, typename Source>
-auto constexpr operator+=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&
+auto constexpr operator+=(prop<T, Source>& left, T const& right) -> prop<T, Source>&
 {
     return left = *left + right;
 }
 
 template <typename T, typename Source>
-auto constexpr operator-(prop_base<T, Source>& right) -> T
+auto constexpr operator-(prop<T, Source>& right) -> T
 {
     return -(*right);
 }
 
 template <typename T, typename Source>
-auto constexpr operator-=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&
+auto constexpr operator-=(prop<T, Source>& left, T const& right) -> prop<T, Source>&
 {
     return left = *left - right;
 }
 
 template <typename T, typename Source>
-auto constexpr operator/=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&
+auto constexpr operator/=(prop<T, Source>& left, T const& right) -> prop<T, Source>&
 {
     return left = *left / right;
 }
 
 template <typename T, typename Source>
-auto constexpr operator*=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&
+auto constexpr operator*=(prop<T, Source>& left, T const& right) -> prop<T, Source>&
 {
     return left = *left * right;
 }
 
 template <typename T, typename Source>
-auto constexpr operator==(prop_base<T, Source> const& left, T const& right) -> bool
+auto constexpr operator==(prop<T, Source> const& left, T const& right) -> bool
 {
     return *left == right;
 }
 
 template <typename T, typename Source>
-auto constexpr operator==(prop_base<T, Source> const& left, prop_base<T, Source> const& right) -> bool
+auto constexpr operator==(prop<T, Source> const& left, prop<T, Source> const& right) -> bool
 {
     return *left == *right;
 }
 
 template <typename T, typename Source>
-auto constexpr operator<=>(prop_base<T, Source> const& left, T const& right) -> std::partial_ordering
+auto constexpr operator<=>(prop<T, Source> const& left, T const& right) -> std::partial_ordering
 {
     return *left <=> right;
 }
 
 template <typename T, typename Source>
-auto constexpr operator<=>(prop_base<T, Source> const& left, prop_base<T, Source> const& right) -> std::partial_ordering
+auto constexpr operator<=>(prop<T, Source> const& left, prop<T, Source> const& right) -> std::partial_ordering
 {
     return *left <=> *right;
 }

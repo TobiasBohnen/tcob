@@ -42,11 +42,11 @@ struct particle_event {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API particle {
+class TCOB_API particle final {
 public:
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API settings {
+    class settings {
     public:
         min_max<f32>      Speed;
         min_max<degree_f> Direction;

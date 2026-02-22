@@ -89,14 +89,14 @@ namespace detail {
 
 namespace detail {
     template <typename T, typename Source>
-    class prop_base : public non_copyable {
+    class prop final : public non_copyable {
     public:
         using return_type       = typename Source::return_type;
         using const_return_type = typename Source::const_return_type;
 
-        constexpr prop_base() = default;
-        explicit constexpr prop_base(T val); // HACK: only field_source
-        explicit constexpr prop_base(Source source);
+        constexpr prop() = default;
+        explicit constexpr prop(T val); // HACK: only field_source
+        explicit constexpr prop(Source source);
 
         signal<T const> Changed;
 
@@ -106,7 +106,7 @@ namespace detail {
         auto operator*() const noexcept -> const_return_type;
 
         void operator()(T const& value);
-        auto operator=(T const& value) -> prop_base&;
+        auto operator=(T const& value) -> prop&;
 
         auto operator[](auto&&... idx) const noexcept -> decltype(auto);
 
@@ -123,37 +123,37 @@ namespace detail {
     ////////////////////////////////////////////////////////////
 
     template <typename T, typename Source>
-    auto constexpr operator+=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&;
+    auto constexpr operator+=(prop<T, Source>& left, T const& right) -> prop<T, Source>&;
 
     template <typename T, typename Source>
-    auto constexpr operator-(prop_base<T, Source>& right) -> T;
+    auto constexpr operator-(prop<T, Source>& right) -> T;
 
     template <typename T, typename Source>
-    auto constexpr operator-=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&;
+    auto constexpr operator-=(prop<T, Source>& left, T const& right) -> prop<T, Source>&;
 
     template <typename T, typename Source>
-    auto constexpr operator/=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&;
+    auto constexpr operator/=(prop<T, Source>& left, T const& right) -> prop<T, Source>&;
 
     template <typename T, typename Source>
-    auto constexpr operator*=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&;
+    auto constexpr operator*=(prop<T, Source>& left, T const& right) -> prop<T, Source>&;
 
     template <typename T, typename Source>
-    auto constexpr operator==(prop_base<T, Source> const& left, T const& right) -> bool;
+    auto constexpr operator==(prop<T, Source> const& left, T const& right) -> bool;
 
     template <typename T, typename Source>
-    auto constexpr operator==(prop_base<T, Source> const& left, prop_base<T, Source> const& right) -> bool;
+    auto constexpr operator==(prop<T, Source> const& left, prop<T, Source> const& right) -> bool;
 
     template <typename T, typename Source>
-    auto constexpr operator<=>(prop_base<T, Source> const& left, T const& right) -> std::partial_ordering;
+    auto constexpr operator<=>(prop<T, Source> const& left, T const& right) -> std::partial_ordering;
 
     template <typename T, typename Source>
-    auto constexpr operator<=>(prop_base<T, Source> const& left, prop_base<T, Source> const& right) -> std::partial_ordering;
+    auto constexpr operator<=>(prop<T, Source> const& left, prop<T, Source> const& right) -> std::partial_ordering;
 
     template <typename T>
     struct is_prop_base : std::false_type { };
 
     template <typename V, typename S>
-    struct is_prop_base<prop_base<V, S>> : std::true_type { };
+    struct is_prop_base<prop<V, S>> : std::true_type { };
 
 }
 
@@ -161,15 +161,15 @@ namespace detail {
 
 // field-backed property.
 template <typename T>
-using prop = detail::prop_base<T, detail::field_source<T>>;
+using prop = detail::prop<T, detail::field_source<T>>;
 
 // validating field-backed property.
 template <typename T>
-using prop_chk = detail::prop_base<T, detail::checked_field_source<T>>;
+using prop_chk = detail::prop<T, detail::checked_field_source<T>>;
 
 // function-backed property.
 template <typename T>
-using prop_fn = detail::prop_base<T, detail::func_source<T>>;
+using prop_fn = detail::prop<T, detail::func_source<T>>;
 
 template <typename T>
 concept PropertyLike = detail::is_prop_base<std::remove_cvref_t<T>>::value;

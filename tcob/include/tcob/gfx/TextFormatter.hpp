@@ -45,7 +45,7 @@ struct format_token {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API result {
+class TCOB_API result final {
 public:
     std::vector<format_token> Tokens {};
     isize                     QuadCount {0};

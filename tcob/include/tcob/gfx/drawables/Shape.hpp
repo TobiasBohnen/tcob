@@ -107,7 +107,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API circle_shape : public shape {
+class TCOB_API circle_shape final : public shape {
 public:
     circle_shape();
 
