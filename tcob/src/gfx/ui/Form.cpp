@@ -173,6 +173,7 @@ auto form_base::active_modal() const -> modal_dialog*
 
 void form_base::change_cursor_mode(cursor_mode mode)
 {
+    _lastCursor = mode;
     if (!Cursor) { return; }
 
     string newMode;
@@ -237,13 +238,13 @@ auto form_base::last_mouse_position() const -> point_i
     return _mousePos;
 }
 
+void form_base::on_tick()
+{
+    change_cursor_mode(_lastCursor);
+}
+
 void form_base::on_update(milliseconds deltaTime)
 {
-    // set cursor
-    if (_topWidget) {
-        change_cursor_mode(_topWidget->Cursor);
-    }
-
     auto const& widgets {containers()};
 
     // tooltip
@@ -445,6 +446,7 @@ void form_base::on_mouse_hover(input::mouse::motion_event const& ev)
         _injector.on_mouse_leave(_topWidget);
         _topWidget = newTop;
         _injector.on_mouse_enter(_topWidget);
+        change_cursor_mode(_topWidget ? _topWidget->Cursor : cursor_mode::Default);
     } else {
         _injector.on_mouse_hover(_topWidget, ev);
     }

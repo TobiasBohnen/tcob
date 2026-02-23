@@ -88,6 +88,7 @@ public:
 protected:
     form_base(string name, rect_f const& bounds);
 
+    void on_tick() override;
     void on_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;
@@ -144,6 +145,7 @@ private:
     point_i      _clickPos {};
     point_i      _mousePos {};
     milliseconds _mouseOverTime {0};
+    cursor_mode  _lastCursor {cursor_mode::Default};
 
     tcob::detail::connection_manager _connections {};
 

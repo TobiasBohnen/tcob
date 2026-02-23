@@ -100,8 +100,8 @@ void panel::on_update(milliseconds deltaTime)
     _hScrollbar.update(deltaTime);
 
     check_mode();
-    if (_currentMode) {
-        form().change_cursor_mode(*_currentMode);
+    if (_dragMode) {
+        form().change_cursor_mode(*_dragMode);
     }
 }
 
@@ -170,11 +170,11 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
     ev.Handled = scrollDrag(_vScrollbar) || scrollDrag(_hScrollbar);
     if (ev.Handled) { return; }
 
-    if (_dragStart && _currentMode) {
+    if (_dragStart && _dragMode) {
         rect_f     newBounds {*Bounds};
         auto const localPos {screen_to_local(*this, ev.Position)};
 
-        switch (*_currentMode) {
+        switch (*_dragMode) {
         case cursor_mode::Move: {
             newBounds = {localPos - *_dragStart, Bounds->Size};
             break;
@@ -267,7 +267,10 @@ void panel::on_mouse_button_down(input::mouse::button_event const& ev)
 
 void panel::on_mouse_button_up(input::mouse::button_event const& ev)
 {
-    _dragStart = std::nullopt;
+    if (_dragStart) {
+        form().change_cursor_mode(cursor_mode::Default);
+        _dragStart = std::nullopt;
+    }
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == controls().PrimaryMouseButton) {
@@ -334,7 +337,7 @@ void panel::check_mode()
     if (_dragStart) { return; }
     auto const mp {form().last_mouse_position()};
 
-    _currentMode = can_move() ? std::optional {cursor_mode::Move} : std::nullopt;
+    _dragMode = can_move() ? std::optional {cursor_mode::Move} : std::nullopt;
     if (!can_resize()) { return; }
 
     auto const inBounds {hit_test_bounds()};
@@ -348,21 +351,21 @@ void panel::check_mode()
         bool const onBottom {mp.Y > static_cast<i32>(outBounds.bottom())};
 
         if (onLeft && onTop) {
-            _currentMode = cursor_mode::NW_Resize;
+            _dragMode = cursor_mode::NW_Resize;
         } else if (onRight && onBottom) {
-            _currentMode = cursor_mode::SE_Resize;
+            _dragMode = cursor_mode::SE_Resize;
         } else if (onRight && onTop) {
-            _currentMode = cursor_mode::NE_Resize;
+            _dragMode = cursor_mode::NE_Resize;
         } else if (onLeft && onBottom) {
-            _currentMode = cursor_mode::SW_Resize;
+            _dragMode = cursor_mode::SW_Resize;
         } else if (onLeft) {
-            _currentMode = cursor_mode::W_Resize;
+            _dragMode = cursor_mode::W_Resize;
         } else if (onRight) {
-            _currentMode = cursor_mode::E_Resize;
+            _dragMode = cursor_mode::E_Resize;
         } else if (onTop) {
-            _currentMode = cursor_mode::N_Resize;
+            _dragMode = cursor_mode::N_Resize;
         } else if (onBottom) {
-            _currentMode = cursor_mode::S_Resize;
+            _dragMode = cursor_mode::S_Resize;
         }
     }
 }

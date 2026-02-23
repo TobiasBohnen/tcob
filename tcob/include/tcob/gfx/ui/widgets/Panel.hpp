@@ -91,7 +91,7 @@ private:
     bool                    _overScrollBars {false};
 
     std::optional<point_f>     _dragStart;
-    std::optional<cursor_mode> _currentMode;
+    std::optional<cursor_mode> _dragMode;
 
     panel::style _style;
 };

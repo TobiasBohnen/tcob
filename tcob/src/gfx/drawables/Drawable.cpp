@@ -58,7 +58,12 @@ void entity::update(milliseconds deltaTime)
 {
     if (_mode == update_mode::Fixed) { return; }
 
-    on_update(deltaTime);
+    on_tick();
+
+    _updateTime += deltaTime;
+    if (_updateTime < UpdateInterval) { return; }
+    on_update(_updateTime);
+    _updateTime = milliseconds::zero();
 }
 
 void entity::fixed_update(milliseconds deltaTime)

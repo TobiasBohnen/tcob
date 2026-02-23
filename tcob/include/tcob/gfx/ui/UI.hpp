@@ -445,7 +445,7 @@ namespace detail {
         void on_focus_lost(widget* widget) const;
 
     private:
-        auto check(widget* widget) const -> bool;
+        static auto Check(widget* widget) -> bool;
     };
 
 }

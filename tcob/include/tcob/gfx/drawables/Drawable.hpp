@@ -44,7 +44,7 @@ private:
 
 class TCOB_API entity : public drawable, public hybrid_updatable, public input::receiver {
 public:
-    // TODO:  mouse enter/leave, frame limit
+    milliseconds UpdateInterval {0};
 
     void update(milliseconds deltaTime) final;
     void fixed_update(milliseconds deltaTime) final;
@@ -68,8 +68,11 @@ protected:
     void on_controller_button_down(input::controller::button_event const&) override { }
     void on_controller_button_up(input::controller::button_event const&) override { }
 
+    virtual void on_tick() { }
+
 private:
-    update_mode _mode;
+    update_mode  _mode;
+    milliseconds _updateTime {0};
 };
 
 }

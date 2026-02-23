@@ -165,6 +165,7 @@ void image_box::on_mouse_button_up(input::mouse::button_event const& ev)
         _dragPosition = std::nullopt;
         Dropped({.Sender = this, .Target = form().find_widget_at(ev.Position), .Position = ev.Position});
         ev.Handled = true;
+        form().change_cursor_mode(cursor_mode::Default);
     }
 }
 
