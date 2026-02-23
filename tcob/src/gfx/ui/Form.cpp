@@ -235,6 +235,11 @@ void form_base::change_cursor_mode(cursor_mode mode)
     TooltipOffset = point_f {off.Width, off.Height};
 }
 
+auto form_base::last_mouse_position() const -> point_i
+{
+    return _mousePos;
+}
+
 void form_base::on_update(milliseconds deltaTime)
 {
     // set cursor
@@ -269,7 +274,7 @@ void form_base::on_update(milliseconds deltaTime)
         }
 
         // re-hover
-        on_mouse_hover({.Position = locate_service<input::system>().mouse().get_position()});
+        on_mouse_hover({.Position = _mousePos});
 
         _layoutDirty = false;
         _canvasDirty = true;
@@ -329,7 +334,7 @@ void form_base::on_draw_to(gfx::render_target& target, transform const& xform)
     // tooltip
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
         auto ttBounds {*_topWidget->Tooltip->Bounds};
-        ttBounds.Position = point_f {locate_service<input::system>().mouse().get_position()} - Bounds->Position + TooltipOffset;
+        ttBounds.Position = point_f {_mousePos} - Bounds->Position + TooltipOffset;
         if (ttBounds.right() > Bounds->right()) { ttBounds.Position.X -= ttBounds.width() + TooltipOffset.X; }
         if (ttBounds.bottom() > Bounds->bottom()) { ttBounds.Position.Y -= ttBounds.height() + TooltipOffset.Y; }
         _topWidget->Tooltip->Bounds = ttBounds;
@@ -420,6 +425,7 @@ void form_base::on_key_up(input::keyboard::event const& ev)
 
 void form_base::on_mouse_motion(input::mouse::motion_event const& ev)
 {
+    _mousePos = ev.Position;
     if (_isLButtonDown) { // FIXME: restict (widget::can_drag?) TODO: add drag origin
         _injector.on_mouse_drag(_focusWidget, ev);
     } else {

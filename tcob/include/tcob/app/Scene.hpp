@@ -62,7 +62,7 @@ private:
     void move_child_to_front(scene_node* node);
     void send_child_to_back(scene_node* node);
 
-    void handle_input_event(auto&& event, auto&& handler);
+    void handle_input_event(auto&& event, auto&& handler, transform const& xform);
 
     std::vector<std::unique_ptr<scene_node>> _children;
     scene_node*                              _parent;
@@ -113,7 +113,7 @@ protected:
 private:
     void attach_events();
     void detach_events();
-    void handle_input_event(auto&& event, auto&& handler);
+    void handle_input_event(auto&& event, auto&& handler, transform const& xform);
 
     detail::connection_manager  _connections {};
     game&                       _game;

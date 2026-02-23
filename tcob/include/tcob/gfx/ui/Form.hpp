@@ -83,6 +83,8 @@ public:
 
     void change_cursor_mode(cursor_mode mode);
 
+    auto last_mouse_position() const -> point_i;
+
 protected:
     form_base(string name, rect_f const& bounds);
 
@@ -140,6 +142,7 @@ private:
     bool         _isTooltipVisible {false};
     i32          _currentTabIndex {-1};
     point_i      _clickPos {};
+    point_i      _mousePos {};
     milliseconds _mouseOverTime {0};
 
     tcob::detail::connection_manager _connections {};

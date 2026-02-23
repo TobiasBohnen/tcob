@@ -8,13 +8,16 @@
 
 #include <ranges>
 
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Transform.hpp"
+
 namespace tcob {
 
-inline void scene::handle_input_event(auto&& event, auto&& handler)
+inline void scene::handle_input_event(auto&& event, auto&& handler, transform const& xform)
 {
     // TODO: add 'focused' entity
     if (_rootNode) {
-        _rootNode->handle_input_event(event, handler);
+        _rootNode->handle_input_event(event, handler, xform);
         if (event.Handled) { return; }
     }
 
@@ -22,18 +25,25 @@ inline void scene::handle_input_event(auto&& event, auto&& handler)
     (this->*handler)(event);
 }
 
-inline void scene_node::handle_input_event(auto&& event, auto&& handler)
+inline void scene_node::handle_input_event(auto&& event, auto&& handler, transform const& xform)
 {
+    transform const world {xform * get_transform()};
+
     // first nodes
-    for (auto& ir : _children | std::views::reverse) {
-        ir->handle_input_event(event, handler);
+    for (auto& child : _children | std::views::reverse) {
+        child->handle_input_event(event, handler, world);
         if (event.Handled) { return; }
     }
 
     // then entity
     if (*Entity && Entity->is_visible()) {
-        ((*Entity).get()->*handler)(event);
-        if (event.Handled) { return; }
+        if constexpr (requires { event.Position; }) {
+            auto ev {event};
+            ev.Position = point_i {world.as_inverted() * point_f {ev.Position}};
+            ((*Entity).get()->*handler)(ev);
+        } else {
+            ((*Entity).get()->*handler)(event);
+        }
     }
 }
 

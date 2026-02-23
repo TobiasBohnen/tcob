@@ -13,7 +13,6 @@
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
@@ -333,7 +332,7 @@ auto panel::can_resize() const -> bool
 void panel::check_mode()
 {
     if (_dragStart) { return; }
-    auto const mp {locate_service<input::system>().mouse().get_position()};
+    auto const mp {form().last_mouse_position()};
 
     _currentMode = can_move() ? std::optional {cursor_mode::Move} : std::nullopt;
     if (!can_resize()) { return; }
