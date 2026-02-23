@@ -165,9 +165,7 @@ void game::step()
 
     if (deltaUpdate >= frameLimit) {
         // update
-        PreUpdate(deltaUpdate);
         Update(deltaUpdate);
-        PostUpdate(deltaUpdate);
         _lastUpdate = now;
 
         // render

@@ -44,9 +44,7 @@ public:
     signal<>                   Start;       //!< Signal emitted when the game starts.
     signal<>                   Finish;      //!< Signal emitted when the game finishes.
     signal<milliseconds const> FixedUpdate; //!< Signal emitted at a fixed time interval.
-    signal<milliseconds const> PreUpdate;   //!< Signal emitted before the main update.
     signal<milliseconds const> Update;      //!< Signal emitted during the main update.
-    signal<milliseconds const> PostUpdate;  //!< Signal emitted after the main update.
     signal<gfx::render_target> Draw;        //!< Signal emitted when rendering is required.
 
     void start();
