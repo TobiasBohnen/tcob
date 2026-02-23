@@ -58,10 +58,7 @@ form_base::form_base(string name, rect_f const& bounds)
     Shader.Changed.connect([this](auto const& value) { _renderer.set_shader(value); });
 }
 
-form_base::~form_base()
-{
-    // TODO: disconnect ALL events
-}
+form_base::~form_base() = default;
 
 auto form_base::name() const -> string const&
 {
@@ -554,7 +551,6 @@ void form_base::on_visibility_changed()
             _topWidget = nullptr;
         }
     }
-    // TODO: else inject mouse_motion
 }
 
 void form_base::on_text_input(input::keyboard::text_input_event const& ev)

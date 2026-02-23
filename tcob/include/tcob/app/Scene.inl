@@ -15,7 +15,7 @@ namespace tcob {
 
 inline void scene::handle_input_event(auto&& event, auto&& handler, transform const& xform)
 {
-    // TODO: add 'focused' entity
+    // first the root node
     if (_rootNode) {
         _rootNode->handle_input_event(event, handler, xform);
         if (event.Handled) { return; }
