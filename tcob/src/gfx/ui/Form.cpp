@@ -68,6 +68,11 @@ auto form_base::name() const -> string const&
     return _name;
 }
 
+auto form_base::bounds() const -> rect_f
+{
+    return Bounds;
+}
+
 auto form_base::top_widget() const -> widget*
 {
     return _topWidget;

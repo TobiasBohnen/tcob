@@ -11,6 +11,7 @@
 
 #include "tcob/app/Game.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/AssetLibrary.hpp"
@@ -235,13 +236,19 @@ auto scene_node::can_draw() const -> bool
 
 void scene_node::on_draw_to(gfx::render_target& target, transform const& xform)
 {
+    transform const world {xform * get_transform()};
     if (*Entity) {
-        Entity->draw_to(target, xform);
+        Entity->draw_to(target, world);
     }
-
     for (auto& child : _children) {
-        child->draw_to(target, xform);
+        child->draw_to(target, world);
     }
+}
+
+auto scene_node::pivot() const -> point_f
+{
+    if (!Entity) { return point_f::Zero; }
+    return Entity->bounds().center();
 }
 
 }

@@ -10,12 +10,14 @@
 #include <vector>
 
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Assets.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Transformable.hpp"
 #include "tcob/gfx/Window.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 
@@ -26,7 +28,7 @@ class game;
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API scene_node : public gfx::drawable, public hybrid_updatable {
+class TCOB_API scene_node : public gfx::drawable, public gfx::transformable, public hybrid_updatable {
     friend class scene;
 
 public:
@@ -52,6 +54,9 @@ protected:
 
     auto can_draw() const -> bool override;
     void on_draw_to(gfx::render_target& target, transform const& xform) override;
+
+    auto pivot() const -> point_f override;
+    void on_transform_changed() override { }
 
 private:
     void move_child_to_front(scene_node* node);

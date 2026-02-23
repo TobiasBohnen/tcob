@@ -63,6 +63,7 @@ public:
 
     auto mouse_position() const -> point_i;
     auto is_button_down() const -> bool;
+    auto bounds() const -> rect_f override;
 
     void from_string(string const& html);
     void from_string(string const& html, string const& css);

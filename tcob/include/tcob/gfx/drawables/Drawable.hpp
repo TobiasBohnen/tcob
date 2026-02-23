@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -43,10 +44,12 @@ private:
 
 class TCOB_API entity : public drawable, public hybrid_updatable, public input::receiver {
 public:
-    // TODO: bounds, mouse enter/leave, frame limit
+    // TODO:  mouse enter/leave, frame limit
 
     void update(milliseconds deltaTime) final;
     void fixed_update(milliseconds deltaTime) final;
+
+    virtual auto bounds() const -> rect_f = 0;
 
 protected:
     entity(update_mode mode = update_mode::Normal);

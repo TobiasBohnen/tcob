@@ -49,6 +49,7 @@ public:
     point_f TooltipOffset {point_f::Zero};
 
     auto name() const -> string const&;
+    auto bounds() const -> rect_f override;
 
     template <std::derived_from<tooltip> T = tooltip>
     auto create_tooltip(string const& name) -> std::shared_ptr<T>;

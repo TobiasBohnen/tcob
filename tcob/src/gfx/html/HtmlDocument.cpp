@@ -59,6 +59,11 @@ auto document::is_button_down() const -> bool
     return _buttonDown;
 }
 
+auto document::bounds() const -> rect_f
+{
+    return Bounds;
+}
+
 void document::from_string(string const& html)
 {
     string css;
