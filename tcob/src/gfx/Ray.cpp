@@ -14,7 +14,6 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Polygon.hpp"
 
 namespace tcob::gfx {
@@ -41,6 +40,11 @@ auto ray::intersect_line(point_f a, point_f b) const -> std::optional<result>
     return std::nullopt;
 }
 
+auto ray::intersect_rect(rect_f const& rect) const -> std::vector<result>
+{
+    return intersect_rect(rect.top_left(), rect.top_right(), rect.bottom_left(), rect.bottom_right());
+}
+
 auto ray::intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, point_f bottomRight) const -> std::vector<result>
 {
     std::vector<result> retValue;
@@ -49,15 +53,6 @@ auto ray::intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, 
     if (auto const distance {intersect_segment(_direction, point_d {bottomRight}, point_d {bottomLeft})}) { retValue.emplace_back(get_result(*distance)); }
     if (auto const distance {intersect_segment(_direction, point_d {bottomLeft}, point_d {topLeft})}) { retValue.emplace_back(get_result(*distance)); }
     return retValue;
-}
-
-auto ray::intersect_rect(rect_f const& rect, transform const& xform) const -> std::vector<result>
-{
-    point_f const topLeft {xform * rect.top_left()};
-    point_f const topRight {xform * rect.top_right()};
-    point_f const bottomLeft {xform * rect.bottom_left()};
-    point_f const bottomRight {xform * rect.bottom_right()};
-    return intersect_rect(topLeft, topRight, bottomLeft, bottomRight);
 }
 
 auto ray::intersect_circle(point_f const& center, f32 radius) const -> std::vector<result>
@@ -108,18 +103,6 @@ auto ray::intersect_polyline(polyline_span polygon) const -> std::vector<result>
     }
 
     return retValue;
-}
-
-auto ray::intersect_polyline(polyline_span polygon, transform const& xform) const -> std::vector<result>
-{
-    std::vector<point_f> points;
-
-    points.reserve(polygon.size());
-    for (auto const& point : polygon) {
-        points.push_back(xform * point);
-    }
-
-    return intersect_polyline(points);
 }
 
 auto ray::intersect_segment(point_d const& rd, point_d const& p0, point_d const& p1) const -> std::optional<f64>

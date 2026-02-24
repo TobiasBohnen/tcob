@@ -78,7 +78,7 @@ void shape_batch::send_to_back(shape const& shape)
 void shape_batch::sort_by_y_position()
 {
     std::ranges::stable_sort(_children, [](auto const& a, auto const& b) {
-        return a->aabb(transform::Identity).bottom() < b->aabb(transform::Identity).bottom();
+        return a->aabb().bottom() < b->aabb().bottom();
     });
     _isDirty = true;
 }
@@ -98,12 +98,12 @@ auto shape_batch::get_shape_at(isize index) const -> shape&
     return *_children.at(static_cast<usize>(index));
 }
 
-auto shape_batch::intersect(ray const& ray, u32 mask, transform const& worldXform) const -> std::unordered_map<shape*, std::vector<ray::result>>
+auto shape_batch::intersect(ray const& ray, u32 mask) const -> std::unordered_map<shape*, std::vector<ray::result>>
 {
     std::unordered_map<shape*, std::vector<ray::result>> retValue;
     for (auto const& child : _children) {
         if (child->IntersectMask & mask) {
-            auto points {child->intersect(ray, worldXform)};
+            auto points {child->intersect(ray)};
             if (points.empty()) { continue; }
             retValue.emplace(child.get(), std::move(points));
         }
@@ -111,12 +111,12 @@ auto shape_batch::intersect(ray const& ray, u32 mask, transform const& worldXfor
     return retValue;
 }
 
-auto shape_batch::intersect(rect_f const& rect, u32 mask, transform const& worldXform) const -> std::vector<shape*>
+auto shape_batch::intersect(rect_f const& rect, u32 mask) const -> std::vector<shape*>
 {
     std::vector<shape*> retValue;
     for (auto const& child : _children) {
         if (child->IntersectMask & mask) {
-            if (child->aabb(worldXform).intersects(rect, true)) {
+            if (child->aabb().intersects(rect, true)) {
                 retValue.push_back(child.get());
             }
         }
@@ -248,14 +248,19 @@ auto rect_shape::geometry(isize pass) -> geometry_view
         .Type     = primitive_type::Triangles};
 }
 
-auto rect_shape::intersect(ray const& ray, transform const& worldXform) const -> std::vector<ray::result>
+auto rect_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
-    return ray.intersect_rect(*Bounds, worldXform * get_transform());
+    auto const&   xform {get_transform()};
+    point_f const topLeft {xform * Bounds->top_left()};
+    point_f const topRight {xform * Bounds->top_right()};
+    point_f const bottomLeft {xform * Bounds->bottom_left()};
+    point_f const bottomRight {xform * Bounds->bottom_right()};
+    return ray.intersect_rect(topLeft, topRight, bottomLeft, bottomRight);
 }
 
-auto rect_shape::aabb(transform const& worldXform) const -> rect_f
+auto rect_shape::aabb() const -> rect_f
 {
-    auto const  xform {worldXform * get_transform()};
+    auto const& xform {get_transform()};
     auto const& rect {*Bounds};
 
     auto const topLeft {xform * rect.top_left()};
@@ -326,16 +331,16 @@ auto circle_shape::geometry(isize pass) -> geometry_view
         .Type     = primitive_type::Triangles};
 }
 
-auto circle_shape::aabb(transform const& worldXform) const -> rect_f
+auto circle_shape::aabb() const -> rect_f
 {
-    auto const worldCenter {worldXform * get_transform() * Center};
+    auto const worldCenter {get_transform() * Center};
     return {worldCenter - point_f {Radius, Radius},
             {Radius * 2.0f, Radius * 2.0f}};
 }
 
-auto circle_shape::intersect(ray const& ray, transform const& worldXform) const -> std::vector<ray::result>
+auto circle_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
-    return ray.intersect_circle(worldXform * get_transform() * Center, Radius);
+    return ray.intersect_circle(get_transform() * Center, Radius);
 }
 
 void circle_shape::on_update(milliseconds /* deltaTime */)
@@ -426,9 +431,9 @@ auto poly_shape::geometry(isize pass) -> geometry_view
         .Type     = primitive_type::Triangles};
 }
 
-auto poly_shape::aabb(transform const& worldXform) const -> rect_f
+auto poly_shape::aabb() const -> rect_f
 {
-    auto const xform {worldXform * get_transform()};
+    auto const& xform {get_transform()};
 
     point_f max {std::numeric_limits<f32>::lowest(), std::numeric_limits<f32>::lowest()};
     point_f min {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
@@ -446,17 +451,24 @@ auto poly_shape::aabb(transform const& worldXform) const -> rect_f
     return rect_f::FromLTRB(min.X, min.Y, max.X, max.Y);
 }
 
-auto poly_shape::intersect(ray const& ray, transform const& worldXform) const -> std::vector<ray::result>
+auto poly_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
-    auto const xform {worldXform * get_transform()};
+    auto const& xform {get_transform()};
+
+    auto const intersect_polyline {[&ray, &xform](polyline_span polygon) -> std::vector<ray::result> {
+        std::vector<point_f> points;
+        points.reserve(polygon.size());
+        for (auto const& point : polygon) { points.push_back(xform * point); }
+        return ray.intersect_polyline(points);
+    }};
 
     std::vector<ray::result> retValue;
     for (auto const& polygon : *Polygons) {
-        auto points {ray.intersect_polyline(polygon.Outline, xform)};
-        retValue.insert(retValue.end(), points.begin(), points.end());
+        auto const outPoints {intersect_polyline(polygon.Outline)};
+        retValue.insert(retValue.end(), outPoints.begin(), outPoints.end());
 
         for (auto const& hole : polygon.Holes) {
-            auto holePoints {ray.intersect_polyline(hole, xform)};
+            auto const holePoints {intersect_polyline(hole)};
             retValue.insert(retValue.end(), holePoints.begin(), holePoints.end());
         }
     }
@@ -609,11 +621,11 @@ auto mesh_shape::geometry(isize /* pass */) -> geometry_view
     return {.Vertices = _xformVerts, .Indices = _inds, .Type = primitive_type::Triangles};
 }
 
-auto mesh_shape::aabb(transform const& worldXform) const -> rect_f
+auto mesh_shape::aabb() const -> rect_f
 {
     if (_verts.empty()) { return rect_f::Zero; }
 
-    auto const xform {worldXform * get_transform()};
+    auto const& xform {get_transform()};
 
     auto const topLeft {xform * _localBounds.top_left()};
     auto const topRight {xform * _localBounds.top_right()};
@@ -626,7 +638,7 @@ auto mesh_shape::aabb(transform const& worldXform) const -> rect_f
     return {{lr.first, tb.first}, {lr.second - lr.first, tb.second - tb.first}};
 }
 
-auto mesh_shape::intersect(ray const& ray, transform const& worldXform) const -> std::vector<ray::result>
+auto mesh_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
     std::vector<ray::result>      results {};
     std::set<std::pair<u32, u32>> tested;
@@ -637,8 +649,8 @@ auto mesh_shape::intersect(ray const& ray, transform const& worldXform) const ->
 
         if (!_edgeCount.contains(reverseEdge)) {
             if (tested.insert(std::minmax(a, b)).second) {
-                auto const v0 {worldXform * _xformVerts[a].Position};
-                auto const v1 {worldXform * _xformVerts[b].Position};
+                auto const v0 {_xformVerts[a].Position};
+                auto const v1 {_xformVerts[b].Position};
 
                 if (auto hit {ray.intersect_line(v0, v1)}) {
                     results.push_back(*hit);
@@ -705,5 +717,4 @@ auto mesh_shape::center() const -> point_f
 
     return {sum.X / static_cast<f32>(_verts.size()), sum.Y / static_cast<f32>(_verts.size())};
 }
-
 }

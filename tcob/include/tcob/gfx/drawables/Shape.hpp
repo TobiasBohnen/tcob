@@ -56,10 +56,10 @@ public:
     void hide();
     auto is_visible() const -> bool;
 
-    virtual auto geometry(isize pass) -> geometry_view             = 0;
-    virtual auto aabb(transform const& worldXform) const -> rect_f = 0;
+    virtual auto geometry(isize pass) -> geometry_view = 0;
+    virtual auto aabb() const -> rect_f                = 0;
 
-    virtual auto intersect(ray const& ray, transform const& worldXform = transform::Identity) const -> std::vector<ray::result> = 0;
+    virtual auto intersect(ray const& ray) const -> std::vector<ray::result> = 0;
 
     auto is_dirty() const -> bool;
 
@@ -89,9 +89,9 @@ public:
     prop<point_f> TextureScroll;
 
     auto geometry(isize pass) -> geometry_view override;
-    auto aabb(transform const& worldXform) const -> rect_f override;
+    auto aabb() const -> rect_f override;
 
-    auto intersect(ray const& ray, transform const& worldXform = transform::Identity) const -> std::vector<ray::result> override;
+    auto intersect(ray const& ray) const -> std::vector<ray::result> override;
 
     void move_by(point_f offset);
 
@@ -117,9 +117,9 @@ public:
     prop<i32>     Segments {90};
 
     auto geometry(isize pass) -> geometry_view override;
-    auto aabb(transform const& worldXform) const -> rect_f override;
+    auto aabb() const -> rect_f override;
 
-    auto intersect(ray const& ray, transform const& worldXform = transform::Identity) const -> std::vector<ray::result> override;
+    auto intersect(ray const& ray) const -> std::vector<ray::result> override;
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -141,9 +141,9 @@ public:
     prop<std::vector<polygon>> Polygons;
 
     auto geometry(isize pass) -> geometry_view override;
-    auto aabb(transform const& worldXform) const -> rect_f override;
+    auto aabb() const -> rect_f override;
 
-    auto intersect(ray const& ray, transform const& worldXform = transform::Identity) const -> std::vector<ray::result> override;
+    auto intersect(ray const& ray) const -> std::vector<ray::result> override;
 
     void clip(poly_shape const& other, clip_mode mode);
 
@@ -172,9 +172,9 @@ public:
     auto load [[nodiscard]] (io::istream& in, string const& ext) noexcept -> bool;
 
     auto geometry(isize pass) -> geometry_view override;
-    auto aabb(transform const& worldXform) const -> rect_f override;
+    auto aabb() const -> rect_f override;
 
-    auto intersect(ray const& ray, transform const& worldXform = transform::Identity) const -> std::vector<ray::result> override;
+    auto intersect(ray const& ray) const -> std::vector<ray::result> override;
 
     void move_by(point_f offset);
 
@@ -229,8 +229,8 @@ public:
 
     auto get_shape_at(isize index) const -> shape&;
 
-    auto intersect(ray const& ray, u32 mask = 0xFFFFFFFF, transform const& worldXform = transform::Identity) const -> std::unordered_map<shape*, std::vector<ray::result>>;
-    auto intersect(rect_f const& rect, u32 mask = 0xFFFFFFFF, transform const& worldXform = transform::Identity) const -> std::vector<shape*>;
+    auto intersect(ray const& ray, u32 mask = 0xFFFFFFFF) const -> std::unordered_map<shape*, std::vector<ray::result>>;
+    auto intersect(rect_f const& rect, u32 mask = 0xFFFFFFFF) const -> std::vector<shape*>;
 
     void clear();
 
