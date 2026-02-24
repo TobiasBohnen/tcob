@@ -251,4 +251,10 @@ auto scene_node::pivot() const -> point_f
     return Entity->bounds().center();
 }
 
+auto scene_node::world_transform() const -> transform
+{
+    if (!_parent) { return get_transform(); }
+    return _parent->world_transform() * get_transform();
+}
+
 }

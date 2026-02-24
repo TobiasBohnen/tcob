@@ -46,6 +46,8 @@ public:
     void bring_to_front();
     void send_to_back();
 
+    auto world_transform() const -> transform;
+
 protected:
     explicit scene_node(scene_node* parent);
 
