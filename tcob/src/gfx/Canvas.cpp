@@ -39,7 +39,8 @@
 namespace tcob::gfx {
 using namespace detail;
 
-auto constexpr NVG_KAPPA90 {0.5522847493f}; // Length proportional to radius of a cubic bezier handle for 90deg arcs.;
+constexpr f32 KAPPA90 {0.5522847493f}; // Length proportional to radius of a cubic bezier handle for 90deg arcs.;
+constexpr f32 RAD90 {TAU_F / 4};
 
 static auto SignF(f32 a) -> f32 { return a >= 0.0f ? 1.0f : -1.0f; }
 
@@ -280,13 +281,13 @@ void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 
     _cache->append_commands(std::vector<f32> {
                                 MoveTo, x, y + ryTL,
                                 LineTo, x, y + h - ryBL,
-                                BezierTo, x, y + h - (ryBL * (1 - NVG_KAPPA90)), x + (rxBL * (1 - NVG_KAPPA90)), y + h, x + rxBL, y + h,
+                                BezierTo, x, y + h - (ryBL * (1 - KAPPA90)), x + (rxBL * (1 - KAPPA90)), y + h, x + rxBL, y + h,
                                 LineTo, x + w - rxBR, y + h,
-                                BezierTo, x + w - (rxBR * (1 - NVG_KAPPA90)), y + h, x + w, y + h - (ryBR * (1 - NVG_KAPPA90)), x + w, y + h - ryBR,
+                                BezierTo, x + w - (rxBR * (1 - KAPPA90)), y + h, x + w, y + h - (ryBR * (1 - KAPPA90)), x + w, y + h - ryBR,
                                 LineTo, x + w, y + ryTR,
-                                BezierTo, x + w, y + (ryTR * (1 - NVG_KAPPA90)), x + w - (rxTR * (1 - NVG_KAPPA90)), y, x + w - rxTR, y,
+                                BezierTo, x + w, y + (ryTR * (1 - KAPPA90)), x + w - (rxTR * (1 - KAPPA90)), y, x + w - rxTR, y,
                                 LineTo, x + rxTL, y,
-                                BezierTo, x + (rxTL * (1 - NVG_KAPPA90)), y, x, y + (ryTL * (1 - NVG_KAPPA90)), x, y + ryTL,
+                                BezierTo, x + (rxTL * (1 - KAPPA90)), y, x, y + (ryTL * (1 - KAPPA90)), x, y + ryTL,
                                 Close},
                             _states->get().XForm);
 }
@@ -299,10 +300,10 @@ void canvas::ellipse(point_f c, f32 rx, f32 ry)
 
     _cache->append_commands(std::vector<f32> {
                                 MoveTo, cx - rx, cy,
-                                BezierTo, cx - rx, cy + (ry * NVG_KAPPA90), cx - (rx * NVG_KAPPA90), cy + ry, cx, cy + ry,
-                                BezierTo, cx + (rx * NVG_KAPPA90), cy + ry, cx + rx, cy + (ry * NVG_KAPPA90), cx + rx, cy,
-                                BezierTo, cx + rx, cy - (ry * NVG_KAPPA90), cx + (rx * NVG_KAPPA90), cy - ry, cx, cy - ry,
-                                BezierTo, cx - (rx * NVG_KAPPA90), cy - ry, cx - rx, cy - (ry * NVG_KAPPA90), cx - rx, cy,
+                                BezierTo, cx - rx, cy + (ry * KAPPA90), cx - (rx * KAPPA90), cy + ry, cx, cy + ry,
+                                BezierTo, cx + (rx * KAPPA90), cy + ry, cx + rx, cy + (ry * KAPPA90), cx + rx, cy,
+                                BezierTo, cx + rx, cy - (ry * KAPPA90), cx + (rx * KAPPA90), cy - ry, cx, cy - ry,
+                                BezierTo, cx - (rx * KAPPA90), cy - ry, cx - rx, cy - (ry * KAPPA90), cx - rx, cy,
                                 Close},
                             _states->get().XForm);
 }
@@ -325,8 +326,6 @@ void canvas::quad_bezier_to(point_f cp, point_f end)
 }
 
 ////////////////////////////////////////////////////////////
-
-constexpr f32 RAD90 {TAU_F / 4};
 
 void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian_f const endAngle, winding const dir)
 {
