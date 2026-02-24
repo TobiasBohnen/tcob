@@ -58,10 +58,10 @@ void tab_container::on_prepare_redraw()
     widget_container::on_prepare_redraw();
 }
 
-void tab_container::remove_tab(widget* tab)
+void tab_container::remove_tab(widget const& tab)
 {
     for (usize i {0}; i < _tabs.size(); ++i) {
-        if (_tabs[i].get() == tab) {
+        if (_tabs[i].get() == &tab) {
             _tabs.erase(_tabs.begin() + i);
             _tabLabels.erase(_tabLabels.begin() + i);
             clear_sub_styles();
@@ -78,10 +78,10 @@ void tab_container::remove_tab(widget* tab)
     queue_redraw();
 }
 
-void tab_container::clear_tabs()
+void tab_container::clear()
 {
     while (!_tabs.empty()) {
-        remove_tab(_tabs.front().get());
+        remove_tab(*_tabs.front());
     }
 }
 

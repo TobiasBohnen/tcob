@@ -46,9 +46,8 @@ public:
     auto create_section(utf8_string const& name) -> T&;
     template <std::derived_from<widget_container> T>
     auto create_section(utf8_string const& name, item const& label) -> T&;
-
-    void remove_section(widget* sec);
-    void clear_sections();
+    void remove_section(widget const& sec);
+    void clear();
 
     void change_section_label(widget* sec, utf8_string const& label);
     void change_section_label(widget* sec, item const& label);

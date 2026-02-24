@@ -62,13 +62,6 @@ auto lighting_system::remove_light_source(light_source const& light) -> bool
     return retValue;
 }
 
-void lighting_system::clear_light_sources()
-{
-    for (auto& ls : _lightSources) { ls->_parent = nullptr; }
-    _lightSources.clear();
-    _isDirty = true;
-}
-
 void lighting_system::notify_light_changed(light_source* /* light */)
 {
     _isDirty = true;
@@ -94,16 +87,17 @@ auto lighting_system::remove_shadow_caster(shadow_caster const& shadow) -> bool
     return retValue;
 }
 
-void lighting_system::clear_shadow_casters()
+void lighting_system::clear()
 {
-    for (auto& sc : _shadowCasters) { sc->_parent = nullptr; }
-    _shadowCasters.clear();
     _isDirty = true;
 
-    if (_quadTree) {
-        _quadTree->clear();
-        mark_lights_dirty();
-    }
+    for (auto& ls : _lightSources) { ls->_parent = nullptr; }
+    _lightSources.clear();
+
+    for (auto& sc : _shadowCasters) { sc->_parent = nullptr; }
+    _shadowCasters.clear();
+
+    if (_quadTree) { _quadTree->clear(); }
 }
 
 void lighting_system::notify_shadow_changed(shadow_caster* shadow)

@@ -55,9 +55,8 @@ public:
     auto create_tab(utf8_string const& name) -> T&;
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name, item const& label) -> T&;
-
-    void remove_tab(widget* tab);
-    void clear_tabs();
+    void remove_tab(widget const& tab);
+    void clear();
 
     void change_tab_label(widget* tab, utf8_string const& label);
     void change_tab_label(widget* tab, item const& label);

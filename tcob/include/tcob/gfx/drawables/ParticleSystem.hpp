@@ -197,7 +197,6 @@ public:
     void stop();
 
     auto create_emitter() -> particle_emitter&;
-
     auto remove_emitter(particle_emitter const& emitter) -> bool;
     void clear();
 

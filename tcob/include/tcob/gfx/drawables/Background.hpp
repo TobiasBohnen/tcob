@@ -62,7 +62,6 @@ public:
     size_f                    TextureScale {size_f::One};
 
     auto create_layer() -> parallax_background_layer&;
-
     auto remove_layer(parallax_background_layer const& layer) -> bool;
     void clear();
 

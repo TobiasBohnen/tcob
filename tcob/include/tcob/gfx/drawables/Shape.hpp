@@ -217,8 +217,8 @@ public:
 
     template <std::derived_from<shape> T>
     auto create_shape() -> T&;
-
     auto remove_shape(shape const& shape) -> bool;
+    void clear();
 
     void bring_to_front(shape const& shape);
     void send_to_back(shape const& shape);
@@ -231,8 +231,6 @@ public:
 
     auto intersect(ray const& ray, u32 mask = 0xFFFFFFFF) const -> std::unordered_map<shape*, std::vector<ray::result>>;
     auto intersect(rect_f const& rect, u32 mask = 0xFFFFFFFF) const -> std::vector<shape*>;
-
-    void clear();
 
 protected:
     void on_update(milliseconds deltaTime) override;

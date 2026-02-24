@@ -116,15 +116,13 @@ public:
 
     template <typename T = light_source>
     auto create_light_source(auto&&... args) -> T&;
-
     auto remove_light_source(light_source const& light) -> bool;
-    void clear_light_sources();
 
     template <typename T = shadow_caster>
     auto create_shadow_caster(auto&&... args) -> T&;
-
     auto remove_shadow_caster(shadow_caster const& shadow) -> bool;
-    void clear_shadow_casters();
+
+    void clear();
 
     void set_blend_funcs(blend_funcs funcs);
 

@@ -73,10 +73,10 @@ void accordion::on_prepare_redraw()
     widget_container::on_prepare_redraw();
 }
 
-void accordion::remove_section(widget* sec)
+void accordion::remove_section(widget const& sec)
 {
     for (usize i {0}; i < _sections.size(); ++i) {
-        if (_sections[i].get() == sec) {
+        if (_sections[i].get() == &sec) {
             _sections.erase(_sections.begin() + i);
             _sectionLabels.erase(_sectionLabels.begin() + i);
             clear_sub_styles();
@@ -93,10 +93,10 @@ void accordion::remove_section(widget* sec)
     queue_redraw();
 }
 
-void accordion::clear_sections()
+void accordion::clear()
 {
     while (!_sections.empty()) {
-        remove_section(_sections.front().get());
+        remove_section(*_sections.front());
     }
 }
 

@@ -73,7 +73,6 @@ public:
     prop<point_f>             Position;
 
     auto create_layer() -> tilemap_layer&;
-
     auto remove_layer(tilemap_layer const& layer) -> bool;
     void clear();
 
