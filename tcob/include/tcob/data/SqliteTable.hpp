@@ -24,6 +24,9 @@ inline constexpr ignore_t ignore;
 struct replace_t { };
 inline constexpr replace_t replace;
 
+struct unique_t { };
+inline constexpr unique_t unique_index;
+
 struct column_info {
     utf8_string Name;
     utf8_string Type;
@@ -40,6 +43,11 @@ public:
     auto name() const -> utf8_string const&;
     auto qualified_name() const -> utf8_string;
     auto info() const -> std::vector<column_info>;
+
+    auto create_index(utf8_string const& indexName, auto&&... columns) -> bool;
+    auto create_index(unique_t, utf8_string const& indexName, auto&&... columns) -> bool;
+    auto drop_index(utf8_string const& indexName) -> bool;
+    auto index_exists(utf8_string const& indexName) const -> bool;
 
     auto column_names() const -> std::set<utf8_string>;
     auto row_count() const -> i32;
@@ -65,6 +73,7 @@ public:
     auto delete_from() const -> delete_statement;
 
 private:
+    auto create_index(utf8_string const& indexName, bool unique, auto&&... columns) -> bool;
     auto insert_into(insert_statement::mode mode, auto&&... columns) const -> insert_statement;
 
     auto check_columns(auto&&... columns) const -> bool;

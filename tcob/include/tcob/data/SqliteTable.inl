@@ -7,6 +7,7 @@
 #include "SqliteTable.hpp"
 
 #include <cassert>
+#include <format>
 #include <vector>
 
 #include "tcob/core/StringUtils.hpp"
@@ -36,6 +37,31 @@ namespace detail {
             return select_statement<Values...> {db, distinct, schema, name, helper::join(columnStrings, ", ")};
         }
     }
+}
+
+inline auto table::create_index(utf8_string const& indexName, auto&&... columns) -> bool
+{
+    return create_index(indexName, false, columns...);
+}
+
+inline auto table::create_index(unique_t, utf8_string const& indexName, auto&&... columns) -> bool
+{
+    return create_index(indexName, true, columns...);
+}
+
+inline auto table::create_index(utf8_string const& indexName, bool isUnique, auto&&... columns) -> bool
+{
+    std::vector<utf8_string> columnStrings;
+    ((columnStrings.push_back(quote_identifier(utf8_string {columns}))), ...);
+
+    statement  stmt {_db};
+    auto const sql {std::format("CREATE {}INDEX IF NOT EXISTS {}.{} ON {} ({});",
+                                isUnique ? "UNIQUE " : "",
+                                quote_identifier(_schema),
+                                quote_identifier(indexName),
+                                quote_identifier(_name),
+                                helper::join(columnStrings, ", "))};
+    return stmt.prepare(sql) && stmt.step() == step_status::Done;
 }
 
 template <typename... Values>

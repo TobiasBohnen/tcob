@@ -79,6 +79,27 @@ auto table::info() const -> std::vector<column_info>
     return retValue;
 }
 
+auto table::drop_index(utf8_string const& indexName) -> bool
+{
+    statement  stmt {_db};
+    auto const sql {std::format("DROP INDEX IF EXISTS {}.{};",
+                                quote_identifier(_schema),
+                                quote_identifier(indexName))};
+    return stmt.prepare(sql) && stmt.step() == step_status::Done;
+}
+
+auto table::index_exists(utf8_string const& indexName) const -> bool
+{
+    statement stmt {_db};
+    if (stmt.prepare(std::format("SELECT COUNT(1) FROM {}.sqlite_master WHERE type='index' AND name={};",
+                                 quote_identifier(_schema), quote_identifier(indexName)))) {
+        if (stmt.step() == step_status::Row) {
+            return stmt.get_column_value<i32>(0) > 0;
+        }
+    }
+    return false;
+}
+
 auto table::column_names() const -> std::set<utf8_string>
 {
     statement select {_db};
