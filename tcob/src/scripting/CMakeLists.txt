@@ -1,6 +1,5 @@
 # scripting
 list(APPEND SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/Scripting.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Lua.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/LuaScript.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/LuaTypes.cpp
