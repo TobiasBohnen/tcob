@@ -25,9 +25,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <algorithm>
 #include <array>
 #include <cstdio>
+#include <span>
+#include <utility>
 
 namespace tcob::detail::magic_enum_reduced {
 
@@ -42,8 +43,7 @@ struct static_string {
     constexpr static_string(string_view sv) noexcept
     {
         // std::copy() is not constexpr in C++17, hence...
-        for (std::size_t n = 0; n < N; ++n)
-            content[n] = sv[n];
+        for (std::size_t n = 0; n < N; ++n) { content[n] = sv[n]; }
     }
     constexpr operator string_view() const noexcept { return {content.data(), N}; }
 
@@ -80,7 +80,7 @@ auto constexpr n() noexcept
 template <typename E, E V>
 auto constexpr is_valid()
 {
-    [[maybe_unused]] constexpr E v = static_cast<E>(V);
+    [[maybe_unused]] constexpr E v = V;
     return !n<E, V>().empty();
 }
 
@@ -90,21 +90,20 @@ auto constexpr ualue(std::size_t v)
     return static_cast<E>(custom_range<E>::Min + v);
 }
 
-template <std::size_t N>
-auto constexpr count_values(bool const (&valid)[N])
+auto constexpr count_values(std::span<bool const> valid)
 {
     std::size_t count = 0;
-    for (std::size_t n = 0; n < N; ++n)
-        if (valid[n])
-            ++count;
+    for (std::size_t n = 0; n < valid.size(); ++n) {
+        if (valid[n]) { ++count; }
+    }
     return count;
 }
 
 template <typename E, std::size_t... I>
 auto constexpr values(std::index_sequence<I...>) noexcept
 {
-    constexpr bool valid[sizeof...(I)] = {is_valid<E, ualue<E>(I)>()...};
-    auto constexpr num_valid           = count_values(valid);
+    constexpr auto valid     = std::array {is_valid<E, ualue<E>(I)>()...};
+    constexpr auto num_valid = count_values(valid);
     static_assert(num_valid > 0, "no support for empty enums");
 
     std::array<E, num_valid> values = {};
@@ -149,21 +148,19 @@ template <typename E>
 inline auto constexpr entries_v = entries<E>(std::make_index_sequence<values_v<E>.size()>());
 
 template <typename E>
-constexpr string_view enum_to_string(E value)
+constexpr auto enum_to_string(E value) -> string_view
 {
     for (auto const& [key, name] : entries_v<E>) {
-        if (value == key)
-            return name;
+        if (value == key) { return name; }
     }
     return {};
 }
 
 template <typename E>
-constexpr E string_to_enum(string_view value)
+constexpr auto string_to_enum(string_view value) -> E
 {
     for (auto const& [key, name] : entries_v<E>) {
-        if (value == name)
-            return key;
+        if (value == name) { return key; }
     }
     return {};
 }

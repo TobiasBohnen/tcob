@@ -19,7 +19,7 @@ BreakConstructorInitializers: BeforeComma
 AllowAllArgumentsOnNextLine: True
 BreakBeforeBinaryOperators: NonAssignment
 AlignArrayOfStructures: None
-Cpp11BracedListStyle: True
+Cpp11BracedListStyle: FunctionCall
 SpaceBeforeCpp11BracedList: True
 IndentPPDirectives: BeforeHash
 BreakBeforeConceptDeclarations: Allowed

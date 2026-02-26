@@ -17,8 +17,9 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
-#include "tcob/core/ext/magic_enum_reduced.hpp"
 #include "tcob/data/Sqlite.hpp"
+
+#include "tcob/core/magic_enum_reduced.hpp"
 
 namespace tcob::db {
 

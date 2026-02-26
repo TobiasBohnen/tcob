@@ -16,6 +16,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/io/Stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/random/Engine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/random/Random.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/spatial/Spatial.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Color.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Common.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces.cpp
@@ -99,7 +100,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Transform.inl
     ${TCOB_INC_DIR}/tcob/core/TypeFactory.hpp
     ${TCOB_INC_DIR}/tcob/core/TypeFactory.inl
-    ${TCOB_INC_DIR}/tcob/core/ext/magic_enum_reduced.hpp
+    ${TCOB_INC_DIR}/tcob/core/magic_enum_reduced.hpp
 )
 
 tcob_add_obj_library(tcob_core "${SRC}" "${HDR}")

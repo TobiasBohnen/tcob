@@ -24,7 +24,7 @@
 #include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
-#include "tcob/core/ext/magic_enum_reduced.hpp"
+#include "tcob/core/magic_enum_reduced.hpp"
 
 namespace tcob::data {
 
