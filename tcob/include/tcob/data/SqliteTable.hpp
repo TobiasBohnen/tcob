@@ -58,6 +58,8 @@ public:
     auto insert_into(ignore_t, auto&&... columns) const -> insert_statement;
     auto insert_into(replace_t, auto&&... columns) const -> insert_statement;
 
+    auto upsert_into(upsert const& ups, auto&&... columns) const -> upsert_statement;
+
     auto update(auto&&... columns) const -> update_statement;
 
     auto delete_from() const -> delete_statement;

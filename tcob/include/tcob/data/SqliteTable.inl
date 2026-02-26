@@ -74,6 +74,17 @@ inline auto table::insert_into(insert_statement::mode mode, auto&&... columns) c
     return insert_statement {_db, mode, _schema, _name, helper::join(columnStrings, ", "), sizeof...(columns)};
 }
 
+inline auto table::upsert_into(upsert const& ups, auto&&... columns) const -> upsert_statement
+{
+    assert(check_columns(columns...));
+    std::vector<utf8_string> columnStrings;
+    std::vector<utf8_string> rawColumnStrings;
+    ((columnStrings.push_back(quote_identifier(utf8_string {columns}))), ...);
+    ((rawColumnStrings.push_back(utf8_string {columns})), ...);
+
+    return upsert_statement {_db, ups.str(rawColumnStrings), _schema, _name, helper::join(columnStrings, ", "), sizeof...(columns)};
+}
+
 inline auto table::update(auto&&... columns) const -> update_statement
 {
     assert(check_columns(columns...));

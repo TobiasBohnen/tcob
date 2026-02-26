@@ -50,6 +50,28 @@ namespace detail {
             return retValue;
         }
     }
+
+    inline auto insert_exec(auto&& stmt, usize columnCount, auto&& value, auto&&... values) -> bool
+    {
+        usize constexpr columnsPerValue {value_size<std::remove_cvref_t<decltype(value)>>::Size};
+        static_assert(((value_size<std::remove_cvref_t<decltype(values)>>::Size == columnsPerValue) && ...),
+                      "All inserted values must have the same number of columns");
+
+        usize const valueCount {count(value, values...)};
+        bool const  singleValues {columnsPerValue == 1 && (valueCount % columnCount) == 0};
+        if (singleValues) {
+            if (!stmt.prepare(stmt.query_string(columnCount, valueCount / columnCount))) { return false; }
+        } else if (columnCount == columnsPerValue) {
+            if (!stmt.prepare(stmt.query_string(columnsPerValue, valueCount))) { return false; }
+        } else {
+            return false;
+        }
+
+        i32 idx {1};
+        stmt.bind_parameter(idx, value);
+        ((stmt.bind_parameter(idx, values)), ...);
+        return stmt.step() == step_status::Done;
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -315,31 +337,14 @@ inline auto update_statement::where(T const& cond) -> update_statement&
 
 inline auto insert_statement::operator()(auto&& value, auto&&... values) -> bool
 {
-    // prepare
-    usize constexpr columnsPerValue {detail::value_size<std::remove_cvref_t<decltype(value)>>::Size};
-    static_assert(((detail::value_size<std::remove_cvref_t<decltype(values)>>::Size == columnsPerValue) && ...), "All inserted values must have the same number of columns");
+    return detail::insert_exec(*this, _columnCount, value, values...);
+}
 
-    usize const valueCount {detail::count(value, values...)};
-    bool const  singleValues {columnsPerValue == 1 && (valueCount % _columnCount) == 0};
-    if (singleValues) {
-        if (!prepare(query_string(_columnCount, valueCount / _columnCount))) {
-            return false;
-        }
-    } else if (_columnCount == columnsPerValue) {
-        if (!prepare(query_string(columnsPerValue, valueCount))) {
-            return false;
-        }
-    } else {
-        return false;
-    }
+////////////////////////////////////////////////////////////
 
-    // bind parameters
-    i32 idx {1};
-    bind_parameter(idx, value);
-    ((bind_parameter(idx, values)), ...);
-
-    // execute
-    return step() == step_status::Done;
+inline auto upsert_statement::operator()(auto&& value, auto&&... values) -> bool
+{
+    return detail::insert_exec(*this, _columnCount, value, values...);
 }
 
 ////////////////////////////////////////////////////////////

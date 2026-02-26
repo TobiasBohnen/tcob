@@ -121,9 +121,9 @@ public:
     template <typename T>
     auto where(T const& cond) -> update_statement&;
 
-private:
     auto query_string() const -> utf8_string;
 
+private:
     utf8_string _where;
     bind_func   _whereBind;
     utf8_string _sql;
@@ -143,10 +143,34 @@ public:
 
     auto operator() [[nodiscard]] (auto&& value, auto&&... values) -> bool;
 
-private:
     auto query_string(usize columnCount, usize rowCount) const -> utf8_string;
 
+private:
     utf8_string _sql;
+    usize       _columnCount;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API upsert {
+public:
+    utf8_string              ConflictColumn;
+    std::vector<utf8_string> UpdateColumns;
+
+    auto str(std::vector<utf8_string> const& rawColumnStrings) const -> utf8_string;
+};
+
+class TCOB_API upsert_statement final : public statement {
+public:
+    upsert_statement(database_view db, utf8_string conflict, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns, usize columnCount);
+
+    auto operator() [[nodiscard]] (auto&& value, auto&&... values) -> bool;
+
+    auto query_string(usize columnCount, usize rowCount) const -> utf8_string;
+
+private:
+    utf8_string _sql;
+    utf8_string _onConflict;
     usize       _columnCount;
 };
 
@@ -161,9 +185,9 @@ public:
     template <typename T>
     auto where(T const& cond) -> delete_statement&;
 
-private:
     auto query_string() const -> utf8_string;
 
+private:
     utf8_string _where;
     bind_func   _whereBind;
     utf8_string _sql;

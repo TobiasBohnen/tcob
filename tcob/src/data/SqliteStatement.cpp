@@ -129,6 +129,35 @@ auto insert_statement::query_string(usize columnCount, usize rowCount) const -> 
 
 ////////////////////////////////////////////////////////////
 
+auto upsert::str(std::vector<utf8_string> const& rawColumnStrings) const -> utf8_string
+{
+    utf8_string setClauses;
+    auto const& updateCols {UpdateColumns.empty() ? rawColumnStrings : UpdateColumns};
+    for (auto const& col : updateCols) {
+        if (col == ConflictColumn) { continue; }
+        if (!setClauses.empty()) { setClauses += ", "; }
+        setClauses += std::format(R"("{}" = excluded."{}")", col, col);
+    }
+    return std::format(R"( ON CONFLICT("{}") DO UPDATE SET {})", ConflictColumn, setClauses);
+}
+
+upsert_statement::upsert_statement(database_view db, utf8_string conflict, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns, usize columnCount)
+    : statement {db}
+    , _onConflict(std::move(conflict))
+    , _columnCount {columnCount}
+{
+    _sql = std::format(R"(INSERT INTO "{}"."{}" ({}))", schemaName, table, columns);
+}
+
+auto upsert_statement::query_string(usize columnCount, usize rowCount) const -> utf8_string
+{
+    auto const paramLine {"(" + helper::join("?", columnCount, ", ") + ")"};
+    auto const paramLines {helper::join(std::vector<utf8_string>(rowCount, paramLine), ", ")};
+    return std::format("{} VALUES {}{};", _sql, paramLines, _onConflict);
+}
+
+////////////////////////////////////////////////////////////
+
 delete_statement::delete_statement(database_view db, utf8_string const& schemaName, utf8_string const& table)
     : statement {db}
 {
