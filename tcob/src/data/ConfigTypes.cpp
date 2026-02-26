@@ -183,7 +183,10 @@ void object::add_entry(index_type key, entry const& entry)
 
 void object::remove_entry(index_type key)
 {
-    values()->erase(find(key));
+    auto* v {values()};
+    if (auto it {find(key)}; it != v->end()) {
+        v->erase(it);
+    }
 }
 
 auto object::find(index_type key) -> cfg_object_entries::iterator
