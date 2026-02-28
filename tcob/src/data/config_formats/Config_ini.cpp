@@ -489,7 +489,7 @@ auto ini_writer::write_section(io::ostream& stream, object const& obj, utf8_stri
             stream << ";" << c << "\n";
         }
 
-        bool const needsEscape {k.find('.') != utf8_string::npos};
+        bool const needsEscape {k.contains('.')};
         if (v.is<object>()) {
             if (needsEscape) {
                 if (prefix.empty()) {
@@ -536,7 +536,7 @@ auto ini_writer::write_inline_section(io::ostream& stream, object const& obj, us
         if (!first) { stream << ", "; }
         first = false;
 
-        bool const needsEscape {k.find('.') != utf8_string::npos};
+        bool const needsEscape {k.contains('.')};
         if (needsEscape) {
             stream << "'" << k << "' = ";
         } else {

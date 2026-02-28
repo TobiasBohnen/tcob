@@ -53,6 +53,11 @@ auto to_string(char const* s) -> string
 
 auto split(string_view str, char delim) -> std::vector<string_view>
 {
+    return split(str, {&delim, 1});
+}
+
+auto split(string_view str, string_view delim) -> std::vector<string_view>
+{
     std::vector<string_view> retValue;
     retValue.reserve(10);
 
@@ -60,7 +65,7 @@ auto split(string_view str, char delim) -> std::vector<string_view>
     usize end {str.find(delim)};
     while (end != string_view::npos) {
         retValue.emplace_back(str.substr(start, end - start));
-        start = end + 1;
+        start = end + delim.size();
         end   = str.find(delim, start);
     }
     if (start < str.size()) {
@@ -71,11 +76,16 @@ auto split(string_view str, char delim) -> std::vector<string_view>
 
 auto split_once(string_view str, char delim) -> std::pair<string_view, string_view>
 {
+    return split_once(str, {&delim, 1});
+}
+
+auto split_once(string_view str, string_view delim) -> std::pair<string_view, string_view>
+{
     usize const pos {str.find(delim)};
     if (pos == string_view::npos) { return {str, {}}; }
 
     string_view key {str.substr(0, pos)};
-    string_view value {str.substr(pos + 1)};
+    string_view value {str.substr(pos + delim.size())};
     return {key, value};
 }
 

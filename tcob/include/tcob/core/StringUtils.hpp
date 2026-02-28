@@ -32,7 +32,9 @@ TCOB_API auto join(string_view c, usize count, string_view delim) -> string;
 
 auto          split_for_each(string_view str, char delim, auto&& f) -> bool;
 TCOB_API auto split(string_view str, char delim) -> std::vector<string_view>;
+TCOB_API auto split(string_view str, string_view delim) -> std::vector<string_view>;
 TCOB_API auto split_once(string_view str, char delim) -> std::pair<string_view, string_view>;
+TCOB_API auto split_once(string_view str, string_view delim) -> std::pair<string_view, string_view>;
 
 auto          split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> bool;
 TCOB_API auto split_preserve_brackets(string_view str, char delim) -> std::vector<string_view>;
