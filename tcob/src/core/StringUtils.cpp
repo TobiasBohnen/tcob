@@ -112,6 +112,8 @@ auto trim(string_view source) -> string_view
 
 auto replace(string_view source, string_view from, string_view to) -> string
 {
+    if (from.empty()) { return string {source}; }
+
     string retValue;
     usize  startPos {0};
     usize  fromPos {0};
@@ -169,7 +171,7 @@ auto random_string(usize length) -> string
     return retValue;
 }
 
-auto join(string_view c, usize count, string_view delim) -> string
+auto rep(string_view c, usize count, string_view delim) -> string
 {
     if (count == 0 || c.empty()) { return {}; }
 

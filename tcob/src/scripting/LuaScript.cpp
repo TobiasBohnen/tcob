@@ -112,6 +112,7 @@ void script::open_addons()
         tab["starts_with"] = +[](string_view s, string_view prefix) { return s.starts_with(prefix); };
         tab["ends_with"]   = +[](string_view s, string_view suffix) { return s.ends_with(suffix); };
         tab["split"]       = +[](string_view s, string_view delim) { return helper::split(s, delim); };
+        tab["replace"]     = +[](string_view s, string_view from, string_view to) { return helper::replace(s, from, to); };
     });
 
     with("table", [](auto&& tab) {

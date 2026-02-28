@@ -122,7 +122,7 @@ insert_statement::insert_statement(database_view db, mode mode, utf8_string cons
 auto insert_statement::query_string(usize columnCount, usize rowCount) const -> utf8_string
 {
     // values
-    auto const paramLine {"(" + helper::join("?", columnCount, ", ") + ")"};
+    auto const paramLine {"(" + helper::rep("?", columnCount, ", ") + ")"};
     auto const paramLines {helper::join(std::vector<utf8_string>(rowCount, paramLine), ", ")};
     return std::format("{} VALUES {};", _sql, paramLines);
 }
@@ -151,7 +151,7 @@ upsert_statement::upsert_statement(database_view db, utf8_string conflict, utf8_
 
 auto upsert_statement::query_string(usize columnCount, usize rowCount) const -> utf8_string
 {
-    auto const paramLine {"(" + helper::join("?", columnCount, ", ") + ")"};
+    auto const paramLine {"(" + helper::rep("?", columnCount, ", ") + ")"};
     auto const paramLines {helper::join(std::vector<utf8_string>(rowCount, paramLine), ", ")};
     return std::format("{} VALUES {}{};", _sql, paramLines, _onConflict);
 }
