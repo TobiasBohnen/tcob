@@ -5,11 +5,15 @@
 
 #include "tcob/scripting/LuaScript.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <memory>
 #include <optional>
 #include <utility>
+#include <variant>
 
 #include "tcob/core/Logger.hpp"
+#include "tcob/core/StringUtils.hpp"
 #include "tcob/scripting/Lua.hpp"
 #include "tcob/scripting/LuaTypes.hpp"
 #include "tcob/scripting/Scripting.hpp"
@@ -81,6 +85,39 @@ auto script::gc() const -> garbage_collector
 auto script::create_table() const -> table
 {
     return table::Create(_view);
+}
+
+void script::open_addons()
+{
+    auto const with {[&](string const& name, auto fn) {
+        if (_globalTable.has(name)) { fn(_globalTable[name].as<table>()); }
+    }};
+
+    with("math", [](auto&& tab) {
+        tab["clamp"]    = +[](f32 v, f32 low, f32 high) { return std::clamp(v, low, high); };
+        tab["lerp"]     = +[](f32 a, f32 b, f32 t) { return a + ((b - a) * t); };
+        tab["round"]    = +[](f32 v) { return std::round(v); };
+        tab["sign"]     = +[](f32 v) -> f32 { return (v > 0.f) - (v < 0.f); };
+        tab["saturate"] = +[](f32 v) { return std::clamp(v, 0.f, 1.f); };
+        tab["wrap"]     = +[](f32 v, f32 low, f32 high) {
+            f32 const range {high - low};
+            f32       result {std::fmod(v - low, range)};
+            if (result < 0.f) { result += range; }
+            return low + result;
+        };
+    });
+
+    with("string", [](auto&& tab) {
+        tab["trim"]        = +[](string_view s) { return helper::trim(s); };
+        tab["starts_with"] = +[](string_view s, string_view prefix) { return s.starts_with(prefix); };
+        tab["ends_with"]   = +[](string_view s, string_view suffix) { return s.ends_with(suffix); };
+        tab["split"]       = +[](string_view s, string_view delim) { return helper::split(s, delim); };
+    });
+
+    with("table", [](auto&& tab) {
+        tab["contains"] = +[](table const& t, std::variant<string, i32> s) { return t.has(s); };
+        tab["keys"]     = +[](table const& t) { return t.get_keys<std::variant<i32, string>>(); };
+    });
 }
 
 auto script::call_buffer(string_view script, string const& name) const -> std::optional<error_code>

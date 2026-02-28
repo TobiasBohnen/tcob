@@ -66,6 +66,8 @@ public:
     template <typename... Args>
     void open_libraries(Args... args);
 
+    void open_addons();
+
     template <typename R = void>
     auto load_binary(path const& file) const -> function<R>;
     template <typename R = void>
