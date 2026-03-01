@@ -277,16 +277,14 @@ void gl_canvas::render_clip(canvas::scissor const& scissor, f32 fringe, std::vec
         return;
     }
 
-    usize const pathCount {paths.size()};
-
     call.PathOffset    = _paths.size();
-    call.PathCount     = pathCount;
+    call.PathCount     = paths.size();
     call.Image         = nullptr;
     call.Type          = nvg_call_type::Clip;
     call.TriangleCount = 0;
 
     // Allocate vertices.
-    usize const maxverts {get_max_vertcount(paths) + call.TriangleCount};
+    usize const maxverts {get_max_vertcount(paths)};
     usize       offset {alloc_verts(maxverts)};
 
     for (auto const& path : paths) {
