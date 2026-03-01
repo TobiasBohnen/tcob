@@ -564,7 +564,7 @@ void widget_painter::do_bordered_circle(rect_f const& rect, paint const& back, b
 
     // border
     f32 const borderSize {borderStyle.Size.calc(rect.width())};
-    do_border({rect.left() + (rect.width() / 2 - r), rect.top() + (rect.height() / 2 - r), r * 2, r * 2}, borderStyle, borderSize, r);
+    do_border({rect.left() + ((rect.width() / 2) - r), rect.top() + ((rect.height() / 2) - r), r * 2, r * 2}, borderStyle, borderSize, r);
 }
 
 void widget_painter::do_border(rect_f const& rect, border_element const& borderStyle, f32 borderSize, f32 borderRadius)
