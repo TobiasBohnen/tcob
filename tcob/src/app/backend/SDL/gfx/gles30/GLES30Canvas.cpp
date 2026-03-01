@@ -370,7 +370,7 @@ auto gl_canvas::convert_paint(canvas::paint const& paint, canvas::scissor const&
     }
 
     retValue.Extent     = paint.Extent.to_array();
-    retValue.StrokeMult = (width * 0.5f + fringe * 0.5f) / fringe;
+    retValue.StrokeMult = ((width * 0.5f) + (fringe * 0.5f)) / fringe;
     retValue.StrokeThr  = strokeThr;
 
     if (paint.Image) {
