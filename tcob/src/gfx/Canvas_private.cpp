@@ -92,29 +92,6 @@ static auto PointEquals(f32 x1, f32 y1, f32 x2, f32 y2, f32 tol) -> i32
     return (dx * dx) + (dy * dy) < tol * tol;
 }
 
-static void PolyReverse(std::span<canvas_point> pts)
-{
-    canvas_point tmp;
-    usize        i {0};
-    usize        j {pts.size() - 1};
-    while (i < j) {
-        tmp    = pts[i];
-        pts[i] = pts[j];
-        pts[j] = tmp;
-        ++i;
-        --j;
-    }
-}
-
-static auto TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -> f32
-{
-    f32 const abx {bx - ax};
-    f32 const aby {by - ay};
-    f32 const acx {cx - ax};
-    f32 const acy {cy - ay};
-    return (acx * aby) - (abx * acy);
-}
-
 static void ChooseBevel(bool bevel, canvas_point const& p0, canvas_point const& p1, f32 w, f32& x0, f32& y0, f32& x1, f32& y1)
 {
     if (bevel) {
@@ -442,6 +419,14 @@ static auto DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
 
 static auto PolyArea(std::span<canvas_point> pts)
 {
+    static auto const TriArea2 {[](f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -> f32 {
+        f32 const abx {bx - ax};
+        f32 const aby {by - ay};
+        f32 const acx {cx - ax};
+        f32 const acy {cy - ay};
+        return (acx * aby) - (abx * acy);
+    }};
+
     f32 area {0};
     for (usize i {2}; i < pts.size(); ++i) {
         canvas_point const a {pts[0]};
@@ -677,8 +662,10 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
         // Enforce winding if requested.
         if (enforceWinding && path.Count > 2) {
             f32 const area {PolyArea({start, path.Count})};
-            if (path.Winding == winding::CCW && area < 0.0f) { PolyReverse({start, path.Count}); }
-            if (path.Winding == winding::CW && area > 0.0f) { PolyReverse({start, path.Count}); }
+            if ((path.Winding == winding::CCW && area < 0.0f)
+                || (path.Winding == winding::CW && area > 0.0f)) {
+                std::ranges::reverse(std::span {start, path.Count});
+            }
         }
 
         // Calculate segment direction, length, and update _bounds.
@@ -719,14 +706,14 @@ void path_cache::expand_stroke(f32 w, line_cap lineCap, line_join lineJoin, f32 
     usize cverts {0};
     for (auto const& path : _paths) {
         if (lineJoin == line_join::Round) {
-            cverts += (path.Count + path.BevelCount * (ncap + 2) + 1) * 2; // plus one for loop}
+            cverts += (path.Count + (path.BevelCount * (ncap + 2)) + 1) * 2; // plus one for loop
         } else {
-            cverts += (path.Count + path.BevelCount * 5 + 1) * 2;          // plus one for loop}
+            cverts += (path.Count + (path.BevelCount * 5) + 1) * 2;          // plus one for loop
         }
         if (!path.Closed) {
             // space for caps
             if (lineCap == line_cap::Round) {
-                cverts += (ncap * 2 + 2) * 2;
+                cverts += ((ncap * 2) + 2) * 2;
             } else {
                 cverts += (3 + 3) * 2;
             }
@@ -828,7 +815,7 @@ void path_cache::expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 frin
     for (auto const& path : _paths) {
         cverts += path.Count + path.BevelCount + 1;
         if (fringe) {
-            cverts += (path.Count + path.BevelCount * 5 + 1) * 2; // plus one for loop
+            cverts += (path.Count + (path.BevelCount * 5) + 1) * 2; // plus one for loop
         }
     }
 
@@ -1022,7 +1009,7 @@ void path_cache::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2, f32 x3, f32 y3
     f32 const d2 {std::abs((((x2 - x4) * dy) - ((y2 - y4) * dx)))};
     f32 const d3 {std::abs((((x3 - x4) * dy) - ((y3 - y4) * dx)))};
 
-    if ((d2 + d3) * (d2 + d3) < _tessTolerance * (dx * dx + dy * dy)) {
+    if ((d2 + d3) * (d2 + d3) < _tessTolerance * ((dx * dx) + (dy * dy))) {
         add_point(x4, y4, type);
         return;
     }
@@ -1108,5 +1095,4 @@ void path_cache::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
         path.Convex = (nleft == path.Count);
     }
 }
-
 }
