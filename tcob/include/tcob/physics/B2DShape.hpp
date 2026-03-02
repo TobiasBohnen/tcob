@@ -104,7 +104,7 @@ public:
     struct settings {
         shape::settings Shape;
 
-        std::span<point_f const> Verts;
+        std::span<point_f const> Vertices;
         f32                      Radius {};
     };
 

@@ -1330,8 +1330,8 @@ static auto GetShapeDef(shape::settings const& shapeSettings)
 b2d_shape::b2d_shape(b2d_body* body, polygon_shape::settings const& settings, shape::settings const& shapeSettings)
 {
     std::vector<b2Vec2> v;
-    v.reserve(settings.Verts.size());
-    for (auto const& vert : settings.Verts) {
+    v.reserve(settings.Vertices.size());
+    for (auto const& vert : settings.Vertices) {
         v.emplace_back(vert.X, vert.Y);
     }
 
