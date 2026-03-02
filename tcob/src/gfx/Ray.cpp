@@ -57,7 +57,7 @@ auto ray::intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, 
 
 auto ray::intersect_circle(point_f const& center, f32 radius) const -> std::vector<result>
 {
-    f64 const b {2.0 * ((_origin.X - center.X) * _direction.X + (_origin.Y - center.Y) * _direction.Y)};
+    f64 const b {2.0 * (((_origin.X - center.X) * _direction.X) + ((_origin.Y - center.Y) * _direction.Y))};
     f64 const c {((_origin.X - center.X) * (_origin.X - center.X)) + ((_origin.Y - center.Y) * (_origin.Y - center.Y)) - (radius * radius)};
 
     f64 const discr {(b * b) - (4 * c)};
