@@ -387,7 +387,7 @@ void color_picker::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void color_picker::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    if (hover_color(ev.Position) && select_color()) { ev.Handled = true; }
+    if (select_color()) { ev.Handled = true; }
 }
 
 void color_picker::on_mouse_button_down(input::mouse::button_event const& ev)

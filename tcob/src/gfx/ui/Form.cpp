@@ -424,10 +424,9 @@ void form_base::on_key_up(input::keyboard::event const& ev)
 void form_base::on_mouse_motion(input::mouse::motion_event const& ev)
 {
     _mousePos = ev.Position;
-    if (_isLButtonDown) { // FIXME: restict (widget::can_drag?) TODO: add drag origin
+    on_mouse_hover(ev);
+    if (_isLButtonDown) { // TODO: add drag origin
         _injector.on_mouse_drag(_focusWidget, ev);
-    } else {
-        on_mouse_hover(ev);
     }
 }
 
