@@ -39,8 +39,9 @@ inline void scene_node::handle_input_event(auto&& event, auto&& handler, transfo
     if (*Entity && Entity->is_visible()) {
         if constexpr (requires { event.Position; }) {
             auto ev {event};
-            ev.Position = point_i {world.as_inverted() * point_f {ev.Position}};
+            ev.Position = point_i {world.as_inverted() * point_f {ev.Position}}; // TODO: let entity handle transform
             ((*Entity).get()->*handler)(ev);
+            event.Handled = ev.Handled;
         } else {
             ((*Entity).get()->*handler)(event);
         }

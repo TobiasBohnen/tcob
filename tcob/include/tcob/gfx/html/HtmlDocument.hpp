@@ -14,6 +14,7 @@
     #include "tcob/core/Property.hpp"
     #include "tcob/core/Rect.hpp"
     #include "tcob/core/Signal.hpp"
+    #include "tcob/core/Transform.hpp"
     #include "tcob/core/assets/Asset.hpp"
     #include "tcob/core/assets/Assets.hpp"
     #include "tcob/core/input/Input.hpp"
