@@ -178,6 +178,8 @@ public:
 
     auto get_impl() -> detail::b2d_body*;
 
+    auto test_point(point_f pos) const -> bool;
+
 private:
     body(world& world, detail::b2d_world* b2dWorld, body_transform const& xform, settings const& bodySettings);
 

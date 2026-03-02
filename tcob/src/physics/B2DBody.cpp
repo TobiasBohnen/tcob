@@ -5,6 +5,7 @@
 
 #include "tcob/physics/B2DBody.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <memory>
 
@@ -97,6 +98,11 @@ auto body::rotational_inertia() const -> f32
 void body::set_mass_data(mass_data const& data) const
 {
     _impl->set_mass_data(data);
+}
+
+auto body::aabb() const -> rect_f
+{
+    return _impl->compute_aabb();
 }
 
 auto body::world_to_local_point(point_f pos) const -> point_f
@@ -221,9 +227,9 @@ void body::enable_hit_events(bool enable) const
     _impl->enable_hit_events(enable);
 }
 
-auto body::aabb() const -> rect_f
+auto body::test_point(point_f pos) const -> bool
 {
-    return _impl->compute_aabb();
+    return std::ranges::any_of(_shapes, [pos](auto const& shape) { return shape->test_point(pos); });
 }
 
 ////////////////////////////////////////////////////////////
