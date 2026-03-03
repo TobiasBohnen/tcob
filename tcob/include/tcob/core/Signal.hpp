@@ -98,11 +98,7 @@ public:
         requires(IsVoid);
 
     template <typename S = EvArgs>
-    void operator()(S const& args) const
-        requires(!IsVoid);
-
-    template <typename S = EvArgs>
-    void operator()(S& args) const
+    void operator()(S&& args) const
         requires(!IsVoid);
 
     template <typename Func>

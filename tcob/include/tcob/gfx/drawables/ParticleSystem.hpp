@@ -32,13 +32,6 @@
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace tcob::gfx {
-////////////////////////////////////////////////////////////
-
-template <typename T>
-struct particle_event {
-    T&           Particle;
-    milliseconds DeltaTime;
-};
 
 ////////////////////////////////////////////////////////////
 
@@ -134,6 +127,13 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+struct particle_event {
+    particle&    Particle;
+    milliseconds DeltaTime;
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API particle_emitter final : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
@@ -186,7 +186,7 @@ public:
 
     ~particle_system() override = default;
 
-    signal<particle_event<particle> const> ParticleUpdate;
+    signal<particle_event> ParticleUpdate;
 
     prop<asset_ptr<material>> Material;
 

@@ -30,11 +30,10 @@ inline void signal<EvArgs>::operator()() const
 
 template <typename EvArgs>
 template <typename S>
-inline void signal<EvArgs>::operator()(S const& args) const
+inline void signal<EvArgs>::operator()(S&& args) const // NOLINT
     requires(!IsVoid)
 {
     bool needsCleanup {false};
-
     for (isize i {0}; i < std::ssize(_slots); ++i) {
         auto const& [id, func] {_slots[i]};
         if (func) {
@@ -46,31 +45,6 @@ inline void signal<EvArgs>::operator()(S const& args) const
             needsCleanup = true;
         }
     }
-
-    if (needsCleanup) {
-        std::erase_if(_slots, [](auto const& slot) { return !slot.second; });
-    }
-}
-
-template <typename EvArgs>
-template <typename S>
-inline void signal<EvArgs>::operator()(S& args) const
-    requires(!IsVoid)
-{
-    bool needsCleanup {false};
-
-    for (isize i {0}; i < std::ssize(_slots); ++i) {
-        auto const& [id, func] {_slots[i]};
-        if (func) {
-            if constexpr (requires { args.Handled; }) {
-                if (args.Handled) { break; }
-            }
-            func(args);
-        } else {
-            needsCleanup = true;
-        }
-    }
-
     if (needsCleanup) {
         std::erase_if(_slots, [](auto const& slot) { return !slot.second; });
     }
