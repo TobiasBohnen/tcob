@@ -63,7 +63,7 @@ drop_down_list::drop_down_list(init const& wi)
 
     Class("drop_down_list");
 
-    form().DrawOverlay.connect([&](widget_painter& painter) {
+    _drawOverlayCon = form().DrawOverlay.connect([this](widget_painter& painter) {
         if (!_isExtended) { return; }
 
         transform xform;

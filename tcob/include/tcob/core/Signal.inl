@@ -15,7 +15,7 @@ inline void signal<EvArgs>::operator()() const
     bool needsCleanup {false};
 
     for (isize i {0}; i < std::ssize(_slots); ++i) {
-        auto const& [id, func] = _slots[i];
+        auto const& [id, func] {_slots[i]};
         if (func) {
             func();
         } else {
@@ -24,9 +24,7 @@ inline void signal<EvArgs>::operator()() const
     }
 
     if (needsCleanup) {
-        std::erase_if(_slots, [](auto const& slot) {
-            return !slot.second;
-        });
+        std::erase_if(_slots, [](auto const& slot) { return !slot.second; });
     }
 }
 
@@ -38,7 +36,7 @@ inline void signal<EvArgs>::operator()(S const& args) const
     bool needsCleanup {false};
 
     for (isize i {0}; i < std::ssize(_slots); ++i) {
-        auto const& [id, func] = _slots[i];
+        auto const& [id, func] {_slots[i]};
         if (func) {
             if constexpr (requires { args.Handled; }) {
                 if (args.Handled) { break; }
@@ -50,9 +48,7 @@ inline void signal<EvArgs>::operator()(S const& args) const
     }
 
     if (needsCleanup) {
-        std::erase_if(_slots, [](auto const& slot) {
-            return !slot.second;
-        });
+        std::erase_if(_slots, [](auto const& slot) { return !slot.second; });
     }
 }
 
@@ -64,7 +60,7 @@ inline void signal<EvArgs>::operator()(S& args) const
     bool needsCleanup {false};
 
     for (isize i {0}; i < std::ssize(_slots); ++i) {
-        auto const& [id, func] = _slots[i];
+        auto const& [id, func] {_slots[i]};
         if (func) {
             if constexpr (requires { args.Handled; }) {
                 if (args.Handled) { break; }
@@ -76,9 +72,7 @@ inline void signal<EvArgs>::operator()(S& args) const
     }
 
     if (needsCleanup) {
-        std::erase_if(_slots, [](auto const& slot) {
-            return !slot.second;
-        });
+        std::erase_if(_slots, [](auto const& slot) { return !slot.second; });
     }
 }
 

@@ -68,5 +68,6 @@ private:
     std::optional<point_f> _dragPosition {std::nullopt};
 
     animation_tweener _animationTween;
+    scoped_connection _drawOverlayCon;
 };
 }

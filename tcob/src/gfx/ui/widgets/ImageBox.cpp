@@ -45,7 +45,7 @@ image_box::image_box(init const& wi)
 
     _animationTween.Changed.connect([this](auto const& val) { Image.mutate([&val](icon& icon) { icon.TextureRegion = val; }); });
 
-    form().DrawOverlay.connect([&](widget_painter& painter) {
+    _drawOverlayCon = form().DrawOverlay.connect([this](widget_painter& painter) {
         if (!_dragPosition) { return; }
 
         auto&     myCanvas {painter.canvas()};

@@ -11,6 +11,7 @@
 
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -93,5 +94,6 @@ private:
     scrollbar _vScrollbar;
 
     drop_down_list::style _style;
+    scoped_connection     _drawOverlayCon;
 };
 }
