@@ -29,7 +29,7 @@ inline void widget::prepare_sub_style(T& style, isize idx, string const& styleCl
         .Attributes = attributes(),
     };
     auto* subStyle {static_cast<T*>(styles().get(selectors))};
-    _subStyleTransitions[idx].try_start(subStyle, TransitionDuration, TransitionStep);
+    _subStyleTransitions[idx].start(subStyle, TransitionDuration, TransitionStep);
     _subStyleTransitions[idx].apply(style);
 }
 

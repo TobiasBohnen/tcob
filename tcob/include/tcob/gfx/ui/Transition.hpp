@@ -6,18 +6,20 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/gfx/ui/Style.hpp"
+
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+template <std::derived_from<style> T>
 class transition {
 public:
-    void try_start(T const* target, milliseconds duration, milliseconds step);
+    void start(T const* target, milliseconds duration, milliseconds step);
     void reset(T const* target);
 
     auto update(milliseconds deltaTime) -> bool;
 
-    template <typename S>
+    template <std::derived_from<style> S>
     void apply(S& style);
 
 private:

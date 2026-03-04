@@ -9,11 +9,13 @@
 #include <algorithm>
 #include <cassert>
 
+#include "tcob/gfx/ui/Style.hpp"
+
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline void transition<T>::try_start(T const* target, milliseconds duration, milliseconds step)
+template <std::derived_from<style> T>
+inline void transition<T>::start(T const* target, milliseconds duration, milliseconds step)
 {
     if (target == _targetStyle) { return; }
 
@@ -26,7 +28,7 @@ inline void transition<T>::try_start(T const* target, milliseconds duration, mil
     _targetStyle = target;
 }
 
-template <typename T>
+template <std::derived_from<style> T>
 inline void transition<T>::reset(T const* target)
 {
     _currentTime = milliseconds::zero();
@@ -38,13 +40,13 @@ inline void transition<T>::reset(T const* target)
     _sourceStyle = _targetStyle;
 }
 
-template <typename T>
+template <std::derived_from<style> T>
 auto transition<T>::is_active() const -> bool
 {
     return _duration.count() > 0 && _currentTime < _duration && _sourceStyle && _targetStyle;
 }
 
-template <typename T>
+template <std::derived_from<style> T>
 auto transition<T>::update(milliseconds deltaTime) -> bool
 {
     if (!is_active()) { return false; }
@@ -59,18 +61,13 @@ auto transition<T>::update(milliseconds deltaTime) -> bool
     return false;
 }
 
-template <typename T>
-template <typename S>
+template <std::derived_from<style> T>
+template <std::derived_from<style> S>
 inline void transition<T>::apply(S& style)
 {
     if (_targetStyle) {
-#if defined(TCOB_DEBUG)
-        auto dp {dynamic_cast<S const*>(_targetStyle)};
-        assert(dp);
-        style = *dp;
-#else
+        assert(dynamic_cast<S const*>(_targetStyle));
         style = *static_cast<S const*>(_targetStyle);
-#endif
     }
 
     if (!is_active()) { return; }

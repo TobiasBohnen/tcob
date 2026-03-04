@@ -259,7 +259,7 @@ void widget::prepare_redraw()
 
     if (_lastSelectors != newSelectors) {
         auto* style {dynamic_cast<widget_style*>(_form->Styles->get(newSelectors))};
-        _transition.try_start(style, TransitionDuration, TransitionStep);
+        _transition.start(style, TransitionDuration, TransitionStep);
         _currentStyle = style;
 
         _lastSelectors = newSelectors;
