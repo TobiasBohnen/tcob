@@ -8,6 +8,7 @@
 
 #include <vector>
 
+#include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
@@ -72,7 +73,7 @@ private:
 
 class TCOB_API marimekko_chart : public chart<std::vector<f32>> {
 public:
-    class TCOB_API style : public grid_chart_style {
+    class TCOB_API style : public chart_style {
     public:
         dimensions BarSize {};
         length     BarRadius {};
@@ -95,6 +96,10 @@ class TCOB_API pie_chart : public chart<f32> {
 public:
     class TCOB_API style : public chart_style {
     public:
+        length   InnerRadius {0, length::type::Relative};
+        degree_f PadAngle {0};
+
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit pie_chart(init const& wi);

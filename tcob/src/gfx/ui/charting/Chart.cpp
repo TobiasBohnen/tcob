@@ -295,6 +295,14 @@ void marimekko_chart::on_draw_chart(widget_painter& painter)
 
 ////////////////////////////////////////////////////////////
 
+void pie_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
+{
+    chart_style::Transition(target, from, to, step);
+
+    target.InnerRadius = length::Lerp(from.InnerRadius, to.InnerRadius, step);
+    target.PadAngle    = degree_f::Lerp(from.PadAngle, to.PadAngle, step);
+}
+
 pie_chart::pie_chart(init const& wi)
     : chart {wi}
 {
@@ -312,20 +320,40 @@ void pie_chart::on_draw_chart(widget_painter& painter)
     if (total == 0.0) { return; }
 
     auto const [cx, cy] {rect.center()};
-    f32 const radius {std::min(rect.width(), rect.height()) / 2};
+    f32 const  radius {std::min(rect.width(), rect.height()) / 2};
+    f32 const  innerRadius {std::min(_style.InnerRadius.calc(radius), radius * 0.95f)};
+    bool const isDonut {innerRadius > 0.0f};
+    f64 const  padAngle {radian_d {_style.PadAngle}.Value};
+    f64 const  halfPad {padAngle / 2.0};
 
     f64 angle {0.0};
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
+        f64 const   fraction {s.Value / total};
+        f64 const   fullSweep {fraction * TAU};
+        f64 const   sweep {std::max(0.0, fullSweep - padAngle)};
 
-        f64 const fraction {s.Value / total};
-        f64 const sweep {fraction * TAU};
+        if (sweep <= 0.0) {
+            angle += fullSweep;
+            continue;
+        }
+
+        f64 const startAngle {angle + halfPad};
 
         canvas.begin_path();
-        canvas.move_to({cx, cy});
-        canvas.arc({cx, cy}, radius,
-                   radian_d {angle}, radian_d {angle + sweep},
-                   gfx::winding::CW);
+        if (isDonut) {
+            canvas.arc({cx, cy}, radius,
+                       radian_d {startAngle}, radian_d {startAngle + sweep},
+                       gfx::winding::CW);
+            canvas.arc({cx, cy}, innerRadius,
+                       radian_d {startAngle + sweep}, radian_d {startAngle},
+                       gfx::winding::CCW);
+        } else {
+            canvas.move_to({cx, cy});
+            canvas.arc({cx, cy}, radius,
+                       radian_d {startAngle}, radian_d {startAngle + sweep},
+                       gfx::winding::CW);
+        }
         canvas.close_path();
 
         canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
@@ -334,7 +362,7 @@ void pie_chart::on_draw_chart(widget_painter& painter)
         canvas.set_stroke_style(colors::Black);
         canvas.stroke();
 
-        angle += sweep;
+        angle += fullSweep;
     }
 }
 
