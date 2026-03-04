@@ -537,8 +537,8 @@ void radar_chart::on_draw_chart(widget_painter& painter)
         }
     }
 
-    // TODO: outline
     f32 const lineWidth {_style.LineSize.calc(radius)};
+    f32 const outlineWidth {lineWidth + _style.OutlineSize.calc(radius)};
 
     // draw series polygons
     for (usize i {0}; i < Dataset->size(); ++i) {
@@ -565,11 +565,19 @@ void radar_chart::on_draw_chart(widget_painter& painter)
         if (_style.FillAreaAlpha > 0) {
             canvas.set_fill_style({c.R, c.G, c.B, _style.FillAreaAlpha});
             canvas.fill();
-        }
 
-        canvas.set_stroke_style(c);
-        canvas.set_stroke_width(lineWidth);
-        canvas.stroke();
+            canvas.set_stroke_style(_style.OutlineColor);
+            canvas.set_stroke_width(outlineWidth);
+            canvas.stroke();
+        } else {
+            canvas.set_stroke_style(_style.OutlineColor);
+            canvas.set_stroke_width(outlineWidth);
+            canvas.stroke();
+
+            canvas.set_stroke_style(c);
+            canvas.set_stroke_width(lineWidth);
+            canvas.stroke();
+        }
     }
 }
 
