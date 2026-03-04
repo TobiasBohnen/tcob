@@ -98,8 +98,8 @@ void thumb_element::lerp(thumb_element const& from, thumb_element const& to, f64
 {
     paint_lerp(Background, from.Background, to.Background, step);
 
-    LongSide  = length::Lerp(from.LongSide, to.LongSide, step);
-    ShortSide = length::Lerp(from.ShortSide, to.ShortSide, step);
+    LongSide  = helper::lerp(from.LongSide, to.LongSide, step);
+    ShortSide = helper::lerp(from.ShortSide, to.ShortSide, step);
     Border.lerp(from.Border, to.Border, step);
 }
 
@@ -111,7 +111,7 @@ void nav_arrow_element::lerp(nav_arrow_element const& from, nav_arrow_element co
 
     Size = dimensions::Lerp(from.Size, to.Size, step);
     Border.lerp(from.Border, to.Border, step);
-    Padding = thickness::Lerp(from.Padding, to.Padding, step);
+    Padding = helper::lerp(from.Padding, to.Padding, step);
 }
 
 void bar_element::lerp(bar_element const& from, bar_element const& to, f64 step)
@@ -119,7 +119,7 @@ void bar_element::lerp(bar_element const& from, bar_element const& to, f64 step)
     paint_lerp(LowerBackground, from.LowerBackground, to.LowerBackground, step);
     paint_lerp(HigherBackground, from.HigherBackground, to.HigherBackground, step);
 
-    Size = length::Lerp(from.Size, to.Size, step);
+    Size = helper::lerp(from.Size, to.Size, step);
     Border.lerp(from.Border, to.Border, step);
 }
 
@@ -127,8 +127,8 @@ void border_element::lerp(border_element const& from, border_element const& to, 
 {
     paint_lerp(Background, from.Background, to.Background, step);
 
-    Radius = length::Lerp(from.Radius, to.Radius, step);
-    Size   = length::Lerp(from.Size, to.Size, step);
+    Radius = helper::lerp(from.Radius, to.Radius, step);
+    Size   = helper::lerp(from.Size, to.Size, step);
 
     usize const         ldashSize {from.Dash.size()};
     usize const         rdashSize {to.Dash.size()};
@@ -137,7 +137,7 @@ void border_element::lerp(border_element const& from, border_element const& to, 
     for (usize i {0}; i < targetDash.size(); ++i) {
         auto const ldash {i < ldashSize ? from.Dash[i] : length {0, i < rdashSize ? to.Dash[i].Type : length::type::Absolute}};
         auto const rdash {i < rdashSize ? to.Dash[i] : length {0, i < ldashSize ? from.Dash[i].Type : length::type::Absolute}};
-        targetDash[i] = length::Lerp(ldash, rdash, step);
+        targetDash[i] = helper::lerp(ldash, rdash, step);
     }
     Dash = targetDash;
 
@@ -146,37 +146,37 @@ void border_element::lerp(border_element const& from, border_element const& to, 
 
 void text_element::lerp(text_element const& from, text_element const& to, f64 step)
 {
-    Color = color::Lerp(from.Color, to.Color, step);
-    Size  = length::Lerp(from.Size, to.Size, step);
+    Color = helper::lerp(from.Color, to.Color, step);
+    Size  = helper::lerp(from.Size, to.Size, step);
     Decoration.lerp(from.Decoration, to.Decoration, step);
     Shadow.lerp(from.Shadow, to.Shadow, step);
 }
 
 void caret_element::lerp(caret_element const& from, caret_element const& to, f64 step)
 {
-    Color  = color::Lerp(from.Color, to.Color, step);
-    Height = length::Lerp(from.Height, to.Height, step);
-    Width  = length::Lerp(from.Width, to.Width, step);
+    Color  = helper::lerp(from.Color, to.Color, step);
+    Height = helper::lerp(from.Height, to.Height, step);
+    Width  = helper::lerp(from.Width, to.Width, step);
 }
 
 void shadow_element::lerp(shadow_element const& from, shadow_element const& to, f64 step)
 {
-    Color   = color::Lerp(from.Color, to.Color, step);
-    OffsetX = length::Lerp(from.OffsetX, to.OffsetX, step);
-    OffsetY = length::Lerp(from.OffsetY, to.OffsetY, step);
+    Color   = helper::lerp(from.Color, to.Color, step);
+    OffsetX = helper::lerp(from.OffsetX, to.OffsetX, step);
+    OffsetY = helper::lerp(from.OffsetY, to.OffsetY, step);
 }
 
 void deco_element::lerp(deco_element const& from, deco_element const& to, f64 step)
 {
-    Color = color::Lerp(from.Color, to.Color, step);
-    Size  = length::Lerp(from.Size, to.Size, step);
+    Color = helper::lerp(from.Color, to.Color, step);
+    Size  = helper::lerp(from.Size, to.Size, step);
 }
 
 void tick_element::lerp(tick_element const& from, tick_element const& to, f64 step)
 {
     paint_lerp(Foreground, from.Foreground, to.Foreground, step);
 
-    Size = length::Lerp(from.Size, to.Size, step);
+    Size = helper::lerp(from.Size, to.Size, step);
 }
 
 void scrollbar_element::lerp(scrollbar_element const& from, scrollbar_element const& to, f64 step)
@@ -191,7 +191,7 @@ void item_element::lerp(item_element const& from, item_element const& to, f64 st
     paint_lerp(Background, from.Background, to.Background, step);
 
     Border.lerp(from.Border, to.Border, step);
-    Padding = thickness::Lerp(from.Padding, to.Padding, step);
+    Padding = helper::lerp(from.Padding, to.Padding, step);
 }
 
 ////////////////////////////////////////////////////////////

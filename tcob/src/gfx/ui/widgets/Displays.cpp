@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
@@ -35,7 +36,7 @@ void dot_matrix_display::style::Transition(style& target, style const& from, sty
     if (from.Colors.size() != to.Colors.size()) { return; }
     for (auto const& [k, v] : from.Colors) {
         if (to.Colors.contains(k)) {
-            target.Colors[k] = color::Lerp(v, to.Colors.at(k), step);
+            target.Colors[k] = helper::lerp(v, to.Colors.at(k), step);
         }
     }
 }
@@ -105,9 +106,9 @@ void seven_segment_display::style::Transition(style& target, style const& from, 
 {
     widget_style::Transition(target, from, to, step);
 
-    target.Size          = length::Lerp(from.Size, to.Size, step);
-    target.ActiveColor   = color::Lerp(from.ActiveColor, to.ActiveColor, step);
-    target.InactiveColor = color::Lerp(from.InactiveColor, to.InactiveColor, step);
+    target.Size          = helper::lerp(from.Size, to.Size, step);
+    target.ActiveColor   = helper::lerp(from.ActiveColor, to.ActiveColor, step);
+    target.InactiveColor = helper::lerp(from.InactiveColor, to.InactiveColor, step);
 }
 
 seven_segment_display::seven_segment_display(init const& wi)
@@ -307,9 +308,9 @@ void color_picker::style::Transition(style& target, style const& from, style con
 {
     widget_style::Transition(target, from, to, step);
 
-    target.HueSelectWidth = length::Lerp(from.HueSelectWidth, to.HueSelectWidth, step);
-    target.MarkerColor    = color::Lerp(from.MarkerColor, to.MarkerColor, step);
-    target.MarkerSize     = length::Lerp(from.MarkerSize, to.MarkerSize, step);
+    target.HueSelectWidth = helper::lerp(from.HueSelectWidth, to.HueSelectWidth, step);
+    target.MarkerColor    = helper::lerp(from.MarkerColor, to.MarkerColor, step);
+    target.MarkerSize     = helper::lerp(from.MarkerSize, to.MarkerSize, step);
 }
 
 color_picker::color_picker(init const& wi)

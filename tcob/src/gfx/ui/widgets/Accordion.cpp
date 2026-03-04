@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Transform.hpp"
@@ -29,7 +30,7 @@ void accordion::style::Transition(style& target, style const& from, style const&
 {
     widget_style::Transition(target, from, to, step);
 
-    target.SectionBarHeight = length::Lerp(from.SectionBarHeight, to.SectionBarHeight, step);
+    target.SectionBarHeight = helper::lerp(from.SectionBarHeight, to.SectionBarHeight, step);
 }
 
 accordion::accordion(init const& wi)

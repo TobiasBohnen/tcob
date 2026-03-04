@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/ui/Style.hpp"
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/tweening/TweenFunc.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -57,8 +58,8 @@ auto style::ease_value(f64 t) const -> f64
 
 void widget_style::Transition(widget_style& target, widget_style const& from, widget_style const& to, f64 step)
 {
-    target.Padding = thickness::Lerp(from.Padding, to.Padding, step);
-    target.Margin  = thickness::Lerp(from.Margin, to.Margin, step);
+    target.Padding = helper::lerp(from.Padding, to.Padding, step);
+    target.Margin  = helper::lerp(from.Margin, to.Margin, step);
     paint_lerp(target.Background, from.Background, to.Background, step);
 
     target.DropShadow.lerp(from.DropShadow, to.DropShadow, step);

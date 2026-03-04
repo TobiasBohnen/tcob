@@ -29,7 +29,7 @@ void drop_down_list::style::Transition(style& target, style const& from, style c
     widget_style::Transition(target, from, to, step);
 
     target.Text.lerp(from.Text, to.Text, step);
-    target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
+    target.ItemHeight = helper::lerp(from.ItemHeight, to.ItemHeight, step);
     target.VScrollBar.lerp(from.VScrollBar, to.VScrollBar, step);
 
     target.MaxVisibleItems = helper::lerp(from.MaxVisibleItems, to.MaxVisibleItems, step);

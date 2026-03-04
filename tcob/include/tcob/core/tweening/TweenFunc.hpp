@@ -33,14 +33,6 @@ concept Function =
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-concept Lerpable =
-    requires(T const& t, f32 time) {
-        { T::Lerp(t, t, time) } -> std::same_as<T>;
-    };
-
-////////////////////////////////////////////////////////////
-
 template <typename T, ease_mode Mode = ease_mode::In>
 class polynomial final {
 public:

@@ -51,6 +51,8 @@ namespace helper {
     {
         if constexpr (Arithmetic<T>) {
             return static_cast<T>(std::lerp(static_cast<f64>(from), static_cast<f64>(to), step));
+        } else if constexpr (requires { T::Lerp(from, to, step); }) {
+            return T::Lerp(from, to, step);
         } else {
             return (step < 0.5) ? from : to;
         }

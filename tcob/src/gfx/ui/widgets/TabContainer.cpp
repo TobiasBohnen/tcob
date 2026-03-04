@@ -29,7 +29,7 @@ void tab_container::style::Transition(style& target, style const& from, style co
 {
     widget_style::Transition(target, from, to, step);
 
-    target.Bar.Size = length::Lerp(from.Bar.Size, to.Bar.Size, step);
+    target.Bar.Size = helper::lerp(from.Bar.Size, to.Bar.Size, step);
     target.Bar.Rows = helper::lerp(from.Bar.Rows, to.Bar.Rows, step);
 }
 

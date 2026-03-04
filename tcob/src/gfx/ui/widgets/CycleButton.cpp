@@ -26,7 +26,7 @@ void cycle_button::style::Transition(style& target, style const& from, style con
 {
     widget_style::Transition(target, from, to, step);
 
-    target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
+    target.ItemHeight = helper::lerp(from.ItemHeight, to.ItemHeight, step);
     target.Bar.lerp(from.Bar, to.Bar, step);
     target.GapRatio = helper::lerp(from.GapRatio, to.GapRatio, step);
 }

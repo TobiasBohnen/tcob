@@ -31,7 +31,7 @@ void line_chart::style::Transition(style& target, style const& from, style const
 {
     grid_chart_style::Transition(target, from, to, step);
 
-    target.LineSize = length::Lerp(from.LineSize, to.LineSize, step);
+    target.LineSize = helper::lerp(from.LineSize, to.LineSize, step);
 }
 
 line_chart::line_chart(init const& wi)
@@ -120,8 +120,8 @@ void bar_chart::style::Transition(style& target, style const& from, style const&
 {
     grid_chart_style::Transition(target, from, to, step);
 
-    target.BarSize   = length::Lerp(from.BarSize, to.BarSize, step);
-    target.BarRadius = length::Lerp(from.BarRadius, to.BarRadius, step);
+    target.BarSize   = helper::lerp(from.BarSize, to.BarSize, step);
+    target.BarRadius = helper::lerp(from.BarRadius, to.BarRadius, step);
 }
 
 bar_chart::bar_chart(init const& wi)
@@ -220,8 +220,8 @@ void marimekko_chart::style::Transition(style& target, style const& from, style 
 {
     chart_style::Transition(target, from, to, step);
 
-    target.BarSize   = dimensions::Lerp(from.BarSize, to.BarSize, step);
-    target.BarRadius = length::Lerp(from.BarRadius, to.BarRadius, step);
+    target.BarSize   = helper::lerp(from.BarSize, to.BarSize, step);
+    target.BarRadius = helper::lerp(from.BarRadius, to.BarRadius, step);
 }
 
 marimekko_chart::marimekko_chart(init const& wi)
@@ -299,8 +299,8 @@ void pie_chart::style::Transition(style& target, style const& from, style const&
 {
     chart_style::Transition(target, from, to, step);
 
-    target.InnerRadius = length::Lerp(from.InnerRadius, to.InnerRadius, step);
-    target.PadAngle    = degree_f::Lerp(from.PadAngle, to.PadAngle, step);
+    target.InnerRadius = helper::lerp(from.InnerRadius, to.InnerRadius, step);
+    target.PadAngle    = helper::lerp(from.PadAngle, to.PadAngle, step);
 }
 
 pie_chart::pie_chart(init const& wi)
@@ -373,7 +373,7 @@ void scatter_chart::style::Transition(style& target, style const& from, style co
     chart_style::Transition(target, from, to, step);
 
     target.PointSize   = helper::lerp(from.PointSize, to.PointSize, step);
-    target.StrokeColor = color::Lerp(from.StrokeColor, to.StrokeColor, step);
+    target.StrokeColor = helper::lerp(from.StrokeColor, to.StrokeColor, step);
 }
 
 scatter_chart::scatter_chart(init const& wi)
@@ -436,7 +436,7 @@ void radar_chart::style::Transition(style& target, style const& from, style cons
     target.FillAreaAlpha = helper::lerp(from.FillAreaAlpha, to.FillAreaAlpha, step);
 
     target.GridLineWidth = helper::lerp(from.GridLineWidth, to.GridLineWidth, step);
-    target.GridColor     = color::Lerp(from.GridColor, to.GridColor, step);
+    target.GridColor     = helper::lerp(from.GridColor, to.GridColor, step);
 }
 
 radar_chart::radar_chart(init const& wi)

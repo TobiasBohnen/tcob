@@ -34,11 +34,7 @@ inline auto polynomial<T, Mode>::operator()(f64 t) const -> type
             : 0.5 * (2.0 - std::pow(2.0 * (1.0 - t), Exponent));
     }
 
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, factor);
-    } else {
-        return static_cast<type>(Start + ((End - Start) * factor));
-    }
+    return helper::lerp(Start, End, factor);
 }
 
 ////////////////////////////////////////////////////////////
@@ -60,11 +56,7 @@ inline auto exponential<T, Mode>::operator()(f64 t) const -> type
             : (2.0 - std::pow(2.0, (-20.0 * t) + 10.0)) / 2.0;
     }
 
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, factor);
-    } else {
-        return static_cast<type>(Start + (End - Start) * factor);
-    }
+    return helper::lerp(Start, End, factor);
 }
 
 ////////////////////////////////////////////////////////////
@@ -74,11 +66,7 @@ inline auto linear<T>::operator()(f64 t) const -> type
 {
     if (t == 0) { return Start; }
 
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, t);
-    } else {
-        return static_cast<type>(Start + static_cast<f64>((End - Start) * t));
-    }
+    return helper::lerp(Start, End, t);
 }
 
 ////////////////////////////////////////////////////////////
@@ -88,12 +76,8 @@ inline auto smoothstep<T>::operator()(f64 t) const -> type
 {
     if (t == 0) { return Start; }
 
-    f64 const e {t * t * (3.0 - 2.0 * t)};
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, e);
-    } else {
-        return static_cast<type>(Start + static_cast<f64>((End - Start) * e));
-    }
+    f64 const factor {t * t * (3.0 - (2.0 * t))};
+    return helper::lerp(Start, End, factor);
 }
 
 ////////////////////////////////////////////////////////////
@@ -103,12 +87,8 @@ inline auto smootherstep<T>::operator()(f64 t) const -> type
 {
     if (t == 0) { return Start; }
 
-    f64 const e {t * t * t * (t * (t * 6.0 - 15.0) + 10.0)};
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, e);
-    } else {
-        return static_cast<type>(Start + static_cast<f64>((End - Start) * e));
-    }
+    f64 const factor {t * t * t * ((t * ((t * 6.0) - 15.0)) + 10.0)};
+    return helper::lerp(Start, End, factor);
 }
 
 ////////////////////////////////////////////////////////////
@@ -127,11 +107,7 @@ inline auto bounce<T, Mode>::operator()(f64 t) const -> type
             : (get_bounce_out((t * 2.0) - 1.0) * 0.5) + 0.5;
     }
 
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, factor);
-    } else {
-        return static_cast<type>(Start + (End - Start) * factor);
-    }
+    return helper::lerp(Start, End, factor);
 }
 
 template <typename T, ease_mode Mode>
@@ -183,11 +159,7 @@ inline auto elastic<T, Mode>::operator()(f64 t) const -> type
         }
     }
 
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, factor);
-    } else {
-        return static_cast<type>(Start + (End - Start) * factor);
-    }
+    return helper::lerp(Start, End, factor);
 }
 
 ////////////////////////////////////////////////////////////
@@ -197,26 +169,22 @@ inline auto back<T, Mode>::operator()(f64 t) const -> type
 {
     f64 factor {0};
     if constexpr (Mode == ease_mode::In) {
-        factor = t * t * ((Overshoot + 1.0) * t - Overshoot);
+        factor = t * t * (((Overshoot + 1.0) * t) - Overshoot);
     } else if constexpr (Mode == ease_mode::Out) {
         t -= 1.0;
-        factor = (t * t * ((Overshoot + 1.0) * t + Overshoot)) + 1.0;
+        factor = (t * t * (((Overshoot + 1.0) * t) + Overshoot)) + 1.0;
     } else {
         f64 const s {Overshoot * 1.525};
         if (t < 0.5) {
             t *= 2.0;
-            factor = 0.5 * (t * t * ((s + 1.0) * t - s));
+            factor = 0.5 * (t * t * (((s + 1.0) * t) - s));
         } else {
             t      = (t * 2.0) - 2.0;
-            factor = 0.5 * (t * t * ((s + 1.0) * t + s) + 2.0);
+            factor = 0.5 * ((t * t * (((s + 1.0) * t) + s)) + 2.0);
         }
     }
 
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, factor);
-    } else {
-        return static_cast<type>(Start + (End - Start) * factor);
-    }
+    return helper::lerp(Start, End, factor);
 }
 
 ////////////////////////////////////////////////////////////
@@ -232,14 +200,10 @@ inline auto circular<T, Mode>::operator()(f64 t) const -> type
     } else {
         factor = t < 0.5
             ? (1.0 - std::sqrt(1.0 - (4.0 * t * t))) * 0.5
-            : (std::sqrt(1.0 - ((-2.0 * t + 2.0) * (-2.0 * t + 2.0))) + 1.0) * 0.5;
+            : (std::sqrt(1.0 - (((-2.0 * t) + 2.0) * ((-2.0 * t) + 2.0))) + 1.0) * 0.5;
     }
 
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Start, End, factor);
-    } else {
-        return static_cast<type>(Start + (End - Start) * factor);
-    }
+    return helper::lerp(Start, End, factor);
 }
 
 ////////////////////////////////////////////////////////////
@@ -248,11 +212,7 @@ template <typename T>
 inline auto sine_wave<T>::operator()(f64 t) const -> type
 {
     f64 const val {get_wavevalue(Frequency * t)};
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Min, Max, val);
-    } else {
-        return static_cast<type>(Min + static_cast<f64>((Max - Min) * val));
-    }
+    return helper::lerp(Min, Max, val);
 }
 
 template <typename T>
@@ -267,11 +227,7 @@ template <typename T>
 inline auto triangle_wave<T>::operator()(f64 t) const -> type
 {
     f64 const val {get_wavevalue((Frequency * t) + Phase)};
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Min, Max, val);
-    } else {
-        return static_cast<type>(Min + static_cast<f64>((Max - Min) * val));
-    }
+    return helper::lerp(Min, Max, val);
 }
 
 template <typename T>
@@ -286,11 +242,7 @@ template <typename T>
 inline auto square_wave<T>::operator()(f64 t) const -> type
 {
     f64 const val {get_wavevalue(Frequency * t)};
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Min, Max, val);
-    } else {
-        return static_cast<type>(Min + static_cast<f64>((Max - Min) * val));
-    }
+    return helper::lerp(Min, Max, val);
 }
 
 template <typename T>
@@ -319,11 +271,7 @@ template <typename T>
 inline auto sawtooth_wave<T>::operator()(f64 t) const -> type
 {
     f64 const val {get_wavevalue((Frequency * t) + Phase)};
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(Min, Max, val);
-    } else {
-        return static_cast<type>(Min + static_cast<f64>((Max - Min) * val));
-    }
+    return helper::lerp(Min, Max, val);
 }
 
 template <typename T>
@@ -404,8 +352,8 @@ inline auto catmull_rom::operator()(f64 t) const -> type
     f64 const exp1 {exp0 * exp0};
     f64 const exp2 {exp1 * exp0};
 
-    f32 const x {static_cast<f32>(0.5 * ((2 * p1.X) + (-p0.X + p2.X) * exp0 + (2 * p0.X - 5 * p1.X + 4 * p2.X - p3.X) * exp1 + (-p0.X + 3 * p1.X - 3 * p2.X + p3.X) * exp2))};
-    f32 const y {static_cast<f32>(0.5 * ((2 * p1.Y) + (-p0.Y + p2.Y) * exp0 + (2 * p0.Y - 5 * p1.Y + 4 * p2.Y - p3.Y) * exp1 + (-p0.Y + 3 * p1.Y - 3 * p2.Y + p3.Y) * exp2))};
+    f32 const x {static_cast<f32>(0.5 * ((2 * p1.X) + ((-p0.X + p2.X) * exp0) + (((2 * p0.X) - (5 * p1.X) + (4 * p2.X) - p3.X) * exp1) + ((-p0.X + (3 * p1.X) - (3 * p2.X) + p3.X) * exp2)))};
+    f32 const y {static_cast<f32>(0.5 * ((2 * p1.Y) + ((-p0.Y + p2.Y) * exp0) + (((2 * p0.Y) - (5 * p1.Y) + (4 * p2.Y) - p3.Y) * exp1) + ((-p0.Y + (3 * p1.Y) - (3 * p2.Y) + p3.Y) * exp2)))};
     return {x, y};
 }
 
@@ -444,11 +392,7 @@ inline auto curve<T>::operator()(f64 t) const -> type
     point const& next {_elements[index + 1]};
     f64 const    pos {(t - current.Position) / (next.Position - current.Position)};
 
-    if constexpr (Lerpable<type>) {
-        return type::Lerp(current.Value, next.Value, pos);
-    } else {
-        return static_cast<type>(current.Value + ((next.Value - current.Value) * pos));
-    }
+    return helper::lerp(current.Value, next.Value, pos);
 }
 
 ////////////////////////////////////////////////////////////

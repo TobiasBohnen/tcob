@@ -24,7 +24,7 @@ void chart_style::Transition(chart_style& target, chart_style const& from, chart
         if (i >= to.Colors.size()) {
             target.Colors[i] = from.Colors[i];
         } else {
-            target.Colors[i] = color::Lerp(from.Colors[i], to.Colors[i], step);
+            target.Colors[i] = helper::lerp(from.Colors[i], to.Colors[i], step);
         }
     }
 }
@@ -34,7 +34,7 @@ void grid_chart_style::Transition(grid_chart_style& target, grid_chart_style con
     chart_style::Transition(target, from, to, step);
 
     target.GridLineWidth = helper::lerp(from.GridLineWidth, to.GridLineWidth, step);
-    target.GridColor     = color::Lerp(from.GridColor, to.GridColor, step);
+    target.GridColor     = helper::lerp(from.GridColor, to.GridColor, step);
 }
 
 }
