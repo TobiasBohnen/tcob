@@ -32,6 +32,7 @@ legend::legend(init const& wi)
         queue_redraw();
     });
 }
+
 void legend::on_draw(widget_painter& painter)
 {
     rect_f const         rect {draw_background(_style, painter)};
@@ -45,7 +46,7 @@ void legend::on_draw(widget_painter& painter)
     bool const isVertical {get_orientation() == orientation::Vertical};
     f32 const  itemSize {(isVertical ? rect.height() : rect.width()) / static_cast<f32>(legendDefs.size())};
     f32 const  markerSize {std::min(isVertical ? rect.width() / 2 : itemSize / 2,
-                                   (isVertical ? itemSize : rect.height()) * 0.6f)};
+                                    (isVertical ? itemSize : rect.height()) * 0.6f)};
     point_f    pos {rect.top_left()};
 
     for (auto const& [name, color] : legendDefs) {

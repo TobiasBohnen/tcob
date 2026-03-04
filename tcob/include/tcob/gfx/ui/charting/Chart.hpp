@@ -25,7 +25,7 @@ public:
     class TCOB_API style : public grid_chart_style {
     public:
         length LineSize {3.0f, length::type::Absolute};
-        bool   SmoothLines {false}; // TODO: lerp?
+        bool   SmoothLines {false};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
@@ -51,7 +51,7 @@ public:
     public:
         length BarSize {1.f, length::type::Relative};
         length BarRadius {};
-        bool   StackBars {false}; // TODO: lerp?
+        bool   StackBars {false};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
@@ -143,11 +143,11 @@ class TCOB_API radar_chart : public chart<std::vector<f32>> {
 public:
     class style : public chart_style {
     public:
-        f32 LineWidth {4.0f};
-        u8  FillAreaAlpha {0};
+        length LineWidth {4.0f, length::type::Absolute};
+        u8     FillAreaAlpha {0};
 
         grid_line_amount GridLines {grid_line_amount::Normal};
-        f32              GridLineWidth {2.0f};
+        length           GridLineWidth {2.0f, length::type::Absolute};
         color            GridColor {colors::Gray};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);

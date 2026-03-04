@@ -31,7 +31,8 @@ void line_chart::style::Transition(style& target, style const& from, style const
 {
     grid_chart_style::Transition(target, from, to, step);
 
-    target.LineSize = helper::lerp(from.LineSize, to.LineSize, step);
+    target.LineSize    = helper::lerp(from.LineSize, to.LineSize, step);
+    target.SmoothLines = helper::lerp(from.SmoothLines, to.SmoothLines, step);
 }
 
 line_chart::line_chart(init const& wi)
@@ -122,6 +123,7 @@ void bar_chart::style::Transition(style& target, style const& from, style const&
 
     target.BarSize   = helper::lerp(from.BarSize, to.BarSize, step);
     target.BarRadius = helper::lerp(from.BarRadius, to.BarRadius, step);
+    target.StackBars = helper::lerp(from.StackBars, to.StackBars, step);
 }
 
 bar_chart::bar_chart(init const& wi)
@@ -319,39 +321,45 @@ void pie_chart::on_draw_chart(widget_painter& painter)
     for (auto const& s : *Dataset) { total += s.Value; }
     if (total == 0.0) { return; }
 
-    auto const [cx, cy] {rect.center()};
+    auto const center {rect.center()};
     f32 const  radius {std::min(rect.width(), rect.height()) / 2};
     f32 const  innerRadius {std::min(_style.InnerRadius.calc(radius), radius * 0.95f)};
     bool const isDonut {innerRadius > 0.0f};
     f64 const  padAngle {radian_d {_style.PadAngle}.Value};
-    f64 const  halfPad {padAngle / 2.0};
+
+    f64 const outerHalfPad {padAngle / 2.0};
+    f64 const innerHalfPad {isDonut
+                                ? std::atan2(std::sin(outerHalfPad) * radius, innerRadius)
+                                : outerHalfPad};
 
     f64 angle {0.0};
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
         f64 const   fraction {s.Value / total};
         f64 const   fullSweep {fraction * TAU};
-        f64 const   sweep {std::max(0.0, fullSweep - padAngle)};
+        f64 const   outerSweep {std::max(0.0, fullSweep - padAngle)};
+        f64 const   innerSweep {std::max(0.0, fullSweep - innerHalfPad * 2.0)};
 
-        if (sweep <= 0.0) {
+        if (outerSweep <= 0.0) {
             angle += fullSweep;
             continue;
         }
 
-        f64 const startAngle {angle + halfPad};
+        f64 const outerStart {angle + outerHalfPad};
+        f64 const innerStart {angle + innerHalfPad};
 
         canvas.begin_path();
         if (isDonut) {
-            canvas.arc({cx, cy}, radius,
-                       radian_d {startAngle}, radian_d {startAngle + sweep},
+            canvas.arc(center, radius,
+                       radian_d {outerStart}, radian_d {outerStart + outerSweep},
                        gfx::winding::CW);
-            canvas.arc({cx, cy}, innerRadius,
-                       radian_d {startAngle + sweep}, radian_d {startAngle},
+            canvas.arc(center, innerRadius,
+                       radian_d {innerStart + innerSweep}, radian_d {innerStart},
                        gfx::winding::CCW);
         } else {
-            canvas.move_to({cx, cy});
-            canvas.arc({cx, cy}, radius,
-                       radian_d {startAngle}, radian_d {startAngle + sweep},
+            canvas.move_to(center);
+            canvas.arc(center, radius,
+                       radian_d {outerStart}, radian_d {outerStart + outerSweep},
                        gfx::winding::CW);
         }
         canvas.close_path();
@@ -459,7 +467,7 @@ void radar_chart::on_draw_chart(widget_painter& painter)
     if (_style.GridLines != grid_line_amount::None) {
         // draw radial axes
         canvas.set_stroke_style(_style.GridColor);
-        canvas.set_stroke_width(_style.GridLineWidth);
+        canvas.set_stroke_width(std::max(_style.GridLineWidth.calc(radius), 1.0f));
         for (usize i {0}; i < axisCount; ++i) {
             f32 const angle {(static_cast<f32>(i) / axisCount) * TAU_F};
             f32 const x {center.X + (std::cos(angle) * radius)};
@@ -496,6 +504,8 @@ void radar_chart::on_draw_chart(widget_painter& painter)
         }
     }
 
+    f32 const lineWidth {std::max(_style.LineWidth.calc(radius), 1.0f)};
+
     // draw series polygons
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
@@ -524,7 +534,7 @@ void radar_chart::on_draw_chart(widget_painter& painter)
         }
 
         canvas.set_stroke_style(c);
-        canvas.set_stroke_width(_style.LineWidth);
+        canvas.set_stroke_width(lineWidth);
         canvas.stroke();
     }
 }
