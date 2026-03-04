@@ -144,7 +144,7 @@ private:
 
 class TCOB_API radar_chart : public chart<std::vector<f32>> {
 public:
-    class style : public chart_style {
+    class TCOB_API style : public chart_style {
     public:
         u8 FillAreaAlpha {0};
 

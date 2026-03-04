@@ -38,8 +38,8 @@ void grid_chart_style::Transition(grid_chart_style& target, grid_chart_style con
 {
     chart_style::Transition(target, from, to, step);
 
-    target.GridLineWidth = helper::lerp(from.GridLineWidth, to.GridLineWidth, step);
-    target.GridColor     = helper::lerp(from.GridColor, to.GridColor, step);
+    target.GridLineSize = helper::lerp(from.GridLineSize, to.GridLineSize, step);
+    target.GridColor    = helper::lerp(from.GridColor, to.GridColor, step);
 }
 
 }

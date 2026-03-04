@@ -90,7 +90,7 @@ template <typename T>
 inline void grid_chart<T>::draw_grid(gfx::canvas& canvas, grid_chart_style const& style, rect_f const& bounds) const
 {
     auto [horizontalGridLines, verticalGridLines] {calc_grid_lines()};
-    if (verticalGridLines == 1) { verticalGridLines = 2; }
+    if (horizontalGridLines == 1) { horizontalGridLines = 2; }
     if (verticalGridLines == 1) { verticalGridLines = 2; }
 
     canvas.set_stroke_style(style.GridColor);
