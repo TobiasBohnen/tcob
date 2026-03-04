@@ -49,7 +49,7 @@ public:
 
     void start();
 
-    template <std::derived_from<scene> T>
+    template <DerivedFrom<scene> T>
     void push_scene();
 
     void push_scene(std::shared_ptr<scene> const& scene);

@@ -116,10 +116,10 @@ protected:
 
     auto styles() const -> style_collection const&;
 
-    template <std::derived_from<widget_style> T>
+    template <DerivedFrom<widget_style> T>
     void prepare_style(T& style);
 
-    template <std::derived_from<style> T>
+    template <DerivedFrom<style> T>
     void prepare_sub_style(T& style, isize idx, string const& styleClass, widget_flags flags);
     void reset_sub_style(isize idx, string const& styleClass, widget_flags flags);
     void clear_sub_styles();

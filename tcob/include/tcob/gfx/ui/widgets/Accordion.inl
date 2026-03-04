@@ -14,13 +14,13 @@
 
 namespace tcob::ui {
 
-template <std::derived_from<widget_container> T>
+template <DerivedFrom<widget_container> T>
 inline auto accordion::create_section(utf8_string const& name) -> T&
 {
     return create_section<T>(name, {.Text = name, .Icon = {}, .UserData = {}});
 }
 
-template <std::derived_from<widget_container> T>
+template <DerivedFrom<widget_container> T>
 inline auto accordion::create_section(utf8_string const& name, item const& label) -> T&
 {
     queue_redraw();

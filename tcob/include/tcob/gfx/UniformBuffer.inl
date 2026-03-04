@@ -28,7 +28,7 @@ inline auto uniform_buffer::update(std::span<T const> data, usize offset) const 
     return data.size_bytes();
 }
 
-template <std::derived_from<render_backend::uniform_buffer_base> T>
+template <DerivedFrom<render_backend::uniform_buffer_base> T>
 inline auto uniform_buffer::get_impl() const -> T*
 {
     return static_cast<T*>(_impl.get());

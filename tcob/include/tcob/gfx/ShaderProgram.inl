@@ -10,7 +10,7 @@
 
 namespace tcob::gfx {
 
-template <std::derived_from<render_backend::shader_base> T>
+template <DerivedFrom<render_backend::shader_base> T>
 inline auto shader::get_impl() const -> T*
 {
     return static_cast<T*>(_impl.get());

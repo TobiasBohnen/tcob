@@ -21,7 +21,7 @@ namespace tcob::ui {
 
 namespace detail {
     template <typename Derived>
-    template <std::derived_from<widget> T>
+    template <DerivedFrom<widget> T>
     inline auto default_creator<Derived>::create_widget(string const& name) -> T&
     {
         return static_cast<Derived*>(this)->template add_widget<T>(name);
@@ -31,7 +31,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<widget> T>
+template <DerivedFrom<widget> T>
 inline auto layout::add_widget(string const& name) -> T&
 {
     auto  widget {std::make_unique<T>(create_init(name))};
@@ -43,7 +43,7 @@ inline auto layout::add_widget(string const& name) -> T&
 
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<widget> T>
+template <DerivedFrom<widget> T>
 inline auto manual_layout::create_widget(rect_f const& rect, string const& name) -> T&
 {
     auto& retValue {add_widget<T>(name)};
@@ -53,7 +53,7 @@ inline auto manual_layout::create_widget(rect_f const& rect, string const& name)
 
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<widget> T>
+template <DerivedFrom<widget> T>
 inline auto flex_size_layout::create_widget(point_f pos, string const& name) -> T&
 {
     auto& retValue {add_widget<T>(name)};
@@ -63,7 +63,7 @@ inline auto flex_size_layout::create_widget(point_f pos, string const& name) -> 
 
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<widget> T>
+template <DerivedFrom<widget> T>
 inline auto dock_layout::create_widget(dock_style dock, string const& name) -> T&
 {
     auto& retValue {add_widget<T>(name)};
@@ -73,7 +73,7 @@ inline auto dock_layout::create_widget(dock_style dock, string const& name) -> T
 
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<widget> T>
+template <DerivedFrom<widget> T>
 inline auto grid_layout::create_widget(rect_i const& bounds, string const& name) -> T&
 {
     auto& retValue {add_widget<T>(name)};
@@ -89,7 +89,7 @@ inline auto grid_layout::create_widget(rect_i const& bounds, string const& name)
 
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<widget> T>
+template <DerivedFrom<widget> T>
 inline auto tree_layout::create_widget(i32 level, string const& name) -> T&
 {
     auto& retValue {add_widget<T>(name)};
@@ -102,7 +102,7 @@ inline auto tree_layout::create_widget(i32 level, string const& name) -> T&
 
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<widget> T>
+template <DerivedFrom<widget> T>
 inline auto magnetic_snap_layout::create_widget(rect_f const& rect, string const& name) -> T&
 {
     auto& retValue {add_widget<T>(name)};

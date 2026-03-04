@@ -13,14 +13,14 @@
 
 namespace tcob::ui {
 
-template <std::derived_from<widget_style> T>
+template <DerivedFrom<widget_style> T>
 inline void widget::prepare_style(T& style)
 {
     _transition.apply(style);
     _currentStyle = &style;
 }
 
-template <std::derived_from<style> T>
+template <DerivedFrom<style> T>
 inline void widget::prepare_sub_style(T& style, isize idx, string const& styleClass, widget_flags flags)
 {
     widget_style_selectors const selectors {

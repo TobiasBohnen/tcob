@@ -20,16 +20,16 @@ template <typename T>
 concept Boolean = std::is_same_v<T, bool>;
 
 template <typename T>
-concept Arithmetic = std::is_arithmetic_v<T>;
+concept Arithmetic = std::is_arithmetic_v<T> && !std::is_same_v<T, bool>;
 
 template <typename T>
-concept Integral = std::is_integral_v<T>;
+concept Integral = std::is_integral_v<T> && !std::is_same_v<T, bool>;
 
 template <typename T>
-concept Unsigned = std::is_unsigned_v<T> && std::is_integral_v<T>;
+concept Unsigned = std::is_unsigned_v<T> && Integral<T>;
 
 template <typename T>
-concept Signed = std::is_signed_v<T> && std::is_integral_v<T>;
+concept Signed = std::is_signed_v<T> && Integral<T>;
 
 template <typename T>
 concept FloatingPoint = std::is_floating_point_v<T>;
@@ -47,10 +47,10 @@ template <typename T, typename D>
 concept BaseOf = std::is_base_of_v<T, D> && std::is_convertible_v<D const*, T const*>;
 
 template <typename T, typename D>
-concept DerivedFrom = std::derived_from<D, T>;
+concept DerivedFrom = std::derived_from<T, D>;
 
 template <typename T, typename D>
-concept BaseOfOrDerivedFrom = BaseOf<T, D> || DerivedFrom<D, T>;
+concept BaseOfOrDerivedFrom = BaseOf<T, D> || DerivedFrom<T, D>;
 
 template <typename T>
 concept POD = std::is_trivially_copyable_v<T> && std::is_standard_layout_v<T>;

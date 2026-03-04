@@ -215,7 +215,7 @@ class TCOB_API shape_batch final : public drawable, public updatable {
 public:
     shape_batch();
 
-    template <std::derived_from<shape> T>
+    template <DerivedFrom<shape> T>
     auto create_shape() -> T&;
     auto remove_shape(shape const& shape) -> bool;
     void clear();

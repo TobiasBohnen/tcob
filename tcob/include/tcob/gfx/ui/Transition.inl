@@ -14,7 +14,7 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<style> T>
+template <DerivedFrom<style> T>
 inline void transition<T>::start(T const* target, milliseconds duration, milliseconds step)
 {
     if (target == _targetStyle) { return; }
@@ -28,7 +28,7 @@ inline void transition<T>::start(T const* target, milliseconds duration, millise
     _targetStyle = target;
 }
 
-template <std::derived_from<style> T>
+template <DerivedFrom<style> T>
 inline void transition<T>::reset(T const* target)
 {
     _currentTime = milliseconds::zero();
@@ -40,13 +40,13 @@ inline void transition<T>::reset(T const* target)
     _sourceStyle = _targetStyle;
 }
 
-template <std::derived_from<style> T>
+template <DerivedFrom<style> T>
 auto transition<T>::is_active() const -> bool
 {
     return _duration.count() > 0 && _currentTime < _duration && _sourceStyle && _targetStyle;
 }
 
-template <std::derived_from<style> T>
+template <DerivedFrom<style> T>
 auto transition<T>::update(milliseconds deltaTime) -> bool
 {
     if (!is_active()) { return false; }
@@ -61,8 +61,8 @@ auto transition<T>::update(milliseconds deltaTime) -> bool
     return false;
 }
 
-template <std::derived_from<style> T>
-template <std::derived_from<style> S>
+template <DerivedFrom<style> T>
+template <DerivedFrom<style> S>
 inline void transition<T>::apply(S& style)
 {
     if (_targetStyle) {

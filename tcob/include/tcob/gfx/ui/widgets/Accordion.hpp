@@ -42,9 +42,9 @@ public:
     prop_chk<isize> HoveredSectionIndex;
     prop<bool>      MaximizeActiveSection;
 
-    template <std::derived_from<widget_container> T>
+    template <DerivedFrom<widget_container> T>
     auto create_section(utf8_string const& name) -> T&;
-    template <std::derived_from<widget_container> T>
+    template <DerivedFrom<widget_container> T>
     auto create_section(utf8_string const& name, item const& label) -> T&;
     void remove_section(widget const& sec);
     void clear();

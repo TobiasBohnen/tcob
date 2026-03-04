@@ -10,7 +10,7 @@
 
 namespace tcob::gfx {
 
-template <std::derived_from<shape> T>
+template <DerivedFrom<shape> T>
 inline auto shape_batch::create_shape() -> T&
 {
     _isDirty = true;

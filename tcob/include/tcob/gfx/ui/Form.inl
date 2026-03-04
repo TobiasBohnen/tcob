@@ -18,7 +18,7 @@ namespace tcob::ui {
 
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<layout> Layout>
+template <DerivedFrom<layout> Layout>
 inline form<Layout>::form(form_init const& init, auto&&... layoutArgs)
     : form_base {init.Name, rect_f {init.Bounds}}
     , _layout {this, layoutArgs...}
@@ -26,56 +26,56 @@ inline form<Layout>::form(form_init const& init, auto&&... layoutArgs)
     _layout.Changed.connect([&] { queue_redraw(); });
 }
 
-template <std::derived_from<layout> Layout>
-template <std::derived_from<widget_container> T>
+template <DerivedFrom<layout> Layout>
+template <DerivedFrom<widget_container> T>
 inline auto form<Layout>::create_container(auto&&... args) -> T&
 {
     return _layout.template create_widget<T>(args...);
 }
 
-template <std::derived_from<layout> Layout>
+template <DerivedFrom<layout> Layout>
 inline auto form<Layout>::containers() const -> std::span<std::unique_ptr<widget> const>
 {
     return _layout.widgets();
 }
 
-template <std::derived_from<layout> Layout>
+template <DerivedFrom<layout> Layout>
 inline void form<Layout>::remove_container(widget* widget)
 {
     _layout.remove(widget);
 }
 
-template <std::derived_from<layout> Layout>
+template <DerivedFrom<layout> Layout>
 inline void form<Layout>::clear_containers()
 {
     _layout.clear();
 }
 
-template <std::derived_from<layout> Layout>
+template <DerivedFrom<layout> Layout>
 inline void form<Layout>::apply_layout()
 {
     _layout.apply(Bounds->Size);
 }
 
-template <std::derived_from<layout> Layout>
+template <DerivedFrom<layout> Layout>
 inline auto form<Layout>::get_layout() -> layout*
 {
     return &_layout;
 }
 
-template <std::derived_from<layout> Layout>
+template <DerivedFrom<layout> Layout>
 inline auto form<Layout>::get_layout() const -> layout const*
 {
     return &_layout;
 }
 
-template <std::derived_from<layout> Layout>
+template <DerivedFrom<layout> Layout>
 inline auto form<Layout>::allows_move() const -> bool
 {
     return _layout.allows_move();
 }
 
-template <std::derived_from<layout> Layout>
+template <DerivedFrom<layout> Layout>
 inline auto form<Layout>::allows_resize() const -> bool
 {
     return _layout.allows_resize();
@@ -83,7 +83,7 @@ inline auto form<Layout>::allows_resize() const -> bool
 
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<tooltip> T>
+template <DerivedFrom<tooltip> T>
 inline auto form_base::create_tooltip(string const& name) -> std::shared_ptr<T>
 {
     widget::init const wi {
@@ -97,7 +97,7 @@ inline auto form_base::create_tooltip(string const& name) -> std::shared_ptr<T>
     return retValue;
 }
 
-template <std::derived_from<modal_dialog> T>
+template <DerivedFrom<modal_dialog> T>
 inline auto form_base::create_modal_dialog(string const& name) -> std::shared_ptr<T>
 {
     widget::init const wi {

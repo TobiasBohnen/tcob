@@ -10,7 +10,7 @@
 
 namespace tcob {
 
-template <std::derived_from<scene> T>
+template <DerivedFrom<scene> T>
 inline void game::push_scene()
 {
     push_scene(std::make_shared<T>(*this));

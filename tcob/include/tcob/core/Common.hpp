@@ -49,7 +49,7 @@ namespace helper {
     template <typename T>
     auto constexpr lerp(T from, T to, f64 step) -> T
     {
-        if constexpr (Arithmetic<T> && !Boolean<T>) {
+        if constexpr (Arithmetic<T>) {
             return static_cast<T>(std::lerp(static_cast<f64>(from), static_cast<f64>(to), step));
         } else if constexpr (requires { T::Lerp(from, to, step); }) {
             return T::Lerp(from, to, step);

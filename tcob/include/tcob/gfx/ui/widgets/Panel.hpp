@@ -44,9 +44,9 @@ public:
     prop<bool> Movable;
     prop<bool> Resizable;
 
-    template <std::derived_from<layout> T>
+    template <DerivedFrom<layout> T>
     auto create_layout(auto&&... args) -> T&;
-    template <std::derived_from<layout> T>
+    template <DerivedFrom<layout> T>
     auto get_layout() -> T&;
 
     auto widgets() const -> std::span<std::unique_ptr<widget> const> override;

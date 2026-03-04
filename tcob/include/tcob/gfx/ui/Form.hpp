@@ -51,9 +51,9 @@ public:
     auto name() const -> string const&;
     auto bounds() const -> rect_f override;
 
-    template <std::derived_from<tooltip> T = tooltip>
+    template <DerivedFrom<tooltip> T = tooltip>
     auto create_tooltip(string const& name) -> std::shared_ptr<T>;
-    template <std::derived_from<modal_dialog> T = modal_dialog>
+    template <DerivedFrom<modal_dialog> T = modal_dialog>
     auto create_modal_dialog(string const& name) -> std::shared_ptr<T>;
 
     auto find_widget_at(point_i pos) const -> widget*;
@@ -161,12 +161,12 @@ struct form_init {
     rect_i Bounds;
 };
 
-template <std::derived_from<layout> Layout = dock_layout>
+template <DerivedFrom<layout> Layout = dock_layout>
 class form : public form_base {
 public:
     form(form_init const& init, auto&&... layoutArgs);
 
-    template <std::derived_from<widget_container> T>
+    template <DerivedFrom<widget_container> T>
     auto create_container(auto&&... args) -> T&;
 
     auto containers() const -> std::span<std::unique_ptr<widget> const> override;

@@ -76,7 +76,7 @@ public:
 
     auto regions(this auto&& self) -> decltype(auto);
 
-    template <std::derived_from<render_backend::texture_base> T>
+    template <DerivedFrom<render_backend::texture_base> T>
     auto get_impl() const -> T*;
 
     static inline char const* AssetName {"texture"};

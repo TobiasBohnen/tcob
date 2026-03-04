@@ -11,7 +11,7 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<style> T>
+template <DerivedFrom<style> T>
 class transition {
 public:
     void start(T const* target, milliseconds duration, milliseconds step);
@@ -19,7 +19,7 @@ public:
 
     auto update(milliseconds deltaTime) -> bool;
 
-    template <std::derived_from<style> S>
+    template <DerivedFrom<style> S>
     void apply(S& style);
 
 private:

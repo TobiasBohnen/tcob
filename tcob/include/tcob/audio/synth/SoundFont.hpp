@@ -14,6 +14,7 @@
     #include <vector>
 
     #include "tcob/audio/Buffer.hpp"
+    #include "tcob/core/Concepts.hpp"
     #include "tcob/core/Interfaces.hpp"
 
 struct tsf;
@@ -347,7 +348,7 @@ class TCOB_API sound_font_commands : public non_copyable {
 public:
     void start_new_section(milliseconds duration);
 
-    template <std::derived_from<sound_font::command> T>
+    template <DerivedFrom<sound_font::command> T>
     void add(auto&&... args);
 
     auto duration() const -> milliseconds;

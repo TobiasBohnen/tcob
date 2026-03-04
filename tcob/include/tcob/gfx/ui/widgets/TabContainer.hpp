@@ -51,9 +51,9 @@ public:
     prop_chk<isize> ActiveTabIndex;
     prop_chk<isize> HoveredTabIndex;
 
-    template <std::derived_from<widget_container> T>
+    template <DerivedFrom<widget_container> T>
     auto create_tab(utf8_string const& name) -> T&;
-    template <std::derived_from<widget_container> T>
+    template <DerivedFrom<widget_container> T>
     auto create_tab(utf8_string const& name, item const& label) -> T&;
     void remove_tab(widget const& tab);
     void clear();

@@ -14,7 +14,7 @@
 
 namespace tcob::ui {
 
-template <std::derived_from<layout> T>
+template <DerivedFrom<layout> T>
 inline auto panel::create_layout(auto&&... args) -> T&
 {
     queue_redraw();
@@ -23,7 +23,7 @@ inline auto panel::create_layout(auto&&... args) -> T&
     return *static_cast<T*>(_layout.get());
 }
 
-template <std::derived_from<layout> T>
+template <DerivedFrom<layout> T>
 inline auto panel::get_layout() -> T&
 {
 #if defined(TCOB_DEBUG)

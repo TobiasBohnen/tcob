@@ -12,7 +12,7 @@
 
 namespace tcob::ui {
 
-template <std::derived_from<style> T>
+template <DerivedFrom<style> T>
 inline auto style_collection::create(string const& name, style_flags flags, style_attributes const& attribs) -> std::shared_ptr<T>
 {
     std::shared_ptr<T> retValue {std::make_shared<T>()};
@@ -20,7 +20,7 @@ inline auto style_collection::create(string const& name, style_flags flags, styl
     return retValue;
 }
 
-template <std::derived_from<widget> T>
+template <DerivedFrom<widget> T>
 inline auto style_collection::create(string const& name, style_flags flags, style_attributes const& attribs) -> std::shared_ptr<typename T::style>
 {
     return create<typename T::style>(name, flags, attribs);

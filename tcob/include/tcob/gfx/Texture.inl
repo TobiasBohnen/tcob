@@ -10,7 +10,7 @@
 
 namespace tcob::gfx {
 
-template <std::derived_from<render_backend::texture_base> T>
+template <DerivedFrom<render_backend::texture_base> T>
 inline auto texture::get_impl() const -> T*
 {
     return static_cast<T*>(_impl.get());

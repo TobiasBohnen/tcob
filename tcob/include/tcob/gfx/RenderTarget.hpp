@@ -61,7 +61,7 @@ public:
     void         bind_pass(pass const& pass) const;
     void         unbind_pass() const;
 
-    template <std::derived_from<render_backend::render_target_base> T>
+    template <DerivedFrom<render_backend::render_target_base> T>
     auto get_impl() const -> T*;
 
 protected:

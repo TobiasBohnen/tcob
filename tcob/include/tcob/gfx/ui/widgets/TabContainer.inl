@@ -15,13 +15,13 @@
 
 namespace tcob::ui {
 
-template <std::derived_from<widget_container> T>
+template <DerivedFrom<widget_container> T>
 inline auto tab_container::create_tab(utf8_string const& name) -> T&
 {
     return create_tab<T>(name, {.Text = name, .Icon = {}, .UserData = {}});
 }
 
-template <std::derived_from<widget_container> T>
+template <DerivedFrom<widget_container> T>
 inline auto tab_container::create_tab(utf8_string const& name, item const& label) -> T&
 {
     queue_redraw();

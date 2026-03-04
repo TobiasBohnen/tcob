@@ -28,7 +28,7 @@ public:
     template <POD T>
     auto update(std::span<T const> data, usize offset) const -> usize;
 
-    template <std::derived_from<render_backend::uniform_buffer_base> T>
+    template <DerivedFrom<render_backend::uniform_buffer_base> T>
     auto get_impl() const -> T*;
 
 private:

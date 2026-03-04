@@ -23,7 +23,7 @@ public:
     explicit operator bool() const;
     auto     is_valid() const -> bool;
 
-    template <std::derived_from<render_backend::shader_base> T>
+    template <DerivedFrom<render_backend::shader_base> T>
     auto get_impl() const -> T*;
 
     static inline char const* AssetName {"shader"};

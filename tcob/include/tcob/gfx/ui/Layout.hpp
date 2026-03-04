@@ -28,7 +28,7 @@ namespace detail {
     template <typename Derived>
     class default_creator {
     public:
-        template <std::derived_from<widget> T>
+        template <DerivedFrom<widget> T>
         auto create_widget(string const& name) -> T&;
     };
 }
@@ -62,7 +62,7 @@ public:
 protected:
     explicit layout(parent parent);
 
-    template <std::derived_from<widget> T>
+    template <DerivedFrom<widget> T>
     auto add_widget(string const& name) -> T&;
 
     virtual void do_layout(size_f size) = 0;
@@ -82,7 +82,7 @@ class TCOB_API manual_layout : public layout {
 public:
     explicit manual_layout(parent parent);
 
-    template <std::derived_from<widget> T>
+    template <DerivedFrom<widget> T>
     auto create_widget(rect_f const& rect, string const& name) -> T&;
 
     auto allows_move() const -> bool override;
@@ -99,7 +99,7 @@ class TCOB_API flex_size_layout : public layout {
 public:
     explicit flex_size_layout(parent parent);
 
-    template <std::derived_from<widget> T>
+    template <DerivedFrom<widget> T>
     auto create_widget(point_f pos, string const& name) -> T&;
 
     auto allows_move() const -> bool override;
@@ -115,7 +115,7 @@ class TCOB_API dock_layout : public layout {
 public:
     explicit dock_layout(parent parent);
 
-    template <std::derived_from<widget> T>
+    template <DerivedFrom<widget> T>
     auto create_widget(dock_style dock, string const& name) -> T&;
 
 protected:
@@ -132,7 +132,7 @@ class TCOB_API grid_layout final : public layout {
 public:
     grid_layout(parent parent, size_i initSize, bool autoGrow = false);
 
-    template <std::derived_from<widget> T>
+    template <DerivedFrom<widget> T>
     auto create_widget(rect_i const& bounds, string const& name) -> T&;
 
 protected:
@@ -218,7 +218,7 @@ class TCOB_API tree_layout final : public layout {
 public:
     tree_layout(parent parent);
 
-    template <std::derived_from<widget> T>
+    template <DerivedFrom<widget> T>
     auto create_widget(i32 level, string const& name) -> T&;
 
 protected:
@@ -266,7 +266,7 @@ class TCOB_API magnetic_snap_layout : public layout {
 public:
     explicit magnetic_snap_layout(parent parent, f32 distance, bool snapEdges = true, bool snapSiblings = true);
 
-    template <std::derived_from<widget> T>
+    template <DerivedFrom<widget> T>
     auto create_widget(rect_f const& rect, string const& name) -> T&;
 
     auto allows_move() const -> bool override;

@@ -83,10 +83,10 @@ public:
 
 class TCOB_API style_collection final {
 public:
-    template <std::derived_from<style> T>
+    template <DerivedFrom<style> T>
     auto create(string const& name, style_flags flags, style_attributes const& attribs = {}) -> std::shared_ptr<T>;
 
-    template <std::derived_from<widget> T>
+    template <DerivedFrom<widget> T>
     auto create(string const& name, style_flags flags, style_attributes const& attribs = {}) -> std::shared_ptr<typename T::style>;
 
     auto get(widget_style_selectors const& select) const -> style*;
