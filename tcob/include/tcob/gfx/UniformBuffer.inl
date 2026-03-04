@@ -8,7 +8,7 @@
 
 #include <span>
 
-#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
 
@@ -17,15 +17,21 @@ namespace tcob::gfx {
 template <POD T>
 inline auto uniform_buffer::update(T data, usize offset) const -> usize
 {
-    _impl->update(&data, sizeof(data), offset);
+    update(&data, sizeof(data), offset);
     return sizeof(data);
 }
 
 template <POD T>
 inline auto uniform_buffer::update(std::span<T const> data, usize offset) const -> usize
 {
-    _impl->update(data.data(), data.size_bytes(), offset);
+    update(data.data(), data.size_bytes(), offset);
     return data.size_bytes();
+}
+
+template <std::derived_from<render_backend::uniform_buffer_base> T>
+inline auto uniform_buffer::get_impl() const -> T*
+{
+    return static_cast<T*>(_impl.get());
 }
 
 }

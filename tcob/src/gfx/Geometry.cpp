@@ -13,8 +13,10 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Transform.hpp"
+#include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx {
 
@@ -116,8 +118,9 @@ void set_texcoords(quad& q, texture_region const& region, bool flipHorizontally,
 
 void set_texcoords(quad& q, pass const& pass, string const& region, bool flipHorizontally, bool flipVertically)
 {
-    if (pass.Texture && pass.Texture->regions().contains(region)) {
-        geometry::set_texcoords(q, pass.Texture->regions()[region], flipHorizontally, flipVertically);
+    asset_ptr<texture> const& tex {pass.Texture};
+    if (tex && tex->regions().contains(region)) {
+        geometry::set_texcoords(q, tex->regions()[region], flipHorizontally, flipVertically);
     } else {
         geometry::set_texcoords(q, {.UVRect = {0, 0, 1, 1}, .Level = 0});
     }

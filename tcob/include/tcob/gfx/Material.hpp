@@ -6,13 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Gfx.hpp"
-#include "tcob/gfx/ShaderProgram.hpp"
-#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
@@ -20,8 +19,9 @@ namespace tcob::gfx {
 
 class TCOB_API pass final {
 public:
-    asset_ptr<shader>  Shader {};
-    asset_ptr<texture> Texture {};
+    asset_ptr<shader>               Shader {};
+    asset_ptr<texture>              Texture {};
+    std::shared_ptr<uniform_buffer> UniformBuffer {};
 
     blend_funcs    BlendFuncs {};
     blend_equation BlendEquation {blend_equation::Add};

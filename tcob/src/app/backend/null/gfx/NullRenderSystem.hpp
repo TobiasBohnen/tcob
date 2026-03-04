@@ -91,8 +91,6 @@ public:
 class null_uniform_buffer final : public tcob::gfx::render_backend::uniform_buffer_base {
 public:
     void update(void const* data, usize size, usize offset) override;
-
-    void bind_base(u32 index) override;
 };
 
 ////////////////////////////////////////////////////////////

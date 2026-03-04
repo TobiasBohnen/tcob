@@ -261,6 +261,10 @@ namespace gfx {
 
     class material;
     class pass;
+
+    class shader;
+    class texture;
+    class uniform_buffer;
 }
 namespace gfx::render_backend {
     class canvas_base;

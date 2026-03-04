@@ -94,6 +94,5 @@ void null_canvas::render_clip(canvas::scissor const&, f32, std::vector<canvas::p
 void null_canvas::add_gradient(i32, color_gradient const&) { }
 
 void null_uniform_buffer::update(void const*, usize, usize) { }
-void null_uniform_buffer::bind_base(u32) { }
 
 }

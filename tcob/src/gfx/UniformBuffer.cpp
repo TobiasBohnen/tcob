@@ -24,9 +24,9 @@ auto uniform_buffer::update(bool data, usize offset) const -> usize
     return sizeof(d);
 }
 
-void uniform_buffer::bind_base(u32 index) const
+void uniform_buffer::update(void const* data, usize size, usize offset) const
 {
-    _impl->bind_base(index);
+    _impl->update(data, size, offset);
 }
 
 }

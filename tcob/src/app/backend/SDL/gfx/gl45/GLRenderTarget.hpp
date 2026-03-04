@@ -44,7 +44,7 @@ private:
 
     texture*                        _tex {nullptr};
     std::unique_ptr<gl_framebuffer> _frameBuffer;
-    gl_uniform_buffer               _matUniformBuffer {sizeof(vec4) + sizeof(f32)};
+    gl_uniform_buffer               _defaultPassUniformBuffer {sizeof(vec4) + sizeof(f32)};
 };
 
 }

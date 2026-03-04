@@ -23,7 +23,7 @@ public:
     template <POD T>
     auto update(T data, usize offset) -> usize;
 
-    void bind_base(u32 index) override;
+    void bind_base(u32 index);
 
 protected:
     void do_destroy() override;

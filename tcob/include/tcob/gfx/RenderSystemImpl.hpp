@@ -94,8 +94,6 @@ public:
     virtual ~uniform_buffer_base() = default;
 
     virtual void update(void const* data, usize size, usize offset) = 0;
-
-    virtual void bind_base(u32 index) = 0;
 };
 
 ////////////////////////////////////////////////////////////

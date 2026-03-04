@@ -24,7 +24,9 @@
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/ShaderProgram.hpp" // IWYU pragma: keep
 #include "tcob/gfx/Texture.hpp"
+#include "tcob/gfx/UniformBuffer.hpp" // IWYU pragma: keep
 
 namespace tcob::gfx::gles30 {
 
@@ -150,9 +152,13 @@ void gl_render_target::bind_pass(pass const& pass)
     }
 
     usize offset {0};
-    offset += _matUniformBuffer.update(pass.Color.to_float_array(), offset);
-    offset += _matUniformBuffer.update(pass.PointSize, offset);
-    _matUniformBuffer.bind_base(1);
+    offset += _defaultPassUniformBuffer.update(pass.Color.to_float_array(), offset);
+    offset += _defaultPassUniformBuffer.update(pass.PointSize, offset);
+    _defaultPassUniformBuffer.bind_base(1);
+
+    if (pass.UniformBuffer) {
+        pass.UniformBuffer->get_impl<gl_uniform_buffer>()->bind_base(2);
+    }
 
     // set blend mode
     GLCHECK(glEnable(GL_BLEND));

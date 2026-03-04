@@ -28,9 +28,12 @@ public:
     template <POD T>
     auto update(std::span<T const> data, usize offset) const -> usize;
 
-    void bind_base(u32 index) const;
+    template <std::derived_from<render_backend::uniform_buffer_base> T>
+    auto get_impl() const -> T*;
 
 private:
+    void update(void const* data, usize size, usize offset) const;
+
     std::unique_ptr<render_backend::uniform_buffer_base> _impl;
 };
 
