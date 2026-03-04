@@ -1,7 +1,7 @@
 R"(#version 300 es
 precision mediump float;
 
-uniform Material
+uniform Pass
 {
    vec4 matColor;
    float matPointSize;

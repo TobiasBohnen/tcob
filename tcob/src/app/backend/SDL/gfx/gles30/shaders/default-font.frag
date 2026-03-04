@@ -2,7 +2,7 @@ R"(#version 300 es
 precision mediump float;
 precision highp sampler2DArray;
 
-uniform Material
+uniform Pass
 {
     vec4 matColor;
     float matPointSize;

@@ -15,11 +15,11 @@ layout(std140, binding = 0)uniform Globals
 	bool debug; 
 } global;
 
-layout(std140, binding = 1)uniform Material
+layout(std140, binding = 1)uniform Pass
 {
 	vec4 color;
 	float point_size;
-} material;
+} pass;
 
 layout(location = 0)out VS_OUT
 {

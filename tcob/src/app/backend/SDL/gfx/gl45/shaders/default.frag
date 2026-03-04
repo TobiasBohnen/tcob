@@ -1,11 +1,11 @@
 R"(
 #version 450 core
 
-layout(std140, binding = 1)uniform Material
+layout(std140, binding = 1)uniform Pass
 {
 	vec4 color;
 	float point_size;
-} material;
+} pass;
 
 layout(location = 0)out vec4 fragColor;
 
@@ -17,6 +17,6 @@ layout(location = 0)in VS_OUT
 
 void main()
 {
-   fragColor = fs_in.color * material.color;
+   fragColor = fs_in.color * pass.color;
 }
 )"

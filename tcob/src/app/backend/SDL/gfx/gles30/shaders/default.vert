@@ -15,7 +15,7 @@ uniform Globals
     bool debug; 
 };
 
-uniform Material
+uniform Pass
 {
    vec4 matColor;
    float matPointSize;
