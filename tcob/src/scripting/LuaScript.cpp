@@ -97,7 +97,7 @@ void script::open_addons()
         tab["clamp"]    = +[](f32 v, f32 low, f32 high) { return std::clamp(v, low, high); };
         tab["lerp"]     = +[](f32 a, f32 b, f32 t) { return a + ((b - a) * t); };
         tab["round"]    = +[](f32 v) { return std::round(v); };
-        tab["sign"]     = +[](f32 v) -> f32 { return (v > 0.f) - (v < 0.f); };
+        tab["sign"]     = +[](f32 v) -> f32 { return static_cast<f32>((v > 0.f) - (v < 0.f)); };
         tab["saturate"] = +[](f32 v) { return std::clamp(v, 0.f, 1.f); };
         tab["wrap"]     = +[](f32 v, f32 low, f32 high) {
             f32 const range {high - low};
