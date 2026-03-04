@@ -14,6 +14,7 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
@@ -40,7 +41,11 @@ struct legend_def {
 
 class TCOB_API chart_style : public widget_style {
 public:
+    text_element       Text;
     std::vector<color> Colors;
+
+    color  OutlineColor {colors::Black};
+    length OutlineSize {1.0f, length::type::Absolute};
 
     static void Transition(chart_style& target, chart_style const& from, chart_style const& to, f64 step);
 };
@@ -89,8 +94,8 @@ public:
     grid_line_amount HorizontalGridLines {grid_line_amount::Normal};
     grid_line_amount VerticalGridLines {grid_line_amount::Normal};
 
-    f32   GridLineWidth {1.0f};
-    color GridColor {colors::Gray};
+    length GridLineSize {1.0f, length::type::Absolute};
+    color  GridColor {colors::Gray};
 
     static void Transition(grid_chart_style& target, grid_chart_style const& from, grid_chart_style const& to, f64 step);
 };

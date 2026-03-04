@@ -94,7 +94,7 @@ inline void grid_chart<T>::draw_grid(gfx::canvas& canvas, grid_chart_style const
     if (verticalGridLines == 1) { verticalGridLines = 2; }
 
     canvas.set_stroke_style(style.GridColor);
-    canvas.set_stroke_width(style.GridLineWidth);
+    canvas.set_stroke_width(style.GridLineSize.calc(bounds.width()));
 
     // horizontal lines
     if (horizontalGridLines > 1) {

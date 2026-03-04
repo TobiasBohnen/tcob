@@ -33,6 +33,7 @@ void line_chart::style::Transition(style& target, style const& from, style const
 
     target.LineSize    = helper::lerp(from.LineSize, to.LineSize, step);
     target.SmoothLines = helper::lerp(from.SmoothLines, to.SmoothLines, step);
+    target.LabelHeight = helper::lerp(from.LabelHeight, to.LabelHeight, step);
 }
 
 line_chart::line_chart(init const& wi)
@@ -48,10 +49,15 @@ void line_chart::on_draw_chart(widget_painter& painter)
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    draw_grid(canvas, _style, rect);
+    f32 const    labelHeight {XLabels->empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
+    f32 const    xStep {rect.width() / max_x()};
+    f32 const    halfStep {XLabels->empty() ? 0.0f : xStep / 2.0f};
+    rect_f const chartRect {rect.left() + halfStep, rect.top(), rect.width() - (halfStep * 2.0f), rect.height() - labelHeight};
+    rect_f const labelArea {rect.left(), rect.bottom() - labelHeight, rect.width(), labelHeight};
 
-    auto const xStep {rect.width() / (max_x() - 1)};
+    draw_grid(canvas, _style, chartRect);
 
+    auto const cxStep {chartRect.width() / (max_x() - 1)};
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
         usize const len {s.Value.size()};
@@ -59,8 +65,8 @@ void line_chart::on_draw_chart(widget_painter& painter)
 
         std::vector<point_f> points;
         for (usize j {0}; j < len; ++j) {
-            f32 const x {rect.left() + (xStep * j)};
-            f32 const y {position_in_yaxis(s.Value[j], *YAxis, rect)};
+            f32 const x {chartRect.left() + (cxStep * j)};
+            f32 const y {position_in_yaxis(s.Value[j], *YAxis, chartRect)};
             points.emplace_back(x, y);
         }
         if (points.size() == 1) { continue; }
@@ -74,10 +80,10 @@ void line_chart::on_draw_chart(widget_painter& painter)
                 auto const& p2 {points[j + 1]};
                 auto const& p3 {(j + 2 < points.size()) ? points[j + 2] : points[j + 1]};
 
-                point_f c1 {p1.X + ((p2.X - p0.X) * 0.5f / 3.0f),
-                            p1.Y + ((p2.Y - p0.Y) * 0.5f / 3.0f)};
-                point_f c2 {p2.X - ((p3.X - p1.X) * 0.5f / 3.0f),
-                            p2.Y - ((p3.Y - p1.Y) * 0.5f / 3.0f)};
+                point_f const c1 {p1.X + ((p2.X - p0.X) * 0.5f / 3.0f),
+                                  p1.Y + ((p2.Y - p0.Y) * 0.5f / 3.0f)};
+                point_f const c2 {p2.X - ((p3.X - p1.X) * 0.5f / 3.0f),
+                                  p2.Y - ((p3.Y - p1.Y) * 0.5f / 3.0f)};
 
                 canvas.cubic_bezier_to(c1, c2, p2);
             }
@@ -87,12 +93,21 @@ void line_chart::on_draw_chart(widget_painter& painter)
             }
         }
 
-        canvas.set_stroke_style(colors::Black);
-        canvas.set_stroke_width(_style.LineSize.calc(rect.width()) + 1);
+        canvas.set_stroke_style(_style.OutlineColor);
+        canvas.set_stroke_width(_style.LineSize.calc(chartRect.width()) + _style.OutlineSize.calc(chartRect.width()));
         canvas.stroke();
         canvas.set_stroke_style(_style.Colors[i % _style.Colors.size()]);
-        canvas.set_stroke_width(_style.LineSize.calc(rect.width()));
+        canvas.set_stroke_width(_style.LineSize.calc(chartRect.width()));
         canvas.stroke();
+    }
+
+    if (_style.Text.Font && !XLabels->empty()) {
+        for (usize i {0}; i < XLabels->size(); ++i) {
+            rect_f const labelRect {
+                labelArea.left() + (static_cast<f32>(i) * xStep), labelArea.top(),
+                xStep, labelHeight};
+            painter.draw_text(_style.Text, labelRect, (*XLabels)[i]);
+        }
     }
 }
 
@@ -121,9 +136,10 @@ void bar_chart::style::Transition(style& target, style const& from, style const&
 {
     grid_chart_style::Transition(target, from, to, step);
 
-    target.BarSize   = helper::lerp(from.BarSize, to.BarSize, step);
-    target.BarRadius = helper::lerp(from.BarRadius, to.BarRadius, step);
-    target.StackBars = helper::lerp(from.StackBars, to.StackBars, step);
+    target.BarSize     = helper::lerp(from.BarSize, to.BarSize, step);
+    target.BarRadius   = helper::lerp(from.BarRadius, to.BarRadius, step);
+    target.StackBars   = helper::lerp(from.StackBars, to.StackBars, step);
+    target.LabelHeight = helper::lerp(from.LabelHeight, to.LabelHeight, step);
 }
 
 bar_chart::bar_chart(init const& wi)
@@ -139,13 +155,18 @@ void bar_chart::on_draw_chart(widget_painter& painter)
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    draw_grid(canvas, _style, rect);
+    f32 const    labelHeight {XLabels->empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
+    rect_f const chartRect {rect.left(), rect.top(), rect.width(), rect.height() - labelHeight};
+    rect_f const labelArea {rect.left(), rect.bottom() - labelHeight, rect.width(), labelHeight};
+
+    draw_grid(canvas, _style, chartRect);
 
     usize const barCount {Dataset->size()};
 
-    f32 const columnWidth {rect.width() / max_x()};
+    f32 const columnWidth {chartRect.width() / max_x()};
     f32 const barWidth {_style.BarSize.calc(columnWidth)};
     f32 const barRadius {_style.BarRadius.calc(barWidth)};
+    f32 const outlineWidth {_style.OutlineSize.calc(chartRect.width())};
 
     if (_style.StackBars) {
         for (usize j {0}; j < max_x(); ++j) {
@@ -157,16 +178,16 @@ void bar_chart::on_draw_chart(widget_painter& painter)
 
                 canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
 
-                f32 const yAbs {position_in_yaxis(s.Value[j], *YAxis, rect)};
-                f32 const barHeight {rect.bottom() - yAbs};
+                f32 const yAbs {position_in_yaxis(s.Value[j], *YAxis, chartRect)};
+                f32 const barHeight {chartRect.bottom() - yAbs};
                 f32 const y {yAbs - yOffset};
-                f32 const x {rect.left() + (columnWidth * j) + ((columnWidth - barWidth) / 2)};
+                f32 const x {chartRect.left() + (columnWidth * j) + ((columnWidth - barWidth) / 2)};
 
                 canvas.begin_path();
                 canvas.rounded_rect({{x, y}, {barWidth, barHeight}}, barRadius);
                 canvas.fill();
-                canvas.set_stroke_width(1);
-                canvas.set_stroke_style(colors::Black);
+                canvas.set_stroke_width(outlineWidth);
+                canvas.set_stroke_style(_style.OutlineColor);
                 canvas.stroke();
 
                 yOffset += barHeight;
@@ -181,18 +202,28 @@ void bar_chart::on_draw_chart(widget_painter& painter)
 
             canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
 
-            f32 const xOffset {rect.left() + (barWidth / barCount * i) + ((columnWidth - barWidth) / 2)};
+            f32 const xOffset {chartRect.left() + (barWidth / barCount * i) + ((columnWidth - barWidth) / 2)};
             for (usize j {0}; j < valueCount; ++j) {
                 f32 const x {xOffset + (columnWidth * j)};
-                f32 const y {position_in_yaxis(s.Value[j], *YAxis, rect)};
+                f32 const y {position_in_yaxis(s.Value[j], *YAxis, chartRect)};
 
                 canvas.begin_path();
-                canvas.rounded_rect({{x, y}, {barWidth / static_cast<f32>(barCount), rect.bottom() - y}}, barRadius);
+                canvas.rounded_rect({{x, y}, {barWidth / static_cast<f32>(barCount), chartRect.bottom() - y}}, barRadius);
                 canvas.fill();
-                canvas.set_stroke_width(1);
-                canvas.set_stroke_style(colors::Black);
+                canvas.set_stroke_width(outlineWidth);
+                canvas.set_stroke_style(_style.OutlineColor);
                 canvas.stroke();
             }
+        }
+    }
+
+    if (_style.Text.Font && !XLabels->empty()) {
+        f32 const groupWidth {labelArea.width() / static_cast<f32>(max_x())};
+        for (usize i {0}; i < XLabels->size(); ++i) {
+            rect_f const labelRect {
+                labelArea.left() + (static_cast<f32>(i) * groupWidth), labelArea.top(),
+                groupWidth, labelHeight};
+            painter.draw_text(_style.Text, labelRect, (*XLabels)[i]);
         }
     }
 }
@@ -255,7 +286,8 @@ void marimekko_chart::on_draw_chart(widget_painter& painter)
     f32 const total {std::accumulate(columnTotals.begin(), columnTotals.end(), 0.0f)};
     if (total == 0.0f) { return; }
 
-    f32 xCursor {rect.left()};
+    f32 const outlineWidth {_style.OutlineSize.calc(rect.width())};
+    f32       xCursor {rect.left()};
 
     for (usize j {0}; j < valueCount; ++j) {
         f32 const  columnFraction {columnTotals[j] / total};
@@ -284,8 +316,8 @@ void marimekko_chart::on_draw_chart(widget_painter& painter)
             rect_f const block {{x, y}, {barWidth, barHeight}};
             canvas.rounded_rect(block, barRadius);
             canvas.fill();
-            canvas.set_stroke_width(1);
-            canvas.set_stroke_style(colors::Black);
+            canvas.set_stroke_width(outlineWidth);
+            canvas.set_stroke_style(_style.OutlineColor);
             canvas.stroke();
 
             yOffset += height;
@@ -323,14 +355,14 @@ void pie_chart::on_draw_chart(widget_painter& painter)
 
     auto const center {rect.center()};
     f32 const  radius {std::min(rect.width(), rect.height()) / 2};
-    f32 const  innerRadius {std::min(_style.InnerRadius.calc(radius), radius * 0.95f)};
+    f32 const  innerRadius {_style.InnerRadius.calc(radius)};
     bool const isDonut {innerRadius > 0.0f};
     f64 const  padAngle {radian_d {_style.PadAngle}.Value};
 
     f64 const outerHalfPad {padAngle / 2.0};
-    f64 const innerHalfPad {isDonut
-                                ? std::atan2(std::sin(outerHalfPad) * radius, innerRadius)
-                                : outerHalfPad};
+    f64 const innerHalfPad {isDonut ? std::atan2(std::sin(outerHalfPad) * radius, innerRadius)
+                                    : outerHalfPad};
+    f32 const outlineWidth {_style.OutlineSize.calc(rect.width())};
 
     f64 angle {0.0};
     for (usize i {0}; i < Dataset->size(); ++i) {
@@ -366,8 +398,8 @@ void pie_chart::on_draw_chart(widget_painter& painter)
 
         canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
         canvas.fill();
-        canvas.set_stroke_width(1);
-        canvas.set_stroke_style(colors::Black);
+        canvas.set_stroke_width(outlineWidth);
+        canvas.set_stroke_style(_style.OutlineColor);
         canvas.stroke();
 
         angle += fullSweep;
@@ -380,8 +412,7 @@ void scatter_chart::style::Transition(style& target, style const& from, style co
 {
     chart_style::Transition(target, from, to, step);
 
-    target.PointSize   = helper::lerp(from.PointSize, to.PointSize, step);
-    target.StrokeColor = helper::lerp(from.StrokeColor, to.StrokeColor, step);
+    target.PointSize = helper::lerp(from.PointSize, to.PointSize, step);
 }
 
 scatter_chart::scatter_chart(init const& wi)
@@ -398,12 +429,14 @@ void scatter_chart::on_draw_chart(widget_painter& painter)
 
     draw_grid(canvas, _style, rect);
 
+    f32 const outlineWidth {_style.OutlineSize.calc(rect.width())};
+
     // plot points
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
         canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
-        canvas.set_stroke_style(_style.StrokeColor);
-        canvas.set_stroke_width(1);
+        canvas.set_stroke_style(_style.OutlineColor);
+        canvas.set_stroke_width(outlineWidth);
 
         canvas.begin_path();
         for (auto const& pt : s.Value) {
@@ -440,11 +473,11 @@ auto scatter_chart::calc_grid_lines() const -> size_i
 void radar_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
     chart_style::Transition(target, from, to, step);
-    target.LineWidth     = helper::lerp(from.LineWidth, to.LineWidth, step);
     target.FillAreaAlpha = helper::lerp(from.FillAreaAlpha, to.FillAreaAlpha, step);
 
-    target.GridLineWidth = helper::lerp(from.GridLineWidth, to.GridLineWidth, step);
-    target.GridColor     = helper::lerp(from.GridColor, to.GridColor, step);
+    target.LineSize     = helper::lerp(from.LineSize, to.LineSize, step);
+    target.GridLineSize = helper::lerp(from.GridLineSize, to.GridLineSize, step);
+    target.GridColor    = helper::lerp(from.GridColor, to.GridColor, step);
 }
 
 radar_chart::radar_chart(init const& wi)
@@ -467,7 +500,7 @@ void radar_chart::on_draw_chart(widget_painter& painter)
     if (_style.GridLines != grid_line_amount::None) {
         // draw radial axes
         canvas.set_stroke_style(_style.GridColor);
-        canvas.set_stroke_width(std::max(_style.GridLineWidth.calc(radius), 1.0f));
+        canvas.set_stroke_width(_style.GridLineSize.calc(radius));
         for (usize i {0}; i < axisCount; ++i) {
             f32 const angle {(static_cast<f32>(i) / axisCount) * TAU_F};
             f32 const x {center.X + (std::cos(angle) * radius)};
@@ -504,7 +537,8 @@ void radar_chart::on_draw_chart(widget_painter& painter)
         }
     }
 
-    f32 const lineWidth {std::max(_style.LineWidth.calc(radius), 1.0f)};
+    // TODO: outline
+    f32 const lineWidth {_style.LineSize.calc(radius)};
 
     // draw series polygons
     for (usize i {0}; i < Dataset->size(); ++i) {

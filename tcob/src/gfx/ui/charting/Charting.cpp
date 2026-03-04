@@ -18,6 +18,8 @@ void chart_style::Transition(chart_style& target, chart_style const& from, chart
 {
     widget_style::Transition(target, from, to, step);
 
+    target.Text.lerp(from.Text, to.Text, step);
+
     target.Colors.clear();
     target.Colors.resize(from.Colors.size());
     for (usize i {0}; i < from.Colors.size(); ++i) {
@@ -27,6 +29,9 @@ void chart_style::Transition(chart_style& target, chart_style const& from, chart
             target.Colors[i] = helper::lerp(from.Colors[i], to.Colors[i], step);
         }
     }
+
+    target.OutlineColor = helper::lerp(from.OutlineColor, to.OutlineColor, step);
+    target.OutlineSize  = helper::lerp(from.OutlineSize, to.OutlineSize, step);
 }
 
 void grid_chart_style::Transition(grid_chart_style& target, grid_chart_style const& from, grid_chart_style const& to, f64 step)

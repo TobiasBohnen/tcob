@@ -26,13 +26,15 @@ public:
     public:
         length LineSize {3.0f, length::type::Absolute};
         bool   SmoothLines {false};
+        length LabelHeight;
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit line_chart(init const& wi);
 
-    prop<axis> YAxis;
+    prop<std::vector<string>> XLabels;
+    prop<axis>                YAxis;
 
 protected:
     void on_draw_chart(widget_painter& painter) override;
@@ -52,13 +54,15 @@ public:
         length BarSize {1.f, length::type::Relative};
         length BarRadius {};
         bool   StackBars {false};
+        length LabelHeight;
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit bar_chart(init const& wi);
 
-    prop<axis> YAxis;
+    prop<std::vector<string>> XLabels;
+    prop<axis>                YAxis;
 
 protected:
     void on_draw_chart(widget_painter& painter) override;
@@ -117,8 +121,7 @@ class TCOB_API scatter_chart : public grid_chart<std::vector<point_f>> {
 public:
     class TCOB_API style : public grid_chart_style {
     public:
-        f32   PointSize {4.0f};
-        color StrokeColor {colors::Black};
+        f32 PointSize {4.0f};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
@@ -143,11 +146,12 @@ class TCOB_API radar_chart : public chart<std::vector<f32>> {
 public:
     class style : public chart_style {
     public:
-        length LineWidth {4.0f, length::type::Absolute};
-        u8     FillAreaAlpha {0};
+        u8 FillAreaAlpha {0};
+
+        length LineSize {3.0f, length::type::Absolute};
 
         grid_line_amount GridLines {grid_line_amount::Normal};
-        length           GridLineWidth {2.0f, length::type::Absolute};
+        length           GridLineSize {2.0f, length::type::Absolute};
         color            GridColor {colors::Gray};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
