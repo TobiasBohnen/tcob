@@ -18,7 +18,6 @@ layout(std140, binding = 0)uniform Globals
 layout(std140, binding = 1)uniform Pass
 {
 	vec4 color;
-	float point_size;
 } pass;
 
 layout(location = 0)out VS_OUT

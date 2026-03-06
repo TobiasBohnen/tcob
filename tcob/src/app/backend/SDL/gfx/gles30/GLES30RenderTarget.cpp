@@ -153,7 +153,6 @@ void gl_render_target::bind_pass(pass const& pass)
 
     usize offset {0};
     offset += _defaultPassUniformBuffer.update(pass.Color.to_float_array(), offset);
-    offset += _defaultPassUniformBuffer.update(pass.PointSize, offset);
     _defaultPassUniformBuffer.bind_base(1);
 
     if (pass.UniformBuffer) {

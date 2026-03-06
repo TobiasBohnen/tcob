@@ -4,7 +4,6 @@ precision mediump float;
 uniform Pass
 {
    vec4 matColor;
-   float matPointSize;
 };
 
 out vec4 fragColor;

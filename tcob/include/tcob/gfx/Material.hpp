@@ -27,7 +27,6 @@ public:
     blend_equation BlendEquation {blend_equation::Add};
 
     color Color {colors::White};
-    f32   PointSize {1};
 
     stencil_func StencilFunc {stencil_func::Always};
     stencil_op   StencilOp {stencil_op::Keep};

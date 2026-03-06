@@ -105,7 +105,6 @@ namespace Material {
     static char const* separate_blend_func {"separate_blend_func"};
     static char const* blend_equation {"blend_equation"};
 
-    static char const* point_size {"point_size"};
     static char const* color {"color"};
 
     static char const* stencil_func {"stencil_func"};
@@ -559,7 +558,6 @@ void cfg_material_loader::declare()
 
         assetSection.try_get(def.pass.BlendEquation, API::Material::blend_equation);
         assetSection.try_get(def.pass.Color, API::Material::color);
-        assetSection.try_get(def.pass.PointSize, API::Material::point_size);
         assetSection.try_get(def.pass.StencilFunc, API::Material::stencil_func);
         assetSection.try_get(def.pass.StencilOp, API::Material::stencil_op);
         assetSection.try_get(def.pass.StencilRef, API::Material::stencil_ref);

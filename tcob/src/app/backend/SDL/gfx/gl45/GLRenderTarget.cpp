@@ -148,7 +148,6 @@ void gl_render_target::bind_pass(pass const& pass)
 
     usize offset {0};
     offset += _defaultPassUniformBuffer.update(pass.Color.to_float_array(), offset);
-    offset += _defaultPassUniformBuffer.update(pass.PointSize, offset);
     _defaultPassUniformBuffer.bind_base(1);
 
     if (pass.UniformBuffer) {
@@ -161,8 +160,6 @@ void gl_render_target::bind_pass(pass const& pass)
         convert_enum(pass.BlendFuncs.SourceColorBlendFunc), convert_enum(pass.BlendFuncs.DestinationColorBlendFunc),
         convert_enum(pass.BlendFuncs.SourceAlphaBlendFunc), convert_enum(pass.BlendFuncs.DestinationAlphaBlendFunc));
     glBlendEquation(convert_enum(pass.BlendEquation));
-
-    glPointSize(pass.PointSize);
 
     // set stencil mode
     bool const needsStencil {(pass.StencilFunc != stencil_func::Always) || (pass.StencilOp != stencil_op::Keep)};

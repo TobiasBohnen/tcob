@@ -5,7 +5,6 @@ precision highp sampler2DArray;
 uniform Pass
 {
     vec4 matColor;
-    float matPointSize;
 };
 
 out vec4 fragColor;
