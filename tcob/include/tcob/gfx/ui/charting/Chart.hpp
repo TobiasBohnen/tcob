@@ -33,8 +33,8 @@ public:
 
     explicit line_chart(init const& wi);
 
-    prop<std::vector<string>> XLabels;
-    prop<axis>                YAxis;
+    prop<axis> XAxis;
+    prop<axis> YAxis;
 
 protected:
     void on_draw_chart(widget_painter& painter) override;
@@ -61,8 +61,8 @@ public:
 
     explicit bar_chart(init const& wi);
 
-    prop<std::vector<string>> XLabels;
-    prop<axis>                YAxis;
+    prop<axis> XAxis;
+    prop<axis> YAxis;
 
 protected:
     void on_draw_chart(widget_painter& painter) override;
@@ -81,11 +81,14 @@ public:
     public:
         dimensions BarSize {};
         length     BarRadius {};
+        length     LabelHeight;
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit marimekko_chart(init const& wi);
+
+    prop<axis> XAxis;
 
 protected:
     void on_draw_chart(widget_painter& painter) override;
@@ -121,7 +124,8 @@ class TCOB_API scatter_chart : public grid_chart<std::vector<point_f>> {
 public:
     class TCOB_API style : public grid_chart_style {
     public:
-        f32 PointSize {4.0f};
+        f32    PointSize {4.0f};
+        length LabelHeight;
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };

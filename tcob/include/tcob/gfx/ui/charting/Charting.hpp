@@ -22,8 +22,9 @@ namespace tcob::ui::charts {
 ////////////////////////////////////////////////////////////
 
 struct axis {
-    f32 Min {0.0f};
-    f32 Max {1.0f};
+    f32                 Min {0.0f};
+    f32                 Max {1.0f};
+    std::vector<string> Labels;
 };
 
 template <typename T>

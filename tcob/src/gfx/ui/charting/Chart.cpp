@@ -40,6 +40,8 @@ line_chart::line_chart(init const& wi)
     : grid_chart {wi}
 {
     Class("line_chart");
+
+    XAxis.Changed.connect([&] { queue_redraw(); });
     YAxis.Changed.connect([&] { queue_redraw(); });
 }
 
@@ -49,9 +51,9 @@ void line_chart::on_draw_chart(widget_painter& painter)
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    f32 const    labelHeight {XLabels->empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
+    f32 const    labelHeight {XAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
     f32 const    xStep {rect.width() / max_x()};
-    f32 const    halfStep {XLabels->empty() ? 0.0f : xStep / 2.0f};
+    f32 const    halfStep {XAxis->Labels.empty() ? 0.0f : xStep / 2.0f};
     rect_f const chartRect {rect.left() + halfStep, rect.top(), rect.width() - (halfStep * 2.0f), rect.height() - labelHeight};
     rect_f const labelArea {rect.left(), rect.bottom() - labelHeight, rect.width(), labelHeight};
 
@@ -101,12 +103,12 @@ void line_chart::on_draw_chart(widget_painter& painter)
         canvas.stroke();
     }
 
-    if (_style.Text.Font && !XLabels->empty()) {
-        for (usize i {0}; i < XLabels->size(); ++i) {
+    if (_style.Text.Font && !XAxis->Labels.empty()) {
+        for (usize i {0}; i < XAxis->Labels.size(); ++i) {
             rect_f const labelRect {
                 labelArea.left() + (static_cast<f32>(i) * xStep), labelArea.top(),
                 xStep, labelHeight};
-            painter.draw_text(_style.Text, labelRect, (*XLabels)[i]);
+            painter.draw_text(_style.Text, labelRect, XAxis->Labels[i]);
         }
     }
 }
@@ -146,6 +148,8 @@ bar_chart::bar_chart(init const& wi)
     : grid_chart {wi}
 {
     Class("bar_chart");
+
+    XAxis.Changed.connect([&] { queue_redraw(); });
     YAxis.Changed.connect([&] { queue_redraw(); });
 }
 
@@ -155,7 +159,7 @@ void bar_chart::on_draw_chart(widget_painter& painter)
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    f32 const    labelHeight {XLabels->empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
+    f32 const    labelHeight {XAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
     rect_f const chartRect {rect.left(), rect.top(), rect.width(), rect.height() - labelHeight};
     rect_f const labelArea {rect.left(), rect.bottom() - labelHeight, rect.width(), labelHeight};
 
@@ -217,13 +221,13 @@ void bar_chart::on_draw_chart(widget_painter& painter)
         }
     }
 
-    if (_style.Text.Font && !XLabels->empty()) {
+    if (_style.Text.Font && !XAxis->Labels.empty()) {
         f32 const groupWidth {labelArea.width() / static_cast<f32>(max_x())};
-        for (usize i {0}; i < XLabels->size(); ++i) {
+        for (usize i {0}; i < XAxis->Labels.size(); ++i) {
             rect_f const labelRect {
                 labelArea.left() + (static_cast<f32>(i) * groupWidth), labelArea.top(),
                 groupWidth, labelHeight};
-            painter.draw_text(_style.Text, labelRect, (*XLabels)[i]);
+            painter.draw_text(_style.Text, labelRect, XAxis->Labels[i]);
         }
     }
 }
@@ -253,14 +257,17 @@ void marimekko_chart::style::Transition(style& target, style const& from, style 
 {
     chart_style::Transition(target, from, to, step);
 
-    target.BarSize   = helper::lerp(from.BarSize, to.BarSize, step);
-    target.BarRadius = helper::lerp(from.BarRadius, to.BarRadius, step);
+    target.BarSize     = helper::lerp(from.BarSize, to.BarSize, step);
+    target.BarRadius   = helper::lerp(from.BarRadius, to.BarRadius, step);
+    target.LabelHeight = helper::lerp(from.LabelHeight, to.LabelHeight, step);
 }
 
 marimekko_chart::marimekko_chart(init const& wi)
     : chart {wi}
 {
     Class("marimekko_chart");
+
+    XAxis.Changed.connect([&]() { queue_redraw(); });
 }
 
 void marimekko_chart::on_draw_chart(widget_painter& painter)
@@ -286,17 +293,21 @@ void marimekko_chart::on_draw_chart(widget_painter& painter)
     f32 const total {std::accumulate(columnTotals.begin(), columnTotals.end(), 0.0f)};
     if (total == 0.0f) { return; }
 
-    f32 const outlineWidth {_style.OutlineSize.calc(rect.width())};
-    f32       xCursor {rect.left()};
+    f32 const    labelHeight {XAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
+    rect_f const chartRect {rect.left(), rect.top(), rect.width(), rect.height() - labelHeight};
+    rect_f const labelArea {rect.left(), rect.bottom() - labelHeight, rect.width(), labelHeight};
+
+    f32 const outlineWidth {_style.OutlineSize.calc(chartRect.width())};
+    f32       xCursor {chartRect.left()};
 
     for (usize j {0}; j < valueCount; ++j) {
         f32 const  columnFraction {columnTotals[j] / total};
-        f32 const  columnWidth {rect.width() * columnFraction};
+        f32 const  columnWidth {chartRect.width() * columnFraction};
         auto const barWidth {_style.BarSize.Width.calc(columnWidth)};
         auto const barRadius {_style.BarRadius.calc(barWidth)};
 
         f32       yOffset {0.0f};
-        f32 const baseline {rect.bottom()};
+        f32 const baseline {chartRect.bottom()};
 
         for (usize i {0}; i < seriesCount; ++i) {
             auto const& s {Dataset[i]};
@@ -305,22 +316,25 @@ void marimekko_chart::on_draw_chart(widget_painter& painter)
             f32 const value {s.Value[j]};
             if (columnTotals[j] == 0.0f) { continue; }
 
-            f32 const  height {rect.height() * (value / columnTotals[j])};
+            f32 const  height {chartRect.height() * (value / columnTotals[j])};
             auto const barHeight {_style.BarSize.Height.calc(height)};
             f32 const  y {baseline - (yOffset + height) + ((height - barHeight) / 2)};
             f32 const  x {xCursor + ((columnWidth - barWidth) / 2)};
 
             canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
-
             canvas.begin_path();
-            rect_f const block {{x, y}, {barWidth, barHeight}};
-            canvas.rounded_rect(block, barRadius);
+            canvas.rounded_rect({{x, y}, {barWidth, barHeight}}, barRadius);
             canvas.fill();
             canvas.set_stroke_width(outlineWidth);
             canvas.set_stroke_style(_style.OutlineColor);
             canvas.stroke();
 
             yOffset += height;
+        }
+
+        if (_style.Text.Font && j < XAxis->Labels.size()) {
+            rect_f const labelRect {xCursor, labelArea.top(), columnWidth, labelHeight};
+            painter.draw_text(_style.Text, labelRect, XAxis->Labels[j]);
         }
 
         xCursor += columnWidth;
@@ -412,7 +426,8 @@ void scatter_chart::style::Transition(style& target, style const& from, style co
 {
     chart_style::Transition(target, from, to, step);
 
-    target.PointSize = helper::lerp(from.PointSize, to.PointSize, step);
+    target.PointSize   = helper::lerp(from.PointSize, to.PointSize, step);
+    target.LabelHeight = helper::lerp(from.LabelHeight, to.LabelHeight, step);
 }
 
 scatter_chart::scatter_chart(init const& wi)
@@ -427,11 +442,18 @@ void scatter_chart::on_draw_chart(widget_painter& painter)
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    draw_grid(canvas, _style, rect);
+    f32 const xLabelHeight {XAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
+    f32 const yLabelWidth {YAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.width())};
 
-    f32 const outlineWidth {_style.OutlineSize.calc(rect.width())};
+    rect_f const chartRect {rect.left() + yLabelWidth + (_style.PointSize), rect.top() + xLabelHeight + (_style.PointSize),
+                            rect.width() - yLabelWidth - xLabelHeight - (_style.PointSize * 2), rect.height() - (xLabelHeight * 2.0f) - (_style.PointSize * 2)};
+    rect_f const xLabelArea {chartRect.left(), rect.bottom() - xLabelHeight, chartRect.width(), xLabelHeight};
+    rect_f const yLabelArea {rect.left(), chartRect.top(), yLabelWidth, chartRect.height()};
 
-    // plot points
+    draw_grid(canvas, _style, chartRect);
+
+    f32 const outlineWidth {_style.OutlineSize.calc(chartRect.width())};
+
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
         canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
@@ -440,12 +462,31 @@ void scatter_chart::on_draw_chart(widget_painter& painter)
 
         canvas.begin_path();
         for (auto const& pt : s.Value) {
-            f32 const x {position_in_xaxis(pt.X, XAxis, rect)};
-            f32 const y {position_in_yaxis(pt.Y, YAxis, rect)};
+            f32 const x {position_in_xaxis(pt.X, *XAxis, chartRect)};
+            f32 const y {position_in_yaxis(pt.Y, *YAxis, chartRect)};
             canvas.circle({x, y}, _style.PointSize);
         }
         canvas.fill();
         canvas.stroke();
+    }
+
+    if (_style.Text.Font && !XAxis->Labels.empty()) {
+        f32 const xStep {chartRect.width() / static_cast<f32>(XAxis->Labels.size() - 1)};
+        for (usize i {0}; i < XAxis->Labels.size(); ++i) {
+            f32 const    cx {chartRect.left() + (static_cast<f32>(i) * xStep)};
+            rect_f const labelRect {cx - (xStep / 2.0f), xLabelArea.top(), xStep, xLabelHeight};
+            painter.draw_text(_style.Text, labelRect, XAxis->Labels[i]);
+        }
+    }
+
+    if (_style.Text.Font && !YAxis->Labels.empty()) {
+        f32 const yStep {chartRect.height() / static_cast<f32>(YAxis->Labels.size() - 1)};
+        for (usize i {0}; i < YAxis->Labels.size(); ++i) {
+            usize const  ri {YAxis->Labels.size() - 1 - i};
+            f32 const    cy {chartRect.top() + (static_cast<f32>(i) * yStep)};
+            rect_f const labelRect {yLabelArea.left(), cy - (yStep / 2.0f), yLabelWidth, yStep};
+            painter.draw_text(_style.Text, labelRect, YAxis->Labels[ri]);
+        }
     }
 }
 
