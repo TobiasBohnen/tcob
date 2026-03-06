@@ -33,16 +33,12 @@ void line_chart::style::Transition(style& target, style const& from, style const
 
     target.LineSize    = helper::lerp(from.LineSize, to.LineSize, step);
     target.SmoothLines = helper::lerp(from.SmoothLines, to.SmoothLines, step);
-    target.LabelHeight = helper::lerp(from.LabelHeight, to.LabelHeight, step);
 }
 
 line_chart::line_chart(init const& wi)
     : grid_chart {wi}
 {
     Class("line_chart");
-
-    XAxis.Changed.connect([&] { queue_redraw(); });
-    YAxis.Changed.connect([&] { queue_redraw(); });
 }
 
 void line_chart::on_draw_chart(widget_painter& painter)
@@ -103,12 +99,12 @@ void line_chart::on_draw_chart(widget_painter& painter)
         canvas.stroke();
     }
 
-    if (_style.Text.Font && !XAxis->Labels.empty()) {
+    if (_style.XAxisText.Font && !XAxis->Labels.empty()) {
         for (usize i {0}; i < XAxis->Labels.size(); ++i) {
             rect_f const labelRect {
                 labelArea.left() + (static_cast<f32>(i) * xStep), labelArea.top(),
                 xStep, labelHeight};
-            painter.draw_text(_style.Text, labelRect, XAxis->Labels[i]);
+            painter.draw_text(_style.XAxisText, labelRect, XAxis->Labels[i]);
         }
     }
 }
@@ -138,19 +134,15 @@ void bar_chart::style::Transition(style& target, style const& from, style const&
 {
     grid_chart_style::Transition(target, from, to, step);
 
-    target.BarSize     = helper::lerp(from.BarSize, to.BarSize, step);
-    target.BarRadius   = helper::lerp(from.BarRadius, to.BarRadius, step);
-    target.StackBars   = helper::lerp(from.StackBars, to.StackBars, step);
-    target.LabelHeight = helper::lerp(from.LabelHeight, to.LabelHeight, step);
+    target.BarSize   = helper::lerp(from.BarSize, to.BarSize, step);
+    target.BarRadius = helper::lerp(from.BarRadius, to.BarRadius, step);
+    target.StackBars = helper::lerp(from.StackBars, to.StackBars, step);
 }
 
 bar_chart::bar_chart(init const& wi)
     : grid_chart {wi}
 {
     Class("bar_chart");
-
-    XAxis.Changed.connect([&] { queue_redraw(); });
-    YAxis.Changed.connect([&] { queue_redraw(); });
 }
 
 void bar_chart::on_draw_chart(widget_painter& painter)
@@ -221,13 +213,13 @@ void bar_chart::on_draw_chart(widget_painter& painter)
         }
     }
 
-    if (_style.Text.Font && !XAxis->Labels.empty()) {
+    if (_style.XAxisText.Font && !XAxis->Labels.empty()) {
         f32 const groupWidth {labelArea.width() / static_cast<f32>(max_x())};
         for (usize i {0}; i < XAxis->Labels.size(); ++i) {
             rect_f const labelRect {
                 labelArea.left() + (static_cast<f32>(i) * groupWidth), labelArea.top(),
                 groupWidth, labelHeight};
-            painter.draw_text(_style.Text, labelRect, XAxis->Labels[i]);
+            painter.draw_text(_style.XAxisText, labelRect, XAxis->Labels[i]);
         }
     }
 }
@@ -257,17 +249,14 @@ void marimekko_chart::style::Transition(style& target, style const& from, style 
 {
     chart_style::Transition(target, from, to, step);
 
-    target.BarSize     = helper::lerp(from.BarSize, to.BarSize, step);
-    target.BarRadius   = helper::lerp(from.BarRadius, to.BarRadius, step);
-    target.LabelHeight = helper::lerp(from.LabelHeight, to.LabelHeight, step);
+    target.BarSize   = helper::lerp(from.BarSize, to.BarSize, step);
+    target.BarRadius = helper::lerp(from.BarRadius, to.BarRadius, step);
 }
 
 marimekko_chart::marimekko_chart(init const& wi)
     : chart {wi}
 {
     Class("marimekko_chart");
-
-    XAxis.Changed.connect([&]() { queue_redraw(); });
 }
 
 void marimekko_chart::on_draw_chart(widget_painter& painter)
@@ -332,9 +321,9 @@ void marimekko_chart::on_draw_chart(widget_painter& painter)
             yOffset += height;
         }
 
-        if (_style.Text.Font && j < XAxis->Labels.size()) {
+        if (_style.XAxisText.Font && j < XAxis->Labels.size()) {
             rect_f const labelRect {xCursor, labelArea.top(), columnWidth, labelHeight};
-            painter.draw_text(_style.Text, labelRect, XAxis->Labels[j]);
+            painter.draw_text(_style.XAxisText, labelRect, XAxis->Labels[j]);
         }
 
         xCursor += columnWidth;
@@ -426,8 +415,7 @@ void scatter_chart::style::Transition(style& target, style const& from, style co
 {
     chart_style::Transition(target, from, to, step);
 
-    target.PointSize   = helper::lerp(from.PointSize, to.PointSize, step);
-    target.LabelHeight = helper::lerp(from.LabelHeight, to.LabelHeight, step);
+    target.PointSize = helper::lerp(from.PointSize, to.PointSize, step);
 }
 
 scatter_chart::scatter_chart(init const& wi)
@@ -442,11 +430,12 @@ void scatter_chart::on_draw_chart(widget_painter& painter)
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
+    f32 const pointSize {_style.PointSize.calc(rect.width())};
     f32 const xLabelHeight {XAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
     f32 const yLabelWidth {YAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.width())};
 
-    rect_f const chartRect {rect.left() + yLabelWidth + (_style.PointSize), rect.top() + xLabelHeight + (_style.PointSize),
-                            rect.width() - yLabelWidth - xLabelHeight - (_style.PointSize * 2), rect.height() - (xLabelHeight * 2.0f) - (_style.PointSize * 2)};
+    rect_f const chartRect {rect.left() + yLabelWidth + pointSize, rect.top() + xLabelHeight + pointSize,
+                            rect.width() - yLabelWidth - xLabelHeight - (pointSize * 2), rect.height() - (xLabelHeight * 2.0f) - (pointSize * 2)};
     rect_f const xLabelArea {chartRect.left(), rect.bottom() - xLabelHeight, chartRect.width(), xLabelHeight};
     rect_f const yLabelArea {rect.left(), chartRect.top(), yLabelWidth, chartRect.height()};
 
@@ -464,28 +453,28 @@ void scatter_chart::on_draw_chart(widget_painter& painter)
         for (auto const& pt : s.Value) {
             f32 const x {position_in_xaxis(pt.X, *XAxis, chartRect)};
             f32 const y {position_in_yaxis(pt.Y, *YAxis, chartRect)};
-            canvas.circle({x, y}, _style.PointSize);
+            canvas.circle({x, y}, pointSize);
         }
         canvas.fill();
         canvas.stroke();
     }
 
-    if (_style.Text.Font && !XAxis->Labels.empty()) {
+    if (_style.XAxisText.Font && !XAxis->Labels.empty()) {
         f32 const xStep {chartRect.width() / static_cast<f32>(XAxis->Labels.size() - 1)};
         for (usize i {0}; i < XAxis->Labels.size(); ++i) {
             f32 const    cx {chartRect.left() + (static_cast<f32>(i) * xStep)};
             rect_f const labelRect {cx - (xStep / 2.0f), xLabelArea.top(), xStep, xLabelHeight};
-            painter.draw_text(_style.Text, labelRect, XAxis->Labels[i]);
+            painter.draw_text(_style.XAxisText, labelRect, XAxis->Labels[i]);
         }
     }
 
-    if (_style.Text.Font && !YAxis->Labels.empty()) {
+    if (_style.YAxisText.Font && !YAxis->Labels.empty()) {
         f32 const yStep {chartRect.height() / static_cast<f32>(YAxis->Labels.size() - 1)};
         for (usize i {0}; i < YAxis->Labels.size(); ++i) {
             usize const  ri {YAxis->Labels.size() - 1 - i};
             f32 const    cy {chartRect.top() + (static_cast<f32>(i) * yStep)};
             rect_f const labelRect {yLabelArea.left(), cy - (yStep / 2.0f), yLabelWidth, yStep};
-            painter.draw_text(_style.Text, labelRect, YAxis->Labels[ri]);
+            painter.draw_text(_style.YAxisText, labelRect, YAxis->Labels[ri]);
         }
     }
 }
@@ -588,7 +577,7 @@ void radar_chart::on_draw_chart(widget_painter& painter)
         std::vector<point_f> points;
         for (usize j {0}; j < axisCount; ++j) {
             f32 const value {(j < s.Value.size()) ? s.Value[j] : 0.0f};
-            f32 const normalized {(value - ValueAxis->Min) / (ValueAxis->Max - ValueAxis->Min)};
+            f32 const normalized {(value - YAxis->Min) / (YAxis->Max - YAxis->Min)};
             f32 const angle {(static_cast<f32>(j) / axisCount) * TAU_F};
             f32 const r {normalized * radius};
 

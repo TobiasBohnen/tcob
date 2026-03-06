@@ -11,7 +11,6 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
-#include "tcob/core/Property.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/charting/Charting.hpp"
@@ -26,15 +25,11 @@ public:
     public:
         length LineSize {3.0f, length::type::Absolute};
         bool   SmoothLines {false};
-        length LabelHeight;
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit line_chart(init const& wi);
-
-    prop<axis> XAxis;
-    prop<axis> YAxis;
 
 protected:
     void on_draw_chart(widget_painter& painter) override;
@@ -54,15 +49,11 @@ public:
         length BarSize {1.f, length::type::Relative};
         length BarRadius {};
         bool   StackBars {false};
-        length LabelHeight;
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit bar_chart(init const& wi);
-
-    prop<axis> XAxis;
-    prop<axis> YAxis;
 
 protected:
     void on_draw_chart(widget_painter& painter) override;
@@ -81,14 +72,11 @@ public:
     public:
         dimensions BarSize {};
         length     BarRadius {};
-        length     LabelHeight;
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit marimekko_chart(init const& wi);
-
-    prop<axis> XAxis;
 
 protected:
     void on_draw_chart(widget_painter& painter) override;
@@ -124,16 +112,12 @@ class TCOB_API scatter_chart : public grid_chart<std::vector<point_f>> {
 public:
     class TCOB_API style : public grid_chart_style {
     public:
-        f32    PointSize {4.0f};
-        length LabelHeight;
+        length PointSize {3.0f, length::type::Absolute};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit scatter_chart(init const& wi);
-
-    prop<axis> XAxis;
-    prop<axis> YAxis;
 
 protected:
     void on_draw_chart(widget_painter& painter) override;
@@ -162,8 +146,6 @@ public:
     };
 
     explicit radar_chart(init const& wi);
-
-    prop<axis> ValueAxis;
 
 protected:
     void on_draw_chart(widget_painter& painter) override;

@@ -42,7 +42,11 @@ struct legend_def {
 
 class TCOB_API chart_style : public widget_style {
 public:
-    text_element       Text;
+    text_element XAxisText;
+    text_element YAxisText;
+
+    length LabelHeight;
+
     std::vector<color> Colors;
 
     color  OutlineColor {colors::Black};
@@ -55,10 +59,13 @@ class TCOB_API chart_base : public widget {
 public:
     virtual ~chart_base() = default;
 
+    prop<axis> XAxis;
+    prop<axis> YAxis;
+
     virtual auto legend() const -> std::vector<legend_def> = 0;
 
 protected:
-    using widget::widget;
+    explicit chart_base(init const& wi);
 };
 
 template <typename T>

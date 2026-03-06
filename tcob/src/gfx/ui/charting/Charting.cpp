@@ -18,7 +18,10 @@ void chart_style::Transition(chart_style& target, chart_style const& from, chart
 {
     widget_style::Transition(target, from, to, step);
 
-    target.Text.lerp(from.Text, to.Text, step);
+    target.XAxisText.lerp(from.XAxisText, to.XAxisText, step);
+    target.YAxisText.lerp(from.YAxisText, to.YAxisText, step);
+
+    target.LabelHeight = helper::lerp(from.LabelHeight, to.LabelHeight, step);
 
     target.Colors.clear();
     target.Colors.resize(from.Colors.size());
@@ -40,6 +43,13 @@ void grid_chart_style::Transition(grid_chart_style& target, grid_chart_style con
 
     target.GridLineSize = helper::lerp(from.GridLineSize, to.GridLineSize, step);
     target.GridColor    = helper::lerp(from.GridColor, to.GridColor, step);
+}
+
+chart_base::chart_base(init const& wi)
+    : widget {wi}
+{
+    XAxis.Changed.connect([&] { queue_redraw(); });
+    YAxis.Changed.connect([&] { queue_redraw(); });
 }
 
 }
