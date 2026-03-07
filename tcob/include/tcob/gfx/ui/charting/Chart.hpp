@@ -6,12 +6,13 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <utility>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
-#include "tcob/core/Size.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/charting/Charting.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -32,9 +33,9 @@ public:
     explicit line_chart(init const& wi);
 
 protected:
-    void on_draw_chart(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels) override;
 
-    auto calc_grid_lines() const -> size_i override;
+    auto calc_grid_lines() const -> std::pair<i32, i32> override;
 
 private:
     line_chart::style _style;
@@ -56,9 +57,9 @@ public:
     explicit bar_chart(init const& wi);
 
 protected:
-    void on_draw_chart(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels) override;
 
-    auto calc_grid_lines() const -> size_i override;
+    auto calc_grid_lines() const -> std::pair<i32, i32> override;
 
 private:
     bar_chart::style _style;
@@ -79,7 +80,7 @@ public:
     explicit marimekko_chart(init const& wi);
 
 protected:
-    void on_draw_chart(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels) override;
 
 private:
     marimekko_chart::style _style;
@@ -100,7 +101,7 @@ public:
     explicit pie_chart(init const& wi);
 
 protected:
-    void on_draw_chart(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels) override;
 
 private:
     pie_chart::style _style;
@@ -120,9 +121,12 @@ public:
     explicit scatter_chart(init const& wi);
 
 protected:
-    void on_draw_chart(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels) override;
 
-    auto calc_grid_lines() const -> size_i override;
+    void on_mouse_drag(input::mouse::motion_event const& ev) override;
+    void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
+
+    auto calc_grid_lines() const -> std::pair<i32, i32> override;
 
 private:
     scatter_chart::style _style;
@@ -148,7 +152,7 @@ public:
     explicit radar_chart(init const& wi);
 
 protected:
-    void on_draw_chart(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels) override;
 
 private:
     radar_chart::style _style;

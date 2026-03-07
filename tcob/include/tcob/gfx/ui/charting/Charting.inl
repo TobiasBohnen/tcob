@@ -6,6 +6,7 @@
 #pragma once
 #include "Charting.hpp"
 
+#include <format>
 #include <vector>
 
 #include "tcob/core/Rect.hpp"
@@ -19,17 +20,7 @@ template <typename T>
 inline chart<T>::chart(init const& wi)
     : chart_base {wi}
 {
-    Dataset.Changed.connect([&] {
-        _maxX = 0;
-        if constexpr (HasSize<T>) {
-            for (auto const& s : *Dataset) {
-                _maxX = std::max(_maxX, s.Value.size());
-            }
-        } else {
-            _maxX = 1;
-        }
-        queue_redraw();
-    });
+    Dataset.Changed.connect([&] { queue_redraw(); });
 }
 
 template <typename T>
@@ -51,31 +42,20 @@ inline void chart<T>::on_draw(widget_painter& painter)
     auto const* style {dynamic_cast<chart_style const*>(current_style())};
     if (style && style->Colors.empty()) { return; }
 
-    on_draw_chart(painter);
-}
+    auto const getLabels {[&](axis const& axis) -> std::vector<string> {
+        if (!axis.CustomLabels.empty()) { return axis.CustomLabels; }
+        if (axis.LabelCount <= 0) { return {}; }
+        std::vector<string> labels;
+        for (i32 i {0}; i < axis.LabelCount; ++i) {
+            f32 const value {axis.LabelCount == 1
+                                 ? axis.Min
+                                 : axis.Min + ((static_cast<f32>(i) / (static_cast<f32>(axis.LabelCount) - 1)) * (axis.Max - axis.Min))};
+            labels.push_back(std::format("{:.{}f}", value, axis.LabelPrecision));
+        }
+        return labels;
+    }};
 
-template <typename T>
-inline auto chart<T>::max_x() const -> usize
-{
-    return _maxX;
-}
-
-template <typename T>
-inline auto grid_chart<T>::position_in_xaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32
-{
-    f32 const range {axis.Max - axis.Min};
-    if (range == 0.0f) { return bounds.left(); }
-    f32 const norm {(value - axis.Min) / range};
-    return bounds.left() + (norm * bounds.width());
-}
-
-template <typename T>
-inline auto grid_chart<T>::position_in_yaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32
-{
-    f32 const range {axis.Max - axis.Min};
-    if (range == 0.0f) { return bounds.bottom(); }
-    f32 const norm {(value - axis.Min) / range};
-    return bounds.bottom() - (norm * bounds.height());
+    on_draw_chart(painter, getLabels(XAxis), getLabels(YAxis));
 }
 
 ////////////////////////////////////////////////////////////
@@ -87,8 +67,10 @@ inline grid_chart<T>::grid_chart(widget::init const& wi)
 }
 
 template <typename T>
-inline void grid_chart<T>::draw_grid(gfx::canvas& canvas, grid_chart_style const& style, rect_f const& bounds) const
+inline void grid_chart<T>::draw_grid(gfx::canvas& canvas, grid_chart_style const& style, rect_f const& bounds)
 {
+    _gridRect = bounds;
+
     auto [horizontalGridLines, verticalGridLines] {calc_grid_lines()};
     if (horizontalGridLines == 1) { horizontalGridLines = 2; }
     if (verticalGridLines == 1) { verticalGridLines = 2; }
@@ -114,4 +96,29 @@ inline void grid_chart<T>::draw_grid(gfx::canvas& canvas, grid_chart_style const
         }
     }
 }
+
+template <typename T>
+inline auto grid_chart<T>::grid_rect() const -> rect_f const&
+{
+    return _gridRect;
+}
+
+template <typename T>
+inline auto grid_chart<T>::position_in_xaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32
+{
+    f32 const range {axis.Max - axis.Min};
+    if (range == 0.0f) { return bounds.left(); }
+    f32 const norm {(value - axis.Min) / range};
+    return bounds.left() + (norm * bounds.width());
+}
+
+template <typename T>
+inline auto grid_chart<T>::position_in_yaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32
+{
+    f32 const range {axis.Max - axis.Min};
+    if (range == 0.0f) { return bounds.bottom(); }
+    f32 const norm {(value - axis.Min) / range};
+    return bounds.bottom() - (norm * bounds.height());
+}
+
 }

@@ -6,12 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <utility>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -22,9 +22,14 @@ namespace tcob::ui::charts {
 ////////////////////////////////////////////////////////////
 
 struct axis {
-    f32                 Min {0.0f};
-    f32                 Max {1.0f};
-    std::vector<string> Labels;
+    // TODO: Title, Ticks
+    f32 Min {0.0f};
+    f32 Max {1.0f};
+
+    i32 LabelCount {0};
+    i32 LabelPrecision {2};
+
+    std::vector<string> CustomLabels;
 };
 
 template <typename T>
@@ -43,9 +48,10 @@ struct legend_def {
 class TCOB_API chart_style : public widget_style {
 public:
     text_element XAxisText;
-    text_element YAxisText;
+    length       XLabelHeight;
 
-    length LabelHeight;
+    text_element YAxisText;
+    length       YLabelWidth;
 
     std::vector<color> Colors;
 
@@ -66,6 +72,16 @@ public:
 
 protected:
     explicit chart_base(init const& wi);
+
+    void draw_x_labels(widget_painter& painter, chart_style const& style, rect_f const& labelArea, std::vector<string> const& labels, bool slots) const;
+    void draw_y_labels(widget_painter& painter, chart_style const& style, rect_f const& labelArea, std::vector<string> const& labels) const;
+
+    auto x_label_count() const -> usize;
+    auto y_label_count() const -> usize;
+
+private:
+    usize _labelX {0};
+    usize _labelY {0};
 };
 
 template <typename T>
@@ -80,12 +96,7 @@ protected:
 
     void on_draw(widget_painter& painter) final;
 
-    void virtual on_draw_chart(widget_painter& painter) = 0;
-
-    auto max_x() const -> usize;
-
-private:
-    usize _maxX {0};
+    void virtual on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels) = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -114,12 +125,17 @@ public:
 protected:
     grid_chart(widget::init const& wi);
 
-    void draw_grid(gfx::canvas& canvas, grid_chart_style const& style, rect_f const& bounds) const;
+    void draw_grid(gfx::canvas& canvas, grid_chart_style const& style, rect_f const& bounds);
 
-    virtual auto calc_grid_lines() const -> size_i = 0;
+    auto grid_rect() const -> rect_f const&;
+
+    virtual auto calc_grid_lines() const -> std::pair<i32, i32> = 0;
 
     auto position_in_xaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32;
     auto position_in_yaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32;
+
+private:
+    rect_f _gridRect;
 };
 
 }

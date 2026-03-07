@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -16,6 +17,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -41,21 +43,24 @@ line_chart::line_chart(init const& wi)
     Class("line_chart");
 }
 
-void line_chart::on_draw_chart(widget_painter& painter)
+void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels)
 {
     rect_f const         rect {draw_background(_style, painter)};
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    f32 const    labelHeight {XAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
-    f32 const    xStep {rect.width() / max_x()};
-    f32 const    halfStep {XAxis->Labels.empty() ? 0.0f : xStep / 2.0f};
-    rect_f const chartRect {rect.left() + halfStep, rect.top(), rect.width() - (halfStep * 2.0f), rect.height() - labelHeight};
-    rect_f const labelArea {rect.left(), rect.bottom() - labelHeight, rect.width(), labelHeight};
+    usize const xLabelCount {x_label_count()};
+    f32 const   xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
+    f32 const   yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
+
+    rect_f const chartRect {rect.left() + yLabelWidth, rect.top() + xLabelHeight,
+                            rect.width() - yLabelWidth - xLabelHeight, rect.height() - (xLabelHeight * 2.0f)};
+    rect_f const xLabelArea {chartRect.left(), rect.bottom() - xLabelHeight, chartRect.width(), xLabelHeight};
+    rect_f const yLabelArea {rect.left(), chartRect.top(), yLabelWidth, chartRect.height()};
 
     draw_grid(canvas, _style, chartRect);
 
-    auto const cxStep {chartRect.width() / (max_x() - 1)};
+    auto const cxStep {chartRect.width() / (xLabelCount - 1)};
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
         usize const len {s.Value.size()};
@@ -99,33 +104,27 @@ void line_chart::on_draw_chart(widget_painter& painter)
         canvas.stroke();
     }
 
-    if (_style.XAxisText.Font && !XAxis->Labels.empty()) {
-        for (usize i {0}; i < XAxis->Labels.size(); ++i) {
-            rect_f const labelRect {
-                labelArea.left() + (static_cast<f32>(i) * xStep), labelArea.top(),
-                xStep, labelHeight};
-            painter.draw_text(_style.XAxisText, labelRect, XAxis->Labels[i]);
-        }
-    }
+    draw_x_labels(painter, _style, xLabelArea, xLabels, false);
+    draw_y_labels(painter, _style, yLabelArea, yLabels);
 }
 
-auto line_chart::calc_grid_lines() const -> size_i
+auto line_chart::calc_grid_lines() const -> std::pair<i32, i32>
 {
     isize verticalGridLines {0};
     switch (_style.VerticalGridLines) {
     case grid_line_amount::None:   break;
-    case grid_line_amount::Few:    verticalGridLines = (max_x() / 2); break;
-    case grid_line_amount::Normal: verticalGridLines = max_x(); break;
-    case grid_line_amount::Many:   verticalGridLines = (max_x() * 2) - 1; break;
+    case grid_line_amount::Few:    verticalGridLines = (x_label_count() / 2); break;
+    case grid_line_amount::Normal: verticalGridLines = x_label_count(); break;
+    case grid_line_amount::Many:   verticalGridLines = (x_label_count() * 2) - 1; break;
     }
     isize horizontalGridLines {0};
     switch (_style.HorizontalGridLines) {
     case grid_line_amount::None:   break;
-    case grid_line_amount::Few:    horizontalGridLines = 3; break;
-    case grid_line_amount::Normal: horizontalGridLines = 5; break;
-    case grid_line_amount::Many:   horizontalGridLines = 10; break;
+    case grid_line_amount::Few:    horizontalGridLines = (y_label_count() / 2); break;
+    case grid_line_amount::Normal: horizontalGridLines = y_label_count(); break;
+    case grid_line_amount::Many:   horizontalGridLines = (y_label_count() * 2) - 1; break;
     }
-    return {static_cast<i32>(horizontalGridLines), static_cast<i32>(verticalGridLines)};
+    return {std::max(2, static_cast<i32>(horizontalGridLines)), std::max(2, static_cast<i32>(verticalGridLines))};
 }
 
 ////////////////////////////////////////////////////////////
@@ -145,29 +144,31 @@ bar_chart::bar_chart(init const& wi)
     Class("bar_chart");
 }
 
-void bar_chart::on_draw_chart(widget_painter& painter)
+void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels)
 {
     rect_f const         rect {draw_background(_style, painter)};
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    f32 const    labelHeight {XAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
-    rect_f const chartRect {rect.left(), rect.top(), rect.width(), rect.height() - labelHeight};
-    rect_f const labelArea {rect.left(), rect.bottom() - labelHeight, rect.width(), labelHeight};
+    usize const  xLabelCount {x_label_count()};
+    usize const  yLabelCount {y_label_count()};
+    f32 const    xLabelHeight {xLabelCount == 0 ? 0.0f : _style.XLabelHeight.calc(rect.height())};
+    f32 const    yLabelWidth {yLabelCount == 0 ? 0.0f : _style.YLabelWidth.calc(rect.width())};
+    rect_f const chartRect {rect.left() + yLabelWidth, rect.top() + xLabelHeight, rect.width() - yLabelWidth, rect.height() - (xLabelHeight * 2.0f)};
+    rect_f const xLabelArea {chartRect.left(), rect.bottom() - xLabelHeight, chartRect.width(), xLabelHeight};
+    rect_f const yLabelArea {rect.left(), chartRect.top(), yLabelWidth, chartRect.height()};
 
     draw_grid(canvas, _style, chartRect);
 
     usize const barCount {Dataset->size()};
-
-    f32 const columnWidth {chartRect.width() / max_x()};
-    f32 const barWidth {_style.BarSize.calc(columnWidth)};
-    f32 const barRadius {_style.BarRadius.calc(barWidth)};
-    f32 const outlineWidth {_style.OutlineSize.calc(chartRect.width())};
+    f32 const   columnWidth {chartRect.width() / xLabelCount};
+    f32 const   barWidth {_style.BarSize.calc(columnWidth)};
+    f32 const   barRadius {_style.BarRadius.calc(barWidth)};
+    f32 const   outlineWidth {_style.OutlineSize.calc(chartRect.width())};
 
     if (_style.StackBars) {
-        for (usize j {0}; j < max_x(); ++j) {
+        for (usize j {0}; j < xLabelCount; ++j) {
             f32 yOffset {0.0f};
-
             for (usize i {0}; i < barCount; ++i) {
                 auto const& s {Dataset[i]};
                 if (j >= s.Value.size()) { continue; }
@@ -213,34 +214,27 @@ void bar_chart::on_draw_chart(widget_painter& painter)
         }
     }
 
-    if (_style.XAxisText.Font && !XAxis->Labels.empty()) {
-        f32 const groupWidth {labelArea.width() / static_cast<f32>(max_x())};
-        for (usize i {0}; i < XAxis->Labels.size(); ++i) {
-            rect_f const labelRect {
-                labelArea.left() + (static_cast<f32>(i) * groupWidth), labelArea.top(),
-                groupWidth, labelHeight};
-            painter.draw_text(_style.XAxisText, labelRect, XAxis->Labels[i]);
-        }
-    }
+    draw_x_labels(painter, _style, xLabelArea, xLabels, true);
+    draw_y_labels(painter, _style, yLabelArea, yLabels);
 }
 
-auto bar_chart::calc_grid_lines() const -> size_i
+auto bar_chart::calc_grid_lines() const -> std::pair<i32, i32>
 {
     isize verticalGridLines {0};
     switch (_style.VerticalGridLines) {
     case grid_line_amount::None:   break;
-    case grid_line_amount::Few:    verticalGridLines = (max_x() / 2) + 1; break;
-    case grid_line_amount::Normal: verticalGridLines = max_x() + 1; break;
-    case grid_line_amount::Many:   verticalGridLines = (max_x() * 2) + 1; break;
+    case grid_line_amount::Few:    verticalGridLines = (x_label_count() / 2) + 1; break;
+    case grid_line_amount::Normal: verticalGridLines = x_label_count() + 1; break;
+    case grid_line_amount::Many:   verticalGridLines = (x_label_count() * 2) + 1; break;
     }
     isize horizontalGridLines {0};
     switch (_style.HorizontalGridLines) {
     case grid_line_amount::None:   break;
-    case grid_line_amount::Few:    horizontalGridLines = 3; break;
-    case grid_line_amount::Normal: horizontalGridLines = 5; break;
-    case grid_line_amount::Many:   horizontalGridLines = 10; break;
+    case grid_line_amount::Few:    horizontalGridLines = (y_label_count() / 2); break;
+    case grid_line_amount::Normal: horizontalGridLines = y_label_count(); break;
+    case grid_line_amount::Many:   horizontalGridLines = (y_label_count() * 2) - 1; break;
     }
-    return {static_cast<i32>(horizontalGridLines), static_cast<i32>(verticalGridLines)};
+    return {std::max(2, static_cast<i32>(horizontalGridLines)), std::max(2, static_cast<i32>(verticalGridLines))};
 }
 
 ////////////////////////////////////////////////////////////
@@ -259,7 +253,7 @@ marimekko_chart::marimekko_chart(init const& wi)
     Class("marimekko_chart");
 }
 
-void marimekko_chart::on_draw_chart(widget_painter& painter)
+void marimekko_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& /* yLabels */)
 {
     rect_f const         rect {draw_background(_style, painter)};
     scoped_scissor const guard {painter, this};
@@ -282,7 +276,8 @@ void marimekko_chart::on_draw_chart(widget_painter& painter)
     f32 const total {std::accumulate(columnTotals.begin(), columnTotals.end(), 0.0f)};
     if (total == 0.0f) { return; }
 
-    f32 const    labelHeight {XAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
+    usize const  xLabelCount {x_label_count()};
+    f32 const    labelHeight {xLabelCount == 0 ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     rect_f const chartRect {rect.left(), rect.top(), rect.width(), rect.height() - labelHeight};
     rect_f const labelArea {rect.left(), rect.bottom() - labelHeight, rect.width(), labelHeight};
 
@@ -321,9 +316,9 @@ void marimekko_chart::on_draw_chart(widget_painter& painter)
             yOffset += height;
         }
 
-        if (_style.XAxisText.Font && j < XAxis->Labels.size()) {
+        if (_style.XAxisText.Font && j < xLabels.size()) {
             rect_f const labelRect {xCursor, labelArea.top(), columnWidth, labelHeight};
-            painter.draw_text(_style.XAxisText, labelRect, XAxis->Labels[j]);
+            painter.draw_text(_style.XAxisText, labelRect, xLabels[j]);
         }
 
         xCursor += columnWidth;
@@ -346,7 +341,7 @@ pie_chart::pie_chart(init const& wi)
     Class("pie_chart");
 }
 
-void pie_chart::on_draw_chart(widget_painter& painter)
+void pie_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& /* xLabels */, std::vector<string> const& /* yLabels */)
 {
     rect_f const         rect {draw_background(_style, painter)};
     scoped_scissor const guard {painter, this};
@@ -424,15 +419,15 @@ scatter_chart::scatter_chart(init const& wi)
     Class("scatter_chart");
 }
 
-void scatter_chart::on_draw_chart(widget_painter& painter)
+void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels)
 {
     rect_f const         rect {draw_background(_style, painter)};
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
     f32 const pointSize {_style.PointSize.calc(rect.width())};
-    f32 const xLabelHeight {XAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.height())};
-    f32 const yLabelWidth {YAxis->Labels.empty() ? 0.0f : _style.LabelHeight.calc(rect.width())};
+    f32 const xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
+    f32 const yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
 
     rect_f const chartRect {rect.left() + yLabelWidth + pointSize, rect.top() + xLabelHeight + pointSize,
                             rect.width() - yLabelWidth - xLabelHeight - (pointSize * 2), rect.height() - (xLabelHeight * 2.0f) - (pointSize * 2)};
@@ -451,51 +446,73 @@ void scatter_chart::on_draw_chart(widget_painter& painter)
 
         canvas.begin_path();
         for (auto const& pt : s.Value) {
-            f32 const x {position_in_xaxis(pt.X, *XAxis, chartRect)};
-            f32 const y {position_in_yaxis(pt.Y, *YAxis, chartRect)};
-            canvas.circle({x, y}, pointSize);
+            point_f const p {
+                position_in_xaxis(pt.X, *XAxis, chartRect),
+                position_in_yaxis(pt.Y, *YAxis, chartRect)};
+            if (chartRect.contains(p, true)) {
+                canvas.circle(p, pointSize);
+            }
         }
         canvas.fill();
         canvas.stroke();
     }
 
-    if (_style.XAxisText.Font && !XAxis->Labels.empty()) {
-        f32 const xStep {chartRect.width() / static_cast<f32>(XAxis->Labels.size() - 1)};
-        for (usize i {0}; i < XAxis->Labels.size(); ++i) {
-            f32 const    cx {chartRect.left() + (static_cast<f32>(i) * xStep)};
-            rect_f const labelRect {cx - (xStep / 2.0f), xLabelArea.top(), xStep, xLabelHeight};
-            painter.draw_text(_style.XAxisText, labelRect, XAxis->Labels[i]);
-        }
-    }
+    draw_x_labels(painter, _style, xLabelArea, xLabels, false);
+    draw_y_labels(painter, _style, yLabelArea, yLabels);
+}
+void scatter_chart::on_mouse_drag(input::mouse::motion_event const& ev)
+{
+    f32 const xRange {XAxis->Max - XAxis->Min};
+    f32 const yRange {YAxis->Max - YAxis->Min};
 
-    if (_style.YAxisText.Font && !YAxis->Labels.empty()) {
-        f32 const yStep {chartRect.height() / static_cast<f32>(YAxis->Labels.size() - 1)};
-        for (usize i {0}; i < YAxis->Labels.size(); ++i) {
-            usize const  ri {YAxis->Labels.size() - 1 - i};
-            f32 const    cy {chartRect.top() + (static_cast<f32>(i) * yStep)};
-            rect_f const labelRect {yLabelArea.left(), cy - (yStep / 2.0f), yLabelWidth, yStep};
-            painter.draw_text(_style.YAxisText, labelRect, YAxis->Labels[ri]);
-        }
-    }
+    f32 const dx {(static_cast<f32>(ev.RelativeMotion.X) / grid_rect().width()) * xRange};
+    f32 const dy {(static_cast<f32>(ev.RelativeMotion.Y) / grid_rect().height()) * yRange};
+
+    XAxis.mutate([&](axis& a) {
+        a.Min -= dx;
+        a.Max -= dx;
+    });
+    YAxis.mutate([&](axis& a) {
+        a.Min += dy;
+        a.Max += dy;
+    });
 }
 
-auto scatter_chart::calc_grid_lines() const -> size_i
+void scatter_chart::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
-    f32 verticalGridLines {0};
+    f32 const xRange {XAxis->Max - XAxis->Min};
+    f32 const yRange {YAxis->Max - YAxis->Min};
+    f32 const xCenter {(XAxis->Min + XAxis->Max) / 2.0f};
+    f32 const yCenter {(YAxis->Min + YAxis->Max) / 2.0f};
+    f32 const factor {1.0f - (ev.Scroll.Y * 0.1f)};
+
+    XAxis.mutate([&](axis& a) {
+        a.Min = xCenter - (xRange * factor / 2.0f);
+        a.Max = xCenter + (xRange * factor / 2.0f);
+    });
+    YAxis.mutate([&](axis& a) {
+        a.Min = yCenter - (yRange * factor / 2.0f);
+        a.Max = yCenter + (yRange * factor / 2.0f);
+    });
+}
+
+auto scatter_chart::calc_grid_lines() const -> std::pair<i32, i32>
+{
+    isize verticalGridLines {0};
     switch (_style.VerticalGridLines) {
     case grid_line_amount::None:   break;
-    case grid_line_amount::Few:    verticalGridLines = ((XAxis->Max - XAxis->Min) / 2) + 1; break;
-    case grid_line_amount::Normal: verticalGridLines = ((XAxis->Max - XAxis->Min)) + 1; break;
-    case grid_line_amount::Many:   verticalGridLines = ((XAxis->Max - XAxis->Min) * 2) + 1; break;
+    case grid_line_amount::Few:    verticalGridLines = (x_label_count() / 2); break;
+    case grid_line_amount::Normal: verticalGridLines = x_label_count(); break;
+    case grid_line_amount::Many:   verticalGridLines = (x_label_count() * 2) - 1; break;
     }
-    f32 horizontalGridLines {0};
+    isize horizontalGridLines {0};
     switch (_style.HorizontalGridLines) {
     case grid_line_amount::None:   break;
-    case grid_line_amount::Few:    horizontalGridLines = ((YAxis->Max - YAxis->Min) / 2) + 1; break;
-    case grid_line_amount::Normal: horizontalGridLines = ((YAxis->Max - YAxis->Min)) + 1; break;
-    case grid_line_amount::Many:   horizontalGridLines = ((YAxis->Max - YAxis->Min) * 2) + 1; break;
+    case grid_line_amount::Few:    horizontalGridLines = (y_label_count() / 2); break;
+    case grid_line_amount::Normal: horizontalGridLines = y_label_count(); break;
+    case grid_line_amount::Many:   horizontalGridLines = (y_label_count() * 2) - 1; break;
     }
-    return {static_cast<i32>(horizontalGridLines), static_cast<i32>(verticalGridLines)};
+    return {std::max(2, static_cast<i32>(horizontalGridLines)), std::max(2, static_cast<i32>(verticalGridLines))};
 }
 
 ////////////////////////////////////////////////////////////
@@ -516,13 +533,15 @@ radar_chart::radar_chart(init const& wi)
     Class("radar_chart");
 }
 
-void radar_chart::on_draw_chart(widget_painter& painter)
+void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& /* xLabels */, std::vector<string> const& /* yLabels */)
 {
     rect_f const         rect {draw_background(_style, painter)};
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    usize const axisCount {max_x()};
+    usize axisCount {0};
+    for (auto const& s : *Dataset) { axisCount = std::max(axisCount, s.Value.size()); }
+    if (axisCount == 0) { return; }
 
     point_f const center {rect.center()};
     f32 const     radius {std::min(rect.width(), rect.height()) / 2};
@@ -532,11 +551,11 @@ void radar_chart::on_draw_chart(widget_painter& painter)
         canvas.set_stroke_style(_style.GridColor);
         canvas.set_stroke_width(_style.GridLineSize.calc(radius));
         for (usize i {0}; i < axisCount; ++i) {
+            canvas.begin_path();
+            canvas.move_to(center);
             f32 const angle {(static_cast<f32>(i) / axisCount) * TAU_F};
             f32 const x {center.X + (std::cos(angle) * radius)};
             f32 const y {center.Y + (std::sin(angle) * radius)};
-            canvas.begin_path();
-            canvas.move_to(center);
             canvas.line_to({x, y});
             canvas.stroke();
         }

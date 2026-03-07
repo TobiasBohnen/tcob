@@ -9,6 +9,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
@@ -19,9 +20,9 @@ void chart_style::Transition(chart_style& target, chart_style const& from, chart
     widget_style::Transition(target, from, to, step);
 
     target.XAxisText.lerp(from.XAxisText, to.XAxisText, step);
+    target.XLabelHeight = helper::lerp(from.XLabelHeight, to.XLabelHeight, step);
     target.YAxisText.lerp(from.YAxisText, to.YAxisText, step);
-
-    target.LabelHeight = helper::lerp(from.LabelHeight, to.LabelHeight, step);
+    target.YLabelWidth = helper::lerp(from.YLabelWidth, to.YLabelWidth, step);
 
     target.Colors.clear();
     target.Colors.resize(from.Colors.size());
@@ -48,8 +49,52 @@ void grid_chart_style::Transition(grid_chart_style& target, grid_chart_style con
 chart_base::chart_base(init const& wi)
     : widget {wi}
 {
-    XAxis.Changed.connect([&] { queue_redraw(); });
-    YAxis.Changed.connect([&] { queue_redraw(); });
+    XAxis.Changed.connect([&](axis const& axis) {
+        _labelX = axis.CustomLabels.empty() ? axis.LabelCount : axis.CustomLabels.size();
+        queue_redraw();
+    });
+    YAxis.Changed.connect([&](axis const& axis) {
+        _labelY = axis.CustomLabels.empty() ? axis.LabelCount : axis.CustomLabels.size();
+        queue_redraw();
+    });
+}
+
+auto chart_base::x_label_count() const -> usize
+{
+    return _labelX;
+}
+
+auto chart_base::y_label_count() const -> usize
+{
+    return _labelY;
+}
+
+void chart_base::draw_x_labels(widget_painter& painter, chart_style const& style, rect_f const& labelArea, std::vector<string> const& labels, bool slots) const
+{
+    if (!style.XAxisText.Font || labels.empty()) { return; }
+    usize const count {labels.size()};
+    f32 const   xStep {slots ? labelArea.width() / static_cast<f32>(count)
+                             : labelArea.width() / static_cast<f32>(count - 1)};
+    if (!slots && count <= 1) { return; }
+    for (usize i {0}; i < count; ++i) {
+        f32 const    cx {labelArea.left() + (static_cast<f32>(i) * xStep)};
+        rect_f const labelRect {slots ? rect_f {cx, labelArea.top(), xStep, labelArea.height()}
+                                      : rect_f {cx - (xStep / 2.0f), labelArea.top(), xStep, labelArea.height()}};
+        painter.draw_text(style.XAxisText, labelRect, labels[i]);
+    }
+}
+
+void chart_base::draw_y_labels(widget_painter& painter, chart_style const& style, rect_f const& labelArea, std::vector<string> const& labels) const
+{
+    if (!style.YAxisText.Font || labels.empty()) { return; }
+    usize const count {labels.size()};
+    if (count <= 1) { return; }
+    f32 const yStep {labelArea.height() / static_cast<f32>(count - 1)};
+    for (usize i {0}; i < count; ++i) {
+        f32 const    cy {labelArea.top() + (static_cast<f32>(i) * yStep)};
+        rect_f const labelRect {labelArea.left(), cy - (yStep / 2.0f), labelArea.width(), yStep};
+        painter.draw_text(style.YAxisText, labelRect, labels[count - 1 - i]);
+    }
 }
 
 }
