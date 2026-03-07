@@ -79,17 +79,18 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    f32 const lineWidth {_style.LineSize.calc(rect.width())};
-    f32 const outlineWidth {lineWidth + _style.OutlineSize.calc(rect.width())};
-    f32 const xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
-    f32 const yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
-
-    rect_f const chartRect {rect.left() + yLabelWidth, rect.top() + xLabelHeight,
-                            rect.width() - yLabelWidth - xLabelHeight, rect.height() - (xLabelHeight * 2.0f) - lineWidth};
+    f32 const    lineWidth {_style.LineSize.calc(rect.width())};
+    f32 const    outlineWidth {lineWidth + _style.OutlineSize.calc(rect.width())};
+    f32 const    xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
+    f32 const    yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
+    f32 const    topPad {std::max(xLabelHeight, yLabelWidth / 2.0f)};
+    rect_f const chartRect {rect.left() + yLabelWidth, rect.top() + topPad,
+                            rect.width() - yLabelWidth - xLabelHeight, rect.height() - xLabelHeight - topPad - lineWidth};
 
     draw_grid(canvas, _style, chartRect);
 
-    auto const cxStep {chartRect.width() / (x_label_count() - 1)};
+    usize const xCount {x_label_count() > 0 ? x_label_count() : max_x()};
+    auto const  cxStep {chartRect.width() / (xCount - 1)};
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
         usize const len {s.Value.size()};
@@ -458,9 +459,10 @@ void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> c
     f32 const pointSize {_style.PointSize.calc(rect.width())};
     f32 const xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     f32 const yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
+    f32 const leftPad {std::max(yLabelWidth + pointSize, xLabelHeight)};
 
-    rect_f const chartRect {rect.left() + yLabelWidth + pointSize, rect.top() + xLabelHeight + pointSize,
-                            rect.width() - yLabelWidth - xLabelHeight - (pointSize * 2), rect.height() - (xLabelHeight * 2.0f) - (pointSize * 2)};
+    rect_f const chartRect {rect.left() + leftPad, rect.top() + xLabelHeight + pointSize,
+                            rect.width() - leftPad - xLabelHeight, rect.height() - (xLabelHeight * 2.0f) - (pointSize * 2.0f)};
 
     draw_grid(canvas, _style, chartRect);
 
@@ -585,10 +587,10 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
         for (usize i {0}; i < axisCount; ++i) {
             canvas.begin_path();
             canvas.move_to(center);
-            f32 const angle {(static_cast<f32>(i) / axisCount) * TAU_F};
-            f32 const x {center.X + (std::cos(angle) * radius)};
-            f32 const y {center.Y + (std::sin(angle) * radius)};
-            canvas.line_to({x, y});
+            f32 const     angle {(static_cast<f32>(i) / axisCount) * TAU_F};
+            point_f const pos {center.X + (std::cos(angle) * radius),
+                               center.Y + (std::sin(angle) * radius)};
+            canvas.line_to(pos);
             canvas.stroke();
         }
 
@@ -603,13 +605,13 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
             f32 const ringRadius {(static_cast<f32>(r) / ringCount) * radius};
             canvas.begin_path();
             for (usize i {0}; i < axisCount; ++i) {
-                f32 const angle {(static_cast<f32>(i) / axisCount) * TAU_F};
-                f32 const x {center.X + (std::cos(angle) * ringRadius)};
-                f32 const y {center.Y + (std::sin(angle) * ringRadius)};
+                f32 const     angle {(static_cast<f32>(i) / axisCount) * TAU_F};
+                point_f const pos {center.X + (std::cos(angle) * ringRadius),
+                                   center.Y + (std::sin(angle) * ringRadius)};
                 if (i == 0) {
-                    canvas.move_to({x, y});
+                    canvas.move_to(pos);
                 } else {
-                    canvas.line_to({x, y});
+                    canvas.line_to(pos);
                 }
             }
             canvas.close_path();

@@ -20,7 +20,17 @@ template <typename T>
 inline chart<T>::chart(init const& wi)
     : chart_base {wi}
 {
-    Dataset.Changed.connect([&] { queue_redraw(); });
+    Dataset.Changed.connect([&] {
+        _maxX = 0;
+        if constexpr (HasSize<T>) {
+            for (auto const& s : *Dataset) {
+                _maxX = std::max(_maxX, s.Value.size());
+            }
+        } else {
+            _maxX = 1;
+        }
+        queue_redraw();
+    });
 }
 
 template <typename T>
@@ -56,6 +66,12 @@ inline void chart<T>::on_draw(widget_painter& painter)
     }};
 
     on_draw_chart(painter, getLabels(XAxis), getLabels(YAxis));
+}
+
+template <typename T>
+inline auto chart<T>::max_x() const -> usize
+{
+    return _maxX;
 }
 
 ////////////////////////////////////////////////////////////

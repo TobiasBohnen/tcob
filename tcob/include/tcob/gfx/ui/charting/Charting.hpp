@@ -94,6 +94,11 @@ protected:
     void on_draw(widget_painter& painter) final;
 
     void virtual on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels) = 0;
+
+    auto max_x() const -> usize;
+
+private:
+    usize _maxX {0};
 };
 
 ////////////////////////////////////////////////////////////
