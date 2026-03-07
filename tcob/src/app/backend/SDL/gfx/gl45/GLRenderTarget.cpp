@@ -24,9 +24,9 @@
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
-#include "tcob/gfx/ShaderProgram.hpp" // IWYU pragma: keep
+#include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/Texture.hpp"
-#include "tcob/gfx/UniformBuffer.hpp" // IWYU pragma: keep
+#include "tcob/gfx/UniformBuffer.hpp"
 
 namespace tcob::gfx::gl45 {
 
@@ -133,7 +133,8 @@ void gl_render_target::bind_pass(pass const& pass)
     }
 
     if (pass.Shader.is_ready()) {
-        glUseProgram(pass.Shader->get_impl<gl_shader>()->ID);
+        shader& s {*pass.Shader};
+        glUseProgram(s.get_impl<gl_shader>()->ID);
     } else {
         if (pass.Texture.is_ready()) {
             if (pass.Texture->info().Format == texture::format::R8) {

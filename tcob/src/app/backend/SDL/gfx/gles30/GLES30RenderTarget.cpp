@@ -24,9 +24,9 @@
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
-#include "tcob/gfx/ShaderProgram.hpp" // IWYU pragma: keep
+#include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/Texture.hpp"
-#include "tcob/gfx/UniformBuffer.hpp" // IWYU pragma: keep
+#include "tcob/gfx/UniformBuffer.hpp"
 
 namespace tcob::gfx::gles30 {
 
@@ -133,21 +133,22 @@ void gl_render_target::bind_pass(pass const& pass)
     }
 
     if (pass.Shader.is_ready()) {
-        auto* shader {pass.Shader->get_impl<gl_shader>()};
-        glUseProgram(shader->ID);
-        GLCHECK(glUniformBlockBinding(shader->ID, glGetUniformBlockIndex(shader->ID, "Material"), 1));
+        shader& s {*pass.Shader};
+        auto    id {s.get_impl<gl_shader>()->ID};
+        glUseProgram(id);
+        GLCHECK(glUniformBlockBinding(id, glGetUniformBlockIndex(id, "Pass"), 1));
     } else {
         if (pass.Texture.is_ready()) {
             if (pass.Texture->info().Format == texture::format::R8) {
                 GLCHECK(glUseProgram(gl_context::DefaultFontShader));
-                GLCHECK(glUniformBlockBinding(gl_context::DefaultFontShader, glGetUniformBlockIndex(gl_context::DefaultFontShader, "Material"), 1));
+                GLCHECK(glUniformBlockBinding(gl_context::DefaultFontShader, glGetUniformBlockIndex(gl_context::DefaultFontShader, "Pass"), 1));
             } else {
                 GLCHECK(glUseProgram(gl_context::DefaultTexturedShader));
-                GLCHECK(glUniformBlockBinding(gl_context::DefaultTexturedShader, glGetUniformBlockIndex(gl_context::DefaultTexturedShader, "Material"), 1));
+                GLCHECK(glUniformBlockBinding(gl_context::DefaultTexturedShader, glGetUniformBlockIndex(gl_context::DefaultTexturedShader, "Pass"), 1));
             }
         } else {
             GLCHECK(glUseProgram(gl_context::DefaultShader));
-            GLCHECK(glUniformBlockBinding(gl_context::DefaultShader, glGetUniformBlockIndex(gl_context::DefaultShader, "Material"), 1));
+            GLCHECK(glUniformBlockBinding(gl_context::DefaultShader, glGetUniformBlockIndex(gl_context::DefaultShader, "Pass"), 1));
         }
     }
 
