@@ -424,6 +424,7 @@ void form_base::on_key_up(input::keyboard::event const& ev)
 void form_base::on_mouse_motion(input::mouse::motion_event const& ev)
 {
     _mousePos = ev.Position;
+
     on_mouse_hover(ev);
     if (_isLButtonDown) { // TODO: add drag origin
         _injector.on_mouse_drag(_focusWidget, ev);
@@ -440,7 +441,7 @@ void form_base::on_mouse_hover(input::mouse::motion_event const& ev)
         return;
     }
 
-    if (newTop != _topWidget) {
+    if (newTop != _topWidget && !_isLButtonDown) {
         hide_tooltip();
         _injector.on_mouse_leave(_topWidget);
         _topWidget = newTop;

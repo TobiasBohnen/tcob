@@ -30,7 +30,7 @@ public:
     class TCOB_API style : public widget_style {
     public:
         utf8_string  SectionItemClass {"section_items"};
-        length       SectionBarHeight;
+        length       SectionBarHeight {0.10f, length::type::Relative};
         milliseconds ExpandDuration {0};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);

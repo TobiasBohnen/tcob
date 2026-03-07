@@ -29,7 +29,7 @@ namespace tcob::ui::charts {
 
 ////////////////////////////////////////////////////////////
 
-static void draw_x_labels(widget_painter& painter, chart_style const& style, rect_f const& labelArea, std::vector<string> const& labels, bool slots)
+static void draw_x_labels(widget_painter& painter, chart_style const& style, u32 fontSize, rect_f const& labelArea, std::vector<string> const& labels, bool slots)
 {
     if (!style.XAxisText.Font || labels.empty()) { return; }
     usize const count {labels.size()};
@@ -40,11 +40,11 @@ static void draw_x_labels(widget_painter& painter, chart_style const& style, rec
         f32 const    cx {labelArea.left() + (static_cast<f32>(i) * xStep)};
         rect_f const labelRect {slots ? rect_f {cx, labelArea.top(), xStep, labelArea.height()}
                                       : rect_f {cx - (xStep / 2.0f), labelArea.top(), xStep, labelArea.height()}};
-        painter.draw_text(style.XAxisText, labelRect, labels[i]);
+        painter.draw_text(style.XAxisText, labelRect, painter.format_text(style.XAxisText, labelRect.Size, labels[i], fontSize));
     }
 }
 
-static void draw_y_labels(widget_painter& painter, chart_style const& style, rect_f const& labelArea, std::vector<string> const& labels)
+static void draw_y_labels(widget_painter& painter, chart_style const& style, u32 fontSize, rect_f const& labelArea, std::vector<string> const& labels)
 {
     if (!style.YAxisText.Font || labels.empty()) { return; }
     usize const count {labels.size()};
@@ -53,7 +53,7 @@ static void draw_y_labels(widget_painter& painter, chart_style const& style, rec
     for (usize i {0}; i < count; ++i) {
         f32 const    cy {labelArea.top() + (static_cast<f32>(i) * yStep)};
         rect_f const labelRect {labelArea.left(), cy - (yStep / 2.0f), labelArea.width(), yStep};
-        painter.draw_text(style.YAxisText, labelRect, labels[count - 1 - i]);
+        painter.draw_text(style.YAxisText, labelRect, painter.format_text(style.YAxisText, labelRect.Size, labels[count - 1 - i], fontSize));
     }
 }
 
@@ -136,10 +136,12 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
     }
 
     rect_f const xLabelArea {chartRect.left(), rect.bottom() - xLabelHeight, chartRect.width(), xLabelHeight};
-    draw_x_labels(painter, _style, xLabelArea, xLabels, false);
+    u32 const    xFontSize {_style.XAxisText.calc_font_size(xLabelArea.height())};
+    draw_x_labels(painter, _style, xFontSize, xLabelArea, xLabels, false);
 
     rect_f const yLabelArea {rect.left(), chartRect.top(), yLabelWidth, chartRect.height()};
-    draw_y_labels(painter, _style, yLabelArea, yLabels);
+    u32 const    yFontSize {_style.YAxisText.calc_font_size(yLabelArea.height() / y_label_count())};
+    draw_y_labels(painter, _style, yFontSize, yLabelArea, yLabels);
 }
 
 auto line_chart::calc_grid_lines() const -> std::pair<i32, i32>
@@ -249,10 +251,12 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
     }
 
     rect_f const xLabelArea {chartRect.left(), rect.bottom() - xLabelHeight, chartRect.width(), xLabelHeight};
-    draw_x_labels(painter, _style, xLabelArea, xLabels, true);
+    u32 const    xFontSize {_style.XAxisText.calc_font_size(xLabelArea.height())};
+    draw_x_labels(painter, _style, xFontSize, xLabelArea, xLabels, true);
 
     rect_f const yLabelArea {rect.left(), chartRect.top(), yLabelWidth, chartRect.height()};
-    draw_y_labels(painter, _style, yLabelArea, yLabels);
+    u32 const    yFontSize {_style.YAxisText.calc_font_size(yLabelArea.height() / y_label_count())};
+    draw_y_labels(painter, _style, yFontSize, yLabelArea, yLabels);
 }
 
 auto bar_chart::calc_grid_lines() const -> std::pair<i32, i32>
@@ -495,10 +499,12 @@ void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> c
     }
 
     rect_f const xLabelArea {chartRect.left(), rect.bottom() - xLabelHeight, chartRect.width(), xLabelHeight};
-    draw_x_labels(painter, _style, xLabelArea, xLabels, false);
+    u32 const    xFontSize {_style.XAxisText.calc_font_size(xLabelArea.height())};
+    draw_x_labels(painter, _style, xFontSize, xLabelArea, xLabels, false);
 
     rect_f const yLabelArea {rect.left(), chartRect.top(), yLabelWidth, chartRect.height()};
-    draw_y_labels(painter, _style, yLabelArea, yLabels);
+    u32 const    yFontSize {_style.YAxisText.calc_font_size(yLabelArea.height() / y_label_count())};
+    draw_y_labels(painter, _style, yFontSize, yLabelArea, yLabels);
 }
 
 void scatter_chart::on_mouse_drag(input::mouse::motion_event const& ev)

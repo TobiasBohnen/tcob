@@ -50,10 +50,10 @@ struct legend_def {
 class TCOB_API chart_style : public widget_style {
 public:
     text_element XAxisText;
-    length       XLabelHeight;
+    length       XLabelHeight {0.05f, length::type::Relative};
 
     text_element YAxisText;
-    length       YLabelWidth;
+    length       YLabelWidth {0.05f, length::type::Relative};
 
     std::vector<color> Colors;
 

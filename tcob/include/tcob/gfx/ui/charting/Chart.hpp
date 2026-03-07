@@ -48,7 +48,7 @@ public:
     class TCOB_API style : public grid_chart_style {
     public:
         length BarSize {1.f, length::type::Relative};
-        length BarRadius {};
+        length BarRadius {0, length::type::Relative};
         bool   StackBars {false};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
@@ -72,7 +72,7 @@ public:
     class TCOB_API style : public chart_style {
     public:
         dimensions BarSize {};
-        length     BarRadius {};
+        length     BarRadius {0, length::type::Relative};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };

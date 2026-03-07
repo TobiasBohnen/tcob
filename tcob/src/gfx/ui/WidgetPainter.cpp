@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <optional>
 #include <variant>
 #include <vector>
 
@@ -511,10 +512,10 @@ auto widget_painter::canvas() -> gfx::canvas&
     return _canvas;
 }
 
-auto widget_painter::format_text(text_element const& element, size_f size, utf8_string_view text) -> gfx::text_formatter::result
+auto widget_painter::format_text(text_element const& element, size_f size, utf8_string_view text, std::optional<u32> fontSize) -> gfx::text_formatter::result
 {
     auto const tt {transform_text(element.Transform, text)};
-    return format_text(element, size, tt, element.calc_font_size(size.Height), true);
+    return do_format_text(element, size, tt, fontSize ? *fontSize : element.calc_font_size(size.Height), true);
 }
 
 ////////////////////////////////////////////////////////////
@@ -772,7 +773,7 @@ auto widget_painter::get_paint(paint const& p, rect_f const& rect) -> gfx::canva
         p);
 }
 
-auto widget_painter::format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result
+auto widget_painter::do_format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result
 {
     auto const guard {gfx::scoped_canvas_state {_canvas}};
 

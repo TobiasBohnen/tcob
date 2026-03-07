@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <functional>
+#include <optional>
 #include <stack>
 
 #include "tcob/core/Common.hpp"
@@ -54,7 +55,7 @@ public:
 
     auto canvas() -> gfx::canvas&;
 
-    auto format_text(text_element const& element, size_f size, utf8_string_view text) -> gfx::text_formatter::result;
+    auto format_text(text_element const& element, size_f size, utf8_string_view text, std::optional<u32> fontSize = std::nullopt) -> gfx::text_formatter::result;
 
 private:
     void do_nine_patch(nine_patch const& np, rect_f const& rect, border_element const& borderStyle);
@@ -65,7 +66,7 @@ private:
 
     auto get_paint(paint const& p, rect_f const& rect) -> gfx::canvas::paint;
 
-    auto format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result;
+    auto do_format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result;
     auto transform_text(text_transform xform, utf8_string_view text) const -> utf8_string;
 
     gfx::canvas&       _canvas;

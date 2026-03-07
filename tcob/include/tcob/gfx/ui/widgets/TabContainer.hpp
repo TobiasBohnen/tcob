@@ -32,7 +32,7 @@ public:
 
     struct bar {
         position    Position {position::Top};
-        length      Size;
+        length      Size {0.10f, length::type::Relative};
         header_mode Mode {header_mode::Fill};
         f32         Rows {1};
     };

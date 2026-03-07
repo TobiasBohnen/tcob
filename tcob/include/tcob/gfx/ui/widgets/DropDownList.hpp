@@ -32,7 +32,7 @@ public:
         utf8_string NavArrowClass {"nav_arrows"};
 
         utf8_string ItemClass {"list_items"};
-        length      ItemHeight {};
+        length      ItemHeight {0.20f, length::type::Relative};
         f32         MaxVisibleItems {5};
 
         scrollbar_element VScrollBar;
