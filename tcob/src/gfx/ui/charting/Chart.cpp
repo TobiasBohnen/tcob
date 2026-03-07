@@ -290,6 +290,7 @@ void marimekko_chart::on_draw_chart(widget_painter& painter, std::vector<string>
     auto&                canvas {painter.canvas()};
 
     usize const seriesCount {Dataset->size()};
+    if (seriesCount == 0) { return; }
 
     usize const valueCount {Dataset->front().Value.size()};
     if (valueCount == 0) { return; }
@@ -617,7 +618,7 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
     }
 
     f32 const lineWidth {_style.LineSize.calc(radius)};
-    f32 const outlineWidth {lineWidth + _style.OutlineSize.calc(radius)};
+    f32 const outlineWidth {_style.OutlineSize.calc(radius)};
 
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
@@ -637,7 +638,7 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
         for (usize j {1}; j < points.size(); ++j) { canvas.line_to(points[j]); }
         canvas.close_path();
 
-        color c {_style.Colors[i % _style.Colors.size()]};
+        color const c {_style.Colors[i % _style.Colors.size()]};
         if (_style.FillAreaAlpha > 0) {
             canvas.set_fill_style({c.R, c.G, c.B, _style.FillAreaAlpha});
             canvas.fill();
@@ -647,7 +648,7 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
             canvas.stroke();
         } else {
             canvas.set_stroke_style(_style.OutlineColor);
-            canvas.set_stroke_width(outlineWidth);
+            canvas.set_stroke_width(lineWidth + (outlineWidth * 2));
             canvas.stroke();
 
             canvas.set_stroke_style(c);
