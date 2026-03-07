@@ -29,6 +29,36 @@ namespace tcob::ui::charts {
 
 ////////////////////////////////////////////////////////////
 
+static void draw_x_labels(widget_painter& painter, chart_style const& style, rect_f const& labelArea, std::vector<string> const& labels, bool slots)
+{
+    if (!style.XAxisText.Font || labels.empty()) { return; }
+    usize const count {labels.size()};
+    f32 const   xStep {slots ? labelArea.width() / static_cast<f32>(count)
+                             : labelArea.width() / static_cast<f32>(count - 1)};
+    if (!slots && count <= 1) { return; }
+    for (usize i {0}; i < count; ++i) {
+        f32 const    cx {labelArea.left() + (static_cast<f32>(i) * xStep)};
+        rect_f const labelRect {slots ? rect_f {cx, labelArea.top(), xStep, labelArea.height()}
+                                      : rect_f {cx - (xStep / 2.0f), labelArea.top(), xStep, labelArea.height()}};
+        painter.draw_text(style.XAxisText, labelRect, labels[i]);
+    }
+}
+
+static void draw_y_labels(widget_painter& painter, chart_style const& style, rect_f const& labelArea, std::vector<string> const& labels)
+{
+    if (!style.YAxisText.Font || labels.empty()) { return; }
+    usize const count {labels.size()};
+    if (count <= 1) { return; }
+    f32 const yStep {labelArea.height() / static_cast<f32>(count - 1)};
+    for (usize i {0}; i < count; ++i) {
+        f32 const    cy {labelArea.top() + (static_cast<f32>(i) * yStep)};
+        rect_f const labelRect {labelArea.left(), cy - (yStep / 2.0f), labelArea.width(), yStep};
+        painter.draw_text(style.YAxisText, labelRect, labels[count - 1 - i]);
+    }
+}
+
+////////////////////////////////////////////////////////////
+
 void line_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
     grid_chart_style::Transition(target, from, to, step);

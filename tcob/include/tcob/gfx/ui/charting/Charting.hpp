@@ -73,9 +73,6 @@ public:
 protected:
     explicit chart_base(init const& wi);
 
-    void draw_x_labels(widget_painter& painter, chart_style const& style, rect_f const& labelArea, std::vector<string> const& labels, bool slots) const;
-    void draw_y_labels(widget_painter& painter, chart_style const& style, rect_f const& labelArea, std::vector<string> const& labels) const;
-
     auto x_label_count() const -> usize;
     auto y_label_count() const -> usize;
 
