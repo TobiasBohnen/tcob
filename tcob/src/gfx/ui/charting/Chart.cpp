@@ -534,7 +534,7 @@ radar_chart::radar_chart(init const& wi)
     Class("radar_chart");
 }
 
-void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& /* xLabels */, std::vector<string> const& /* yLabels */)
+void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& /* yLabels */)
 {
     rect_f const         rect {draw_background(_style, painter)};
     scoped_scissor const guard {painter, this};
@@ -544,11 +544,11 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
     for (auto const& s : *Dataset) { axisCount = std::max(axisCount, s.Value.size()); }
     if (axisCount == 0) { return; }
 
+    f32 const     labelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     point_f const center {rect.center()};
-    f32 const     radius {std::min(rect.width(), rect.height()) / 2};
+    f32 const     radius {(std::min(rect.width(), rect.height()) / 2) - labelHeight};
 
     if (_style.GridLines != grid_line_amount::None) {
-        // draw radial axes
         canvas.set_stroke_style(_style.GridColor);
         canvas.set_stroke_width(_style.GridLineSize.calc(radius));
         for (usize i {0}; i < axisCount; ++i) {
@@ -561,7 +561,6 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
             canvas.stroke();
         }
 
-        // draw helper/concentric lines
         usize ringCount {0};
         switch (_style.GridLines) {
         case grid_line_amount::None:   break;
@@ -590,7 +589,6 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
     f32 const lineWidth {_style.LineSize.calc(radius)};
     f32 const outlineWidth {lineWidth + _style.OutlineSize.calc(radius)};
 
-    // draw series polygons
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
         if (s.Value.empty()) { continue; }
@@ -606,9 +604,7 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
 
         canvas.begin_path();
         canvas.move_to(points[0]);
-        for (usize j {1}; j < points.size(); ++j) {
-            canvas.line_to(points[j]);
-        }
+        for (usize j {1}; j < points.size(); ++j) { canvas.line_to(points[j]); }
         canvas.close_path();
 
         color c {_style.Colors[i % _style.Colors.size()]};
@@ -627,6 +623,16 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
             canvas.set_stroke_style(c);
             canvas.set_stroke_width(lineWidth);
             canvas.stroke();
+        }
+    }
+
+    if (_style.XAxisText.Font && !xLabels.empty()) {
+        for (usize i {0}; i < std::min(axisCount, xLabels.size()); ++i) {
+            f32 const    angle {(static_cast<f32>(i) / axisCount) * TAU_F};
+            f32 const    x {center.X + (std::cos(angle) * (radius + (labelHeight / 2.0f)))};
+            f32 const    y {center.Y + (std::sin(angle) * (radius + (labelHeight / 2.0f)))};
+            rect_f const labelRect {x - labelHeight, y - (labelHeight / 2.0f), labelHeight * 2.0f, labelHeight};
+            painter.draw_text(_style.XAxisText, labelRect, xLabels[i]);
         }
     }
 }
