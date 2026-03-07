@@ -77,6 +77,8 @@ protected:
 
     auto x_label_count() const -> usize;
     auto y_label_count() const -> usize;
+    auto position_in_xaxis(f32 value, rect_f const& bounds) const -> f32;
+    auto position_in_yaxis(f32 value, rect_f const& bounds) const -> f32;
 
 private:
     usize _labelX {0};
@@ -134,9 +136,6 @@ protected:
     auto grid_rect() const -> rect_f const&;
 
     virtual auto calc_grid_lines() const -> std::pair<i32, i32> = 0;
-
-    auto position_in_xaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32;
-    auto position_in_yaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32;
 
 private:
     rect_f _gridRect;

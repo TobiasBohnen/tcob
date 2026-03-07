@@ -10,6 +10,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
@@ -73,6 +74,22 @@ auto chart_base::x_label_count() const -> usize
 auto chart_base::y_label_count() const -> usize
 {
     return _labelY;
+}
+
+auto chart_base::position_in_xaxis(f32 value, rect_f const& bounds) const -> f32
+{
+    f32 const range {XAxis->Max - XAxis->Min};
+    if (range == 0.0f) { return bounds.left(); }
+    f32 const norm {(value - XAxis->Min) / range};
+    return bounds.left() + (norm * bounds.width());
+}
+
+auto chart_base::position_in_yaxis(f32 value, rect_f const& bounds) const -> f32
+{
+    f32 const range {YAxis->Max - YAxis->Min};
+    if (range == 0.0f) { return bounds.bottom(); }
+    f32 const norm {(value - YAxis->Min) / range};
+    return bounds.bottom() - (norm * bounds.height());
 }
 
 }

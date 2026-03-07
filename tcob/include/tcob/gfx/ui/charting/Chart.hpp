@@ -130,6 +130,7 @@ protected:
 
 private:
     scatter_chart::style _style;
+    point_f              _dragAccum {};
 };
 
 ////////////////////////////////////////////////////////////

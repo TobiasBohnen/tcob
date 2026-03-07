@@ -101,7 +101,7 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
         std::vector<point_f> points;
         for (usize j {0}; j < len; ++j) {
             points.emplace_back(chartRect.left() + (cxStep * static_cast<f32>(j)),
-                                position_in_yaxis(s.Value[j], *YAxis, chartRect));
+                                position_in_yaxis(s.Value[j], chartRect));
         }
         if (points.size() == 1) { continue; }
 
@@ -213,7 +213,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
 
                 canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
 
-                f32 const     yAbs {position_in_yaxis(s.Value[j], *YAxis, chartRect)};
+                f32 const     yAbs {position_in_yaxis(s.Value[j], chartRect)};
                 f32 const     barHeight {chartRect.bottom() - yAbs};
                 point_f const pos {chartRect.left() + (columnWidth * static_cast<f32>(j)) + ((columnWidth - barWidth) / 2.0f),
                                    yAbs - yOffset};
@@ -238,7 +238,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
             f32 const   xOffset {chartRect.left() + (barWidth / barCount * i) + ((columnWidth - barWidth) / 2.0f)};
             for (usize j {0}; j < valueCount; ++j) {
                 point_f const pos {xOffset + (columnWidth * static_cast<f32>(j)),
-                                   position_in_yaxis(s.Value[j], *YAxis, chartRect)};
+                                   position_in_yaxis(s.Value[j], chartRect)};
 
                 canvas.begin_path();
                 canvas.rounded_rect({pos, {barWidth / static_cast<f32>(barCount), chartRect.bottom() - pos.Y}}, barRadius);
@@ -488,8 +488,8 @@ void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> c
         canvas.begin_path();
         for (auto const& pt : s.Value) {
             point_f const p {
-                position_in_xaxis(pt.X, *XAxis, chartRect),
-                position_in_yaxis(pt.Y, *YAxis, chartRect)};
+                position_in_xaxis(pt.X, chartRect),
+                position_in_yaxis(pt.Y, chartRect)};
             if (chartRect.contains(p, true)) {
                 canvas.circle(p, pointSize);
             }
@@ -512,16 +512,24 @@ void scatter_chart::on_mouse_drag(input::mouse::motion_event const& ev)
     f32 const xRange {XAxis->Max - XAxis->Min};
     f32 const yRange {YAxis->Max - YAxis->Min};
 
-    f32 const dx {(static_cast<f32>(ev.RelativeMotion.X) / grid_rect().width()) * xRange};
-    f32 const dy {(static_cast<f32>(ev.RelativeMotion.Y) / grid_rect().height()) * yRange};
+    _dragAccum.X += (static_cast<f32>(ev.RelativeMotion.X) / grid_rect().width()) * xRange;
+    _dragAccum.Y += (static_cast<f32>(ev.RelativeMotion.Y) / grid_rect().height()) * yRange;
 
     XAxis.mutate([&](axis& a) {
-        a.Min -= dx;
-        a.Max -= dx;
+        f32 const snap {helper::round_to_multiple(_dragAccum.X, a.SmallStep)};
+        if (snap != 0.0f) {
+            a.Min -= snap;
+            a.Max -= snap;
+            _dragAccum.X -= snap;
+        }
     });
     YAxis.mutate([&](axis& a) {
-        a.Min += dy;
-        a.Max += dy;
+        f32 const snap {helper::round_to_multiple(_dragAccum.Y, a.SmallStep)};
+        if (snap != 0.0f) {
+            a.Min += snap;
+            a.Max += snap;
+            _dragAccum.Y -= snap;
+        }
     });
 }
 

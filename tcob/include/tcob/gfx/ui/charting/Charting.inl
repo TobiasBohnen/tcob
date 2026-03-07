@@ -137,22 +137,4 @@ inline auto grid_chart<T>::grid_rect() const -> rect_f const&
     return _gridRect;
 }
 
-template <typename T>
-inline auto grid_chart<T>::position_in_xaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32
-{
-    f32 const range {axis.Max - axis.Min};
-    if (range == 0.0f) { return bounds.left(); }
-    f32 const norm {(value - axis.Min) / range};
-    return bounds.left() + (norm * bounds.width());
-}
-
-template <typename T>
-inline auto grid_chart<T>::position_in_yaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32
-{
-    f32 const range {axis.Max - axis.Min};
-    if (range == 0.0f) { return bounds.bottom(); }
-    f32 const norm {(value - axis.Min) / range};
-    return bounds.bottom() - (norm * bounds.height());
-}
-
 }
