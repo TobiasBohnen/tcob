@@ -6,6 +6,7 @@
 #pragma once
 #include "Charting.hpp"
 
+#include <cmath>
 #include <format>
 #include <vector>
 
@@ -52,15 +53,14 @@ inline void chart<T>::on_draw(widget_painter& painter)
     auto const* style {dynamic_cast<chart_style const*>(current_style())};
     if (style && style->Colors.empty()) { return; }
 
-    auto const getLabels {[&](axis const& axis) -> std::vector<string> {
-        if (!axis.CustomLabels.empty()) { return axis.CustomLabels; }
-        if (axis.LabelCount <= 0) { return {}; }
+    auto const getLabels {[&](axis const& a) -> std::vector<string> {
+        if (!a.CustomLabels.empty()) { return a.CustomLabels; }
+        if (a.LargeStep <= 0.0f) { return {}; }
         std::vector<string> labels;
-        for (i32 i {0}; i < axis.LabelCount; ++i) {
-            f32 const value {axis.LabelCount == 1
-                                 ? axis.Min
-                                 : axis.Min + ((static_cast<f32>(i) / (static_cast<f32>(axis.LabelCount) - 1)) * (axis.Max - axis.Min))};
-            labels.push_back(std::format("{:.{}f}", value, axis.LabelPrecision));
+        i32 const           count {static_cast<i32>(std::round((a.Max - a.Min) / a.LargeStep)) + 1};
+        for (i32 i {0}; i < count; ++i) {
+            f32 const value {a.Min + (static_cast<f32>(i) * a.LargeStep)};
+            labels.push_back(std::format("{:.{}f}", value, a.LabelPrecision));
         }
         return labels;
     }};
@@ -83,13 +83,10 @@ inline grid_chart<T>::grid_chart(widget::init const& wi)
 }
 
 template <typename T>
-inline void grid_chart<T>::draw_grid(gfx::canvas& canvas, grid_chart_style const& style, rect_f const& bounds)
+inline void grid_chart<T>::draw_grid(gfx::canvas& canvas, grid_chart_style const& style, f32 tickSize, rect_f const& bounds)
 {
     _gridRect = bounds;
-
     auto [horizontalGridLines, verticalGridLines] {calc_grid_lines()};
-    if (horizontalGridLines == 1) { horizontalGridLines = 2; }
-    if (verticalGridLines == 1) { verticalGridLines = 2; }
 
     canvas.set_stroke_style(style.GridColor);
     canvas.set_stroke_width(style.GridLineSize.calc(bounds.width()));
@@ -109,6 +106,27 @@ inline void grid_chart<T>::draw_grid(gfx::canvas& canvas, grid_chart_style const
             f32 const t {static_cast<f32>(i) / static_cast<f32>(verticalGridLines - 1)};
             f32 const x {bounds.right() - (t * bounds.width())};
             canvas.stroke_line({x, bounds.top()}, {x, bounds.bottom()});
+        }
+    }
+
+    // ticks
+    if (this->XAxis->SmallStep > 0.0f) {
+        f32 const xRange {this->XAxis->Max - this->XAxis->Min};
+        i32 const xTickCount {static_cast<i32>(std::round(xRange / this->XAxis->SmallStep)) + 1};
+        for (i32 i {0}; i < xTickCount; ++i) {
+            f32 const t {static_cast<f32>(i) / static_cast<f32>(xTickCount - 1)};
+            f32 const x {bounds.left() + (t * bounds.width())};
+            canvas.stroke_line({x, bounds.bottom()}, {x, bounds.bottom() + tickSize});
+        }
+    }
+
+    if (this->YAxis->SmallStep > 0.0f) {
+        f32 const yRange {this->YAxis->Max - this->YAxis->Min};
+        i32 const yTickCount {static_cast<i32>(std::round(yRange / this->YAxis->SmallStep)) + 1};
+        for (i32 i {0}; i < yTickCount; ++i) {
+            f32 const t {static_cast<f32>(i) / static_cast<f32>(yTickCount - 1)};
+            f32 const y {bounds.bottom() - (t * bounds.height())};
+            canvas.stroke_line({bounds.left() - tickSize, y}, {bounds.left(), y});
         }
     }
 }

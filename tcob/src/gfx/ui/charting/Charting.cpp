@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/ui/charting/Charting.hpp"
 
+#include <cmath>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -48,12 +49,18 @@ void grid_chart_style::Transition(grid_chart_style& target, grid_chart_style con
 chart_base::chart_base(init const& wi)
     : widget {wi}
 {
+    auto static const calcCount {[](axis const& a) -> usize {
+        if (!a.CustomLabels.empty()) { return a.CustomLabels.size(); }
+        if (a.LargeStep <= 0.0f) { return 0; }
+        return static_cast<usize>(std::round((a.Max - a.Min) / a.LargeStep)) + 1;
+    }};
+
     XAxis.Changed.connect([&](axis const& axis) {
-        _labelX = axis.CustomLabels.empty() ? axis.LabelCount : axis.CustomLabels.size();
+        _labelX = calcCount(axis);
         queue_redraw();
     });
     YAxis.Changed.connect([&](axis const& axis) {
-        _labelY = axis.CustomLabels.empty() ? axis.LabelCount : axis.CustomLabels.size();
+        _labelY = calcCount(axis);
         queue_redraw();
     });
 }

@@ -22,11 +22,13 @@ namespace tcob::ui::charts {
 ////////////////////////////////////////////////////////////
 
 struct axis {
-    // TODO: Title, Ticks
+    // TODO: Title
     f32 Min {0.0f};
     f32 Max {1.0f};
 
-    i32 LabelCount {0};
+    f32 SmallStep {0.0f};
+    f32 LargeStep {0.5f};
+
     i32 LabelPrecision {2};
 
     std::vector<string> CustomLabels;
@@ -127,7 +129,7 @@ public:
 protected:
     grid_chart(widget::init const& wi);
 
-    void draw_grid(gfx::canvas& canvas, grid_chart_style const& style, rect_f const& bounds);
+    void draw_grid(gfx::canvas& canvas, grid_chart_style const& style, f32 tickSize, rect_f const& bounds);
 
     auto grid_rect() const -> rect_f const&;
 

@@ -79,16 +79,18 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    f32 const    lineWidth {_style.LineSize.calc(rect.width())};
-    f32 const    outlineWidth {lineWidth + _style.OutlineSize.calc(rect.width())};
+    f32 const    tickSize {_style.GridLineSize.calc(rect.width()) * 4.0f};
     f32 const    xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     f32 const    yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
-    f32 const    topPad {std::max(xLabelHeight, yLabelWidth / 2.0f)};
-    rect_f const chartRect {rect.left() + yLabelWidth, rect.top() + topPad,
-                            rect.width() - yLabelWidth - xLabelHeight, rect.height() - xLabelHeight - topPad - lineWidth};
+    f32 const    leftPad {std::max(xLabelHeight + tickSize, yLabelWidth + tickSize)};
+    f32 const    topPad {std::max((xLabelHeight + tickSize) / 2.0f, (yLabelWidth + tickSize) / 2.0f)};
+    rect_f const chartRect {rect.left() + leftPad, rect.top() + topPad,
+                            rect.width() - (leftPad * 2.0f), rect.height() - (topPad * 3.0f)};
 
-    draw_grid(canvas, _style, chartRect);
+    draw_grid(canvas, _style, tickSize, chartRect);
 
+    f32 const   lineWidth {_style.LineSize.calc(rect.width())};
+    f32 const   outlineWidth {lineWidth + _style.OutlineSize.calc(rect.width())};
     usize const xCount {x_label_count() > 0 ? x_label_count() : max_x()};
     auto const  cxStep {chartRect.width() / (xCount - 1)};
     for (usize i {0}; i < Dataset->size(); ++i) {
@@ -182,22 +184,26 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
+    f32 const    tickSize {_style.GridLineSize.calc(rect.width()) * 4.0f};
     usize const  xLabelCount {x_label_count()};
     f32 const    xLabelHeight {xLabelCount == 0 ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     f32 const    yLabelWidth {y_label_count() == 0 ? 0.0f : _style.YLabelWidth.calc(rect.width())};
-    rect_f const chartRect {rect.left() + yLabelWidth, rect.top() + xLabelHeight,
-                            rect.width() - yLabelWidth, rect.height() - (xLabelHeight * 2.0f)};
+    f32 const    leftPad {yLabelWidth + tickSize};
+    f32 const    topPad {std::max((xLabelHeight + tickSize) / 2.0f, (yLabelWidth + tickSize) / 2.0f)};
+    rect_f const chartRect {rect.left() + leftPad, rect.top() + topPad,
+                            rect.width() - leftPad, rect.height() - (topPad * 2.5f)};
 
-    draw_grid(canvas, _style, chartRect);
+    draw_grid(canvas, _style, tickSize, chartRect);
 
     usize const barCount {Dataset->size()};
-    f32 const   columnWidth {chartRect.width() / xLabelCount};
+    usize const groupCount {xLabelCount == 0 ? barCount : xLabelCount};
+    f32 const   columnWidth {chartRect.width() / static_cast<f32>(groupCount)};
     f32 const   barWidth {_style.BarSize.calc(columnWidth)};
     f32 const   barRadius {_style.BarRadius.calc(barWidth)};
     f32 const   outlineWidth {_style.OutlineSize.calc(chartRect.width())};
 
     if (_style.StackBars) {
-        for (usize j {0}; j < xLabelCount; ++j) {
+        for (usize j {0}; j < groupCount; ++j) {
             f32 yOffset {0.0f};
             for (usize i {0}; i < barCount; ++i) {
                 auto const& s {Dataset[i]};
@@ -207,7 +213,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
 
                 f32 const     yAbs {position_in_yaxis(s.Value[j], *YAxis, chartRect)};
                 f32 const     barHeight {chartRect.bottom() - yAbs};
-                point_f const pos {chartRect.left() + (columnWidth * static_cast<f32>(j)) + ((columnWidth - barWidth) / 2),
+                point_f const pos {chartRect.left() + (columnWidth * static_cast<f32>(j)) + ((columnWidth - barWidth) / 2.0f),
                                    yAbs - yOffset};
 
                 canvas.begin_path();
@@ -227,7 +233,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
 
             auto const& s {Dataset[i]};
             usize const valueCount {s.Value.size()};
-            f32 const   xOffset {chartRect.left() + (barWidth / barCount * i) + ((columnWidth - barWidth) / 2)};
+            f32 const   xOffset {chartRect.left() + (barWidth / barCount * i) + ((columnWidth - barWidth) / 2.0f)};
             for (usize j {0}; j < valueCount; ++j) {
                 point_f const pos {xOffset + (columnWidth * static_cast<f32>(j)),
                                    position_in_yaxis(s.Value[j], *YAxis, chartRect)};
@@ -333,8 +339,8 @@ void marimekko_chart::on_draw_chart(widget_painter& painter, std::vector<string>
 
             f32 const     height {chartRect.height() * (value / columnTotals[j])};
             auto const    barHeight {_style.BarSize.Height.calc(height)};
-            point_f const pos {xCursor + ((columnWidth - barWidth) / 2),
-                               baseline - (yOffset + height) + ((height - barHeight) / 2)};
+            point_f const pos {xCursor + ((columnWidth - barWidth) / 2.0f),
+                               baseline - (yOffset + height) + ((height - barHeight) / 2.0f)};
 
             canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
             canvas.begin_path();
@@ -384,7 +390,7 @@ void pie_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
 
     f32 const  outlineWidth {_style.OutlineSize.calc(rect.width())};
     auto const center {rect.center()};
-    f32 const  radius {(std::min(rect.width(), rect.height()) / 2) - (outlineWidth / 2)};
+    f32 const  radius {(std::min(rect.width(), rect.height()) / 2.0f) - (outlineWidth / 2.0f)};
     f32 const  innerRadius {_style.InnerRadius.calc(radius)};
     bool const isDonut {innerRadius > 0.0f};
     f64 const  padAngle {radian_d {_style.PadAngle}.Value};
@@ -456,15 +462,16 @@ void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> c
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    f32 const pointSize {_style.PointSize.calc(rect.width())};
-    f32 const xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
-    f32 const yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
-    f32 const leftPad {std::max(yLabelWidth + pointSize, xLabelHeight)};
+    f32 const    tickSize {_style.GridLineSize.calc(rect.width()) * 4.0f};
+    f32 const    pointSize {_style.PointSize.calc(rect.width())};
+    f32 const    xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
+    f32 const    yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
+    f32 const    leftPad {std::max(yLabelWidth + pointSize, xLabelHeight)};
+    f32 const    topPad {std::max((xLabelHeight + tickSize + pointSize) / 2.0f, (yLabelWidth + tickSize + pointSize) / 2.0f)};
+    rect_f const chartRect {rect.left() + leftPad, rect.top() + topPad,
+                            rect.width() - (leftPad * 2.0f), rect.height() - (topPad * 2.5f)};
 
-    rect_f const chartRect {rect.left() + leftPad, rect.top() + xLabelHeight + pointSize,
-                            rect.width() - leftPad - xLabelHeight, rect.height() - (xLabelHeight * 2.0f) - (pointSize * 2.0f)};
-
-    draw_grid(canvas, _style, chartRect);
+    draw_grid(canvas, _style, tickSize, chartRect);
 
     f32 const outlineWidth {_style.OutlineSize.calc(chartRect.width())};
 
@@ -523,10 +530,14 @@ void scatter_chart::on_mouse_wheel(input::mouse::wheel_event const& ev)
     XAxis.mutate([&](axis& a) {
         a.Min = xCenter - (xRange * factor / 2.0f);
         a.Max = xCenter + (xRange * factor / 2.0f);
+        a.LargeStep *= factor;
+        a.SmallStep *= factor;
     });
     YAxis.mutate([&](axis& a) {
         a.Min = yCenter - (yRange * factor / 2.0f);
         a.Max = yCenter + (yRange * factor / 2.0f);
+        a.LargeStep *= factor;
+        a.SmallStep *= factor;
     });
 }
 
@@ -579,7 +590,7 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
 
     f32 const     labelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     point_f const center {rect.center()};
-    f32 const     radius {(std::min(rect.width(), rect.height()) / 2) - labelHeight};
+    f32 const     radius {(std::min(rect.width(), rect.height()) / 2.0f) - labelHeight};
 
     if (_style.GridLines != grid_line_amount::None) {
         canvas.set_stroke_style(_style.GridColor);
