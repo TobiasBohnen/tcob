@@ -178,6 +178,12 @@ void tab_container::on_draw(widget_painter& painter)
             case tab_container::header_mode::Compact: {
                 auto const textFormat {painter.format_text(itemStyle.Item.Text, {tabHeaderRect.width() / columns, itemHeight}, item.Text)};
                 itemWidth = textFormat.UsedSize.Width;
+                if (item.Icon.Texture) { itemWidth *= 2; }
+                // add padding/border before removing it again in draw_item
+                itemWidth += _style.Padding.Left.calc(itemWidth);
+                itemWidth += _style.Padding.Right.calc(itemWidth);
+                itemWidth += _style.Border.thickness().Left.calc(itemWidth);
+                itemWidth += _style.Border.thickness().Right.calc(itemWidth);
             } break;
             }
 

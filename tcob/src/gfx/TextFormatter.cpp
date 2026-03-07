@@ -282,7 +282,7 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
         }
 
         y += fontInfo.LineHeight * scale;
-        f32 const lineContentWidth {x - lineStartX};
+        f32 const lineContentWidth {std::ceil(x - lineStartX)};
         retValue.UsedSize.Width = std::max(lineContentWidth, retValue.UsedSize.Width);
 
         if (y + (fontInfo.LineHeight * scale) > availableHeight + baseline) { break; }
