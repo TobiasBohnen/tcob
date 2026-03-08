@@ -125,12 +125,19 @@ protected:
 
     void on_mouse_drag(input::mouse::motion_event const& ev) override;
     void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
+    void on_double_click() override;
 
     auto calc_grid_lines() const -> std::pair<i32, i32> override;
 
 private:
+    struct axis_view {
+        f32 Min {}, Max {}, SmallStep {}, LargeStep {};
+    };
+
     scatter_chart::style _style;
     point_f              _dragAccum {};
+    bool                 _ignoreAxisChange {false};
+    axis_view            _initialX {}, _initialY {};
 };
 
 ////////////////////////////////////////////////////////////

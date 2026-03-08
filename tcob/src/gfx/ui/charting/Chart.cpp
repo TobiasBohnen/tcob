@@ -458,6 +458,23 @@ scatter_chart::scatter_chart(init const& wi)
     : grid_chart {wi}
 {
     Class("scatter_chart");
+
+    XAxis.Changed.connect([&](axis const& axis) {
+        if (_ignoreAxisChange) { return; }
+
+        _initialX.Min       = axis.Min;
+        _initialX.Max       = axis.Max;
+        _initialX.SmallStep = axis.SmallStep;
+        _initialX.LargeStep = axis.LargeStep;
+    });
+    YAxis.Changed.connect([&](axis const& axis) {
+        if (_ignoreAxisChange) { return; }
+
+        _initialY.Min       = axis.Min;
+        _initialY.Max       = axis.Max;
+        _initialY.SmallStep = axis.SmallStep;
+        _initialY.LargeStep = axis.LargeStep;
+    });
 }
 
 void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels)
@@ -509,6 +526,8 @@ void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> c
 
 void scatter_chart::on_mouse_drag(input::mouse::motion_event const& ev)
 {
+    _ignoreAxisChange = true;
+
     f32 const xRange {XAxis->Max - XAxis->Min};
     f32 const yRange {YAxis->Max - YAxis->Min};
 
@@ -531,10 +550,14 @@ void scatter_chart::on_mouse_drag(input::mouse::motion_event const& ev)
             _dragAccum.Y -= snap;
         }
     });
+
+    _ignoreAxisChange = false;
 }
 
 void scatter_chart::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
+    _ignoreAxisChange = true;
+
     f32 const xRange {XAxis->Max - XAxis->Min};
     f32 const yRange {YAxis->Max - YAxis->Min};
     f32 const xCenter {(XAxis->Min + XAxis->Max) / 2.0f};
@@ -553,6 +576,18 @@ void scatter_chart::on_mouse_wheel(input::mouse::wheel_event const& ev)
         a.LargeStep *= factor;
         a.SmallStep *= factor;
     });
+    _dragAccum = {};
+
+    _ignoreAxisChange = false;
+}
+
+void scatter_chart::on_double_click()
+{
+    _ignoreAxisChange = true;
+    XAxis.mutate([&](axis& a) { a.Min = _initialX.Min; a.Max = _initialX.Max; a.SmallStep = _initialX.SmallStep; a.LargeStep = _initialX.LargeStep; });
+    YAxis.mutate([&](axis& a) { a.Min = _initialY.Min; a.Max = _initialY.Max; a.SmallStep = _initialY.SmallStep; a.LargeStep = _initialY.LargeStep; });
+    _dragAccum        = {};
+    _ignoreAxisChange = false;
 }
 
 auto scatter_chart::calc_grid_lines() const -> std::pair<i32, i32>
