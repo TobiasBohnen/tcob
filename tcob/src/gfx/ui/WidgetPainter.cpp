@@ -315,10 +315,8 @@ void widget_painter::draw_tick(tick_element const& element, rect_f const& rect)
     case tick_type::Rect: {
         f32 const    width {element.Size.calc(rect.width())};
         f32 const    height {element.Size.calc(rect.height())};
-        rect_f const newRect {rect.left() + ((rect.width() - width) / 2),
-                              rect.top() + ((rect.height() - height) / 2),
-                              width,
-                              height};
+        rect_f const newRect {rect.left() + ((rect.width() - width) / 2), rect.top() + ((rect.height() - height) / 2),
+                              width, height};
         Fill(_canvas, get_paint(element.Foreground, newRect), [&] {
             _canvas.rect(newRect);
         });
@@ -333,10 +331,8 @@ void widget_painter::draw_tick(tick_element const& element, rect_f const& rect)
     case tick_type::Triangle: {
         f32 const    width {element.Size.calc(rect.width())};
         f32 const    height {element.Size.calc(rect.height())};
-        rect_f const newRect {rect.left() + ((rect.width() - width) / 2),
-                              rect.top() + ((rect.height() - height) / 2),
-                              width,
-                              height};
+        rect_f const newRect {rect.left() + ((rect.width() - width) / 2), rect.top() + ((rect.height() - height) / 2),
+                              width, height};
         Fill(_canvas, get_paint(element.Foreground, newRect), [&] {
             _canvas.triangle(
                 {newRect.left() + 2, newRect.top() + 4},

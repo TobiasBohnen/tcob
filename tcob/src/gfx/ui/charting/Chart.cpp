@@ -65,6 +65,11 @@ void line_chart::style::Transition(style& target, style const& from, style const
 
     target.LineSize    = helper::lerp(from.LineSize, to.LineSize, step);
     target.SmoothLines = helper::lerp(from.SmoothLines, to.SmoothLines, step);
+
+    target.MarkerType   = helper::lerp(from.MarkerType, to.MarkerType, step);
+    target.MarkerSize   = helper::lerp(from.MarkerSize, to.MarkerSize, step);
+    target.MarkerColor  = helper::lerp(from.MarkerColor, to.MarkerColor, step);
+    target.MarkerFilled = helper::lerp(from.MarkerFilled, to.MarkerFilled, step);
 }
 
 line_chart::line_chart(init const& wi)
@@ -90,7 +95,7 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
     draw_grid(canvas, _style, tickSize, chartRect);
 
     f32 const   lineWidth {_style.LineSize.calc(rect.width())};
-    f32 const   outlineWidth {lineWidth + _style.OutlineSize.calc(rect.width())};
+    f32 const   outlineWidth {_style.OutlineSize.calc(rect.width())};
     usize const xCount {x_label_count() > 0 ? x_label_count() : max_x()};
     auto const  cxStep {chartRect.width() / (xCount - 1)};
     for (usize i {0}; i < Dataset->size(); ++i) {
@@ -128,11 +133,44 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
         }
 
         canvas.set_stroke_style(_style.OutlineColor);
-        canvas.set_stroke_width(outlineWidth);
+        canvas.set_stroke_width(lineWidth + outlineWidth);
         canvas.stroke();
         canvas.set_stroke_style(_style.Colors[i % _style.Colors.size()]);
         canvas.set_stroke_width(lineWidth);
         canvas.stroke();
+
+        if (_style.MarkerType != marker_type::None) {
+            f32 const markerSize {_style.MarkerSize.calc(chartRect.width())};
+            for (auto const& p : points) {
+                auto const drawShape {[&] {
+                    canvas.begin_path();
+                    switch (_style.MarkerType) {
+                    case marker_type::Disc:     canvas.circle(p, markerSize); break;
+                    case marker_type::Square:   canvas.rect({p.X - markerSize, p.Y - markerSize, markerSize * 2.0f, markerSize * 2.0f}); break;
+                    case marker_type::Triangle: canvas.triangle({p.X, p.Y - markerSize}, {p.X + markerSize, p.Y + markerSize}, {p.X - markerSize, p.Y + markerSize}); break;
+                    case marker_type::None:     break;
+                    }
+                }};
+
+                if (_style.MarkerFilled) {
+                    drawShape();
+                    canvas.set_fill_style(_style.MarkerColor);
+                    canvas.set_stroke_style(_style.OutlineColor);
+                    canvas.set_stroke_width(outlineWidth);
+                    canvas.fill();
+                    canvas.stroke();
+                } else {
+                    drawShape();
+                    canvas.set_stroke_style(_style.OutlineColor);
+                    canvas.set_stroke_width(markerSize);
+                    canvas.stroke();
+                    drawShape();
+                    canvas.set_stroke_style(_style.MarkerColor);
+                    canvas.set_stroke_width(markerSize - outlineWidth);
+                    canvas.stroke();
+                }
+            }
+        }
     }
 
     rect_f const xLabelArea {chartRect.left(), rect.bottom() - xLabelHeight, chartRect.width(), xLabelHeight};

@@ -27,6 +27,11 @@ public:
         length LineSize {3.0f, length::type::Absolute};
         bool   SmoothLines {false};
 
+        marker_type MarkerType {marker_type::None};
+        length      MarkerSize {5.0f, length::type::Absolute};
+        color       MarkerColor {colors::White};
+        bool        MarkerFilled {true};
+
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 

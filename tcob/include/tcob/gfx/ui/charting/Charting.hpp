@@ -45,6 +45,13 @@ struct legend_def {
     color       Color;
 };
 
+enum class marker_type : u8 {
+    None,
+    Disc,
+    Square,
+    Triangle
+};
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API chart_style : public widget_style {
