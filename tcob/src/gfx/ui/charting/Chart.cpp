@@ -84,7 +84,7 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    f32 const    tickSize {_style.GridLineSize.calc(rect.width()) * 4.0f};
+    f32 const    tickSize {_style.TickSize.calc(rect.width())};
     f32 const    xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     f32 const    yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
     f32 const    leftPad {std::max(xLabelHeight + tickSize, yLabelWidth + tickSize)};
@@ -224,7 +224,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    f32 const    tickSize {_style.GridLineSize.calc(rect.width()) * 4.0f};
+    f32 const    tickSize {_style.TickSize.calc(rect.width())};
     usize const  xLabelCount {x_label_count()};
     f32 const    xLabelHeight {xLabelCount == 0 ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     f32 const    yLabelWidth {y_label_count() == 0 ? 0.0f : _style.YLabelWidth.calc(rect.width())};
@@ -521,11 +521,11 @@ void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> c
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    f32 const    tickSize {_style.GridLineSize.calc(rect.width()) * 4.0f};
+    f32 const    tickSize {_style.TickSize.calc(rect.width())};
     f32 const    pointSize {_style.PointSize.calc(rect.width())};
     f32 const    xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     f32 const    yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
-    f32 const    leftPad {std::max(yLabelWidth + pointSize, xLabelHeight)};
+    f32 const    leftPad {std::max(yLabelWidth + tickSize + pointSize, xLabelHeight + tickSize)};
     f32 const    topPad {std::max((xLabelHeight + tickSize + pointSize) / 2.0f, (yLabelWidth + tickSize + pointSize) / 2.0f)};
     rect_f const chartRect {rect.left() + leftPad, rect.top() + topPad,
                             rect.width() - (leftPad * 2.0f), rect.height() - (topPad * 2.5f)};

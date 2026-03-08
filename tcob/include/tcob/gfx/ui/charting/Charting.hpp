@@ -129,6 +129,8 @@ public:
     length GridLineSize {1.0f, length::type::Absolute};
     color  GridColor {colors::Gray};
 
+    length TickSize {4.0f, length::type::Absolute};
+
     static void Transition(grid_chart_style& target, grid_chart_style const& from, grid_chart_style const& to, f64 step);
 };
 
