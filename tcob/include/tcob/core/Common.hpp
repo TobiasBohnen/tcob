@@ -53,6 +53,17 @@ namespace helper {
             return static_cast<T>(std::lerp(static_cast<f64>(from), static_cast<f64>(to), step));
         } else if constexpr (requires { T::Lerp(from, to, step); }) {
             return T::Lerp(from, to, step);
+        } else if constexpr (Container<T>) {
+            T target;
+            target.resize(from.size());
+            for (usize i {0}; i < from.size(); ++i) {
+                if (i >= to.size()) {
+                    target[i] = from[i];
+                } else {
+                    target[i] = helper::lerp(from[i], to[i], step);
+                }
+            }
+            return target;
         } else {
             return (step < 0.5) ? from : to;
         }

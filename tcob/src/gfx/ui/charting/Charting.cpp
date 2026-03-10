@@ -25,25 +25,8 @@ void chart_style::Transition(chart_style& target, chart_style const& from, chart
     target.YAxisText.lerp(from.YAxisText, to.YAxisText, step);
     target.YLabelWidth = helper::lerp(from.YLabelWidth, to.YLabelWidth, step);
 
-    target.Colors.clear();
-    target.Colors.resize(from.Colors.size());
-    for (usize i {0}; i < from.Colors.size(); ++i) {
-        if (i >= to.Colors.size()) {
-            target.Colors[i] = from.Colors[i];
-        } else {
-            target.Colors[i] = helper::lerp(from.Colors[i], to.Colors[i], step);
-        }
-    }
-
-    target.OutlineColors.clear();
-    target.OutlineColors.resize(from.OutlineColors.size());
-    for (usize i {0}; i < from.OutlineColors.size(); ++i) {
-        if (i >= to.OutlineColors.size()) {
-            target.OutlineColors[i] = from.OutlineColors[i];
-        } else {
-            target.OutlineColors[i] = helper::lerp(from.OutlineColors[i], to.OutlineColors[i], step);
-        }
-    }
+    target.Colors        = helper::lerp(from.Colors, to.Colors, step);
+    target.OutlineColors = helper::lerp(from.OutlineColors, to.OutlineColors, step);
 
     target.OutlineSize = helper::lerp(from.OutlineSize, to.OutlineSize, step);
 }
