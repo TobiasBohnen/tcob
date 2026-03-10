@@ -57,6 +57,11 @@ static void draw_y_labels(widget_painter& painter, chart_style const& style, u32
     }
 }
 
+static auto get_color(auto&& vec, usize i) -> color
+{
+    return vec[i % vec.size()];
+}
+
 ////////////////////////////////////////////////////////////
 
 void line_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
@@ -132,10 +137,10 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
             }
         }
 
-        canvas.set_stroke_style(_style.OutlineColor);
+        canvas.set_stroke_style(get_color(_style.OutlineColors, i));
         canvas.set_stroke_width(lineWidth + outlineWidth);
         canvas.stroke();
-        canvas.set_stroke_style(_style.Colors[i % _style.Colors.size()]);
+        canvas.set_stroke_style(get_color(_style.Colors, i));
         canvas.set_stroke_width(lineWidth);
         canvas.stroke();
 
@@ -155,13 +160,13 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
                 if (_style.MarkerFilled) {
                     drawShape();
                     canvas.set_fill_style(_style.MarkerColor);
-                    canvas.set_stroke_style(_style.OutlineColor);
+                    canvas.set_stroke_style(get_color(_style.OutlineColors, i));
                     canvas.set_stroke_width(outlineWidth);
                     canvas.fill();
                     canvas.stroke();
                 } else {
                     drawShape();
-                    canvas.set_stroke_style(_style.OutlineColor);
+                    canvas.set_stroke_style(get_color(_style.OutlineColors, i));
                     canvas.set_stroke_width(markerSize);
                     canvas.stroke();
                     drawShape();
@@ -249,7 +254,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
                 auto const& s {Dataset[i]};
                 if (j >= s.Value.size()) { continue; }
 
-                canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
+                canvas.set_fill_style(get_color(_style.Colors, i));
 
                 f32 const     yAbs {position_in_yaxis(s.Value[j], chartRect)};
                 f32 const     barHeight {chartRect.bottom() - yAbs};
@@ -260,7 +265,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
                 canvas.rounded_rect({pos, {barWidth, barHeight}}, barRadius);
                 canvas.fill();
                 canvas.set_stroke_width(outlineWidth);
-                canvas.set_stroke_style(_style.OutlineColor);
+                canvas.set_stroke_style(get_color(_style.OutlineColors, i));
                 canvas.stroke();
 
                 yOffset += barHeight;
@@ -269,7 +274,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
 
     } else {
         for (usize i {0}; i < barCount; ++i) {
-            canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
+            canvas.set_fill_style(get_color(_style.Colors, i));
 
             auto const& s {Dataset[i]};
             usize const valueCount {s.Value.size()};
@@ -282,7 +287,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
                 canvas.rounded_rect({pos, {barWidth / static_cast<f32>(barCount), chartRect.bottom() - pos.Y}}, barRadius);
                 canvas.fill();
                 canvas.set_stroke_width(outlineWidth);
-                canvas.set_stroke_style(_style.OutlineColor);
+                canvas.set_stroke_style(get_color(_style.OutlineColors, i));
                 canvas.stroke();
             }
         }
@@ -384,12 +389,12 @@ void marimekko_chart::on_draw_chart(widget_painter& painter, std::vector<string>
             point_f const pos {xCursor + ((columnWidth - barWidth) / 2.0f),
                                baseline - (yOffset + height) + ((height - barHeight) / 2.0f)};
 
-            canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
+            canvas.set_fill_style(get_color(_style.Colors, i));
             canvas.begin_path();
             canvas.rounded_rect({pos, {barWidth, barHeight}}, barRadius);
             canvas.fill();
             canvas.set_stroke_width(outlineWidth);
-            canvas.set_stroke_style(_style.OutlineColor);
+            canvas.set_stroke_style(get_color(_style.OutlineColors, i));
             canvas.stroke();
 
             yOffset += height;
@@ -473,10 +478,10 @@ void pie_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
         }
         canvas.close_path();
 
-        canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
+        canvas.set_fill_style(get_color(_style.Colors, i));
         canvas.fill();
         canvas.set_stroke_width(outlineWidth);
-        canvas.set_stroke_style(_style.OutlineColor);
+        canvas.set_stroke_style(get_color(_style.OutlineColors, i));
         canvas.stroke();
 
         angle += fullSweep;
@@ -536,8 +541,8 @@ void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> c
 
     for (usize i {0}; i < Dataset->size(); ++i) {
         auto const& s {Dataset[i]};
-        canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
-        canvas.set_stroke_style(_style.OutlineColor);
+        canvas.set_fill_style(get_color(_style.Colors, i));
+        canvas.set_stroke_style(get_color(_style.OutlineColors, i));
         canvas.set_stroke_width(outlineWidth);
 
         canvas.begin_path();
@@ -738,16 +743,16 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
         for (usize j {1}; j < points.size(); ++j) { canvas.line_to(points[j]); }
         canvas.close_path();
 
-        color const c {_style.Colors[i % _style.Colors.size()]};
+        color const c {get_color(_style.Colors, i)};
         if (_style.FillAreaAlpha > 0) {
             canvas.set_fill_style({c.R, c.G, c.B, _style.FillAreaAlpha});
             canvas.fill();
 
-            canvas.set_stroke_style(_style.OutlineColor);
+            canvas.set_stroke_style(get_color(_style.OutlineColors, i));
             canvas.set_stroke_width(outlineWidth);
             canvas.stroke();
         } else {
-            canvas.set_stroke_style(_style.OutlineColor);
+            canvas.set_stroke_style(get_color(_style.OutlineColors, i));
             canvas.set_stroke_width(lineWidth + (outlineWidth * 2));
             canvas.stroke();
 

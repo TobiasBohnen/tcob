@@ -35,8 +35,17 @@ void chart_style::Transition(chart_style& target, chart_style const& from, chart
         }
     }
 
-    target.OutlineColor = helper::lerp(from.OutlineColor, to.OutlineColor, step);
-    target.OutlineSize  = helper::lerp(from.OutlineSize, to.OutlineSize, step);
+    target.OutlineColors.clear();
+    target.OutlineColors.resize(from.OutlineColors.size());
+    for (usize i {0}; i < from.OutlineColors.size(); ++i) {
+        if (i >= to.OutlineColors.size()) {
+            target.OutlineColors[i] = from.OutlineColors[i];
+        } else {
+            target.OutlineColors[i] = helper::lerp(from.OutlineColors[i], to.OutlineColors[i], step);
+        }
+    }
+
+    target.OutlineSize = helper::lerp(from.OutlineSize, to.OutlineSize, step);
 }
 
 void grid_chart_style::Transition(grid_chart_style& target, grid_chart_style const& from, grid_chart_style const& to, f64 step)

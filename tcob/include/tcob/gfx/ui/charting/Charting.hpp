@@ -62,10 +62,10 @@ public:
     text_element YAxisText;
     length       YLabelWidth {0.05f, length::type::Relative};
 
-    std::vector<color> Colors;
+    std::vector<color> Colors {};
 
-    color  OutlineColor {colors::Black};
-    length OutlineSize {1.0f, length::type::Absolute};
+    std::vector<color> OutlineColors {colors::Black};
+    length             OutlineSize {1.0f, length::type::Absolute};
 
     static void Transition(chart_style& target, chart_style const& from, chart_style const& to, f64 step);
 };
