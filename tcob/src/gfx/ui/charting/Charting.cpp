@@ -37,9 +37,6 @@ void chart_style::Transition(chart_style& target, chart_style const& from, chart
     target.YAxisText.lerp(from.YAxisText, to.YAxisText, step);
     target.YLabelWidth = helper::lerp(from.YLabelWidth, to.YLabelWidth, step);
 
-    target.Colors        = helper::lerp(from.Colors, to.Colors, step);
-    target.OutlineColors = helper::lerp(from.OutlineColors, to.OutlineColors, step);
-
     target.OutlineSize = helper::lerp(from.OutlineSize, to.OutlineSize, step);
 }
 

@@ -21,10 +21,10 @@ template <typename T>
 inline chart<T>::chart(init const& wi)
     : chart_base {wi}
 {
-    Dataset.Changed.connect([&] {
+    Datasets.Changed.connect([&] {
         _maxX = 0;
         if constexpr (HasSize<T>) {
-            for (auto const& s : *Dataset) {
+            for (auto const& s : *Datasets) {
                 _maxX = std::max(_maxX, s.Value.size());
             }
         } else {
@@ -40,8 +40,8 @@ inline auto chart<T>::legend() const -> std::vector<legend_def>
     std::vector<legend_def> retValue;
 
     auto const* style {dynamic_cast<chart_style const*>(current_style())};
-    for (usize i {0}; i < Dataset->size() && style; ++i) {
-        retValue.emplace_back(Dataset[i].Name, style->Colors[i % style->Colors.size()]);
+    for (usize i {0}; i < Datasets->size() && style; ++i) {
+        retValue.emplace_back(Datasets[i].Name, Datasets[i].Color);
     }
     return retValue;
 }
@@ -49,9 +49,9 @@ inline auto chart<T>::legend() const -> std::vector<legend_def>
 template <typename T>
 inline void chart<T>::on_draw(widget_painter& painter)
 {
-    if (Dataset->empty()) { return; }
+    if (Datasets->empty()) { return; }
     auto const* style {dynamic_cast<chart_style const*>(current_style())};
-    if (style && style->Colors.empty()) { return; }
+    if (!style) { return; }
 
     auto const getLabels {[&](axis const& a) -> std::vector<string> {
         if (!a.CustomLabels.empty()) { return a.CustomLabels; }

@@ -35,9 +35,10 @@ struct axis {
 };
 
 template <typename T>
-struct datapoint {
+struct dataset {
     utf8_string Name;
     T           Value;
+    color       Color {colors::White};
 };
 
 struct legend_def {
@@ -76,10 +77,8 @@ public:
     text_element YAxisText;
     length       YLabelWidth {0.05f, length::type::Relative};
 
-    std::vector<color> Colors {};
-
-    std::vector<color> OutlineColors {colors::Black};
-    length             OutlineSize {1.0f, length::type::Absolute};
+    color  OutlineColor {colors::Black};
+    length OutlineSize {1.0f, length::type::Absolute};
 
     static void Transition(chart_style& target, chart_style const& from, chart_style const& to, f64 step);
 };
@@ -109,7 +108,7 @@ private:
 template <typename T>
 class chart : public chart_base {
 public:
-    prop<std::vector<datapoint<T>>> Dataset;
+    prop<std::vector<dataset<T>>> Datasets;
 
     auto legend() const -> std::vector<legend_def> override;
 

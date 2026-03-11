@@ -57,11 +57,6 @@ static void draw_y_labels(widget_painter& painter, chart_style const& style, u32
     }
 }
 
-static auto get_color(auto&& vec, usize i) -> color
-{
-    return vec[i % vec.size()];
-}
-
 ////////////////////////////////////////////////////////////
 
 void line_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
@@ -100,8 +95,8 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
     f32 const   outlineWidth {_style.OutlineSize.calc(rect.width())};
     usize const xCount {x_label_count() > 0 ? x_label_count() : max_x()};
     auto const  cxStep {chartRect.width() / (xCount - 1)};
-    for (usize i {0}; i < Dataset->size(); ++i) {
-        auto const& s {Dataset[i]};
+    for (usize i {0}; i < Datasets->size(); ++i) {
+        auto const& s {Datasets[i]};
         usize const len {s.Value.size()};
         if (len < 2) { continue; }
 
@@ -134,10 +129,10 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
             }
         }
 
-        canvas.set_stroke_style(get_color(_style.OutlineColors, i));
+        canvas.set_stroke_style(_style.OutlineColor);
         canvas.set_stroke_width(lineWidth + outlineWidth);
         canvas.stroke();
-        canvas.set_stroke_style(get_color(_style.Colors, i));
+        canvas.set_stroke_style(s.Color);
         canvas.set_stroke_width(lineWidth);
         canvas.stroke();
 
@@ -157,13 +152,13 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
                 if (_style.Marker.Filled) {
                     drawShape();
                     canvas.set_fill_style(_style.Marker.Color);
-                    canvas.set_stroke_style(get_color(_style.OutlineColors, i));
+                    canvas.set_stroke_style(_style.OutlineColor);
                     canvas.set_stroke_width(outlineWidth);
                     canvas.fill();
                     canvas.stroke();
                 } else {
                     drawShape();
-                    canvas.set_stroke_style(get_color(_style.OutlineColors, i));
+                    canvas.set_stroke_style(_style.OutlineColor);
                     canvas.set_stroke_width(markerSize);
                     canvas.stroke();
                     drawShape();
@@ -237,7 +232,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
 
     draw_grid(canvas, _style, tickSize, chartRect);
 
-    usize const barCount {Dataset->size()};
+    usize const barCount {Datasets->size()};
     usize const groupCount {xLabelCount == 0 ? barCount : xLabelCount};
     f32 const   columnWidth {chartRect.width() / static_cast<f32>(groupCount)};
     f32 const   barWidth {_style.BarSize.calc(columnWidth)};
@@ -248,10 +243,10 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
         for (usize j {0}; j < groupCount; ++j) {
             f32 yOffset {0.0f};
             for (usize i {0}; i < barCount; ++i) {
-                auto const& s {Dataset[i]};
+                auto const& s {Datasets[i]};
                 if (j >= s.Value.size()) { continue; }
 
-                canvas.set_fill_style(get_color(_style.Colors, i));
+                canvas.set_fill_style(s.Color);
 
                 f32 const     yAbs {position_in_yaxis(s.Value[j], chartRect)};
                 f32 const     barHeight {chartRect.bottom() - yAbs};
@@ -262,7 +257,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
                 canvas.rounded_rect({pos, {barWidth, barHeight}}, barRadius);
                 canvas.fill();
                 canvas.set_stroke_width(outlineWidth);
-                canvas.set_stroke_style(get_color(_style.OutlineColors, i));
+                canvas.set_stroke_style(_style.OutlineColor);
                 canvas.stroke();
 
                 yOffset += barHeight;
@@ -271,9 +266,9 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
 
     } else {
         for (usize i {0}; i < barCount; ++i) {
-            canvas.set_fill_style(get_color(_style.Colors, i));
+            auto const& s {Datasets[i]};
+            canvas.set_fill_style(s.Color);
 
-            auto const& s {Dataset[i]};
             usize const valueCount {s.Value.size()};
             f32 const   xOffset {chartRect.left() + (barWidth / barCount * i) + ((columnWidth - barWidth) / 2.0f)};
             for (usize j {0}; j < valueCount; ++j) {
@@ -284,7 +279,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
                 canvas.rounded_rect({pos, {barWidth / static_cast<f32>(barCount), chartRect.bottom() - pos.Y}}, barRadius);
                 canvas.fill();
                 canvas.set_stroke_width(outlineWidth);
-                canvas.set_stroke_style(get_color(_style.OutlineColors, i));
+                canvas.set_stroke_style(_style.OutlineColor);
                 canvas.stroke();
             }
         }
@@ -340,17 +335,17 @@ void marimekko_chart::on_draw_chart(widget_painter& painter, std::vector<string>
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
-    usize const seriesCount {Dataset->size()};
+    usize const seriesCount {Datasets->size()};
     if (seriesCount == 0) { return; }
 
-    usize const valueCount {Dataset->front().Value.size()};
+    usize const valueCount {Datasets->front().Value.size()};
     if (valueCount == 0) { return; }
 
     std::vector<f32> columnTotals(valueCount, 0.0f);
     for (usize j {0}; j < valueCount; ++j) {
         for (usize i {0}; i < seriesCount; ++i) {
-            if (j < Dataset[i].Value.size()) {
-                columnTotals[j] += Dataset[i].Value[j];
+            if (j < Datasets[i].Value.size()) {
+                columnTotals[j] += Datasets[i].Value[j];
             }
         }
     }
@@ -375,7 +370,7 @@ void marimekko_chart::on_draw_chart(widget_painter& painter, std::vector<string>
         f32 const baseline {chartRect.bottom()};
 
         for (usize i {0}; i < seriesCount; ++i) {
-            auto const& s {Dataset[i]};
+            auto const& s {Datasets[i]};
             if (j >= s.Value.size()) { continue; }
 
             f32 const value {s.Value[j]};
@@ -386,12 +381,12 @@ void marimekko_chart::on_draw_chart(widget_painter& painter, std::vector<string>
             point_f const pos {xCursor + ((columnWidth - barWidth) / 2.0f),
                                baseline - (yOffset + height) + ((height - barHeight) / 2.0f)};
 
-            canvas.set_fill_style(get_color(_style.Colors, i));
+            canvas.set_fill_style(s.Color);
             canvas.begin_path();
             canvas.rounded_rect({pos, {barWidth, barHeight}}, barRadius);
             canvas.fill();
             canvas.set_stroke_width(outlineWidth);
-            canvas.set_stroke_style(get_color(_style.OutlineColors, i));
+            canvas.set_stroke_style(_style.OutlineColor);
             canvas.stroke();
 
             yOffset += height;
@@ -429,7 +424,7 @@ void pie_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
     auto&                canvas {painter.canvas()};
 
     f64 total {0.0};
-    for (auto const& s : *Dataset) { total += s.Value; }
+    for (auto const& s : *Datasets) { total += s.Value; }
     if (total == 0.0) { return; }
 
     f32 const  outlineWidth {_style.OutlineSize.calc(rect.width())};
@@ -444,8 +439,8 @@ void pie_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
                                     : outerHalfPad};
 
     f64 angle {0.0};
-    for (usize i {0}; i < Dataset->size(); ++i) {
-        auto const& s {Dataset[i]};
+    for (usize i {0}; i < Datasets->size(); ++i) {
+        auto const& s {Datasets[i]};
         f64 const   fraction {s.Value / total};
         f64 const   fullSweep {fraction * TAU};
         f64 const   outerSweep {std::max(0.0, fullSweep - padAngle)};
@@ -475,10 +470,10 @@ void pie_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
         }
         canvas.close_path();
 
-        canvas.set_fill_style(get_color(_style.Colors, i));
+        canvas.set_fill_style(s.Color);
         canvas.fill();
         canvas.set_stroke_width(outlineWidth);
-        canvas.set_stroke_style(get_color(_style.OutlineColors, i));
+        canvas.set_stroke_style(_style.OutlineColor);
         canvas.stroke();
 
         angle += fullSweep;
@@ -536,10 +531,10 @@ void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> c
 
     f32 const outlineWidth {_style.OutlineSize.calc(chartRect.width())};
 
-    for (usize i {0}; i < Dataset->size(); ++i) {
-        auto const& s {Dataset[i]};
-        canvas.set_fill_style(get_color(_style.Colors, i));
-        canvas.set_stroke_style(get_color(_style.OutlineColors, i));
+    for (usize i {0}; i < Datasets->size(); ++i) {
+        auto const& s {Datasets[i]};
+        canvas.set_fill_style(s.Color);
+        canvas.set_stroke_style(_style.OutlineColor);
         canvas.set_stroke_width(outlineWidth);
 
         canvas.begin_path();
@@ -674,7 +669,7 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
     auto&                canvas {painter.canvas()};
 
     usize axisCount {0};
-    for (auto const& s : *Dataset) { axisCount = std::max(axisCount, s.Value.size()); }
+    for (auto const& s : *Datasets) { axisCount = std::max(axisCount, s.Value.size()); }
     if (axisCount == 0) { return; }
 
     f32 const     labelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
@@ -722,8 +717,8 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
     f32 const lineWidth {_style.LineSize.calc(radius)};
     f32 const outlineWidth {_style.OutlineSize.calc(radius)};
 
-    for (usize i {0}; i < Dataset->size(); ++i) {
-        auto const& s {Dataset[i]};
+    for (usize i {0}; i < Datasets->size(); ++i) {
+        auto const& s {Datasets[i]};
         if (s.Value.empty()) { continue; }
         std::vector<point_f> points;
         for (usize j {0}; j < axisCount; ++j) {
@@ -740,16 +735,16 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
         for (usize j {1}; j < points.size(); ++j) { canvas.line_to(points[j]); }
         canvas.close_path();
 
-        color const c {get_color(_style.Colors, i)};
+        color const c {s.Color};
         if (_style.FillAreaAlpha > 0) {
             canvas.set_fill_style({c.R, c.G, c.B, _style.FillAreaAlpha});
             canvas.fill();
 
-            canvas.set_stroke_style(get_color(_style.OutlineColors, i));
+            canvas.set_stroke_style(_style.OutlineColor);
             canvas.set_stroke_width(outlineWidth);
             canvas.stroke();
         } else {
-            canvas.set_stroke_style(get_color(_style.OutlineColors, i));
+            canvas.set_stroke_style(_style.OutlineColor);
             canvas.set_stroke_width(lineWidth + (outlineWidth * 2));
             canvas.stroke();
 
