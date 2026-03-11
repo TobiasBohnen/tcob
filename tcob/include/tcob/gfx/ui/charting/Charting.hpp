@@ -45,11 +45,25 @@ struct legend_def {
     color       Color;
 };
 
+////////////////////////////////////////////////////////////
+
 enum class marker_type : u8 {
     None,
     Disc,
     Square,
     Triangle
+};
+
+class TCOB_API marker_element {
+public:
+    marker_type Type {marker_type::None};
+    length      Size {5.0f, length::type::Absolute};
+    color       Color {colors::White};
+    bool        Filled {true};
+
+    void lerp(marker_element const& from, marker_element const& to, f64 step);
+
+    auto operator==(marker_element const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////

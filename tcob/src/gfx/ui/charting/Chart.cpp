@@ -71,10 +71,7 @@ void line_chart::style::Transition(style& target, style const& from, style const
     target.LineSize    = helper::lerp(from.LineSize, to.LineSize, step);
     target.SmoothLines = helper::lerp(from.SmoothLines, to.SmoothLines, step);
 
-    target.MarkerType   = helper::lerp(from.MarkerType, to.MarkerType, step);
-    target.MarkerSize   = helper::lerp(from.MarkerSize, to.MarkerSize, step);
-    target.MarkerColor  = helper::lerp(from.MarkerColor, to.MarkerColor, step);
-    target.MarkerFilled = helper::lerp(from.MarkerFilled, to.MarkerFilled, step);
+    target.Marker.lerp(target.Marker, to.Marker, step);
 }
 
 line_chart::line_chart(init const& wi)
@@ -144,12 +141,12 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
         canvas.set_stroke_width(lineWidth);
         canvas.stroke();
 
-        if (_style.MarkerType != marker_type::None) {
-            f32 const markerSize {_style.MarkerSize.calc(chartRect.width())};
+        if (_style.Marker.Type != marker_type::None) {
+            f32 const markerSize {_style.Marker.Size.calc(chartRect.width())};
             for (auto const& p : points) {
                 auto const drawShape {[&] {
                     canvas.begin_path();
-                    switch (_style.MarkerType) {
+                    switch (_style.Marker.Type) {
                     case marker_type::Disc:     canvas.circle(p, markerSize); break;
                     case marker_type::Square:   canvas.rect({p.X - markerSize, p.Y - markerSize, markerSize * 2.0f, markerSize * 2.0f}); break;
                     case marker_type::Triangle: canvas.triangle({p.X, p.Y - markerSize}, {p.X + markerSize, p.Y + markerSize}, {p.X - markerSize, p.Y + markerSize}); break;
@@ -157,9 +154,9 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
                     }
                 }};
 
-                if (_style.MarkerFilled) {
+                if (_style.Marker.Filled) {
                     drawShape();
-                    canvas.set_fill_style(_style.MarkerColor);
+                    canvas.set_fill_style(_style.Marker.Color);
                     canvas.set_stroke_style(get_color(_style.OutlineColors, i));
                     canvas.set_stroke_width(outlineWidth);
                     canvas.fill();
@@ -170,7 +167,7 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
                     canvas.set_stroke_width(markerSize);
                     canvas.stroke();
                     drawShape();
-                    canvas.set_stroke_style(_style.MarkerColor);
+                    canvas.set_stroke_style(_style.Marker.Color);
                     canvas.set_stroke_width(markerSize - outlineWidth);
                     canvas.stroke();
                 }

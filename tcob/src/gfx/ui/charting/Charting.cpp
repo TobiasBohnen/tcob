@@ -16,6 +16,18 @@
 
 namespace tcob::ui::charts {
 
+////////////////////////////////////////////////////////////
+
+void marker_element::lerp(marker_element const& from, marker_element const& to, f64 step)
+{
+    Type   = helper::lerp(from.Type, to.Type, step);
+    Size   = helper::lerp(from.Size, to.Size, step);
+    Color  = helper::lerp(from.Color, to.Color, step);
+    Filled = helper::lerp(from.Filled, to.Filled, step);
+}
+
+////////////////////////////////////////////////////////////
+
 void chart_style::Transition(chart_style& target, chart_style const& from, chart_style const& to, f64 step)
 {
     widget_style::Transition(target, from, to, step);
@@ -31,6 +43,8 @@ void chart_style::Transition(chart_style& target, chart_style const& from, chart
     target.OutlineSize = helper::lerp(from.OutlineSize, to.OutlineSize, step);
 }
 
+////////////////////////////////////////////////////////////
+
 void grid_chart_style::Transition(grid_chart_style& target, grid_chart_style const& from, grid_chart_style const& to, f64 step)
 {
     chart_style::Transition(target, from, to, step);
@@ -38,6 +52,8 @@ void grid_chart_style::Transition(grid_chart_style& target, grid_chart_style con
     target.GridLineSize = helper::lerp(from.GridLineSize, to.GridLineSize, step);
     target.GridColor    = helper::lerp(from.GridColor, to.GridColor, step);
 }
+
+////////////////////////////////////////////////////////////
 
 chart_base::chart_base(init const& wi)
     : widget {wi}
