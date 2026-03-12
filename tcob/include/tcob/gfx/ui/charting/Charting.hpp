@@ -34,13 +34,6 @@ struct axis {
     std::vector<string> CustomLabels;
 };
 
-template <typename T>
-struct dataset {
-    utf8_string Name;
-    T           Value;
-    color       Color {colors::White};
-};
-
 struct legend_def {
     utf8_string Name;
     color       Color;
@@ -48,23 +41,38 @@ struct legend_def {
 
 ////////////////////////////////////////////////////////////
 
-enum class marker_type : u8 {
-    None,
-    Disc,
-    Square,
-    Triangle
+struct marker {
+    enum class type : u8 {
+        None,
+        Disc,
+        Square,
+        Triangle
+    };
+
+    type Type {type::None};
+    bool Filled {true};
 };
 
 class TCOB_API marker_element {
 public:
-    marker_type Type {marker_type::None};
-    length      Size {5.0f, length::type::Absolute};
-    color       Color {colors::White};
-    bool        Filled {true};
+    length Size {5.0f, length::type::Absolute};
+    color  Color {colors::White};
 
     void lerp(marker_element const& from, marker_element const& to, f64 step);
 
     auto operator==(marker_element const& other) const -> bool = default;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+struct dataset {
+    utf8_string Name;
+    T           Value;
+
+    color Color {colors::White};
+
+    marker Marker;
 };
 
 ////////////////////////////////////////////////////////////

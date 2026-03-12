@@ -66,7 +66,7 @@ void line_chart::style::Transition(style& target, style const& from, style const
     target.LineSize    = helper::lerp(from.LineSize, to.LineSize, step);
     target.SmoothLines = helper::lerp(from.SmoothLines, to.SmoothLines, step);
 
-    target.Marker.lerp(target.Marker, to.Marker, step);
+    target.Marker.lerp(from.Marker, to.Marker, step);
 }
 
 line_chart::line_chart(init const& wi)
@@ -136,20 +136,20 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
         canvas.set_stroke_width(lineWidth);
         canvas.stroke();
 
-        if (_style.Marker.Type != marker_type::None) {
+        if (s.Marker.Type != marker::type::None) {
             f32 const markerSize {_style.Marker.Size.calc(chartRect.width())};
             for (auto const& p : points) {
                 auto const drawShape {[&] {
                     canvas.begin_path();
-                    switch (_style.Marker.Type) {
-                    case marker_type::Disc:     canvas.circle(p, markerSize); break;
-                    case marker_type::Square:   canvas.rect({p.X - markerSize, p.Y - markerSize, markerSize * 2.0f, markerSize * 2.0f}); break;
-                    case marker_type::Triangle: canvas.triangle({p.X, p.Y - markerSize}, {p.X + markerSize, p.Y + markerSize}, {p.X - markerSize, p.Y + markerSize}); break;
-                    case marker_type::None:     break;
+                    switch (s.Marker.Type) {
+                    case marker::type::Disc:     canvas.circle(p, markerSize); break;
+                    case marker::type::Square:   canvas.rect({p.X - markerSize, p.Y - markerSize, markerSize * 2.0f, markerSize * 2.0f}); break;
+                    case marker::type::Triangle: canvas.triangle({p.X, p.Y - markerSize}, {p.X + markerSize, p.Y + markerSize}, {p.X - markerSize, p.Y + markerSize}); break;
+                    case marker::type::None:     break;
                     }
                 }};
 
-                if (_style.Marker.Filled) {
+                if (s.Marker.Filled) {
                     drawShape();
                     canvas.set_fill_style(_style.Marker.Color);
                     canvas.set_stroke_style(_style.OutlineColor);

@@ -20,10 +20,8 @@ namespace tcob::ui::charts {
 
 void marker_element::lerp(marker_element const& from, marker_element const& to, f64 step)
 {
-    Type   = helper::lerp(from.Type, to.Type, step);
-    Size   = helper::lerp(from.Size, to.Size, step);
-    Color  = helper::lerp(from.Color, to.Color, step);
-    Filled = helper::lerp(from.Filled, to.Filled, step);
+    Size  = helper::lerp(from.Size, to.Size, step);
+    Color = helper::lerp(from.Color, to.Color, step);
 }
 
 ////////////////////////////////////////////////////////////
