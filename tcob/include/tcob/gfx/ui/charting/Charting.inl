@@ -43,7 +43,8 @@ inline auto chart<T>::legend() const -> std::vector<legend_def>
 
     auto const* style {dynamic_cast<chart_style const*>(current_style())};
     for (usize i {0}; i < Datasets->size() && style; ++i) {
-        retValue.emplace_back(Datasets[i].Name, Datasets[i].Color);
+        auto const& s {Datasets[i]};
+        retValue.emplace_back(s.Name, s.Color, s.Marker);
     }
     return retValue;
 }
@@ -77,33 +78,7 @@ inline void chart<T>::draw_marker(gfx::canvas& canvas, point_f p, dataset<T> con
     color const   markerColor {s.Marker.Color.value_or(s.Color)};
     color const   outlineColor {s.Marker.OutlineColor.value_or(s.OutlineColor)};
 
-    auto const drawShape {[&] {
-        canvas.begin_path();
-        switch (marker.Type) {
-        case marker::type::Disc:     canvas.circle(p, markerSize); break;
-        case marker::type::Square:   canvas.rect({p.X - markerSize, p.Y - markerSize, markerSize * 2.0f, markerSize * 2.0f}); break;
-        case marker::type::Triangle: canvas.triangle({p.X, p.Y - markerSize}, {p.X + markerSize, p.Y + markerSize}, {p.X - markerSize, p.Y + markerSize}); break;
-        case marker::type::None:     break;
-        }
-    }};
-
-    if (marker.Filled) {
-        drawShape();
-        canvas.set_fill_style(markerColor);
-        canvas.set_stroke_style(outlineColor);
-        canvas.set_stroke_width(outlineWidth);
-        canvas.fill();
-        canvas.stroke();
-    } else {
-        drawShape();
-        canvas.set_stroke_style(outlineColor);
-        canvas.set_stroke_width(markerSize);
-        canvas.stroke();
-        drawShape();
-        canvas.set_stroke_style(markerColor);
-        canvas.set_stroke_width(markerSize - outlineWidth);
-        canvas.stroke();
-    }
+    draw_chart_marker(canvas, p, marker, markerColor, markerSize, outlineColor, outlineWidth);
 }
 
 template <typename T>

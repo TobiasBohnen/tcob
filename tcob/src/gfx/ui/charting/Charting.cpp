@@ -10,7 +10,9 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
@@ -94,4 +96,38 @@ auto chart_base::position_in_yaxis(f32 value, rect_f const& bounds) const -> f32
     return bounds.bottom() - (norm * bounds.height());
 }
 
+////////////////////////////////////////////////////////////
+
+void draw_chart_marker(gfx::canvas& canvas, point_f p, marker const& marker, color markerColor, f32 markerSize, color outlineColor, f32 outlineWidth)
+{
+    if (marker.Type == marker::type::None) { return; }
+
+    auto const drawShape {[&] {
+        canvas.begin_path();
+        switch (marker.Type) {
+        case marker::type::Disc:     canvas.circle(p, markerSize); break;
+        case marker::type::Square:   canvas.rect({p.X - markerSize, p.Y - markerSize, markerSize * 2.0f, markerSize * 2.0f}); break;
+        case marker::type::Triangle: canvas.triangle({p.X, p.Y - markerSize}, {p.X + markerSize, p.Y + markerSize}, {p.X - markerSize, p.Y + markerSize}); break;
+        case marker::type::None:     break;
+        }
+    }};
+
+    if (marker.Filled) {
+        drawShape();
+        canvas.set_fill_style(markerColor);
+        canvas.set_stroke_style(outlineColor);
+        canvas.set_stroke_width(outlineWidth);
+        canvas.fill();
+        canvas.stroke();
+    } else {
+        drawShape();
+        canvas.set_stroke_style(outlineColor);
+        canvas.set_stroke_width(markerSize);
+        canvas.stroke();
+        drawShape();
+        canvas.set_stroke_style(markerColor);
+        canvas.set_stroke_width(markerSize - outlineWidth);
+        canvas.stroke();
+    }
+}
 }

@@ -13,6 +13,7 @@
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/charting/Charting.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui::charts {
@@ -39,27 +40,36 @@ void legend::on_draw(widget_painter& painter)
     scoped_scissor const guard {painter, this};
     if (!For) { return; }
     if (!_style.Text.Font) { return; }
-    auto&      canvas {painter.canvas()};
-    auto const legendDefs {(*For)->legend()};
+
+    auto const legendDefs {For->legend()};
     if (legendDefs.empty()) { return; }
+
+    auto& canvas {painter.canvas()};
 
     bool const isVertical {get_orientation() == orientation::Vertical};
     f32 const  itemSize {(isVertical ? rect.height() : rect.width()) / static_cast<f32>(legendDefs.size())};
-    f32 const  markerSize {std::min(isVertical ? rect.width() / 2 : itemSize / 2,
-                                    (isVertical ? itemSize : rect.height()) * 0.6f)};
     point_f    pos {rect.top_left()};
 
-    for (auto const& [name, color] : legendDefs) {
+    f32 const squareSize {std::min(isVertical ? rect.width() / 4.0f : itemSize / 4.0f,
+                                   (isVertical ? itemSize : rect.height()) / 2.0f)};
+    f32 const outlineWidth {std::max(1.0f, squareSize / 10.0f)};
+    f32 const markerSize {std::max(1.0f, squareSize / 5.0f)};
+
+    for (auto const& [name, color, marker] : legendDefs) {
         canvas.set_fill_style(color);
         canvas.begin_path();
-        canvas.rect({{pos.X, pos.Y + (((isVertical ? itemSize : rect.height()) - markerSize) * 0.5f)},
-                     {markerSize, markerSize}});
+        canvas.rect({{pos.X, pos.Y + (((isVertical ? itemSize : rect.height()) - squareSize) / 2.0f)},
+                     {squareSize, squareSize}});
         canvas.fill();
 
+        point_f const markerPos {
+            pos.X + (squareSize / 2.0f),
+            pos.Y + (((isVertical ? itemSize : rect.height()) - squareSize) / 2.0f) + (squareSize / 2.0f)};
+        draw_chart_marker(canvas, markerPos, marker, marker.Color.value_or(color), markerSize, colors::Black, outlineWidth);
+
         rect_f const textBounds {
-            pos.X + markerSize,
-            pos.Y,
-            (isVertical ? rect.width() : itemSize) - markerSize,
+            pos.X + squareSize, pos.Y,
+            (isVertical ? rect.width() : itemSize) - squareSize,
             isVertical ? itemSize : rect.height()};
         painter.draw_text(_style.Text, textBounds, name);
 

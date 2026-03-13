@@ -36,11 +36,6 @@ struct axis {
     std::vector<string> CustomLabels;
 };
 
-struct legend_def {
-    utf8_string Name;
-    color       Color;
-};
-
 ////////////////////////////////////////////////////////////
 
 struct marker {
@@ -69,6 +64,14 @@ struct dataset {
     color OutlineColor {colors::Black};
 
     marker Marker;
+};
+
+////////////////////////////////////////////////////////////
+
+struct legend_def {
+    utf8_string Name;
+    color       Color;
+    marker      Marker;
 };
 
 ////////////////////////////////////////////////////////////
@@ -172,6 +175,9 @@ private:
     rect_f _gridRect;
 };
 
+////////////////////////////////////////////////////////////
+
+TCOB_API void draw_chart_marker(gfx::canvas& canvas, point_f p, marker const& marker, color markerColor, f32 markerSize, color outlineColor, f32 outlineWidth);
 }
 
 #include "Charting.inl"
