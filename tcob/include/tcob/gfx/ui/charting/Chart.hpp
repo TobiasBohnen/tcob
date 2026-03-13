@@ -27,8 +27,6 @@ public:
         length LineSize {3.0f, length::type::Absolute};
         bool   SmoothLines {false};
 
-        marker_element Marker;
-
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
@@ -115,8 +113,6 @@ class TCOB_API scatter_chart : public grid_chart<std::vector<point_f>> {
 public:
     class TCOB_API style : public grid_chart_style {
     public:
-        length PointSize {3.0f, length::type::Absolute};
-
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 

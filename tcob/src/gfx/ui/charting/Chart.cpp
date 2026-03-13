@@ -65,8 +65,6 @@ void line_chart::style::Transition(style& target, style const& from, style const
 
     target.LineSize    = helper::lerp(from.LineSize, to.LineSize, step);
     target.SmoothLines = helper::lerp(from.SmoothLines, to.SmoothLines, step);
-
-    target.Marker.lerp(from.Marker, to.Marker, step);
 }
 
 line_chart::line_chart(init const& wi)
@@ -91,10 +89,12 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
 
     draw_grid(canvas, _style, tickSize, chartRect);
 
+    f32 const   markerSize {_style.MarkerSize.calc(chartRect.width())};
     f32 const   lineWidth {_style.LineSize.calc(rect.width())};
     f32 const   outlineWidth {_style.OutlineSize.calc(rect.width())};
     usize const xCount {x_label_count() > 0 ? x_label_count() : max_x()};
     auto const  cxStep {chartRect.width() / (xCount - 1)};
+
     for (usize i {0}; i < Datasets->size(); ++i) {
         auto const& s {Datasets[i]};
         usize const len {s.Value.size()};
@@ -129,7 +129,7 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
             }
         }
 
-        canvas.set_stroke_style(_style.OutlineColor);
+        canvas.set_stroke_style(s.OutlineColor);
         canvas.set_stroke_width(lineWidth + outlineWidth);
         canvas.stroke();
         canvas.set_stroke_style(s.Color);
@@ -137,35 +137,8 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
         canvas.stroke();
 
         if (s.Marker.Type != marker::type::None) {
-            f32 const markerSize {_style.Marker.Size.calc(chartRect.width())};
             for (auto const& p : points) {
-                auto const drawShape {[&] {
-                    canvas.begin_path();
-                    switch (s.Marker.Type) {
-                    case marker::type::Disc:     canvas.circle(p, markerSize); break;
-                    case marker::type::Square:   canvas.rect({p.X - markerSize, p.Y - markerSize, markerSize * 2.0f, markerSize * 2.0f}); break;
-                    case marker::type::Triangle: canvas.triangle({p.X, p.Y - markerSize}, {p.X + markerSize, p.Y + markerSize}, {p.X - markerSize, p.Y + markerSize}); break;
-                    case marker::type::None:     break;
-                    }
-                }};
-
-                if (s.Marker.Filled) {
-                    drawShape();
-                    canvas.set_fill_style(_style.Marker.Color);
-                    canvas.set_stroke_style(_style.OutlineColor);
-                    canvas.set_stroke_width(outlineWidth);
-                    canvas.fill();
-                    canvas.stroke();
-                } else {
-                    drawShape();
-                    canvas.set_stroke_style(_style.OutlineColor);
-                    canvas.set_stroke_width(markerSize);
-                    canvas.stroke();
-                    drawShape();
-                    canvas.set_stroke_style(_style.Marker.Color);
-                    canvas.set_stroke_width(markerSize - outlineWidth);
-                    canvas.stroke();
-                }
+                draw_marker(canvas, p, s, markerSize, outlineWidth);
             }
         }
     }
@@ -257,7 +230,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
                 canvas.rounded_rect({pos, {barWidth, barHeight}}, barRadius);
                 canvas.fill();
                 canvas.set_stroke_width(outlineWidth);
-                canvas.set_stroke_style(_style.OutlineColor);
+                canvas.set_stroke_style(s.OutlineColor);
                 canvas.stroke();
 
                 yOffset += barHeight;
@@ -279,7 +252,7 @@ void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
                 canvas.rounded_rect({pos, {barWidth / static_cast<f32>(barCount), chartRect.bottom() - pos.Y}}, barRadius);
                 canvas.fill();
                 canvas.set_stroke_width(outlineWidth);
-                canvas.set_stroke_style(_style.OutlineColor);
+                canvas.set_stroke_style(s.OutlineColor);
                 canvas.stroke();
             }
         }
@@ -386,7 +359,7 @@ void marimekko_chart::on_draw_chart(widget_painter& painter, std::vector<string>
             canvas.rounded_rect({pos, {barWidth, barHeight}}, barRadius);
             canvas.fill();
             canvas.set_stroke_width(outlineWidth);
-            canvas.set_stroke_style(_style.OutlineColor);
+            canvas.set_stroke_style(s.OutlineColor);
             canvas.stroke();
 
             yOffset += height;
@@ -473,7 +446,7 @@ void pie_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
         canvas.set_fill_style(s.Color);
         canvas.fill();
         canvas.set_stroke_width(outlineWidth);
-        canvas.set_stroke_style(_style.OutlineColor);
+        canvas.set_stroke_style(s.OutlineColor);
         canvas.stroke();
 
         angle += fullSweep;
@@ -485,8 +458,6 @@ void pie_chart::on_draw_chart(widget_painter& painter, std::vector<string> const
 void scatter_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
     chart_style::Transition(target, from, to, step);
-
-    target.PointSize = helper::lerp(from.PointSize, to.PointSize, step);
 }
 
 scatter_chart::scatter_chart(init const& wi)
@@ -519,11 +490,11 @@ void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> c
     auto&                canvas {painter.canvas()};
 
     f32 const    tickSize {_style.TickSize.calc(rect.width())};
-    f32 const    pointSize {_style.PointSize.calc(rect.width())};
+    f32 const    markerSize {_style.MarkerSize.calc(rect.width())};
     f32 const    xLabelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     f32 const    yLabelWidth {yLabels.empty() ? 0.0f : _style.YLabelWidth.calc(rect.width())};
-    f32 const    leftPad {std::max(yLabelWidth + tickSize + pointSize, xLabelHeight + tickSize)};
-    f32 const    topPad {std::max((xLabelHeight + tickSize + pointSize) / 2.0f, (yLabelWidth + tickSize + pointSize) / 2.0f)};
+    f32 const    leftPad {std::max(yLabelWidth + tickSize + markerSize, xLabelHeight + tickSize)};
+    f32 const    topPad {std::max((xLabelHeight + tickSize + markerSize) / 2.0f, (yLabelWidth + tickSize + markerSize) / 2.0f)};
     rect_f const chartRect {rect.left() + leftPad, rect.top() + topPad,
                             rect.width() - (leftPad * 2.0f), rect.height() - (topPad * 2.5f)};
 
@@ -533,21 +504,14 @@ void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> c
 
     for (usize i {0}; i < Datasets->size(); ++i) {
         auto const& s {Datasets[i]};
-        canvas.set_fill_style(s.Color);
-        canvas.set_stroke_style(_style.OutlineColor);
-        canvas.set_stroke_width(outlineWidth);
-
-        canvas.begin_path();
-        for (auto const& pt : s.Value) {
-            point_f const p {
-                position_in_xaxis(pt.X, chartRect),
-                position_in_yaxis(pt.Y, chartRect)};
-            if (chartRect.contains(p, true)) {
-                canvas.circle(p, pointSize);
+        if (s.Marker.Type != marker::type::None) {
+            for (auto const& pt : s.Value) {
+                point_f const p {position_in_xaxis(pt.X, chartRect), position_in_yaxis(pt.Y, chartRect)};
+                if (chartRect.contains(p, true)) {
+                    draw_marker(canvas, p, s, markerSize, outlineWidth);
+                }
             }
         }
-        canvas.fill();
-        canvas.stroke();
     }
 
     rect_f const xLabelArea {chartRect.left(), rect.bottom() - xLabelHeight, chartRect.width(), xLabelHeight};
@@ -675,6 +639,7 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
     f32 const     labelHeight {xLabels.empty() ? 0.0f : _style.XLabelHeight.calc(rect.height())};
     point_f const center {rect.center()};
     f32 const     radius {(std::min(rect.width(), rect.height()) / 2.0f) - labelHeight};
+    f32 const     markerSize {_style.MarkerSize.calc(radius)};
 
     if (_style.GridLines != grid_line_amount::None) {
         canvas.set_stroke_style(_style.GridColor);
@@ -740,17 +705,23 @@ void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> con
             canvas.set_fill_style({c.R, c.G, c.B, _style.FillAreaAlpha});
             canvas.fill();
 
-            canvas.set_stroke_style(_style.OutlineColor);
+            canvas.set_stroke_style(s.OutlineColor);
             canvas.set_stroke_width(outlineWidth);
             canvas.stroke();
         } else {
-            canvas.set_stroke_style(_style.OutlineColor);
+            canvas.set_stroke_style(s.OutlineColor);
             canvas.set_stroke_width(lineWidth + (outlineWidth * 2));
             canvas.stroke();
 
             canvas.set_stroke_style(c);
             canvas.set_stroke_width(lineWidth);
             canvas.stroke();
+        }
+
+        if (s.Marker.Type != marker::type::None) {
+            for (auto const& p : points) {
+                draw_marker(canvas, p, s, markerSize, outlineWidth);
+            }
         }
     }
 

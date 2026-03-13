@@ -6,10 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <optional>
 #include <utility>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Canvas.hpp"
@@ -51,16 +53,9 @@ struct marker {
 
     type Type {type::None};
     bool Filled {true};
-};
 
-class TCOB_API marker_element {
-public:
-    length Size {5.0f, length::type::Absolute};
-    color  Color {colors::White};
-
-    void lerp(marker_element const& from, marker_element const& to, f64 step);
-
-    auto operator==(marker_element const& other) const -> bool = default;
+    std::optional<color> Color;
+    std::optional<color> OutlineColor;
 };
 
 ////////////////////////////////////////////////////////////
@@ -71,6 +66,7 @@ struct dataset {
     T           Value;
 
     color Color {colors::White};
+    color OutlineColor {colors::Black};
 
     marker Marker;
 };
@@ -85,8 +81,9 @@ public:
     text_element YAxisText;
     length       YLabelWidth {0.05f, length::type::Relative};
 
-    color  OutlineColor {colors::Black};
     length OutlineSize {1.0f, length::type::Absolute};
+
+    length MarkerSize {5.0f, length::type::Absolute};
 
     static void Transition(chart_style& target, chart_style const& from, chart_style const& to, f64 step);
 };
@@ -116,7 +113,9 @@ private:
 template <typename T>
 class chart : public chart_base {
 public:
-    prop<std::vector<dataset<T>>> Datasets;
+    using dataset_type = std::vector<dataset<T>>;
+
+    prop<dataset_type> Datasets;
 
     auto legend() const -> std::vector<legend_def> override;
 
@@ -126,6 +125,8 @@ protected:
     void on_draw(widget_painter& painter) final;
 
     void virtual on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels) = 0;
+
+    void draw_marker(gfx::canvas& canvas, point_f p, dataset<T> const& s, f32 markerSize, f32 outlineWidth);
 
     auto max_x() const -> usize;
 

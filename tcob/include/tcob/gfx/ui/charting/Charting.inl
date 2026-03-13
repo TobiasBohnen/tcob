@@ -10,6 +10,8 @@
 #include <format>
 #include <vector>
 
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -66,6 +68,42 @@ inline void chart<T>::on_draw(widget_painter& painter)
     }};
 
     on_draw_chart(painter, getLabels(XAxis), getLabels(YAxis));
+}
+
+template <typename T>
+inline void chart<T>::draw_marker(gfx::canvas& canvas, point_f p, dataset<T> const& s, f32 markerSize, f32 outlineWidth)
+{
+    marker const& marker {s.Marker};
+    color const   markerColor {s.Marker.Color.value_or(s.Color)};
+    color const   outlineColor {s.Marker.OutlineColor.value_or(s.OutlineColor)};
+
+    auto const drawShape {[&] {
+        canvas.begin_path();
+        switch (marker.Type) {
+        case marker::type::Disc:     canvas.circle(p, markerSize); break;
+        case marker::type::Square:   canvas.rect({p.X - markerSize, p.Y - markerSize, markerSize * 2.0f, markerSize * 2.0f}); break;
+        case marker::type::Triangle: canvas.triangle({p.X, p.Y - markerSize}, {p.X + markerSize, p.Y + markerSize}, {p.X - markerSize, p.Y + markerSize}); break;
+        case marker::type::None:     break;
+        }
+    }};
+
+    if (marker.Filled) {
+        drawShape();
+        canvas.set_fill_style(markerColor);
+        canvas.set_stroke_style(outlineColor);
+        canvas.set_stroke_width(outlineWidth);
+        canvas.fill();
+        canvas.stroke();
+    } else {
+        drawShape();
+        canvas.set_stroke_style(outlineColor);
+        canvas.set_stroke_width(markerSize);
+        canvas.stroke();
+        drawShape();
+        canvas.set_stroke_style(markerColor);
+        canvas.set_stroke_width(markerSize - outlineWidth);
+        canvas.stroke();
+    }
 }
 
 template <typename T>

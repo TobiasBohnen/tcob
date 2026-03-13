@@ -18,14 +18,6 @@ namespace tcob::ui::charts {
 
 ////////////////////////////////////////////////////////////
 
-void marker_element::lerp(marker_element const& from, marker_element const& to, f64 step)
-{
-    Size  = helper::lerp(from.Size, to.Size, step);
-    Color = helper::lerp(from.Color, to.Color, step);
-}
-
-////////////////////////////////////////////////////////////
-
 void chart_style::Transition(chart_style& target, chart_style const& from, chart_style const& to, f64 step)
 {
     widget_style::Transition(target, from, to, step);
@@ -36,6 +28,8 @@ void chart_style::Transition(chart_style& target, chart_style const& from, chart
     target.YLabelWidth = helper::lerp(from.YLabelWidth, to.YLabelWidth, step);
 
     target.OutlineSize = helper::lerp(from.OutlineSize, to.OutlineSize, step);
+
+    target.MarkerSize = helper::lerp(from.MarkerSize, to.MarkerSize, step);
 }
 
 ////////////////////////////////////////////////////////////
@@ -44,8 +38,13 @@ void grid_chart_style::Transition(grid_chart_style& target, grid_chart_style con
 {
     chart_style::Transition(target, from, to, step);
 
+    target.HorizontalGridLines = helper::lerp(from.HorizontalGridLines, to.HorizontalGridLines, step);
+    target.VerticalGridLines   = helper::lerp(from.VerticalGridLines, to.VerticalGridLines, step);
+
     target.GridLineSize = helper::lerp(from.GridLineSize, to.GridLineSize, step);
     target.GridColor    = helper::lerp(from.GridColor, to.GridColor, step);
+
+    target.TickSize = helper::lerp(from.TickSize, to.TickSize, step);
 }
 
 ////////////////////////////////////////////////////////////
