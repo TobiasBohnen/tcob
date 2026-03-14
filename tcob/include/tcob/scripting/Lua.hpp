@@ -143,20 +143,20 @@ struct debug_mask {
 class TCOB_API debug {
 public:
     struct info {
-        string Name;                      /* (n) */
-        string What;                      /* (S) */
-        string Source;                    /* (S) */
-        i32    CurrentLine {0};           /* (l) */
-        i32    LineDefined {0};           /* (S) */
-        i32    LastLineDefined {0};       /* (S) */
-        string NameWhat;                  /* (n) */
-        u8     UpvalueCount {0};          /* (u) number of upvalues */
-        u8     ParameterCount {0};        /* (u) number of parameters */
-        bool   IsVarArg {false};          /* (u) */
-        bool   IsTailCall {false};        /* (t) */
-        i32    FirstTransfer {0};         /* (r) index of first value transferred */
-        i32    TransferredValueCount {0}; /* (r) number of transferred values */
-        string ShortSource;               /* (S) */
+        string_view Name;                      /* (n) */
+        string_view What;                      /* (S) */
+        string_view Source;                    /* (S) */
+        i32         CurrentLine {0};           /* (l) */
+        i32         LineDefined {0};           /* (S) */
+        i32         LastLineDefined {0};       /* (S) */
+        string_view NameWhat;                  /* (n) */
+        u8          UpvalueCount {0};          /* (u) number of upvalues */
+        u8          ParameterCount {0};        /* (u) number of parameters */
+        bool        IsVarArg {false};          /* (u) */
+        bool        IsTailCall {false};        /* (t) */
+        i32         FirstTransfer {0};         /* (r) index of first value transferred */
+        i32         TransferredValueCount {0}; /* (r) number of transferred values */
+        string_view ShortSource;               /* (S) */
     };
 
     debug(state_view* view, lua_Debug* ar);
