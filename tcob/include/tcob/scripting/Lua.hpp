@@ -254,7 +254,6 @@ public:
     auto get_table(i32 idx) const -> type;
     void set_table(i32 idx) const;
     void create_table(i32 narr, i32 nrec) const;
-    void new_table() const;
 
     auto get_metatable(i32 objindex) const -> bool;
     void get_metatable(string const& tableName) const;

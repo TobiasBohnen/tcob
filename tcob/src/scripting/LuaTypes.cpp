@@ -117,7 +117,7 @@ table::table() = default;
 table::table(state_view view)
 {
     auto const guard {view.create_scoped_stack()};
-    view.new_table();
+    view.create_table(0, 0);
     acquire(view, -1);
 }
 
@@ -144,7 +144,7 @@ auto table::create_or_get_metatable() const -> table
 
     push_self();
     if (!view.get_metatable(-1)) {
-        view.new_table();
+        view.create_table(0, 0);
         retValue.acquire(view, -1);
         view.set_metatable(-2);
     }
@@ -170,9 +170,9 @@ auto table::Create(state_view view) -> table
     return table {view};
 }
 
-auto table::PushNew(state_view view) -> table
+auto table::PushNew(state_view view, i32 narr, i32 nrec) -> table
 {
-    view.new_table();
+    view.create_table(narr, nrec);
     return table {view, -1};
 }
 

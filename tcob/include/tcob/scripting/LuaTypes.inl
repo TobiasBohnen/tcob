@@ -157,7 +157,7 @@ inline void table::set(state_view view, auto&& key, auto&&... keysOrValue) const
         view.get_table(-2);
         table lt {};
         if (!view.is_table(-1)) { // set new nested table
-            view.new_table();
+            view.create_table(0, 0);
             lt.acquire(view, -1);
             set(view, key, lt);
         } else {

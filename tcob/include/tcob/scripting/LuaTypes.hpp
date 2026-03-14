@@ -83,7 +83,7 @@ public:
     void dump(io::ostream& stream) const;
 
     static auto Create(state_view view) -> table;
-    static auto PushNew(state_view view) -> table;
+    static auto PushNew(state_view view, i32 narr = 0, i32 nrec = 0) -> table;
     static auto Acquire(state_view view, i32 idx) -> table;
 
 private:

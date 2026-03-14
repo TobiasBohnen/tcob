@@ -346,11 +346,6 @@ void state_view::set_metatable(i32 idx) const
     lua_setmetatable(_state, idx);
 }
 
-void state_view::new_table() const
-{
-    lua_newtable(_state);
-}
-
 void state_view::create_table(i32 narr, i32 nrec) const
 {
     lua_createtable(_state, narr, nrec);

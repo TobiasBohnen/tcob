@@ -1052,7 +1052,7 @@ public:
 
     static void To(state_view view, T const& value)
     {
-        table tab {table::PushNew(view)};
+        table tab {table::PushNew(view, 0, std::tuple_size_v<decltype(Members)>)};
 
         std::apply([&](auto&&... m) { (m.get(tab[m.primary_name()], value), ...); }, Members);
     }
