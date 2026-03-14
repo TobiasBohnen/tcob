@@ -727,6 +727,11 @@ struct converter<string_view> {
 
 template <>
 struct converter<std::nullptr_t> {
+    static auto From(state_view view, i32& idx, std::nullptr_t&) -> bool
+    {
+        return view.is_nil(idx++);
+    }
+
     static void To(state_view view, std::nullptr_t const&)
     {
         view.push_nil();
@@ -998,7 +1003,7 @@ struct converter<std::expected<T, error_code>> {
             base_converter<T>::To(view, *value);
         } else {
             view.push_nil();
-            view.push_string(tcob::detail::magic_enum_reduced::enum_to_string(value.error()));
+            view.push_lstring(tcob::detail::magic_enum_reduced::enum_to_string(value.error()));
         }
     }
 };

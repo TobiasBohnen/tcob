@@ -64,6 +64,11 @@ auto debug::GetMask(debug_mask mask) -> i32
     return retValue;
 }
 
+auto debug::view() const -> state_view&
+{
+    return *_view;
+}
+
 ////////////////////////////////////////////////////////////
 
 scoped_stack::scoped_stack(lua_State* l)

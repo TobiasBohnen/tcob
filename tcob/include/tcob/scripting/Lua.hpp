@@ -165,6 +165,8 @@ public:
 
     static auto GetMask(debug_mask mask) -> i32;
 
+    auto view() const -> state_view&;
+
 private:
     state_view* _view;
     lua_Debug*  _ar;
