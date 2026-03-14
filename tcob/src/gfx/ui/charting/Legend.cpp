@@ -65,7 +65,7 @@ void legend::on_draw(widget_painter& painter)
         point_f const markerPos {
             pos.X + (squareSize / 2.0f),
             pos.Y + (((isVertical ? itemSize : rect.height()) - squareSize) / 2.0f) + (squareSize / 2.0f)};
-        draw_chart_marker(canvas, markerPos, marker, marker.Color.value_or(color), markerSize, colors::Black, outlineWidth);
+        draw_chart_marker(canvas, markerPos, marker, marker.Color.value_or(color), markerSize, marker.OutlineColor.value_or(colors::Black), outlineWidth);
 
         rect_f const textBounds {
             pos.X + squareSize, pos.Y,
