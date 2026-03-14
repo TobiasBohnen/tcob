@@ -994,7 +994,12 @@ struct converter<std::expected<T, error_code>> {
 
     static void To(state_view view, std::expected<T, error_code> const& value)
     {
-        base_converter<T>::To(view, value.value());
+        if (value) {
+            base_converter<T>::To(view, *value);
+        } else {
+            view.push_nil();
+            view.push_string(tcob::detail::magic_enum_reduced::enum_to_string(value.error()));
+        }
     }
 };
 
