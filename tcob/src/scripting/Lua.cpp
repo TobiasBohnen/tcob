@@ -207,6 +207,11 @@ auto state_view::get_type(i32 idx) const -> type
     return GetType(lua_type(_state, idx));
 }
 
+auto state_view::type_name(i32 idx) const -> string
+{
+    return lua_typename(_state, lua_type(_state, idx));
+}
+
 auto state_view::get_top() const -> i32
 {
     return lua_gettop(_state);

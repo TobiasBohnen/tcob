@@ -226,6 +226,7 @@ public:
     auto to_userdata(i32 idx) const -> void*;
 
     auto get_type(i32 idx) const -> type;
+    auto type_name(i32 idx) const -> string;
 
     auto get_top() const -> i32;
 
