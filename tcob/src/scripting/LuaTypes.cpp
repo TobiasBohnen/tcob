@@ -192,11 +192,8 @@ void table::dump(io::ostream& stream) const
 void table::write_to_stream(io::ostream& stream, usize indent) const
 {
     auto const view {get_view()};
-
-    string ind1(indent, ' ');
-    string ind2(indent + 2, ' ');
-
-    stream << "{" << '\n';
+    string     ind1(indent, ' ');
+    string     ind2(indent + 2, ' ');
 
     std::vector<std::variant<i64, string>> keys;
     view.push_nil();
@@ -207,64 +204,83 @@ void table::write_to_stream(io::ostream& stream, usize indent) const
         } else if (view.is_string(-1)) {
             keys.emplace_back(view.to_string(-1));
         }
-
         view.pop(2);
     }
     std::ranges::sort(keys);
 
-    for (auto const& key : keys) {
-        // push key
-        if (auto const* arg0 {std::get_if<string>(&key)}) {
-            view.push_string(*arg0);
-        } else if (auto const* arg1 {std::get_if<i64>(&key)}) {
-            view.push_integer(*arg1);
+    bool isArray {!keys.empty()};
+    for (usize i {0}; i < keys.size() && isArray; ++i) {
+        if (auto const* arg {std::get_if<i64>(&keys[i])}) {
+            if (*arg != static_cast<i64>(i + 1)) { isArray = false; }
+        } else {
+            isArray = false;
         }
-
-        view.raw_get(-2); // get value
-
-        type type {view.get_type(-1)};
-        switch (type) {
-        case type::Nil:
-        case type::LightUserdata:
-        case type::Function:
-        case type::Userdata:
-        case type::Thread:
-            view.pop(1);
-            continue;
-        default:
-            if (std::holds_alternative<string>(key)) {
-                stream << ind2 << std::get<string>(key) << " = ";
-            } else if (std::holds_alternative<i64>(key)) {
-                stream << ind2;
-            }
-            break;
-        }
-
-        string val;
-        switch (type) {
-        case type::Boolean:
-            val = view.to_bool(-1) ? "true" : "false";
-            break;
-        case type::Number:
-            val = view.to_string(-1);
-            break;
-        case type::String:
-            val = "\"" + string(view.to_string(-1)) + "\"";
-            break;
-        case type::Table:
-            view.push_value(-1);
-            write_to_stream(stream, indent + 2);
-            break;
-        default:
-            break;
-        }
-        stream << val << "," << '\n';
-
-        view.pop(1);
     }
 
-    view.pop(1);
-    stream << ind1 << "}";
+    if (isArray) {
+        stream << "{";
+        for (usize i {0}; i < keys.size(); ++i) {
+            view.push_integer(std::get<i64>(keys[i]));
+            view.raw_get(-2);
+            string val;
+            switch (view.get_type(-1)) {
+            case type::Boolean: val = view.to_bool(-1) ? "true" : "false"; break;
+            case type::Number:  val = view.to_string(-1); break;
+            case type::String:  val = "\"" + string(view.to_string(-1)) + "\""; break;
+            case type::Table:
+                view.push_value(-1);
+                write_to_stream(stream, indent);
+                break;
+            default: break;
+            }
+            stream << val;
+            if (i + 1 < keys.size()) { stream << ", "; }
+            view.pop(1);
+        }
+        view.pop(1);
+        stream << "}";
+
+    } else {
+        stream << "{" << '\n';
+        for (auto const& key : keys) {
+            if (auto const* arg0 {std::get_if<string>(&key)}) {
+                view.push_string(*arg0);
+            } else if (auto const* arg1 {std::get_if<i64>(&key)}) {
+                view.push_integer(*arg1);
+            }
+            view.raw_get(-2);
+            type type {view.get_type(-1)};
+            switch (type) {
+            case type::Nil:
+            case type::LightUserdata:
+            case type::Function:
+            case type::Userdata:
+            case type::Thread:        view.pop(1); continue;
+            default:
+                if (std::holds_alternative<string>(key)) {
+                    stream << ind2 << std::get<string>(key) << " = ";
+                } else if (std::holds_alternative<i64>(key)) {
+                    stream << ind2;
+                }
+                break;
+            }
+            string val;
+            switch (type) {
+            case type::Boolean: val = view.to_bool(-1) ? "true" : "false"; break;
+            case type::Number:  val = view.to_string(-1); break;
+            case type::String:  val = "\"" + string(view.to_string(-1)) + "\""; break;
+            case type::Table:
+                view.push_value(-1);
+                write_to_stream(stream, indent + 2);
+                break;
+            default: break;
+            }
+            stream << val << "," << '\n';
+            view.pop(1);
+        }
+        view.pop(1);
+        stream << ind1 << "}";
+    }
 }
 
 ////////////////////////////////////////////////////////////
