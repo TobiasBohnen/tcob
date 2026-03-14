@@ -25,23 +25,28 @@ namespace tcob::scripting {
 
 debug::debug(state_view* view, lua_Debug* ar)
     : Event {static_cast<debug_event>(ar->event)}
-    , Name {ar->name != nullptr ? ar->name : ""}
-    , What {ar->what != nullptr ? ar->what : ""}
-    , Source {ar->source != nullptr ? ar->source : ""}
-    , CurrentLine {ar->currentline}
-    , LineDefined {ar->linedefined}
-    , LastLineDefined {ar->lastlinedefined}
-    , NameWhat {ar->namewhat != nullptr ? ar->namewhat : ""}
-    , UpvalueCount {ar->nups}
-    , ParameterCount {ar->nparams}
-    , IsVarArg {ar->isvararg != 0}
-    , IsTailCall {ar->istailcall != 0}
-    , FirstTransfer {ar->ftransfer}
-    , TransferredValueCount {ar->ntransfer}
-    , ShortSource {ar->short_src}
     , _view {view}
     , _ar {ar}
 {
+}
+
+auto debug::get_info() const -> info
+{
+    _view->get_info(_ar);
+    return {.Name                  = {_ar->name != nullptr ? _ar->name : ""},
+            .What                  = {_ar->what != nullptr ? _ar->what : ""},
+            .Source                = {_ar->source != nullptr ? _ar->source : ""},
+            .CurrentLine           = _ar->currentline,
+            .LineDefined           = _ar->linedefined,
+            .LastLineDefined       = _ar->lastlinedefined,
+            .NameWhat              = {_ar->namewhat != nullptr ? _ar->namewhat : ""},
+            .UpvalueCount          = _ar->nups,
+            .ParameterCount        = _ar->nparams,
+            .IsVarArg              = _ar->isvararg != 0,
+            .IsTailCall            = _ar->istailcall != 0,
+            .FirstTransfer         = _ar->ftransfer,
+            .TransferredValueCount = _ar->ntransfer,
+            .ShortSource           = {_ar->short_src}};
 }
 
 auto debug::get_local(i32 n) const -> string
@@ -561,6 +566,11 @@ void state_view::set_hook(lua_Hook func, i32 mask, i32 count) const
 void state_view::get_info(lua_Debug* ar) const
 {
     lua_getinfo(_state, "Slutnr", ar);
+}
+
+auto state_view::get_extraspace() const -> void*
+{
+    return lua_getextraspace(_state);
 }
 
 auto state_view::gc(i32 what, i32 a, [[maybe_unused]] i32 b, [[maybe_unused]] i32 c) const -> i32

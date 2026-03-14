@@ -142,23 +142,28 @@ struct debug_mask {
 
 class TCOB_API debug {
 public:
+    struct info {
+        string Name;                      /* (n) */
+        string What;                      /* (S) */
+        string Source;                    /* (S) */
+        i32    CurrentLine {0};           /* (l) */
+        i32    LineDefined {0};           /* (S) */
+        i32    LastLineDefined {0};       /* (S) */
+        string NameWhat;                  /* (n) */
+        u8     UpvalueCount {0};          /* (u) number of upvalues */
+        u8     ParameterCount {0};        /* (u) number of parameters */
+        bool   IsVarArg {false};          /* (u) */
+        bool   IsTailCall {false};        /* (t) */
+        i32    FirstTransfer {0};         /* (r) index of first value transferred */
+        i32    TransferredValueCount {0}; /* (r) number of transferred values */
+        string ShortSource;               /* (S) */
+    };
+
     debug(state_view* view, lua_Debug* ar);
 
     debug_event Event {};
-    string      Name;                      /* (n) */
-    string      What;                      /* (S) */
-    string      Source;                    /* (S) */
-    i32         CurrentLine {0};           /* (l) */
-    i32         LineDefined {0};           /* (S) */
-    i32         LastLineDefined {0};       /* (S) */
-    string      NameWhat;                  /* (n) */
-    u8          UpvalueCount {0};          /* (u) number of upvalues */
-    u8          ParameterCount {0};        /* (u) number of parameters */
-    bool        IsVarArg {false};          /* (u) */
-    bool        IsTailCall {false};        /* (t) */
-    i32         FirstTransfer {0};         /* (r) index of first value transferred */
-    i32         TransferredValueCount {0}; /* (r) number of transferred values */
-    string      ShortSource;               /* (S) */
+
+    auto get_info() const -> info;
 
     auto get_local(i32 n) const -> string;
     auto set_local(i32 n) const -> string;
@@ -309,6 +314,8 @@ public:
 
     void set_hook(lua_Hook func, i32 mask, i32 count) const;
     void get_info(lua_Debug* ar) const;
+
+    auto get_extraspace() const -> void*;
 
     auto gc(i32 what, i32 a, i32 b, i32 c) const -> i32;
 

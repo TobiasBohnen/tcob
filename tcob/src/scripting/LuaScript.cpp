@@ -30,15 +30,9 @@ static void Warn(void* ud, char const* msg, int toCont)
 static void Hook(lua_State* l, lua_Debug* ar)
 {
     state_view ls {l};
-    auto const guard {ls.create_scoped_stack()};
-
-    ls.get_metatable("_tcob");
-    table lt {table::Acquire(ls, -1)};
-    if (lt.has("_hook")) {
-        ls.get_info(ar);
+    auto*      hook {*reinterpret_cast<script::HookFunc**>(ls.get_extraspace())};
+    if (hook) {
         debug dbg {&ls, ar};
-
-        auto* hook {reinterpret_cast<script::HookFunc*>(lt["_hook"].as<void*>())};
         (*hook)(dbg);
     }
 }
@@ -169,20 +163,15 @@ void script::register_searcher()
 
 void script::set_hook(HookFunc&& func, debug_mask mask)
 {
-    auto const guard {_view.create_scoped_stack()};
-
-    _view.new_metatable("_tcob");
-    i32 const tableIdx {_view.get_top()};
-
-    _view.push_convert("_hook");
-    _hookFunc = std::move(func);
-    _view.push_convert(reinterpret_cast<void*>(&_hookFunc));
-    _view.set_table(tableIdx);
+    _hookFunc                                             = std::move(func);
+    *reinterpret_cast<HookFunc**>(_view.get_extraspace()) = &_hookFunc;
     _view.set_hook(&Hook, debug::GetMask(mask), 1);
 }
 
 void script::remove_hook()
 {
+    *reinterpret_cast<HookFunc**>(_view.get_extraspace()) = nullptr;
+    _hookFunc                                             = nullptr;
     _view.set_hook(nullptr, 0, 0);
 }
 
