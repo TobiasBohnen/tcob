@@ -154,6 +154,7 @@
 #include <tcob/gfx/ui/widgets/TextBox.hpp>
 #include <tcob/gfx/ui/widgets/Toggle.hpp>
 #include <tcob/gfx/ui/widgets/Tooltip.hpp>
+#include <tcob/gfx/ui/widgets/TreeView.hpp>
 #include <tcob/gfx/ui/widgets/VScrollWidget.hpp>
 #include <tcob/gfx/ui/widgets/Widget.hpp>
 #include <tcob/gfx/ui/widgets/WidgetContainer.hpp>

@@ -44,6 +44,7 @@ class spinner;
 class terminal;
 class text_box;
 class toggle;
+class tree_view;
 
 // displays
 class dot_matrix_display;

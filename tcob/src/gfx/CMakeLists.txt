@@ -68,7 +68,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Label.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/ListBox.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Panel.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Tooltip.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Progressbar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Radiobutton.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Slider.cpp
@@ -77,6 +76,8 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Terminal.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/TextBox.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Toggle.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Tooltip.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/TreeView.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/VScrollWidget.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Widget.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/WidgetContainer.cpp
@@ -159,7 +160,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/ListBox.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Panel.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Panel.inl
-    ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Tooltip.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Progressbar.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Radiobutton.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Slider.hpp
@@ -169,6 +169,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Terminal.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/TextBox.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Toggle.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Tooltip.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/TreeView.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/VScrollWidget.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Widget.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Widget.inl

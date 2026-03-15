@@ -30,7 +30,8 @@ void grid_view::style::Transition(style& target, style const& from, style const&
 {
     vscroll_widget::style::Transition(target, from, to, step);
 
-    target.MaxVisibleRows = helper::lerp(from.MaxVisibleRows, to.MaxVisibleRows, step);
+    target.AutoSizeColumns = helper::lerp(from.AutoSizeColumns, to.AutoSizeColumns, step);
+    target.MaxVisibleRows  = helper::lerp(from.MaxVisibleRows, to.MaxVisibleRows, step);
 }
 
 grid_view::grid_view(init const& wi)
