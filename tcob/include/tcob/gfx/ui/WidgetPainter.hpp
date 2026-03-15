@@ -16,6 +16,7 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -51,7 +52,7 @@ public:
 
     auto draw_bar(bar_element const& element, rect_f const& rect, bar_element::context const& barCtx) -> rect_f;
     auto draw_thumb(thumb_element const& element, rect_f const& rect, thumb_element::context const& thumbCtx) -> rect_f;
-    auto draw_nav_arrow(nav_arrow_element const& element, rect_f const& rect, direction dir) -> rect_f;
+    auto draw_nav_arrow(nav_arrow_element const& element, rect_f const& rect, direction dir, gfx::horizontal_alignment alignment) -> rect_f;
 
     auto canvas() -> gfx::canvas&;
 

@@ -11,6 +11,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -66,10 +67,10 @@ void spinner::on_draw(widget_painter& painter)
 
     rect_f incRect {rect};
     incRect.Size.Height /= 2;
-    _rectCache.first = painter.draw_nav_arrow(incArrowStyle.NavArrow, incRect, direction::Up);
+    _rectCache.first = painter.draw_nav_arrow(incArrowStyle.NavArrow, incRect, direction::Up, gfx::horizontal_alignment::Right);
     rect_f decRect {incRect};
     decRect.Position.Y += decRect.height();
-    _rectCache.second = painter.draw_nav_arrow(decArrowStyle.NavArrow, decRect, direction::Down);
+    _rectCache.second = painter.draw_nav_arrow(decArrowStyle.NavArrow, decRect, direction::Down, gfx::horizontal_alignment::Right);
 
     // text
     if (_style.Text.Font) {

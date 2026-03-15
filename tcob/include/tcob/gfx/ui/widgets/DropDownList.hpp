@@ -27,13 +27,13 @@ class TCOB_API drop_down_list : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
+        utf8_string NavArrowClass {"nav_arrows"};
+        utf8_string ItemClass {"list_items"};
+
         text_element Text;
 
-        utf8_string NavArrowClass {"nav_arrows"};
-
-        utf8_string ItemClass {"list_items"};
-        length      ItemHeight {0.20f, length::type::Relative};
-        f32         MaxVisibleItems {5};
+        length ItemHeight {0.20f, length::type::Relative};
+        f32    MaxVisibleItems {5};
 
         scrollbar_element VScrollBar;
 

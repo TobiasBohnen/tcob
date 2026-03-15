@@ -24,8 +24,9 @@ class TCOB_API spinner : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
+        utf8_string NavArrowClass {"nav_arrows"};
+
         text_element Text;
-        utf8_string  NavArrowClass {"nav_arrows"};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };

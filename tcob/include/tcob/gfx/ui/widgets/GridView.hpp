@@ -28,10 +28,11 @@ class TCOB_API grid_view : public vscroll_widget {
 public:
     class TCOB_API style : public vscroll_widget::style {
     public:
-        bool                     AutoSizeColumns {true};
         utf8_string              HeaderItemClass {"header_items"};
         std::vector<utf8_string> RowItemClasses {"row_items"};
-        f32                      MaxVisibleRows {5};
+
+        bool AutoSizeColumns {true};
+        f32  MaxVisibleRows {5};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };

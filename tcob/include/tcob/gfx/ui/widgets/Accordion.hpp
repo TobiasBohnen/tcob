@@ -29,7 +29,8 @@ class TCOB_API accordion : public widget_container {
 public:
     class TCOB_API style : public widget_style {
     public:
-        utf8_string  SectionItemClass {"section_items"};
+        utf8_string SectionItemClass {"section_items"};
+
         length       SectionBarHeight {0.10f, length::type::Relative};
         milliseconds ExpandDuration {0};
 

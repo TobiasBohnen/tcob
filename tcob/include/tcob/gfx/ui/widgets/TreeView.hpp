@@ -26,10 +26,11 @@ class TCOB_API tree_view : public vscroll_widget {
 public:
     class TCOB_API style : public vscroll_widget::style {
     public:
-        utf8_string ItemClass {"tree_items"};
-        utf8_string NavArrowClass {"tree_nav_arrows"};
-        f32         MaxVisibleRows {10};
-        length      IndentSize {16, length::type::Absolute};
+        std::vector<utf8_string> ItemClasses {"tree_items"};
+        utf8_string              NavArrowClass {"tree_nav_arrows"};
+
+        f32    MaxVisibleRows {10};
+        length IndentSize {16, length::type::Absolute};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };

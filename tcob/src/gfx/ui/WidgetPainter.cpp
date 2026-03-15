@@ -413,12 +413,16 @@ auto widget_painter::draw_thumb(thumb_element const& element, rect_f const& rect
     return retValue;
 }
 
-auto widget_painter::draw_nav_arrow(nav_arrow_element const& element, rect_f const& rect, direction dir) -> rect_f
+auto widget_painter::draw_nav_arrow(nav_arrow_element const& element, rect_f const& rect, direction dir, gfx::horizontal_alignment alignment) -> rect_f
 {
     auto const guard {gfx::scoped_canvas_state {_canvas}};
 
-    rect_f retValue {element.calc(rect)};
-    do_bordered_rect(retValue, dir == direction::Up ? element.UpBackground : element.DownBackground, element.Border);
+    bool const up {dir == direction::Up};
+    bool const left {dir == direction::Left};
+    bool const vert {dir == direction::Up || dir == direction::Down};
+
+    rect_f retValue {element.calc(rect, alignment)};
+    do_bordered_rect(retValue, (up || left) ? element.UpBackground : element.DownBackground, element.Border);
     retValue -= element.Border.thickness();
 
     rect_f arrowRect {retValue};
@@ -432,9 +436,6 @@ auto widget_painter::draw_nav_arrow(nav_arrow_element const& element, rect_f con
     auto const [cx, cy] {arrowRect.center()};
     auto const [l, t] {arrowRect.top_left()};
     auto const [r, b] {arrowRect.bottom_right()};
-    bool const up {dir == direction::Up};
-    bool const left {dir == direction::Left};
-    bool const vert {dir == direction::Up || dir == direction::Down};
 
     switch (element.Type) {
     case nav_arrow_type::Triangle: {

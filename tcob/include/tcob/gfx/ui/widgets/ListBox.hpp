@@ -24,7 +24,8 @@ public:
     class TCOB_API style : public vscroll_widget::style {
     public:
         utf8_string ItemClass {"list_items"};
-        f32         MaxVisibleItems {5};
+
+        f32 MaxVisibleItems {5};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };

@@ -25,6 +25,7 @@ public:
     class TCOB_API style : public widget_style {
     public:
         utf8_string ItemClass {"items"};
+
         length      ItemHeight {0.8f, length::type::Relative};
         bar_element Bar;
         f32         GapRatio {1.0f};

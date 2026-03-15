@@ -13,6 +13,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -63,6 +64,10 @@ void tree_view::on_draw(widget_painter& painter)
     _visibleRows = static_cast<isize>(rect.height() / rowHeight);
     _rowRectCache.clear();
 
+    auto const getRowStyle {[&](i32 depth) {
+        return _style.ItemClasses[depth % _style.ItemClasses.size()];
+    }};
+
     std::function<void(std::vector<node>&, bool, i32, i32&, i32&)> const drawNodes {
         [&](std::vector<node>& nodes, bool draw, i32 depth, i32& row, i32& idx) -> void {
             for (auto& n : nodes) {
@@ -81,19 +86,20 @@ void tree_view::on_draw(widget_painter& painter)
 
                     if (rowRect.bottom() >= rect.top() && rowRect.top() <= rect.bottom()) {
                         item_style rowStyle {};
-                        prepare_sub_style(rowStyle, idx, _style.ItemClass, flg);
+                        prepare_sub_style(rowStyle, idx, getRowStyle(depth), flg);
                         painter.draw_item(rowStyle.Item, rowRect, n.Item);
 
                         if (!n.Children.empty()) {
                             nav_arrows_style arrowStyle {};
                             prepare_sub_style(arrowStyle, idx + 1, _style.NavArrowClass, flg);
-                            std::ignore = painter.draw_nav_arrow(arrowStyle.NavArrow, rowRect,
-                                                                 n.Expanded ? direction::Down : direction::Right);
+                            std::ignore = painter.draw_nav_arrow(arrowStyle.NavArrow, rowRect - rowStyle.Item.Border.thickness() - rowStyle.Item.Padding,
+                                                                 n.Expanded ? direction::Down : direction::Right,
+                                                                 gfx::horizontal_alignment::Right);
                         }
                     }
                     _rowRectCache[&n] = rowRect;
                 } else {
-                    reset_sub_style(idx, _style.ItemClass, flg);
+                    reset_sub_style(idx, getRowStyle(depth), flg);
                     reset_sub_style(idx + 1, _style.NavArrowClass, flg);
                 }
 

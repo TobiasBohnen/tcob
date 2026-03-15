@@ -13,6 +13,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
@@ -40,16 +41,17 @@ auto thumb_element::calc(rect_f const& rect, context const& ctx) const -> rect_f
     return retValue - Border.thickness();
 }
 
-auto nav_arrow_element::calc(rect_f const& rect) const -> rect_f
+auto nav_arrow_element::calc(rect_f const& rect, gfx::horizontal_alignment alignment) const -> rect_f
 {
     rect_f retValue {rect};
-
     retValue.Size.Width  = Size.Width.calc(rect.width());
     retValue.Size.Height = Size.Height.calc(rect.height());
-
-    retValue.Position.X += rect.width() - retValue.width();
+    switch (alignment) {
+    case gfx::horizontal_alignment::Left:     retValue.Position.X = rect.Position.X; break;
+    case gfx::horizontal_alignment::Right:    retValue.Position.X += rect.width() - retValue.width(); break;
+    case gfx::horizontal_alignment::Centered: retValue.Position.X += (rect.width() - retValue.width()) / 2; break;
+    }
     retValue.Position.Y += (rect.height() - retValue.height()) / 2;
-
     return retValue - Border.thickness() - Padding;
 }
 
@@ -121,6 +123,7 @@ void bar_element::lerp(bar_element const& from, bar_element const& to, f64 step)
 
     Size = helper::lerp(from.Size, to.Size, step);
     Border.lerp(from.Border, to.Border, step);
+    // Delay = helper::lerp(from.Delay, to.Delay, step);
 }
 
 void border_element::lerp(border_element const& from, border_element const& to, f64 step)
@@ -146,10 +149,15 @@ void border_element::lerp(border_element const& from, border_element const& to, 
 
 void text_element::lerp(text_element const& from, text_element const& to, f64 step)
 {
-    Color = helper::lerp(from.Color, to.Color, step);
-    Size  = helper::lerp(from.Size, to.Size, step);
-    Decoration.lerp(from.Decoration, to.Decoration, step);
+    Color       = helper::lerp(from.Color, to.Color, step);
+    SelectColor = helper::lerp(from.SelectColor, to.SelectColor, step);
     Shadow.lerp(from.Shadow, to.Shadow, step);
+    Decoration.lerp(from.Decoration, to.Decoration, step);
+    Style     = helper::lerp(from.Style, to.Style, step);
+    Size      = helper::lerp(from.Size, to.Size, step);
+    Alignment = helper::lerp(from.Alignment, to.Alignment, step);
+    Transform = helper::lerp(from.Transform, to.Transform, step);
+    AutoSize  = helper::lerp(from.AutoSize, to.AutoSize, step);
 }
 
 void caret_element::lerp(caret_element const& from, caret_element const& to, f64 step)
@@ -157,6 +165,7 @@ void caret_element::lerp(caret_element const& from, caret_element const& to, f64
     Color  = helper::lerp(from.Color, to.Color, step);
     Height = helper::lerp(from.Height, to.Height, step);
     Width  = helper::lerp(from.Width, to.Width, step);
+    // BlinkRate = helper::lerp(from.BlinkRate, to.BlinkRate, step);
 }
 
 void shadow_element::lerp(shadow_element const& from, shadow_element const& to, f64 step)
@@ -168,14 +177,16 @@ void shadow_element::lerp(shadow_element const& from, shadow_element const& to, 
 
 void deco_element::lerp(deco_element const& from, deco_element const& to, f64 step)
 {
+    Line  = helper::lerp(from.Line, to.Line, step);
+    Style = helper::lerp(from.Style, to.Style, step);
     Color = helper::lerp(from.Color, to.Color, step);
     Size  = helper::lerp(from.Size, to.Size, step);
 }
 
 void tick_element::lerp(tick_element const& from, tick_element const& to, f64 step)
 {
+    Type = helper::lerp(from.Type, to.Type, step);
     paint_lerp(Foreground, from.Foreground, to.Foreground, step);
-
     Size = helper::lerp(from.Size, to.Size, step);
 }
 
@@ -187,11 +198,10 @@ void scrollbar_element::lerp(scrollbar_element const& from, scrollbar_element co
 void item_element::lerp(item_element const& from, item_element const& to, f64 step)
 {
     Text.lerp(from.Text, to.Text, step);
-
     paint_lerp(Background, from.Background, to.Background, step);
-
     Border.lerp(from.Border, to.Border, step);
-    Padding = helper::lerp(from.Padding, to.Padding, step);
+    Padding       = helper::lerp(from.Padding, to.Padding, step);
+    IconTextOrder = helper::lerp(from.IconTextOrder, to.IconTextOrder, step);
 }
 
 ////////////////////////////////////////////////////////////

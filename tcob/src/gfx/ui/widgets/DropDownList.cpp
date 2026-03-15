@@ -14,6 +14,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -164,7 +165,7 @@ void drop_down_list::on_draw(widget_painter& painter)
 
     nav_arrows_style arrowStyle {};
     prepare_sub_style(arrowStyle, -1, _style.NavArrowClass, {.Active = fls.Active && _mouseOverChevron, .Hover = !fls.Active && _mouseOverChevron});
-    _chevronRectCache = painter.draw_nav_arrow(arrowStyle.NavArrow, rect, _isExtended ? direction::Up : direction::Down);
+    _chevronRectCache = painter.draw_nav_arrow(arrowStyle.NavArrow, rect, _isExtended ? direction::Up : direction::Down, gfx::horizontal_alignment::Right);
 
     // text
     if (_style.Text.Font && SelectedItemIndex >= 0) {

@@ -265,8 +265,9 @@ public:
 
 class TCOB_API scrollbar_element {
 public:
-    bar_element Bar;
     utf8_string ThumbClass {"scrollbar_thumb"};
+
+    bar_element Bar;
 
     void lerp(scrollbar_element const& from, scrollbar_element const& to, f64 step);
 
@@ -285,7 +286,7 @@ public:
     border_element Border {};
     thickness      Padding {};
 
-    auto calc(rect_f const& rect) const -> rect_f;
+    auto calc(rect_f const& rect, gfx::horizontal_alignment alignment) const -> rect_f;
 
     void lerp(nav_arrow_element const& from, nav_arrow_element const& to, f64 step);
 

@@ -28,8 +28,9 @@ class TCOB_API slider : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        bar_element Bar;
         utf8_string ThumbClass {"slider_thumb"};
+
+        bar_element Bar;
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
