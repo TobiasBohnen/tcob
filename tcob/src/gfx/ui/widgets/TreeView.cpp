@@ -62,11 +62,11 @@ void tree_view::on_draw(widget_painter& painter)
     _visibleRows = static_cast<isize>(rect.height() / rowHeight);
     _rowRectCache.clear();
 
-    auto const draw_nodes {[&](this auto const& self, std::vector<node>& nodes, bool draw, i32 depth, i32& row, i32& idx) -> void {
+    auto const draw_nodes {[&, that = this /*fixed in gcc-16*/](this auto const& self, std::vector<node>& nodes, bool draw, i32 depth, i32& row, i32& idx) -> void {
         for (auto& n : nodes) {
-            bool const   selected {&n == _selectedNode};
-            bool const   hovered {&n == _hoveredNode};
-            widget_flags flg {.Active = selected, .Hover = hovered};
+            bool const         selected {&n == that->_selectedNode};
+            bool const         hovered {&n == that->_hoveredNode};
+            widget_flags const flg {.Active = selected, .Hover = hovered};
 
             if (draw) {
                 rect_f rowRect {rect};
@@ -79,20 +79,20 @@ void tree_view::on_draw(widget_painter& painter)
 
                 if (rowRect.bottom() >= rect.top() && rowRect.top() <= rect.bottom()) {
                     item_style rowStyle {};
-                    prepare_sub_style(rowStyle, idx, _style.ItemClass, flg);
+                    prepare_sub_style(rowStyle, idx, that->_style.ItemClass, flg);
                     painter.draw_item(rowStyle.Item, rowRect, n.Item);
 
                     if (!n.Children.empty()) {
                         nav_arrows_style arrowStyle {};
-                        prepare_sub_style(arrowStyle, idx + 1, _style.NavArrowClass, flg);
+                        prepare_sub_style(arrowStyle, idx + 1, that->_style.NavArrowClass, flg);
                         std::ignore = painter.draw_nav_arrow(arrowStyle.NavArrow, rowRect,
-                                                             n.Expanded ? direction::Up : direction::Down);
+                                                             n.Expanded ? direction::Down : direction::Right);
                     }
                 }
-                _rowRectCache[&n] = rowRect;
+                that->_rowRectCache[&n] = rowRect;
             } else {
-                reset_sub_style(idx, _style.ItemClass, flg);
-                reset_sub_style(idx + 1, _style.NavArrowClass, flg);
+                reset_sub_style(idx, that->_style.ItemClass, flg);
+                reset_sub_style(idx + 1, that->_style.NavArrowClass, flg);
             }
 
             idx += 2;
@@ -166,16 +166,17 @@ auto tree_view::count_visible(std::vector<node> const& nodes) const -> i32
 
 auto tree_view::get_scroll_max_value() const -> f32
 {
-    f32 const rowHeight {get_row_height(content_bounds().height())};
-    i32       visible {count_visible(Nodes)};
-    return std::max(0.0f, (rowHeight * static_cast<f32>(visible)) - content_bounds().height());
+    f32 const contentHeight {content_bounds().height()};
+    f32 const rowHeight {get_row_height(contentHeight)};
+    return std::max(0.0f, (rowHeight * static_cast<f32>(count_visible(Nodes))) - contentHeight);
 }
 
 auto tree_view::get_scroll_step() const -> f32
 {
     f32 const max {get_scroll_max_value()};
     if (max <= 0.f) { return 1.f; }
-    return get_row_height(content_bounds().height()) * static_cast<f32>(_visibleRows) / max;
+    f32 const contentHeight {content_bounds().height()};
+    return get_row_height(contentHeight) * static_cast<f32>(_visibleRows) / max;
 }
 
 auto tree_view::get_row_height(f32 ref) const -> f32
