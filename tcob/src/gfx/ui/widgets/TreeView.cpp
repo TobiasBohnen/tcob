@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/widgets/TreeView.hpp"
 
 #include <algorithm>
+#include <functional>
 #include <tuple>
 #include <vector>
 
@@ -62,50 +63,51 @@ void tree_view::on_draw(widget_painter& painter)
     _visibleRows = static_cast<isize>(rect.height() / rowHeight);
     _rowRectCache.clear();
 
-    auto const draw_nodes {[&, that = this /*fixed in gcc-16*/](this auto const& self, std::vector<node>& nodes, bool draw, i32 depth, i32& row, i32& idx) -> void {
-        for (auto& n : nodes) {
-            bool const         selected {&n == that->_selectedNode};
-            bool const         hovered {&n == that->_hoveredNode};
-            widget_flags const flg {.Active = selected, .Hover = hovered};
+    std::function<void(std::vector<node>&, bool, i32, i32&, i32&)> const drawNodes {
+        [&](std::vector<node>& nodes, bool draw, i32 depth, i32& row, i32& idx) -> void {
+            for (auto& n : nodes) {
+                bool const         selected {&n == _selectedNode};
+                bool const         hovered {&n == _hoveredNode};
+                widget_flags const flg {.Active = selected, .Hover = hovered};
 
-            if (draw) {
-                rect_f rowRect {rect};
-                rowRect.Position.Y += (rowHeight * static_cast<f32>(row++)) - scrollOffset;
-                rowRect.Size.Height = rowHeight;
+                if (draw) {
+                    rect_f rowRect {rect};
+                    rowRect.Position.Y += (rowHeight * static_cast<f32>(row++)) - scrollOffset;
+                    rowRect.Size.Height = rowHeight;
 
-                f32 const indent {indentSize * static_cast<f32>(depth)};
-                rowRect.Position.X += indent;
-                rowRect.Size.Width = rowRect.width() - indent;
+                    f32 const indent {indentSize * static_cast<f32>(depth)};
+                    rowRect.Position.X += indent;
+                    rowRect.Size.Width = rowRect.width() - indent;
 
-                if (rowRect.bottom() >= rect.top() && rowRect.top() <= rect.bottom()) {
-                    item_style rowStyle {};
-                    that->prepare_sub_style(rowStyle, idx, that->_style.ItemClass, flg);
-                    painter.draw_item(rowStyle.Item, rowRect, n.Item);
+                    if (rowRect.bottom() >= rect.top() && rowRect.top() <= rect.bottom()) {
+                        item_style rowStyle {};
+                        prepare_sub_style(rowStyle, idx, _style.ItemClass, flg);
+                        painter.draw_item(rowStyle.Item, rowRect, n.Item);
 
-                    if (!n.Children.empty()) {
-                        nav_arrows_style arrowStyle {};
-                        that->prepare_sub_style(arrowStyle, idx + 1, that->_style.NavArrowClass, flg);
-                        std::ignore = painter.draw_nav_arrow(arrowStyle.NavArrow, rowRect,
-                                                             n.Expanded ? direction::Down : direction::Right);
+                        if (!n.Children.empty()) {
+                            nav_arrows_style arrowStyle {};
+                            prepare_sub_style(arrowStyle, idx + 1, _style.NavArrowClass, flg);
+                            std::ignore = painter.draw_nav_arrow(arrowStyle.NavArrow, rowRect,
+                                                                 n.Expanded ? direction::Down : direction::Right);
+                        }
                     }
+                    _rowRectCache[&n] = rowRect;
+                } else {
+                    reset_sub_style(idx, _style.ItemClass, flg);
+                    reset_sub_style(idx + 1, _style.NavArrowClass, flg);
                 }
-                that->_rowRectCache[&n] = rowRect;
-            } else {
-                that->reset_sub_style(idx, that->_style.ItemClass, flg);
-                that->reset_sub_style(idx + 1, that->_style.NavArrowClass, flg);
-            }
 
-            idx += 2;
-            if (!n.Children.empty()) {
-                self(n.Children, draw && n.Expanded, depth + 1, row, idx);
+                idx += 2;
+                if (!n.Children.empty()) {
+                    drawNodes(n.Children, draw && n.Expanded, depth + 1, row, idx);
+                }
             }
-        }
-    }};
+        }};
 
     Nodes.mutate([&](auto& nodes) {
         i32 row {0};
         i32 idx {0};
-        draw_nodes(nodes, true, 0, row, idx);
+        drawNodes(nodes, true, 0, row, idx);
         return false;
     });
 }
