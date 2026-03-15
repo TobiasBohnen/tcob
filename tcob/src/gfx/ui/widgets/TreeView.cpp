@@ -79,20 +79,20 @@ void tree_view::on_draw(widget_painter& painter)
 
                 if (rowRect.bottom() >= rect.top() && rowRect.top() <= rect.bottom()) {
                     item_style rowStyle {};
-                    prepare_sub_style(rowStyle, idx, that->_style.ItemClass, flg);
+                    that->prepare_sub_style(rowStyle, idx, that->_style.ItemClass, flg);
                     painter.draw_item(rowStyle.Item, rowRect, n.Item);
 
                     if (!n.Children.empty()) {
                         nav_arrows_style arrowStyle {};
-                        prepare_sub_style(arrowStyle, idx + 1, that->_style.NavArrowClass, flg);
+                        that->prepare_sub_style(arrowStyle, idx + 1, that->_style.NavArrowClass, flg);
                         std::ignore = painter.draw_nav_arrow(arrowStyle.NavArrow, rowRect,
                                                              n.Expanded ? direction::Down : direction::Right);
                     }
                 }
                 that->_rowRectCache[&n] = rowRect;
             } else {
-                reset_sub_style(idx, that->_style.ItemClass, flg);
-                reset_sub_style(idx + 1, that->_style.NavArrowClass, flg);
+                that->reset_sub_style(idx, that->_style.ItemClass, flg);
+                that->reset_sub_style(idx + 1, that->_style.NavArrowClass, flg);
             }
 
             idx += 2;
