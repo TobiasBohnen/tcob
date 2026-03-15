@@ -50,7 +50,7 @@ grid_view::grid_view(init const& wi)
             SelectedCellIndex = INVALID;
             HoveredCellIndex  = INVALID;
             clear_sub_styles();
-            set_scrollbar_value(0);
+            set_scrollbar_offset(0);
         }
 
         queue_redraw();
@@ -273,7 +273,7 @@ auto grid_view::get_column_width(usize col, f32 width) const -> f32
     return width / static_cast<f32>(Header->size());
 }
 
-auto grid_view::get_scroll_max_value() const -> f32
+auto grid_view::get_scroll_max_offset() const -> f32
 {
     if (Header->empty()) { return 0; }
 
@@ -283,7 +283,7 @@ auto grid_view::get_scroll_max_value() const -> f32
 
 auto grid_view::get_scroll_step() const -> f32
 {
-    return get_row_height(content_bounds().height()) * static_cast<f32>(_visibleRows) / get_scroll_max_value();
+    return get_row_height(content_bounds().height()) * static_cast<f32>(_visibleRows) / get_scroll_max_offset();
 }
 
 auto grid_view::get_row_height(f32 ref) const -> f32

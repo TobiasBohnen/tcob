@@ -58,7 +58,7 @@ protected:
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
     void on_mouse_button_down(input::mouse::button_event const& ev) override;
 
-    auto get_scroll_max_value() const -> f32 override;
+    auto get_scroll_max_offset() const -> f32 override;
     auto get_scroll_step() const -> f32 override;
 
 private:

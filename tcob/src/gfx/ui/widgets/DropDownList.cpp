@@ -86,7 +86,7 @@ drop_down_list::drop_down_list(init const& wi)
         _visibleItems = static_cast<isize>(listRect.height() / _itemHeight);
 
         // scrollbar
-        auto const scrollOffset {_vScrollbar.current_value() * get_scroll_max_value()};
+        auto const scrollOffset {_vScrollbar.current_value() * get_scroll_max_offset()};
 
         auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {.Disabled = !is_enabled()} : flags()};
         thumb_style thumbStyle;
@@ -361,10 +361,10 @@ void drop_down_list::set_extended(bool v)
 
 auto drop_down_list::get_scroll_step() const -> f32
 {
-    return get_item_height() * static_cast<f32>(_visibleItems) / get_scroll_max_value();
+    return get_item_height() * static_cast<f32>(_visibleItems) / get_scroll_max_offset();
 }
 
-auto drop_down_list::get_scroll_max_value() const -> f32
+auto drop_down_list::get_scroll_max_offset() const -> f32
 {
     return std::max(1.0f, (get_item_height() * static_cast<f32>(get_items().size())) - content_bounds().height());
 }

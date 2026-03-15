@@ -36,7 +36,7 @@ void vscroll_widget::draw_scrollbar(widget_painter& painter, rect_f& rect)
     auto const* style {dynamic_cast<vscroll_widget::style const*>(current_style())};
     assert(style);
 
-    _vScrollbar.Visible = get_scroll_max_value() > 0;
+    _vScrollbar.Visible = get_scroll_max_offset() > 0;
     if (!_vScrollbar.Visible) { return; }
 
     auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {.Disabled = !is_enabled()} : flags()};
@@ -113,12 +113,12 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
 
 auto vscroll_widget::scrollbar_offset() const -> f32
 {
-    return _vScrollbar.current_value() * get_scroll_max_value();
+    return _vScrollbar.current_value() * get_scroll_max_offset();
 }
 
-void vscroll_widget::set_scrollbar_value(f32 value)
+void vscroll_widget::set_scrollbar_offset(f32 value)
 {
-    auto const max {get_scroll_max_value()};
+    auto const max {get_scroll_max_offset()};
     _vScrollbar.reset(max == 0 ? 0 : value / max);
 }
 

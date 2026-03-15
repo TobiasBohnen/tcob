@@ -33,7 +33,7 @@ tree_view::tree_view(init const& wi)
     Nodes.Changed.connect([this](auto const&) {
         _hoveredNode  = nullptr;
         _selectedNode = nullptr;
-        set_scrollbar_value(0);
+        set_scrollbar_offset(std::min(scrollbar_offset(), get_scroll_max_offset()));
         clear_sub_styles();
         queue_redraw();
     });
@@ -172,7 +172,7 @@ auto tree_view::count_visible(std::vector<node> const& nodes) const -> i32
     return count;
 }
 
-auto tree_view::get_scroll_max_value() const -> f32
+auto tree_view::get_scroll_max_offset() const -> f32
 {
     f32 const contentHeight {content_bounds().height()};
     f32 const rowHeight {get_row_height(contentHeight)};
@@ -181,7 +181,7 @@ auto tree_view::get_scroll_max_value() const -> f32
 
 auto tree_view::get_scroll_step() const -> f32
 {
-    f32 const max {get_scroll_max_value()};
+    f32 const max {get_scroll_max_offset()};
     if (max <= 0.f) { return 1.f; }
     f32 const contentHeight {content_bounds().height()};
     return get_row_height(contentHeight) * static_cast<f32>(_visibleRows) / max;

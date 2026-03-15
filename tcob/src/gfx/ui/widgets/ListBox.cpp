@@ -55,7 +55,7 @@ list_box::list_box(init const& wi)
             HoveredItemIndex  = INVALID_INDEX;
             _itemRectCache.clear();
             clear_sub_styles();
-            set_scrollbar_value(0);
+            set_scrollbar_offset(0);
         }
 
         apply_filter();
@@ -65,7 +65,7 @@ list_box::list_box(init const& wi)
     Filter.Changed.connect([this](auto const& /* val */) {
         HoveredItemIndex  = INVALID_INDEX;
         SelectedItemIndex = INVALID_INDEX;
-        set_scrollbar_value(0);
+        set_scrollbar_offset(0);
 
         apply_filter();
         queue_redraw();
@@ -159,7 +159,7 @@ void list_box::on_update(milliseconds deltaTime)
     // scroll to selected
     if (_scrollToSelected && SelectedItemIndex != INVALID_INDEX && !_itemRectCache.empty()) { // delay scroll to selected after first paint
         f32 const itemHeight {get_item_height(content_bounds().height())};
-        set_scrollbar_value(std::min(itemHeight * static_cast<f32>(SelectedItemIndex), get_scroll_max_value()));
+        set_scrollbar_offset(std::min(itemHeight * static_cast<f32>(SelectedItemIndex), get_scroll_max_offset()));
         _scrollToSelected = false;
     }
 }
@@ -260,7 +260,7 @@ auto list_box::attributes() const -> widget_attributes
     return retValue;
 }
 
-auto list_box::get_scroll_max_value() const -> f32
+auto list_box::get_scroll_max_offset() const -> f32
 {
     if (Items->empty()) { return 0; }
 
@@ -270,7 +270,7 @@ auto list_box::get_scroll_max_value() const -> f32
 
 auto list_box::get_scroll_step() const -> f32
 {
-    return get_item_height(content_bounds().height()) * static_cast<f32>(_visibleItems) / get_scroll_max_value();
+    return get_item_height(content_bounds().height()) * static_cast<f32>(_visibleItems) / get_scroll_max_offset();
 }
 
 void list_box::apply_filter()

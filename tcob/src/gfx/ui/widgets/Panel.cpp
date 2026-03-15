@@ -370,7 +370,7 @@ void panel::check_mode()
     }
 }
 
-auto panel::get_scroll_max_value(orientation orien) const -> f32
+auto panel::get_scroll_max_offset(orientation orien) const -> f32
 {
     f32         retValue {0.0f};
     auto const& content {content_bounds()};
@@ -387,8 +387,8 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
 auto panel::scroll_offset() const -> point_f
 {
     if (!ScrollEnabled) { return point_f::Zero; }
-    return {_hScrollbar.current_value() * get_scroll_max_value(orientation::Horizontal),
-            _vScrollbar.current_value() * get_scroll_max_value(orientation::Vertical)};
+    return {_hScrollbar.current_value() * get_scroll_max_offset(orientation::Horizontal),
+            _vScrollbar.current_value() * get_scroll_max_offset(orientation::Vertical)};
 }
 
 ////////////////////////////////////////////////////////////

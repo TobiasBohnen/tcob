@@ -83,7 +83,7 @@ private:
     void check_mode();
 
     auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
-    auto get_scroll_max_value(orientation orien) const -> f32;
+    auto get_scroll_max_offset(orientation orien) const -> f32;
 
     std::unique_ptr<layout> _layout;
     scrollbar               _vScrollbar;

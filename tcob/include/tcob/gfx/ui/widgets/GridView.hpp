@@ -61,7 +61,7 @@ protected:
 
     auto attributes() const -> widget_attributes override;
 
-    auto get_scroll_max_value() const -> f32 override;
+    auto get_scroll_max_offset() const -> f32 override;
     auto get_scroll_step() const -> f32 override;
 
 private:

@@ -80,7 +80,7 @@ private:
     void set_extended(bool v);
 
     auto get_scroll_step() const -> f32;
-    auto get_scroll_max_value() const -> f32;
+    auto get_scroll_max_offset() const -> f32;
 
     std::unordered_map<isize, rect_f> _itemRectCache;
     rect_f                            _chevronRectCache;

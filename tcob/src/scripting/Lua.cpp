@@ -229,13 +229,13 @@ auto state_view::info(string const& what, lua_Debug* ar) const -> bool
 
 auto state_view::get_local(lua_Debug* ar, i32 n) const -> string
 {
-    auto const* r {lua_getlocal(_state, ar, n)};
+    char const* r {lua_getlocal(_state, ar, n)};
     return r == nullptr ? "" : r;
 }
 
 auto state_view::set_local(lua_Debug* ar, i32 n) const -> string
 {
-    auto const* r {lua_setlocal(_state, ar, n)};
+    char const* r {lua_setlocal(_state, ar, n)};
     return r == nullptr ? "" : r;
 }
 
