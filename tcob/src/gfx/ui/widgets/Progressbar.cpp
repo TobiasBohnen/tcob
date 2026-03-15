@@ -60,7 +60,7 @@ void progress_bar::on_draw(widget_painter& painter)
     std::ignore = painter.draw_bar(
         _style.Bar,
         rect,
-        {.Orientation = get_orientation(),
+        {.Orientation = calc_orientation(),
          .Position    = bar_element::position::CenterOrMiddle,
          .Stops       = {0.0f, _tween.current_value(), 1.0f},
          .StopPattern = {bar_element::type::Low, bar_element::type::High}});

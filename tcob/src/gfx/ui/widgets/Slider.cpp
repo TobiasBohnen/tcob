@@ -65,7 +65,7 @@ void slider::on_draw(widget_painter& painter)
 
     scoped_scissor const guard {painter, this};
 
-    auto const orien {get_orientation()};
+    auto const orien {calc_orientation()};
     auto const pos {bar_element::position::CenterOrMiddle};
 
     f32 const tweenValue {_tween.current_value()};
@@ -218,7 +218,7 @@ void slider::calculate_value(point_f mp)
     rect_f const rect {_barRectCache.Bar};
     f32          frac {0.0f};
 
-    switch (get_orientation()) {
+    switch (calc_orientation()) {
     case orientation::Horizontal: {
         f32 const tw {_barRectCache.Thumb.width()};
         frac = (mp.X - static_cast<f32>(_dragOffset.X) - (tw / 2)) / (rect.width() - tw);
@@ -252,7 +252,7 @@ auto slider::attributes() const -> widget_attributes
 
 auto slider::handle_dir_input(direction dir) -> bool
 {
-    switch (get_orientation()) {
+    switch (calc_orientation()) {
     case orientation::Horizontal:
         switch (dir) {
         case direction::Left:  Value -= *Step; break;
@@ -354,7 +354,7 @@ void range_slider::on_draw(widget_painter& painter)
 
     scoped_scissor const guard {painter, this};
 
-    auto const orien {get_orientation()};
+    auto const orien {calc_orientation()};
     auto const pos {bar_element::position::CenterOrMiddle};
 
     // bar
@@ -524,7 +524,7 @@ void range_slider::calculate_value(bool isMin, point_f mp)
     rect_f const rect {_barRectCache};
     f32          frac {0.0f};
 
-    switch (get_orientation()) {
+    switch (calc_orientation()) {
     case orientation::Horizontal: {
         f32 const tw {thumb.Rect.width()};
         frac = (mp.X - static_cast<f32>(_dragOffset.X) - (tw / 2)) / (rect.width() - tw);
