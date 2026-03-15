@@ -158,7 +158,7 @@ void drop_down_list::on_draw(widget_painter& painter)
 {
     _itemRectCache.clear();
 
-    rect_f const rect {draw_background(_style, painter)};
+    rect_f const rect {draw_base(_style, painter)};
 
     // arrow
     auto const& fls {flags()};

@@ -131,7 +131,7 @@ auto tab_container::widgets() const -> std::span<std::unique_ptr<widget> const>
 
 void tab_container::on_draw(widget_painter& painter)
 {
-    rect_f const rect {draw_background(_style, painter)};
+    rect_f const rect {draw_base(_style, painter)};
 
     // tabs
     _tabRectCache.clear();

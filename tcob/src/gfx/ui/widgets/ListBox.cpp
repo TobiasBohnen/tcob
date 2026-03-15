@@ -107,7 +107,7 @@ void list_box::on_prepare_redraw()
 
 void list_box::on_draw(widget_painter& painter)
 {
-    rect_f rect {draw_background(_style, painter)};
+    rect_f rect {draw_base(_style, painter)};
 
     // scrollbar
     draw_scrollbar(painter, rect);

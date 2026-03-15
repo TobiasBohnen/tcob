@@ -31,7 +31,7 @@ checkbox::checkbox(init const& wi)
 
 void checkbox::on_draw(widget_painter& painter)
 {
-    rect_f const rect {draw_background(_style, painter)};
+    rect_f const rect {draw_base(_style, painter)};
 
     scoped_scissor const guard {painter, this};
 

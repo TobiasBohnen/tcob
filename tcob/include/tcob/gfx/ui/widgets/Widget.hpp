@@ -129,7 +129,7 @@ protected:
     virtual void on_draw(widget_painter& painter) = 0;
     void         prepare_redraw();
 
-    auto draw_background(auto&& style, widget_painter& painter, bool isCircle = false) -> rect_f;
+    auto draw_base(auto&& style, widget_painter& painter, bool isCircle = false) -> rect_f;
 
     virtual void set_redraw(bool val);
     auto         needs_redraw() const -> bool;

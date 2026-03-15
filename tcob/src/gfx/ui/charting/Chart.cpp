@@ -75,7 +75,7 @@ line_chart::line_chart(init const& wi)
 
 void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels)
 {
-    rect_f const         rect {draw_background(_style, painter)};
+    rect_f const         rect {draw_base(_style, painter)};
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
@@ -190,7 +190,7 @@ bar_chart::bar_chart(init const& wi)
 
 void bar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels)
 {
-    rect_f const         rect {draw_background(_style, painter)};
+    rect_f const         rect {draw_base(_style, painter)};
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
@@ -304,7 +304,7 @@ marimekko_chart::marimekko_chart(init const& wi)
 
 void marimekko_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& /* yLabels */)
 {
-    rect_f const         rect {draw_background(_style, painter)};
+    rect_f const         rect {draw_base(_style, painter)};
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
@@ -392,7 +392,7 @@ pie_chart::pie_chart(init const& wi)
 
 void pie_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& /* xLabels */, std::vector<string> const& /* yLabels */)
 {
-    rect_f const         rect {draw_background(_style, painter)};
+    rect_f const         rect {draw_base(_style, painter)};
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
@@ -485,7 +485,7 @@ scatter_chart::scatter_chart(init const& wi)
 
 void scatter_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& yLabels)
 {
-    rect_f const         rect {draw_background(_style, painter)};
+    rect_f const         rect {draw_base(_style, painter)};
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 
@@ -628,7 +628,7 @@ radar_chart::radar_chart(init const& wi)
 
 void radar_chart::on_draw_chart(widget_painter& painter, std::vector<string> const& xLabels, std::vector<string> const& /* yLabels */)
 {
-    rect_f const         rect {draw_background(_style, painter)};
+    rect_f const         rect {draw_base(_style, painter)};
     scoped_scissor const guard {painter, this};
     auto&                canvas {painter.canvas()};
 

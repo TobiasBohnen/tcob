@@ -34,7 +34,7 @@ radio_button::radio_button(init const& wi)
 
 void radio_button::on_draw(widget_painter& painter)
 {
-    rect_f const rect {draw_background(_style, painter, true)};
+    rect_f const rect {draw_base(_style, painter, true)};
 
     scoped_scissor const guard {painter, this};
 

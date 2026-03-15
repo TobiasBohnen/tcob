@@ -147,7 +147,7 @@ auto accordion::widgets() const -> std::span<std::unique_ptr<widget> const>
 
 void accordion::on_draw(widget_painter& painter)
 {
-    rect_f const rect {draw_background(_style, painter)};
+    rect_f const rect {draw_base(_style, painter)};
 
     auto const [secIdx, val] {section_expand()};
 

@@ -33,7 +33,7 @@ inline void widget::prepare_sub_style(T& style, isize idx, string const& styleCl
     _subStyleTransitions[idx].apply(style);
 }
 
-inline auto widget::draw_background(auto&& style, widget_painter& painter, bool isCircle) -> rect_f
+inline auto widget::draw_base(auto&& style, widget_painter& painter, bool isCircle) -> rect_f
 {
     if (is_top_level()) {
         auto& canvas {painter.canvas()};

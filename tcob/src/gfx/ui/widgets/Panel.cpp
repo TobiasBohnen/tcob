@@ -107,7 +107,7 @@ void panel::on_update(milliseconds deltaTime)
 
 void panel::on_draw(widget_painter& painter)
 {
-    rect_f rect {draw_background(_style, painter)};
+    rect_f rect {draw_base(_style, painter)};
 
     // scrollbars
     {
