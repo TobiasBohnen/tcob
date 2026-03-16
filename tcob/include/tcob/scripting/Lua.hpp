@@ -163,7 +163,7 @@ public:
 
     debug_event Event {};
 
-    auto get_info(string const& what) const -> info;
+    auto get_info(string const& what = "Slutnr") const -> info;
 
     auto get_local(i32 n) const -> string;
     auto set_local(i32 n) const -> string;
