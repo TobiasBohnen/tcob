@@ -161,11 +161,11 @@ void script::register_searcher()
     tab[tab.raw_length() + 1] = &_searcher;
 }
 
-void script::set_hook(HookFunc&& func, debug_mask mask)
+void script::set_hook(HookFunc&& func, debug_mask mask, i32 count)
 {
     _hookFunc                                             = std::move(func);
     *reinterpret_cast<HookFunc**>(_view.get_extraspace()) = &_hookFunc;
-    _view.set_hook(&Hook, debug::GetMask(mask), 1);
+    _view.set_hook(&Hook, debug::GetMask(mask), count);
 }
 
 void script::remove_hook()

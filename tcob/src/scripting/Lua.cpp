@@ -30,16 +30,16 @@ debug::debug(state_view* view, lua_Debug* ar)
 {
 }
 
-auto debug::get_info() const -> info
+auto debug::get_info(string const& what) const -> info
 {
-    _view->get_info(_ar);
-    return {.Name                  = {_ar->name != nullptr ? _ar->name : ""},
-            .What                  = {_ar->what != nullptr ? _ar->what : ""},
-            .Source                = {_ar->source != nullptr ? _ar->source : ""},
+    _view->get_info(_ar, what);
+    return {.Name                  = {what.contains('n') && _ar->name != nullptr ? _ar->name : ""},
+            .What                  = {what.contains('S') && _ar->what != nullptr ? _ar->what : ""},
+            .Source                = {what.contains('S') && _ar->source != nullptr ? _ar->source : ""},
             .CurrentLine           = _ar->currentline,
             .LineDefined           = _ar->linedefined,
             .LastLineDefined       = _ar->lastlinedefined,
-            .NameWhat              = {_ar->namewhat != nullptr ? _ar->namewhat : ""},
+            .NameWhat              = {what.contains('n') && _ar->namewhat != nullptr ? _ar->namewhat : ""},
             .UpvalueCount          = _ar->nups,
             .ParameterCount        = _ar->nparams,
             .IsVarArg              = _ar->isvararg != 0,
@@ -222,7 +222,7 @@ auto state_view::get_top() const -> i32
     return lua_gettop(_state);
 }
 
-auto state_view::info(string const& what, lua_Debug* ar) const -> bool
+auto state_view::get_info(string const& what, lua_Debug* ar) const -> bool
 {
     return lua_getinfo(_state, what.c_str(), ar) != 0;
 }
@@ -237,6 +237,14 @@ auto state_view::set_local(lua_Debug* ar, i32 n) const -> string
 {
     char const* r {lua_setlocal(_state, ar, n)};
     return r == nullptr ? "" : r;
+}
+
+auto state_view::get_stack(i32 level) -> debug::info
+{
+    lua_Debug ar;
+    lua_getstack(_state, level, &ar);
+    debug dbg {this, &ar};
+    return dbg.get_info(">Slutnr");
 }
 
 auto state_view::check_stack(i32 size) const -> bool
@@ -563,9 +571,9 @@ void state_view::set_hook(lua_Hook func, i32 mask, i32 count) const
     lua_sethook(_state, func, mask, count);
 }
 
-void state_view::get_info(lua_Debug* ar) const
+void state_view::get_info(lua_Debug* ar, string const& what) const
 {
-    lua_getinfo(_state, "Slutnr", ar);
+    lua_getinfo(_state, what.c_str(), ar);
 }
 
 auto state_view::get_extraspace() const -> void*

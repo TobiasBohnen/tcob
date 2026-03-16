@@ -73,7 +73,7 @@ public:
     template <typename R = void>
     auto load_binary(io::istream& in, string const& name = "") const -> function<R>;
 
-    void set_hook(HookFunc&& func, debug_mask mask = {});
+    void set_hook(HookFunc&& func, debug_mask mask = {}, i32 count = 1);
     void remove_hook();
 
 private:

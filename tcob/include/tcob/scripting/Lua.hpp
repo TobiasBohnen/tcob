@@ -163,7 +163,7 @@ public:
 
     debug_event Event {};
 
-    auto get_info() const -> info;
+    auto get_info(string const& what) const -> info;
 
     auto get_local(i32 n) const -> string;
     auto set_local(i32 n) const -> string;
@@ -235,9 +235,11 @@ public:
 
     auto get_top() const -> i32;
 
-    auto info(string const& what, lua_Debug* ar) const -> bool;
+    auto get_info(string const& what, lua_Debug* ar) const -> bool;
     auto get_local(lua_Debug* ar, i32 n) const -> string;
     auto set_local(lua_Debug* ar, i32 n) const -> string;
+
+    auto get_stack(i32 level) -> debug::info;
 
     auto check_stack(i32 size) const -> bool;
 
@@ -313,7 +315,7 @@ public:
     void set_warnf(lua_WarnFunction f, void* ud) const;
 
     void set_hook(lua_Hook func, i32 mask, i32 count) const;
-    void get_info(lua_Debug* ar) const;
+    void get_info(lua_Debug* ar, string const& what) const;
 
     auto get_extraspace() const -> void*;
 
