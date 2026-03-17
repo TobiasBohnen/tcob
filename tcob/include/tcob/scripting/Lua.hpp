@@ -144,15 +144,16 @@ class TCOB_API debug {
 public:
     struct info {
         string_view Name;                      /* (n) */
+        string_view NameWhat;                  /* (n) */
         string_view What;                      /* (S) */
         string_view Source;                    /* (S) */
         i32         CurrentLine {0};           /* (l) */
         i32         LineDefined {0};           /* (S) */
         i32         LastLineDefined {0};       /* (S) */
-        string_view NameWhat;                  /* (n) */
         u8          UpvalueCount {0};          /* (u) number of upvalues */
         u8          ParameterCount {0};        /* (u) number of parameters */
         bool        IsVarArg {false};          /* (u) */
+        u8          ExtraArgs {0};             /* (t) number of extra arguments */
         bool        IsTailCall {false};        /* (t) */
         i32         FirstTransfer {0};         /* (r) index of first value transferred */
         i32         TransferredValueCount {0}; /* (r) number of transferred values */
@@ -239,7 +240,7 @@ public:
     auto get_local(lua_Debug* ar, i32 n) const -> string;
     auto set_local(lua_Debug* ar, i32 n) const -> string;
 
-    auto get_stack(i32 level) -> debug::info;
+    auto get_stack(i32 level, string const& what) -> std::optional<debug::info>;
 
     auto check_stack(i32 size) const -> bool;
 

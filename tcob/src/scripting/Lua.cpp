@@ -34,15 +34,16 @@ auto debug::get_info(string const& what) const -> info
 {
     _view->get_info(_ar, what);
     return {.Name                  = {what.contains('n') && _ar->name != nullptr ? _ar->name : ""},
+            .NameWhat              = {what.contains('n') && _ar->namewhat != nullptr ? _ar->namewhat : ""},
             .What                  = {what.contains('S') && _ar->what != nullptr ? _ar->what : ""},
             .Source                = {what.contains('S') && _ar->source != nullptr ? _ar->source : ""},
             .CurrentLine           = _ar->currentline,
             .LineDefined           = _ar->linedefined,
             .LastLineDefined       = _ar->lastlinedefined,
-            .NameWhat              = {what.contains('n') && _ar->namewhat != nullptr ? _ar->namewhat : ""},
             .UpvalueCount          = _ar->nups,
             .ParameterCount        = _ar->nparams,
             .IsVarArg              = _ar->isvararg != 0,
+            .ExtraArgs             = _ar->extraargs,
             .IsTailCall            = _ar->istailcall != 0,
             .FirstTransfer         = _ar->ftransfer,
             .TransferredValueCount = _ar->ntransfer,
@@ -239,12 +240,12 @@ auto state_view::set_local(lua_Debug* ar, i32 n) const -> string
     return r == nullptr ? "" : r;
 }
 
-auto state_view::get_stack(i32 level) -> debug::info
+auto state_view::get_stack(i32 level, string const& what) -> std::optional<debug::info>
 {
     lua_Debug ar;
-    lua_getstack(_state, level, &ar);
+    if (!lua_getstack(_state, level, &ar)) { return std::nullopt; }
     debug dbg {this, &ar};
-    return dbg.get_info(">Slutnr");
+    return dbg.get_info(what);
 }
 
 auto state_view::check_stack(i32 size) const -> bool
@@ -499,6 +500,7 @@ void state_view::call(i32 nargs) const
     lua_call(_state, nargs, LUA_MULTRET);
 }
 
+extern "C" {
 static auto ErrorHandler(lua_State* l) -> i32
 {
     if (lua_isstring(l, -1) != 0) {
@@ -507,6 +509,7 @@ static auto ErrorHandler(lua_State* l) -> i32
         lua_pop(l, 1);
     }
     return 0;
+}
 }
 
 auto state_view::pcall(i32 nargs) const -> std::optional<error_code>
