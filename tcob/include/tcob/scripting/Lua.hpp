@@ -185,8 +185,6 @@ public:
     explicit scoped_stack(lua_State* l);
     ~scoped_stack();
 
-    auto top() const -> i32;
-
 private:
     lua_State* _luaState;
     i32        _oldTop;

@@ -42,6 +42,7 @@ template <typename R>
 inline auto script::run(string_view script, string const& name) const -> std::expected<R, error_code>
 {
     auto const guard {_view.create_scoped_stack()};
+    i32 const  oldTop {_view.get_top()};
 
     auto const result {call_buffer(script, name)};
     if constexpr (std::is_void_v<R>) {
@@ -50,13 +51,14 @@ inline auto script::run(string_view script, string const& name) const -> std::ex
         if (result) { return std::unexpected {*result}; }
 
         R retValue {};
-        if (!_view.pull_convert_idx(guard.top() + 1, retValue)) {
+        if (!_view.pull_convert_idx(oldTop + 1, retValue)) {
             return std::unexpected {error_code::TypeMismatch};
         }
 
         return std::expected<R, error_code> {std::move(retValue)};
     }
 }
+
 template <typename T>
 inline auto script::create_wrapper(string const& name, bool autoMeta) -> std::shared_ptr<wrapper<T>>
 {

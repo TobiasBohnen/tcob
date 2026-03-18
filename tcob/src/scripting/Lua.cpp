@@ -91,11 +91,6 @@ scoped_stack::~scoped_stack()
     }
 }
 
-auto scoped_stack::top() const -> i32
-{
-    return _oldTop;
-}
-
 ////////////////////////////////////////////////////////////
 
 static auto GetType(i32 i) -> type
