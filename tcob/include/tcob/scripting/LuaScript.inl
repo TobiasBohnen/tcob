@@ -80,7 +80,7 @@ inline auto script::load_binary(io::istream& in, string const& name) const -> fu
     function<R> retVal {};
     auto        script {in.read_string(in.size_in_bytes())};
     if (load_binary_buffer(script, name)) {
-        _view.pull_convert_idx(-1, retVal);
+        _view.pull_convert_top(retVal);
     }
 
     return retVal;

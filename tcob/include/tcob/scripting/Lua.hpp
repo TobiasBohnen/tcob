@@ -212,6 +212,9 @@ public:
     template <ConvertibleFrom T>
     auto pull_convert_idx(i32 idx, T& t) const -> bool;
 
+    template <ConvertibleFrom T>
+    auto pull_convert_top(T& t) const -> bool;
+
     auto is_bool(i32 idx) const -> bool;
     auto is_function(i32 idx) const -> bool;
     auto is_integer(i32 idx) const -> bool;

@@ -31,6 +31,13 @@ inline auto state_view::pull_convert_idx(i32 idx, T& t) const -> bool
     return convert_from(idx0, t);
 }
 
+template <ConvertibleFrom T>
+inline auto state_view::pull_convert_top(T& t) const -> bool
+{
+    i32 idx0 {-1};
+    return convert_from(idx0, t);
+}
+
 //////get//////
 template <ConvertibleFrom T>
 inline auto state_view::convert_from(i32& idx, T& value) const -> bool
@@ -59,8 +66,8 @@ template <typename WrappedType>
 template <typename T>
 inline auto unknown_set_event<WrappedType>::get_value(T& val) -> bool
 {
-    if (base_converter<T>::IsType(_view, 2)) {
-        if (_view.pull_convert_idx(2, val)) {
+    if (base_converter<T>::IsType(_view, -1)) {
+        if (_view.pull_convert_top(val)) {
             Handled = true;
             return true;
         }

@@ -497,7 +497,7 @@ inline void wrapper<WrappedType>::newindex(WrappedType* b, i32 arg)
     _view.remove(2); // remove arg
     if constexpr (detail::IntIndexable<WrappedType>) {
         typename WrappedType::value_type val {};
-        _view.pull_convert_idx(-1, val);
+        _view.pull_convert_top(val);
         _view.pop(_view.get_top());
         if constexpr (Container<WrappedType>) {
             if (arg == std::ssize(*b) + 1) { // add to vector if index is size + 1
@@ -517,7 +517,7 @@ inline void wrapper<WrappedType>::newindex(WrappedType* b, char const* arg)
 {
     _view.remove(2); // remove arg
     if constexpr (detail::StringIndexable<WrappedType>) {
-        _view.pull_convert_idx(-1, (*b)[arg]);
+        _view.pull_convert_top((*b)[arg]);
     } else if (auto sit {_setters.find(arg)}; sit != _setters.end()) {
         (*sit->second)(_view);
     } else {

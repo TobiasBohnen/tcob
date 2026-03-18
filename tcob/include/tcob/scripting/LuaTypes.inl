@@ -55,7 +55,7 @@ inline auto table::get(auto&&... keys) const -> std::expected<T, error_code>
     if constexpr (sizeof...(keys) == 0) {
         push_self();
         T retValue {};
-        return view.pull_convert_idx(-1, retValue)
+        return view.pull_convert_top(retValue)
             ? std::expected<T, error_code> {std::move(retValue)}
             : std::unexpected<error_code> {error_code::TypeMismatch};
     } else {
@@ -73,7 +73,7 @@ inline auto table::try_get(T& value, auto&& key) const -> bool
     view.push_convert(key);
     view.get_table(-2);
 
-    return !view.is_nil(-1) && view.pull_convert_idx(-1, value);
+    return !view.is_nil(-1) && view.pull_convert_top(value);
 }
 
 inline void table::set(auto&&... keysOrValue) const
@@ -116,7 +116,7 @@ inline auto table::get_keys() const -> std::vector<T>
         view.push_value(-2);
 
         T var {};
-        if (base_converter<T>::IsType(view, -1) && view.pull_convert_idx(-1, var)) {
+        if (base_converter<T>::IsType(view, -1) && view.pull_convert_top(var)) {
             retValue.push_back(var);
         }
 
@@ -142,7 +142,7 @@ inline auto table::get(state_view view, auto&& key, auto&&... keys) const -> std
         if (view.is_nil(-1)) { return std::unexpected {error_code::Undefined}; }
 
         T retValue {};
-        return view.pull_convert_idx(-1, retValue)
+        return view.pull_convert_top(retValue)
             ? std::expected<T, error_code> {std::move(retValue)}
             : std::unexpected {error_code::TypeMismatch};
     }
