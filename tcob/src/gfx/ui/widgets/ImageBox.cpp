@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/ui/widgets/ImageBox.hpp"
 
+#include <algorithm>
 #include <optional>
 
 #include "tcob/core/Common.hpp"
@@ -92,9 +93,9 @@ auto image_box::image_bounds(rect_f const& rect) const -> rect_f
         targetRect = {rect.Position, rect.Size.as_fitted(texSize)};
     } break;
     case fit_mode::PixelPerfect: {
-        f32 const factor {static_cast<f32>(static_cast<i32>(rect.width() / texSize.Width) < static_cast<i32>(rect.height() / texSize.Height)
-                                               ? static_cast<i32>(rect.width() / texSize.Width)
-                                               : static_cast<i32>(rect.height() / texSize.Height))};
+        f32 const factor {static_cast<f32>(std::min(
+            static_cast<i32>(rect.width() / texSize.Width),
+            static_cast<i32>(rect.height() / texSize.Height)))};
         targetRect = {rect.Position, texSize * factor};
     } break;
     case fit_mode::Fill:
