@@ -34,7 +34,7 @@ auto ray::get_point(f64 distance) const -> point_f
 
 auto ray::intersect_line(point_f a, point_f b) const -> std::optional<result>
 {
-    if (auto distance {intersect_segment(_direction, point_d {a}, point_d {b})}) {
+    if (auto const distance {intersect_segment(_direction, point_d {a}, point_d {b})}) {
         return result {.Point = get_point(*distance), .Distance = *distance};
     }
     return std::nullopt;
@@ -55,12 +55,13 @@ auto ray::intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, 
     return retValue;
 }
 
-auto ray::intersect_circle(point_f const& center, f32 radius) const -> std::vector<result>
+auto ray::intersect_circle(point_f const& center, f64 radius) const -> std::vector<result>
 {
-    f64 const b {2.0 * (((_origin.X - center.X) * _direction.X) + ((_origin.Y - center.Y) * _direction.Y))};
-    f64 const c {((_origin.X - center.X) * (_origin.X - center.X)) + ((_origin.Y - center.Y) * (_origin.Y - center.Y)) - (radius * radius)};
+    point_d const oc {_origin - center};
+    f64 const     b {2.0 * oc.dot(_direction)};
+    f64 const     c {oc.dot(oc) - (radius * radius)};
 
-    f64 const discr {(b * b) - (4 * c)};
+    f64 const discr {(b * b) - (4.0 * c)};
     if (discr < 0) { return {}; }
 
     f64 const sqrtDiscr {std::sqrt(discr)};
@@ -80,7 +81,7 @@ auto ray::intersect_function(func const& func, f64 tolerance) const -> std::vect
     point_f lastPoint {func(0)};
     for (f64 t {0}; t <= 1; t += tolerance) {
         point_f const cp {func(t)};
-        if (auto distance {intersect_segment(_direction, point_d {lastPoint}, point_d {cp})}) {
+        if (auto const distance {intersect_segment(_direction, point_d {lastPoint}, point_d {cp})}) {
             auto const p {get_point(*distance)};
             if (!retValue.empty() && retValue.back().Point == p) { continue; }
             retValue.emplace_back(p, *distance);
@@ -97,7 +98,7 @@ auto ray::intersect_polyline(polyline_span polygon) const -> std::vector<result>
 
     usize const n {polygon.size()};
     for (usize i {0}; i < n; ++i) {
-        if (auto distance {intersect_segment(_direction, point_d {polygon[i]}, point_d {polygon[(i + 1) % n]})}) {
+        if (auto const distance {intersect_segment(_direction, point_d {polygon[i]}, point_d {polygon[(i + 1) % n]})}) {
             retValue.emplace_back(get_result(*distance));
         }
     }

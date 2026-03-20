@@ -42,7 +42,7 @@ public:
     auto intersect_rect(rect_f const& rect) const -> std::vector<result>;
     auto intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, point_f bottomRight) const -> std::vector<result>;
 
-    auto intersect_circle(point_f const& center, f32 radius) const -> std::vector<result>;
+    auto intersect_circle(point_f const& center, f64 radius) const -> std::vector<result>;
 
     auto intersect_function(func const& func, f64 tolerance = 0.01) const -> std::vector<result>;
 

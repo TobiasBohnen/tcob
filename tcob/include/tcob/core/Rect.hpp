@@ -61,7 +61,7 @@ public:
     template <Arithmetic U = T>
     auto constexpr equals(rect<U> const& other, f32 tol) const -> bool;
 
-    auto constexpr find_edge(degree_f angle) const -> point<T>;
+    auto constexpr find_edge(degree_f angle) const -> point_f;
 
     auto constexpr as_centered_at(point<T> const& center) const -> rect;
     auto constexpr as_intersection_with(rect const& other) const -> rect;

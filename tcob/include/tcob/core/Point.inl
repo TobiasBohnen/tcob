@@ -37,21 +37,26 @@ auto constexpr point<T>::to_array [[nodiscard]] () const -> std::array<T, 2>
 }
 
 template <Arithmetic T>
-auto constexpr point<T>::dot(point const& p) const -> f64
+template <Arithmetic U>
+auto constexpr point<T>::dot(point<U> const& p) const -> f64
 {
-    return static_cast<f64>(X * p.X + Y * p.Y);
+    return (static_cast<f64>(X) * static_cast<f64>(p.X))
+        + (static_cast<f64>(Y) * static_cast<f64>(p.Y));
 }
 
 template <Arithmetic T>
-auto constexpr point<T>::cross(point const& p) const -> f64
+template <Arithmetic U>
+auto constexpr point<T>::cross(point<U> const& p) const -> f64
 {
-    return static_cast<f64>(X * p.Y - Y * p.X);
+    return (static_cast<f64>(X) * static_cast<f64>(p.Y))
+        - (static_cast<f64>(Y) * static_cast<f64>(p.X));
 }
 
 template <Arithmetic T>
 inline auto point<T>::length() const -> f64
 {
-    return static_cast<f64>(std::sqrt((X * X) + (Y * Y)));
+    return std::sqrt((static_cast<f64>(X) * static_cast<f64>(X))
+                     + (static_cast<f64>(Y) * static_cast<f64>(Y)));
 }
 
 template <Arithmetic T>

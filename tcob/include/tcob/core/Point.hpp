@@ -31,8 +31,10 @@ public:
 
     auto constexpr to_array [[nodiscard]] () const -> std::array<T, 2>;
 
-    auto constexpr dot(point const& p) const -> f64;
-    auto constexpr cross(point const& p) const -> f64;
+    template <Arithmetic U = T>
+    auto constexpr dot(point<U> const& p) const -> f64;
+    template <Arithmetic U = T>
+    auto constexpr cross(point<U> const& p) const -> f64;
 
     auto length() const -> f64;
     auto distance_to(point const& p) const -> f64;
