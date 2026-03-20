@@ -66,9 +66,9 @@ auto constexpr transform::as_matrix4() const -> mat4
 
 auto constexpr transform::as_inverted() const -> transform
 {
-    f32 const det {(Matrix[0] * (Matrix[8] * Matrix[4] - Matrix[5] * Matrix[7]))
-                   - (Matrix[1] * (Matrix[8] * Matrix[3] - Matrix[5] * Matrix[6]))
-                   + (Matrix[2] * (Matrix[7] * Matrix[3] - Matrix[4] * Matrix[6]))};
+    f32 const det {(Matrix[0] * ((Matrix[8] * Matrix[4]) - (Matrix[5] * Matrix[7])))
+                   - (Matrix[1] * ((Matrix[8] * Matrix[3]) - (Matrix[5] * Matrix[6])))
+                   + (Matrix[2] * ((Matrix[7] * Matrix[3]) - (Matrix[4] * Matrix[6])))};
 
     if (det != 0.0f) {
         f32 const invDet {1.0f / det};

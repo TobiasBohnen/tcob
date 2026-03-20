@@ -119,7 +119,7 @@ inline auto to_number(string_view str) -> std::optional<T>
     string temp {str};
     if constexpr (Integral<T>) {
         char*     end {nullptr};
-        i64 const result {std::strtol(temp.c_str(), &end, 10)};
+        i64 const result {std::strtoll(temp.c_str(), &end, 10)};
         if (*end == '\0' && errno != ERANGE) {
             return static_cast<T>(result);
         }

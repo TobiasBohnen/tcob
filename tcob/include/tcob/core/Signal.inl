@@ -13,7 +13,6 @@ inline void signal<EvArgs>::operator()() const
     requires(IsVoid)
 {
     bool needsCleanup {false};
-
     for (isize i {0}; i < std::ssize(_slots); ++i) {
         auto const& [id, func] {_slots[i]};
         if (func) {
