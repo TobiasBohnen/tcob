@@ -41,8 +41,8 @@ inline auto convolution_filter<Width, Height>::operator()(image const& img) cons
 
                 for (i32 filterX {0}; filterX < Width; ++filterX) {
                     for (i32 filterY {0}; filterY < Height; ++filterY) {
-                        isize const imgX {(x - Width / 2 + filterX + imgWidth) % imgWidth};
-                        isize const imgY {(y - Height / 2 + filterY + imgHeight) % imgHeight};
+                        isize const imgX {(x - (Width / 2) + filterX + imgWidth) % imgWidth};
+                        isize const imgY {(y - (Height / 2) + filterY + imgHeight) % imgHeight};
                         usize const idx {static_cast<usize>((imgX + (imgY * info.Size.Width)) * bpp)};
                         i32 const   mat {m[static_cast<usize>(filterX + (filterY * Width))]};
                         red += srcBuffer[idx] * mat;

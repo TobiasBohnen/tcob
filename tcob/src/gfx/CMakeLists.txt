@@ -10,6 +10,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Image.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilters.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ImageQuant.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Material.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Path2d.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Polygon.cpp
@@ -102,6 +103,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/Image.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ImageFilters.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ImageFilters.inl
+    ${TCOB_INC_DIR}/tcob/gfx/ImageQuant.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Material.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Path2d.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Polygon.hpp

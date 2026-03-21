@@ -17,7 +17,7 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
-#include "tcob/gfx/ImageFilters.hpp"
+#include "tcob/gfx/ImageQuant.hpp"
 
 namespace tcob::gfx::detail {
 
