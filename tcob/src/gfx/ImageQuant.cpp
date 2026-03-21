@@ -364,9 +364,23 @@ auto ditherer_base::get_color(u32 idx) const -> color
 
 ////////////////////////////////////////////////////////////
 
-bayer_dither::bayer_dither(std::vector<color> palette)
+bayer_dither::bayer_dither(std::vector<color> palette, bayer_matrix matrix)
     : ditherer_base {std::move(palette)}
 {
+    switch (matrix) {
+    case bayer_matrix::Bayer2x2:
+        _matrix     = Bayer2x2;
+        _matrixSize = 2;
+        break;
+    case bayer_matrix::Bayer4x4:
+        _matrix     = Bayer4x4;
+        _matrixSize = 4;
+        break;
+    case bayer_matrix::Bayer8x8:
+        _matrix     = Bayer8x8;
+        _matrixSize = 8;
+        break;
+    }
 }
 
 auto bayer_dither::to_indexed(image const& img) const -> std::vector<u32>
@@ -381,7 +395,7 @@ auto bayer_dither::to_indexed(image const& img) const -> std::vector<u32>
             isize const idx {(y * w + x)};
 
             color const original {img.get_pixel(idx)};
-            f64 const   threshold {get_threshold(x, y)};
+            f64 const   threshold {(_matrix[((y % _matrixSize) * _matrixSize) + (x % _matrixSize)] - 0.5) * 64.0};
 
             f64 const r {std::clamp(static_cast<f64>(original.R) + threshold, 0.0, 255.0)};
             f64 const g {std::clamp(static_cast<f64>(original.G) + threshold, 0.0, 255.0)};
@@ -392,14 +406,6 @@ auto bayer_dither::to_indexed(image const& img) const -> std::vector<u32>
     }
 
     return retValue;
-}
-
-auto bayer_dither::get_threshold(i32 x, i32 y) const -> f64
-{
-    i32 const mx {x % 8};
-    i32 const my {y % 8};
-    f64 const normalized {bayer8x8[(my * 8) + mx]};
-    return (normalized - 0.5) * 64.0;
 }
 
 ////////////////////////////////////////////////////////////

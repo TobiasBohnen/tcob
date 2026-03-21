@@ -34,7 +34,7 @@ public:
 
     explicit astar_pathfinding(bool allowDiagonal = false, heuristic heuristic = heuristic::Manhattan);
 
-    static constexpr u64 IMPASSABLE_COST = std::numeric_limits<u64>::max();
+    static constexpr u64 IMPASSABLE_COST {std::numeric_limits<u64>::max()};
 
     auto find_path(AStarGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
