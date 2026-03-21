@@ -31,7 +31,8 @@ octree_quant::octree_quant(i32 maxColors)
 auto octree_quant::operator()(image const& img) -> image
 {
     auto const& info {img.info()};
-    auto const [width, height] {info.Size};
+
+    auto const [w, h] {info.Size};
     build_tree(img);
 
     image retValue {image::CreateEmpty(info.Size, info.Format)};
@@ -42,7 +43,7 @@ auto octree_quant::operator()(image const& img) -> image
                 retValue.set_pixel(pixIdx, get_quantized_color(img.get_pixel(pixIdx)));
             }
         },
-        width * height);
+        w * h);
 
     return retValue;
 }
@@ -61,9 +62,9 @@ void octree_quant::build_tree(image const& img)
 {
     auto const& info {img.info()};
 
-    auto const [width, height] {info.Size};
-    for (i32 y {0}; y < height; ++y) {
-        for (i32 x {0}; x < width; ++x) {
+    auto const [w, h] {info.Size};
+    for (i32 y {0}; y < h; ++y) {
+        for (i32 x {0}; x < w; ++x) {
             insert_color(img.get_pixel({x, y}));
         }
     }
@@ -340,12 +341,10 @@ ditherer_base::ditherer_base(std::vector<color> palette)
 auto ditherer_base::operator()(image const& img) const -> image
 {
     auto const& info {img.info()};
-    auto const  width {info.Size.Width};
-    auto const  height {info.Size.Height};
 
     image      retValue {image::CreateEmpty(info.Size, info.Format)};
     auto const inds {to_indexed(img)};
-    for (isize idx {0}; idx < width * height; ++idx) {
+    for (isize idx {0}; idx < info.Size.area(); ++idx) {
         retValue.set_pixel(idx, get_color(inds[idx]));
     }
 
@@ -385,7 +384,8 @@ bayer_dither::bayer_dither(std::vector<color> palette, bayer_matrix matrix)
 
 auto bayer_dither::to_indexed(image const& img) const -> std::vector<u32>
 {
-    auto const&      info {img.info()};
+    auto const& info {img.info()};
+
     std::vector<u32> retValue;
     retValue.resize(info.Size.area());
     auto const [w, h] {info.Size};
@@ -418,7 +418,8 @@ value_noise_dither::value_noise_dither(std::vector<color> palette, size_i gridSi
 
 auto value_noise_dither::to_indexed(image const& img) const -> std::vector<u32>
 {
-    auto const&      info {img.info()};
+    auto const& info {img.info()};
+
     std::vector<u32> retValue;
     retValue.resize(info.Size.area());
     auto const [w, h] {info.Size};
@@ -449,19 +450,19 @@ atkinson_dither::atkinson_dither(std::vector<color> palette)
 
 auto atkinson_dither::to_indexed(image const& img) const -> std::vector<u32>
 {
-    auto const&      info {img.info()};
+    auto const& info {img.info()};
+
     std::vector<u32> retValue;
     retValue.resize(info.Size.area());
-    auto const width {info.Size.Width};
-    auto const height {info.Size.Height};
+    auto const [w, h] {info.Size};
 
-    std::vector<f64> currErrors(width * 3, 0.0);
-    std::vector<f64> nextErrors(width * 3, 0.0);
-    std::vector<f64> next2Errors(width * 3, 0.0);
+    std::vector<f64> currErrors(w * 3, 0.0);
+    std::vector<f64> nextErrors(w * 3, 0.0);
+    std::vector<f64> next2Errors(w * 3, 0.0);
 
-    for (i32 y {0}; y < height; ++y) {
-        for (i32 x {0}; x < width; ++x) {
-            isize const idx {(y * width + x)};
+    for (i32 y {0}; y < h; ++y) {
+        for (i32 x {0}; x < w; ++x) {
+            isize const idx {(y * w + x)};
             color const original {img.get_pixel(idx)};
 
             f64 const r {std::clamp(static_cast<f64>(original.R) + currErrors[(x * 3) + 0], 0.0, 255.0)};
@@ -477,19 +478,19 @@ auto atkinson_dither::to_indexed(image const& img) const -> std::vector<u32>
 
             f64 const factor {1.0 / 8.0};
 
-            if (x + 1 < width) {
+            if (x + 1 < w) {
                 currErrors[((x + 1) * 3) + 0] += errR * factor;
                 currErrors[((x + 1) * 3) + 1] += errG * factor;
                 currErrors[((x + 1) * 3) + 2] += errB * factor;
             }
 
-            if (x + 2 < width) {
+            if (x + 2 < w) {
                 currErrors[((x + 2) * 3) + 0] += errR * factor;
                 currErrors[((x + 2) * 3) + 1] += errG * factor;
                 currErrors[((x + 2) * 3) + 2] += errB * factor;
             }
 
-            if (y + 1 < height) {
+            if (y + 1 < h) {
                 if (x > 0) {
                     nextErrors[((x - 1) * 3) + 0] += errR * factor;
                     nextErrors[((x - 1) * 3) + 1] += errG * factor;
@@ -498,13 +499,13 @@ auto atkinson_dither::to_indexed(image const& img) const -> std::vector<u32>
                 nextErrors[(x * 3) + 0] += errR * factor;
                 nextErrors[(x * 3) + 1] += errG * factor;
                 nextErrors[(x * 3) + 2] += errB * factor;
-                if (x + 1 < width) {
+                if (x + 1 < w) {
                     nextErrors[((x + 1) * 3) + 0] += errR * factor;
                     nextErrors[((x + 1) * 3) + 1] += errG * factor;
                     nextErrors[((x + 1) * 3) + 2] += errB * factor;
                 }
             }
-            if (y + 2 < height) {
+            if (y + 2 < h) {
                 next2Errors[(x * 3) + 0] += errR * factor;
                 next2Errors[(x * 3) + 1] += errG * factor;
                 next2Errors[(x * 3) + 2] += errB * factor;
@@ -528,23 +529,23 @@ floyd_steinberg_dither::floyd_steinberg_dither(std::vector<color> palette)
 
 auto floyd_steinberg_dither::to_indexed(image const& img) const -> std::vector<u32>
 {
-    auto const&      info {img.info()};
+    auto const& info {img.info()};
+
     std::vector<u32> retValue;
     retValue.resize(info.Size.area());
-    auto const width {info.Size.Width};
-    auto const height {info.Size.Height};
+    auto const [w, h] {info.Size};
 
-    std::vector<f64> currErrors(width * 3, 0.0);
-    std::vector<f64> nextErrors(width * 3, 0.0);
+    std::vector<f64> currErrors(w * 3, 0.0);
+    std::vector<f64> nextErrors(w * 3, 0.0);
 
     constexpr f64 coeff_7_16 {7.0 / 16.0};
     constexpr f64 coeff_3_16 {3.0 / 16.0};
     constexpr f64 coeff_5_16 {5.0 / 16.0};
     constexpr f64 coeff_1_16 {1.0 / 16.0};
 
-    for (i32 y {0}; y < height; ++y) {
-        for (i32 x {0}; x < width; ++x) {
-            isize const idx {(y * width + x)};
+    for (i32 y {0}; y < h; ++y) {
+        for (i32 x {0}; x < w; ++x) {
+            isize const idx {(y * w + x)};
             color const original {img.get_pixel(idx)};
 
             f64 const r {std::clamp(static_cast<f64>(original.R) + currErrors[(x * 3) + 0], 0.0, 255.0)};
@@ -559,13 +560,13 @@ auto floyd_steinberg_dither::to_indexed(image const& img) const -> std::vector<u
             f64 const errG {g - static_cast<f64>(quantized.G)};
             f64 const errB {b - static_cast<f64>(quantized.B)};
 
-            if (x + 1 < width) {
+            if (x + 1 < w) {
                 currErrors[((x + 1) * 3) + 0] += errR * coeff_7_16;
                 currErrors[((x + 1) * 3) + 1] += errG * coeff_7_16;
                 currErrors[((x + 1) * 3) + 2] += errB * coeff_7_16;
             }
 
-            if (y + 1 < height) {
+            if (y + 1 < h) {
                 if (x > 0) {
                     nextErrors[((x - 1) * 3) + 0] += errR * coeff_3_16;
                     nextErrors[((x - 1) * 3) + 1] += errG * coeff_3_16;
@@ -574,7 +575,7 @@ auto floyd_steinberg_dither::to_indexed(image const& img) const -> std::vector<u
                 nextErrors[(x * 3) + 0] += errR * coeff_5_16;
                 nextErrors[(x * 3) + 1] += errG * coeff_5_16;
                 nextErrors[(x * 3) + 2] += errB * coeff_5_16;
-                if (x + 1 < width) {
+                if (x + 1 < w) {
                     nextErrors[((x + 1) * 3) + 0] += errR * coeff_1_16;
                     nextErrors[((x + 1) * 3) + 1] += errG * coeff_1_16;
                     nextErrors[((x + 1) * 3) + 2] += errB * coeff_1_16;
