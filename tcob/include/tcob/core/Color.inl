@@ -128,12 +128,6 @@ auto constexpr color::FromHSVA(hsx const& hsv, u8 a) -> color
     return retValue;
 }
 
-auto constexpr color::as_grayscale(f32 redFactor, f32 greenFactor, f32 blueFactor) const -> color
-{
-    u8 const value {static_cast<u8>((R * redFactor) + (G * greenFactor) + (B * blueFactor))};
-    return {value, value, value};
-}
-
 auto constexpr color::Lerp(color from, color to, f64 step) -> color
 {
     step = std::clamp(step, 0.0, 1.0);
@@ -156,7 +150,7 @@ auto constexpr color::as_alpha_premultiplied() const -> color
 
 auto constexpr color::value() const -> u32
 {
-    return static_cast<u32>(R << 24 | G << 16 | B << 8 | A);
+    return (static_cast<u32>(R) << 24) | (static_cast<u32>(G) << 16) | (static_cast<u32>(B) << 8) | static_cast<u32>(A);
 }
 
 auto constexpr color::to_array() const -> std::array<u8, 4>

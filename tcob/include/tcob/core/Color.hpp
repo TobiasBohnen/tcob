@@ -38,7 +38,6 @@ public:
     static auto constexpr FromHSLA(hsx const& hsl, u8 a = 255) -> color;
     static auto constexpr FromHSVA(hsx const& hsv, u8 a = 255) -> color;
 
-    auto constexpr as_grayscale [[nodiscard]] (f32 redFactor = 0.299f, f32 greenFactor = 0.587f, f32 blueFactor = 0.114f) const -> color;
     auto constexpr as_alpha_premultiplied [[nodiscard]] () const -> color;
 
     auto constexpr value() const -> u32;
