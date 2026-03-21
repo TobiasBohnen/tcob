@@ -159,7 +159,6 @@ private:
     void reduce();
     auto get_quantized_color(color c) const -> color;
     void merge_leaf_nodes(node* n, i32 level);
-    auto count_leaves(node* n) -> i32;
 
     i32                                            _maxColors;
     i32                                            _leafCount {0};

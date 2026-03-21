@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -363,9 +364,7 @@ void octree_quantizer::insert_color(color c)
     node* current {_root.get()};
 
     for (i32 level {0}; level < MAX_TREE_DEPTH; ++level) {
-        if (current->IsLeaf) {
-            break;
-        }
+        if (current->IsLeaf) { break; }
 
         i32 const shift {7 - level};
         i32 const index {((c.R >> shift) & 1) << 2 | ((c.G >> shift) & 1) << 1 | ((c.B >> shift) & 1)};
@@ -419,10 +418,11 @@ void octree_quantizer::reduce()
 
 void octree_quantizer::merge_leaf_nodes(node* n, i32 level)
 {
-    _leafCount -= count_leaves(n);
-
     for (auto& child : n->Children) {
         if (child) {
+            assert(child->IsLeaf);
+            _leafCount--;
+
             n->RedSum += child->RedSum;
             n->GreenSum += child->GreenSum;
             n->BlueSum += child->BlueSum;
@@ -443,29 +443,12 @@ void octree_quantizer::merge_leaf_nodes(node* n, i32 level)
     }
 }
 
-auto octree_quantizer::count_leaves(node* n) -> i32
-{
-    i32 retValue {0};
-    for (auto& child : n->Children) {
-        if (child) {
-            if (child->IsLeaf) {
-                retValue++;
-            } else {
-                retValue += count_leaves(child.get());
-            }
-        }
-    }
-    return retValue;
-}
-
 auto octree_quantizer::get_quantized_color(color c) const -> color
 {
     node* current {_root.get()};
 
     for (i32 level {0}; level < MAX_TREE_DEPTH; ++level) {
-        if (current->IsLeaf) {
-            break;
-        }
+        if (current->IsLeaf) { break; }
 
         i32 const shift {7 - level};
         i32 const index {((c.R >> shift) & 1) << 2 | ((c.G >> shift) & 1) << 1 | ((c.B >> shift) & 1)};
