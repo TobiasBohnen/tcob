@@ -438,7 +438,7 @@ auto gif_encoder::add_frame(image_frame const& frame, io::ostream& out) -> bool
         _height = static_cast<i16>(frame.Image.info().Size.Height);
     }
 
-    auto const palette {octree_quantizer::GetPalette(frame.Image, 256)};
+    auto const palette {octree_quant::GetPalette(frame.Image, 256)};
     auto const newFrame {floyd_steinberg_dither {palette}.to_indexed(frame.Image)};
 
     if (_firstFrame) {

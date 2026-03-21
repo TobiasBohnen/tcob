@@ -19,9 +19,9 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API octree_quantizer final {
+class TCOB_API octree_quant final {
 public:
-    explicit octree_quantizer(i32 maxColors);
+    explicit octree_quant(i32 maxColors);
 
     auto operator()(image const& img) -> image;
 

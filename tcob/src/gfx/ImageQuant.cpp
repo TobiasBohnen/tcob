@@ -22,13 +22,13 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-octree_quantizer::octree_quantizer(i32 maxColors)
+octree_quant::octree_quant(i32 maxColors)
     : _maxColors {maxColors}
     , _root {std::make_unique<node>()}
 {
 }
 
-auto octree_quantizer::operator()(image const& img) -> image
+auto octree_quant::operator()(image const& img) -> image
 {
     auto const& info {img.info()};
     auto const [width, height] {info.Size};
@@ -47,9 +47,9 @@ auto octree_quantizer::operator()(image const& img) -> image
     return retValue;
 }
 
-auto octree_quantizer::GetPalette(image const& img, i32 maxColors) -> std::vector<color>
+auto octree_quant::GetPalette(image const& img, i32 maxColors) -> std::vector<color>
 {
-    octree_quantizer quant {maxColors};
+    octree_quant quant {maxColors};
     quant.build_tree(img);
     std::vector<color> palette;
     palette.reserve(quant._leafCount);
@@ -57,7 +57,7 @@ auto octree_quantizer::GetPalette(image const& img, i32 maxColors) -> std::vecto
     return palette;
 }
 
-void octree_quantizer::build_tree(image const& img)
+void octree_quant::build_tree(image const& img)
 {
     auto const& info {img.info()};
 
@@ -73,7 +73,7 @@ void octree_quantizer::build_tree(image const& img)
     }
 }
 
-void octree_quantizer::build_palette(node const* n, std::vector<color>& pal) const
+void octree_quant::build_palette(node const* n, std::vector<color>& pal) const
 {
     auto const getColor {[](node const* target) -> color {
         return {
@@ -95,7 +95,7 @@ void octree_quantizer::build_palette(node const* n, std::vector<color>& pal) con
     }
 }
 
-void octree_quantizer::insert_color(color c)
+void octree_quant::insert_color(color c)
 {
     node* current {_root.get()};
 
@@ -133,7 +133,7 @@ void octree_quantizer::insert_color(color c)
     current->PixelCount++;
 }
 
-void octree_quantizer::reduce()
+void octree_quant::reduce()
 {
     for (i32 level {MAX_TREE_DEPTH - 1}; level >= 0; --level) {
         auto& list {_reducibleNodes[level]};
@@ -152,7 +152,7 @@ void octree_quantizer::reduce()
     }
 }
 
-void octree_quantizer::merge_leaf_nodes(node* n, i32 level)
+void octree_quant::merge_leaf_nodes(node* n, i32 level)
 {
     for (auto& child : n->Children) {
         if (child) {
@@ -179,7 +179,7 @@ void octree_quantizer::merge_leaf_nodes(node* n, i32 level)
     }
 }
 
-auto octree_quantizer::get_quantized_color(color c) const -> color
+auto octree_quant::get_quantized_color(color c) const -> color
 {
     node* current {_root.get()};
 
