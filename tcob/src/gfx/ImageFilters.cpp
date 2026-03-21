@@ -529,8 +529,7 @@ void neuquant::train(image const& img)
     i32 const   lengthCount {info.Size.area()};
 
     i32 const cycleCount {100};
-    i32 const sampleFac {30};
-    i32 const step {sampleFac > 0 ? sampleFac : 1};
+    i32 const step {std::clamp(lengthCount / (_maxColors * 30), 1, 30)};
     u32 const primeStep {499};
 
     f64       alpha {1.0};
