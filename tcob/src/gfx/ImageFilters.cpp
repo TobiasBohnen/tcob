@@ -242,10 +242,10 @@ auto resize_bilinear::operator()(image const& img) const -> image
                 f64 const dx1 {ox - x1};
                 f64 const dx2 {1.0 - dx1};
 
-                u8 const r {static_cast<u8>((dy2 * (dx2 * c1.R + dx1 * c2.R)) + (dy1 * (dx2 * c3.R + dx1 * c4.R)))};
-                u8 const g {static_cast<u8>((dy2 * (dx2 * c1.G + dx1 * c2.G)) + (dy1 * (dx2 * c3.G + dx1 * c4.G)))};
-                u8 const b {static_cast<u8>((dy2 * (dx2 * c1.B + dx1 * c2.B)) + (dy1 * (dx2 * c3.B + dx1 * c4.B)))};
-                u8 const a {static_cast<u8>((dy2 * (dx2 * c1.A + dx1 * c2.A)) + (dy1 * (dx2 * c3.A + dx1 * c4.A)))};
+                u8 const r {static_cast<u8>((dy2 * ((dx2 * c1.R) + (dx1 * c2.R))) + (dy1 * ((dx2 * c3.R) + (dx1 * c4.R))))};
+                u8 const g {static_cast<u8>((dy2 * ((dx2 * c1.G) + (dx1 * c2.G))) + (dy1 * ((dx2 * c3.G) + (dx1 * c4.G))))};
+                u8 const b {static_cast<u8>((dy2 * ((dx2 * c1.B) + (dx1 * c2.B))) + (dy1 * ((dx2 * c3.B) + (dx1 * c4.B))))};
+                u8 const a {static_cast<u8>((dy2 * ((dx2 * c1.A) + (dx1 * c2.A))) + (dy1 * ((dx2 * c3.A) + (dx1 * c4.A))))};
 
                 retValue.set_pixel({x, y}, {r, g, b, a});
             }
@@ -615,7 +615,7 @@ ditherer_base::ditherer_base(std::vector<color> palette)
 {
     for (u32 i {0}; i < _palette.size(); ++i) {
         color const c {_palette[i]};
-        _tree.add({.Position = {static_cast<f32>(c.R), static_cast<f32>(c.G), static_cast<f32>(c.B)}, .ID = i});
+        _tree.add({.Position = {static_cast<f64>(c.R), static_cast<f64>(c.G), static_cast<f64>(c.B)}, .ID = i});
     }
 }
 
@@ -636,7 +636,7 @@ auto ditherer_base::operator()(image const& img) const -> image
 
 auto ditherer_base::find_nearest(f64 r, f64 g, f64 b) const -> u32
 {
-    return _tree.find_nearest(std::array<f32, 3> {{static_cast<f32>(r), static_cast<f32>(g), static_cast<f32>(b)}})->ID;
+    return _tree.find_nearest(std::array<f64, 3> {r, g, b})->ID;
 }
 
 auto ditherer_base::get_color(u32 idx) const -> color

@@ -209,10 +209,10 @@ protected:
 
     std::vector<color> _palette;
     struct color_node {
-        std::array<f32, 3> Position;
+        std::array<f64, 3> Position;
         u32                ID;
 
-        auto get_dimensions() const -> std::array<f32, 3> { return Position; }
+        auto get_dimensions() const -> std::array<f64, 3> { return Position; }
         auto operator==(color_node const& other) const -> bool { return ID == other.ID; }
     };
 

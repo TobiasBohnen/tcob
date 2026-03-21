@@ -18,7 +18,7 @@ namespace tcob {
 template <typename T, usize Dimensions>
 concept KdTreeValue =
     requires(T& t) {
-        { t.get_dimensions() } -> std::same_as<std::array<f32, Dimensions>>;
+        { t.get_dimensions() } -> std::same_as<std::array<f64, Dimensions>>;
         { t == t } -> std::same_as<bool>;
     };
 
@@ -28,7 +28,7 @@ template <typename T, usize Dimensions, usize SplitThreshold = 16, usize MaxDept
     requires KdTreeValue<T, Dimensions>
 class kd_tree {
 public:
-    using point_type  = std::array<f32, Dimensions>;
+    using point_type  = std::array<f64, Dimensions>;
     using bounds_type = std::pair<point_type, point_type>; // min, max
 
     explicit kd_tree(bounds_type const& bounds);
@@ -65,17 +65,17 @@ private:
 
         void query(bounds_type const& bounds, bounds_type const& queryBounds, std::vector<T>& values) const;
 
-        void find_nearest(point_type const& target, bounds_type const& bounds, T const*& best, f32& minDistSq) const;
+        void find_nearest(point_type const& target, bounds_type const& bounds, T const*& best, f64& minDistSq) const;
 
-        static auto GetSide(point_type const& point, usize axis, f32 splitPos) -> u32;
-        static auto ComputeChildBounds(bounds_type const& bounds, usize axis, f32 splitPos, u32 side) -> bounds_type;
+        static auto GetSide(point_type const& point, usize axis, f64 splitPos) -> u32;
+        static auto ComputeChildBounds(bounds_type const& bounds, usize axis, f64 splitPos, u32 side) -> bounds_type;
         static auto Intersects(bounds_type const& a, bounds_type const& b) -> bool;
         static auto PointInBounds(point_type const& point, bounds_type const& bounds) -> bool;
 
     private:
         std::array<std::unique_ptr<node>, 2> _children;
         std::vector<T>                       _values;
-        f32                                  _splitPos {};
+        f64                                  _splitPos {};
         usize                                _axis {};
     };
 

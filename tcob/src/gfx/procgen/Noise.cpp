@@ -19,7 +19,7 @@ namespace tcob::gfx {
 
 static auto Interpolate(f32 a0, f32 a1, f32 w) -> f32
 {
-    f32 const e {w * w * w * (w * (w * 6.0f - 15.0f) + 10.0f)};
+    f32 const e {w * w * w * ((w * ((w * 6.0f) - 15.0f)) + 10.0f)};
     return ((a1 - a0) * e) + a0;
 }
 

@@ -160,11 +160,11 @@ void image::fill(rect_i const& rect, color c)
         idx += bpp;
     }
 
-    u8*         firstRow {&_buffer[(clipped.top() * _info.Size.Width + clipped.left()) * bpp]};
+    u8*         firstRow {&_buffer[((clipped.top() * _info.Size.Width) + clipped.left()) * bpp]};
     isize const rowBytes {static_cast<isize>(clipped.Size.Width) * bpp};
 
     for (i32 y {clipped.top() + 1}; y < clipped.bottom(); ++y) {
-        u8* destRow {&_buffer[(y * _info.Size.Width + clipped.left()) * bpp]};
+        u8* destRow {&_buffer[((y * _info.Size.Width) + clipped.left()) * bpp]};
         std::memcpy(destRow, firstRow, rowBytes);
     }
 }
@@ -192,9 +192,9 @@ void image::blend(point_i offset, image const& src)
             f32 const outA {sa + (da * (1 - sa))};
 
             color const out {
-                static_cast<u8>((srcCol.R * sa + dstCol.R * da * (1 - sa)) / outA),
-                static_cast<u8>((srcCol.G * sa + dstCol.G * da * (1 - sa)) / outA),
-                static_cast<u8>((srcCol.B * sa + dstCol.B * da * (1 - sa)) / outA),
+                static_cast<u8>(((srcCol.R * sa) + (dstCol.R * da * (1 - sa))) / outA),
+                static_cast<u8>(((srcCol.G * sa) + (dstCol.G * da * (1 - sa))) / outA),
+                static_cast<u8>(((srcCol.B * sa) + (dstCol.B * da * (1 - sa))) / outA),
                 static_cast<u8>(outA * 255)};
 
             set_pixel({x + offset.X, y + offset.Y}, out);
