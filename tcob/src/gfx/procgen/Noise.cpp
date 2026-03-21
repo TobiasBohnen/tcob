@@ -11,6 +11,7 @@
 #include <numbers>
 
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/random/Random.hpp"
 
 namespace tcob::gfx {
@@ -25,7 +26,7 @@ static auto Interpolate(f32 a0, f32 a1, f32 w) -> f32
 
 ////////////////////////////////////////////////////////////
 
-perlin_noise::perlin_noise(i32 gridSize, f32 scale, u64 seed)
+perlin_noise::perlin_noise(size_i gridSize, f32 scale, u64 seed)
     : _scale {scale}
     , _seed {seed}
     , _gridSize {gridSize}
@@ -39,14 +40,14 @@ auto perlin_noise::operator()(point_f p) const -> f32
     f32 const x {ps.X - std::floor(ps.X)};
     f32 const y {ps.Y - std::floor(ps.Y)};
 
-    i32 const x0 {static_cast<i32>(x * _gridSize)};
-    i32 const y0 {static_cast<i32>(y * _gridSize)};
+    i32 const x0 {static_cast<i32>(x * _gridSize.Width)};
+    i32 const y0 {static_cast<i32>(y * _gridSize.Height)};
 
-    i32 const x1 {(x0 + 1) % _gridSize};
-    i32 const y1 {(y0 + 1) % _gridSize};
+    i32 const x1 {(x0 + 1) % _gridSize.Width};
+    i32 const y1 {(y0 + 1) % _gridSize.Height};
 
-    f32 const sx {(x * _gridSize) - std::floor(x * _gridSize)};
-    f32 const sy {(y * _gridSize) - std::floor(y * _gridSize)};
+    f32 const sx {(x * _gridSize.Width) - std::floor(x * _gridSize.Width)};
+    f32 const sy {(y * _gridSize.Height) - std::floor(y * _gridSize.Height)};
 
     f32 const n0 {dot_grid_gradient({x0, y0}, {sx, sy})};
     f32 const n1 {dot_grid_gradient({x1, y0}, {sx - 1.0f, sy})};
@@ -130,11 +131,12 @@ void cellular_noise::generate_points(u64 seed)
 
 ////////////////////////////////////////////////////////////
 
-value_noise::value_noise(i32 gridSize, f32 scale, u64 seed)
+value_noise::value_noise(size_i gridSize, f32 scale, u64 seed)
     : _scale {scale}
-    , _grid {{gridSize, gridSize}}
+    , _grid {gridSize}
+    , _gridSize {gridSize}
 {
-    generate_grid(gridSize, seed);
+    generate_grid(seed);
 }
 
 auto value_noise::operator()(point_f p) const -> f32
@@ -144,15 +146,13 @@ auto value_noise::operator()(point_f p) const -> f32
     f32 const x {ps.X - std::floor(ps.X)};
     f32 const y {ps.Y - std::floor(ps.Y)};
 
-    auto const gridSize {_grid.width()};
+    i32 const x0 {static_cast<i32>(x * _gridSize.Width)};
+    i32 const x1 {(x0 + 1) % _gridSize.Width};
+    i32 const y0 {static_cast<i32>(y * _gridSize.Height)};
+    i32 const y1 {(y0 + 1) % _gridSize.Height};
 
-    i32 const x0 {static_cast<i32>(x * gridSize)};
-    i32 const x1 {(x0 + 1) % gridSize};
-    i32 const y0 {static_cast<i32>(y * gridSize)};
-    i32 const y1 {(y0 + 1) % gridSize};
-
-    f32 const sx {(x * gridSize) - std::floor(x * gridSize)};
-    f32 const sy {(y * gridSize) - std::floor(y * gridSize)};
+    f32 const sx {(x * _gridSize.Width) - std::floor(x * _gridSize.Width)};
+    f32 const sy {(y * _gridSize.Height) - std::floor(y * _gridSize.Height)};
 
     f32 const n0 {Interpolate(_grid[x0, y0], _grid[x1, y0], sx)};
     f32 const n1 {Interpolate(_grid[x0, y1], _grid[x1, y1], sx)};
@@ -160,11 +160,11 @@ auto value_noise::operator()(point_f p) const -> f32
     return Interpolate(n0, n1, sy);
 }
 
-void value_noise::generate_grid(i32 gridSize, u64 seed)
+void value_noise::generate_grid(u64 seed)
 {
     rng rng {seed};
-    for (i32 x {0}; x < gridSize; ++x) {
-        for (i32 y {0}; y < gridSize; ++y) {
+    for (i32 x {0}; x < _gridSize.Width; ++x) {
+        for (i32 y {0}; y < _gridSize.Height; ++y) {
             _grid[x, y] = rng(0.0f, 1.0f);
         }
     }

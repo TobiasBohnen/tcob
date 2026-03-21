@@ -10,13 +10,14 @@
 
 #include "tcob/core/Grid.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API perlin_noise final {
 public:
-    explicit perlin_noise(i32 gridSize, f32 scale = 1.0f, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
+    explicit perlin_noise(size_i gridSize, f32 scale = 1.0f, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
 
     auto operator()(point_f p) const -> f32;
 
@@ -25,9 +26,9 @@ private:
 
     auto dot_grid_gradient(point_i i, point_f f) const -> f32;
 
-    f32 _scale;
-    u64 _seed;
-    i32 _gridSize;
+    f32    _scale;
+    u64    _seed;
+    size_i _gridSize;
 };
 
 ////////////////////////////////////////////////////////////
@@ -51,15 +52,16 @@ private:
 
 class TCOB_API value_noise final {
 public:
-    value_noise(i32 gridSize, f32 scale = 1.0f, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
+    value_noise(size_i gridSize, f32 scale = 1.0f, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
 
     auto operator()(point_f p) const -> f32;
 
 private:
-    void generate_grid(i32 gridSize, u64 seed);
+    void generate_grid(u64 seed);
 
     f32       _scale;
     grid<f32> _grid;
+    size_i    _gridSize;
 };
 
 }

@@ -16,7 +16,7 @@ namespace tcob {
 template <typename T>
 inline grid<T>::grid(size_type size, T const& defaultValue)
     : _size {size}
-    , _data(size.Width * size.Height, defaultValue)
+    , _data(size.area(), defaultValue)
 {
 }
 
