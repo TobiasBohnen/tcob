@@ -14,6 +14,7 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/core/spatial/KDTree.hpp"
 #include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/procgen/Noise.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
@@ -238,6 +239,18 @@ private:
          0.796875, 0.296875, 0.921875, 0.421875, 0.765625, 0.265625, 0.890625, 0.390625,
          0.234375, 0.734375, 0.109375, 0.609375, 0.203125, 0.703125, 0.078125, 0.578125,
          0.984375, 0.484375, 0.859375, 0.359375, 0.953125, 0.453125, 0.828125, 0.328125}};
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API value_noise_dither final : public ditherer_base {
+public:
+    explicit value_noise_dither(std::vector<color> palette, size_i gridSize, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
+
+    auto to_indexed(image const& img) const -> std::vector<u32> override;
+
+private:
+    value_noise _noise;
 };
 
 ////////////////////////////////////////////////////////////

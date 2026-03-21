@@ -14,6 +14,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/gfx/Image.hpp"
 
@@ -638,12 +639,11 @@ auto ordered_dither::to_indexed(image const& img) const -> std::vector<u32>
     auto const&      info {img.info()};
     std::vector<u32> retValue;
     retValue.resize(info.Size.area());
-    auto const height {info.Size.Height};
-    auto const width {info.Size.Width};
+    auto const [w, h] {info.Size};
 
-    for (i32 y {0}; y < height; ++y) {
-        for (i32 x {0}; x < width; ++x) {
-            isize const idx {(y * width + x)};
+    for (i32 y {0}; y < h; ++y) {
+        for (i32 x {0}; x < w; ++x) {
+            isize const idx {(y * w + x)};
 
             color const original {img.get_pixel(idx)};
             f64 const   threshold {get_threshold(x, y)};
@@ -665,6 +665,38 @@ auto ordered_dither::get_threshold(i32 x, i32 y) const -> f64
     i32 const my {y % 8};
     f64 const normalized {bayer8x8[(my * 8) + mx]};
     return (normalized - 0.5) * 64.0;
+}
+
+////////////////////////////////////////////////////////////
+
+value_noise_dither::value_noise_dither(std::vector<color> palette, size_i gridSize, u64 seed)
+    : ditherer_base {std::move(palette)}
+    , _noise {gridSize, 1.0f, seed}
+{
+}
+
+auto value_noise_dither::to_indexed(image const& img) const -> std::vector<u32>
+{
+    auto const&      info {img.info()};
+    std::vector<u32> retValue;
+    retValue.resize(info.Size.area());
+    auto const [w, h] {info.Size};
+
+    for (i32 y {0}; y < h; ++y) {
+        for (i32 x {0}; x < w; ++x) {
+            isize const idx {(y * w) + x};
+            color const original {img.get_pixel(idx)};
+            f64 const   threshold {(static_cast<f64>(_noise({static_cast<f32>(x) / w, static_cast<f32>(y) / h})) - 0.5) * 32.0};
+
+            f64 const r {std::clamp(static_cast<f64>(original.R) + threshold, 0.0, 255.0)};
+            f64 const g {std::clamp(static_cast<f64>(original.G) + threshold, 0.0, 255.0)};
+            f64 const b {std::clamp(static_cast<f64>(original.B) + threshold, 0.0, 255.0)};
+
+            retValue[idx] = find_nearest(r, g, b);
+        }
+    }
+
+    return retValue;
 }
 
 ////////////////////////////////////////////////////////////
