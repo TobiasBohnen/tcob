@@ -857,6 +857,8 @@ struct converter<T> {
 
 template <Pointer T>
 struct converter<T> {
+    static inline char const* TypeName {typeid(std::remove_pointer_t<T>).name()};
+
     static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.is_userdata(idx);
@@ -870,35 +872,38 @@ struct converter<T> {
             return true;
         }
 
-        static char const* TypeName {typeid(std::remove_pointer_t<T>).name()};
-
         if (view.is_userdata(idx)) {
-            // try uservalue
-            [[maybe_unused]] type const err {view.get_uservalue(idx)};
+            if (view.get_metatable(idx)) {
+                // try exact match
+                if (!view.get_metatable(TypeName)) { return false; }
+                bool match {view.raw_equal(-1, -2)};
+                view.pop(1);
 
-            assert(err == type::String);
-            string const userDataType {view.to_string(-1)};
-            view.pop(1);
+                if (!match) {
+                    // try _gc variant (managed_ptr)
+                    static string const GCTypeName {string {TypeName} + "_gc"};
+                    if (!view.get_metatable(GCTypeName.c_str())) { return false; }
+                    match = view.raw_equal(-1, -2);
+                    view.pop(1);
+                }
 
-            void* ptr {nullptr};
+                view.pop(1); // pop userdata metatable
 
-            if (userDataType == TypeName || std::is_void_v<std::remove_pointer_t<T>>) {
-                ptr = view.to_userdata(idx++);
-            } else {
-                // try metatable
-                view.get_metatable(userDataType);
+                if (match) {
+                    value = *static_cast<T*>(view.to_userdata(idx++));
+                    return true;
+                }
+
+                // try __types inheritance
+                view.get_metatable(idx);
                 table tab {table::Acquire(view, -1)};
                 view.pop(1);
                 if (tab.is_valid()) {
                     if (std::unordered_set<string> types; tab.try_get(types, "__types") && types.contains(TypeName)) {
-                        ptr = view.to_userdata(idx++);
+                        value = *static_cast<T*>(view.to_userdata(idx++));
+                        return true;
                     }
                 }
-            }
-
-            if (ptr) {
-                value = *static_cast<T*>(ptr); // Lua userdata is T**, so dereference it here
-                return true;
             }
 
             value = nullptr;
@@ -924,15 +929,8 @@ struct converter<T> {
             return;
         }
 
-        static char const* TypeName {typeid(std::remove_pointer_t<T>).name()};
-
         T* obj {static_cast<T*>(view.new_userdata(sizeof(T*)))};
         *obj = value;
-
-        view.push_string(TypeName);
-
-        [[maybe_unused]] i32 const err {view.set_uservalue(-2)};
-        assert(err != 0);
 
         view.new_metatable(TypeName);
         view.set_metatable(-2);
@@ -946,27 +944,24 @@ template <typename T>
 struct converter<scripting::managed_ptr<T>> {
     static void To(state_view view, scripting::managed_ptr<T> const& value)
     {
-        static string TypeName {typeid(T).name()};
+        static char const*  TypeName {typeid(T).name()};
+        static string const GCTypeName {string {TypeName} + "_gc"};
 
         T** obj {static_cast<T**>(view.new_userdata(sizeof(T*)))};
         *obj = value.Pointer;
 
-        view.push_string(TypeName);
-
-        if (view.set_uservalue(-2) != 0) {
-            if (view.new_metatable((TypeName + "_gc")) == 0) {
-                // GC table exists
-                view.set_metatable(-2);
-            } else {
-                // create GC metamethod
-                if constexpr (std::is_destructible_v<T>) {
-                    i32 const tableIdx {view.get_top()};
-                    view.push_convert("__gc");
-                    view.push_cfunction(&gc);
-                    view.set_table(tableIdx);
-                }
-                view.set_metatable(-2);
+        if (view.new_metatable(GCTypeName.c_str()) == 0) {
+            // GC table already exists
+            view.set_metatable(-2);
+        } else {
+            // create GC metamethod
+            if constexpr (std::is_destructible_v<T>) {
+                i32 const tableIdx {view.get_top()};
+                view.push_convert("__gc");
+                view.push_cfunction(&gc);
+                view.set_table(tableIdx);
             }
+            view.set_metatable(-2);
         }
     }
 

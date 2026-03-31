@@ -345,14 +345,14 @@ auto state_view::get_metatable(i32 objindex) const -> bool
     return lua_getmetatable(_state, objindex) == 1;
 }
 
-void state_view::get_metatable(string const& tableName) const
+auto state_view::get_metatable(string const& tableName) const -> bool
 {
-    luaL_getmetatable(_state, tableName.c_str());
+    return luaL_getmetatable(_state, tableName.c_str()) != LUA_TNIL;
 }
 
-void state_view::get_metatable(char const* tableName) const
+auto state_view::get_metatable(char const* tableName) const -> bool
 {
-    luaL_getmetatable(_state, tableName);
+    return luaL_getmetatable(_state, tableName) != LUA_TNIL;
 }
 
 void state_view::set_table(i32 idx) const

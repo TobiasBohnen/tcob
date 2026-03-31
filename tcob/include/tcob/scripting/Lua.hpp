@@ -268,8 +268,8 @@ public:
     void create_table(i32 narr, i32 nrec) const;
 
     auto get_metatable(i32 objindex) const -> bool;
-    void get_metatable(string const& tableName) const;
-    void get_metatable(char const* tableName) const;
+    auto get_metatable(string const& tableName) const -> bool;
+    auto get_metatable(char const* tableName) const -> bool;
     void set_metatable(i32 idx) const;
     auto new_metatable(string const& tableName) const -> i32;
     auto new_metatable(char const* tableName) const -> i32;
