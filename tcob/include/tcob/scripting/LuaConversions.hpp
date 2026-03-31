@@ -875,14 +875,14 @@ struct converter<T> {
         if (view.is_userdata(idx)) {
             if (view.get_metatable(idx)) {
                 // try exact match
-                if (!view.get_metatable(TypeName)) { return false; }
+                view.get_metatable(TypeName);
                 bool match {view.raw_equal(-1, -2)};
                 view.pop(1);
 
                 if (!match) {
                     // try _gc variant (managed_ptr)
                     static string const GCTypeName {string {TypeName} + "_gc"};
-                    if (!view.get_metatable(GCTypeName.c_str())) { return false; }
+                    view.get_metatable(GCTypeName.c_str());
                     match = view.raw_equal(-1, -2);
                     view.pop(1);
                 }
