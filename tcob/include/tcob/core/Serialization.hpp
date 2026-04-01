@@ -39,7 +39,7 @@ struct member {
 
     constexpr auto primary_name() const -> utf8_string_view { return Names[0]; }
 
-    auto get(auto&& object) const
+    auto get(auto&& object) const -> decltype(auto)
     {
         return object.*Ptr;
     }
