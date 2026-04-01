@@ -1038,18 +1038,18 @@ public:
 
         if (tab.raw_length() == std::tuple_size_v<decltype(Members)>) {
             auto const assign {[]<usize... I>(auto& members, auto const& arr, auto& object, std::index_sequence<I...>) {
-                return ((std::get<I>(members).set(arr[I + 1], object)) && ...);
+                return ((std::get<I>(members).from_proxy(arr[I + 1], object)) && ...);
             }};
             return assign(Members, tab, value, std::make_index_sequence<std::tuple_size_v<decltype(Members)>> {});
         }
 
         return std::apply([&](auto&&... m) {
-            return (([&]() {
-                        for (usize i {0}; i < m.NameCount; ++i) {
-                            if (m.set(tab[m.Names[i]], value)) { return true; }
-                        }
-                        return false;
-                    }())
+            return ([&] {
+                for (usize i {0}; i < m.NameCount; ++i) {
+                    if (m.from_proxy(tab[m.Names[i]], value)) { return true; }
+                }
+                return false;
+            }()
                     && ...);
         },
                           Members);
@@ -1059,7 +1059,7 @@ public:
     {
         table tab {table::PushNew(view, 0, std::tuple_size_v<decltype(Members)>)};
 
-        std::apply([&](auto&&... m) { (m.get(tab[m.primary_name()], value), ...); }, Members);
+        std::apply([&](auto&&... m) { (m.to_proxy(tab[m.primary_name()], value), ...); }, Members);
     }
 
 private:

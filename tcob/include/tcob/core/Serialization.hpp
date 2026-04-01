@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <array>
+#include <tuple>
 #include <type_traits>
 
 #include "tcob/core/Common.hpp"
@@ -22,7 +23,8 @@ inline constexpr no_default_t no_default {};
 
 template <auto Ptr, auto Default = no_default>
 struct member {
-    using field_type = typename detail::member_pointer_traits<decltype(Ptr)>::field_type;
+    using pointer_type = decltype(Ptr);
+    using field_type   = typename detail::member_pointer_traits<pointer_type>::field_type;
 
     template <typename... Aliases>
     constexpr member(utf8_string_view name, Aliases... aliases)
@@ -37,20 +39,28 @@ struct member {
 
     constexpr auto primary_name() const -> utf8_string_view { return Names[0]; }
 
-    template <typename T>
-    void get(auto&& proxy, T const& object) const
+    auto get(auto&& object) const
     {
-        proxy = object.*Ptr;
+        return object.*Ptr;
     }
 
-    template <typename T>
-    auto set(auto const& proxy, T& object) const -> bool
+    void to_proxy(auto&& proxy, auto&& object) const
+    {
+        proxy = get(object);
+    }
+
+    void set(auto&& object, auto&& value) const
+    {
+        object.*Ptr = value;
+    }
+
+    auto from_proxy(auto const& proxy, auto&& object) const -> bool
     {
         if constexpr (PropertyLike<field_type>) {
             using prop_type = std::remove_cvref_t<typename field_type::return_type>;
             prop_type temp;
             if (proxy.try_get(temp)) {
-                object.*Ptr = temp;
+                set(object, temp);
                 return true;
             }
         } else {
@@ -59,13 +69,21 @@ struct member {
             }
         }
         if constexpr (!std::is_same_v<decltype(Default), no_default_t>) {
-            object.*Ptr = Default;
+            set(object, Default);
             return true;
         } else {
             return false;
         }
     }
 };
+
+template <auto... Ptrs>
+constexpr auto make_members(auto&&... names)
+{
+    return std::tuple {member<Ptrs> {names}...};
+}
+
+////////////////////////////////////////////////////////////
 
 template <auto Get, auto Set>
 struct member_fn {
@@ -82,19 +100,27 @@ struct member_fn {
 
     constexpr auto primary_name() const -> utf8_string_view { return Names[0]; }
 
-    template <typename T>
-    void get(auto&& proxy, T const& object) const
+    auto get(auto&& object) const -> decltype(auto)
     {
-        proxy = Get(object);
+        return Get(object);
     }
 
-    template <typename T>
-    auto set(auto const& proxy, T& object) const -> bool
+    void to_proxy(auto&& proxy, auto&& object) const
     {
-        using FieldType = std::invoke_result_t<decltype(Get), T const&>;
+        proxy = get(object);
+    }
+
+    void set(auto&& object, auto&& value) const
+    {
+        Set(object, value);
+    }
+
+    auto from_proxy(auto const& proxy, auto&& object) const -> bool
+    {
+        using FieldType = std::invoke_result_t<decltype(Get), decltype(object) const&>;
         FieldType temp;
         if (!proxy.try_get(temp)) { return false; }
-        Set(object, temp);
+        set(object, temp);
         return true;
     }
 };

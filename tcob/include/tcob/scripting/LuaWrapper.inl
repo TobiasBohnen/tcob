@@ -10,6 +10,7 @@
 #include <optional>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <unordered_set>
 #include <utility>
 #include <variant>
@@ -342,6 +343,23 @@ inline void wrapper<WrappedType>::create_metatable(string const& name, bool gc, 
                         }
                     }},
                     tableIdx);
+
+    if constexpr (Serializable<WrappedType>) {
+        constexpr static auto members {WrappedType::Members()};
+        std::apply([&](auto&&... m) {
+            ([&] {
+                using value_type = std::remove_cvref_t<decltype(m.get(std::declval<WrappedType&>()))>;
+                for (usize i {0}; i < m.NameCount; ++i) {
+                    auto getter {wrap_method_helper(std::function<value_type(WrappedType*)> {[m](WrappedType* t) { return m.get(*t); }})};
+                    wrap(m.Names[i], wrap_target::Getter, std::move(getter));
+                    auto setter {wrap_method_helper(std::function<void(WrappedType*, value_type)> {[m](WrappedType* t, value_type const& val) { m.set(*t, val); }})};
+                    wrap(m.Names[i], wrap_target::Setter, std::move(setter));
+                }
+            }(),
+             ...);
+        },
+                   members);
+    }
 
     if (autoMeta) {
 

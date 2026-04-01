@@ -23,7 +23,7 @@ namespace tcob::gfx {
 text::text(asset_ptr<font> font)
     : _font {std::move(font)}
 {
-    _font->TextureResized.connect([this]() { _needsFormat = true; });
+    _font->TextureResized.connect([this] { _needsFormat = true; });
 
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
     Pivot.Changed.connect([this](auto const&) { mark_transform_dirty(); });
