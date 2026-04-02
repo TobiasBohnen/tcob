@@ -283,8 +283,7 @@ void neuquant::train(image const& img)
             i32 const   bmu {find_bmu(c)};
             alter_neighbor(bmu, c, alpha);
 
-            i32 const rad {static_cast<i32>(radius)};
-            for (i32 k {1}; k <= rad; ++k) {
+            for (i32 k {1}; k <= static_cast<i32>(radius); ++k) {
                 f64 const distAlpha {alpha * ((radius - k) / radius)};
                 if (bmu + k < _maxColors) { alter_neighbor(bmu + k, c, distAlpha); }
                 if (bmu - k >= 0) { alter_neighbor(bmu - k, c, distAlpha); }
