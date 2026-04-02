@@ -22,13 +22,11 @@ namespace tcob::gfx {
 
 class TCOB_API octree_quant final {
 public:
-    explicit octree_quant(i32 maxColors);
-
-    auto operator()(image const& img) -> image;
-
     auto static GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
 
 private:
+    explicit octree_quant(i32 maxColors);
+
     static constexpr i32 MAX_TREE_DEPTH {8};
 
     struct node {
@@ -62,13 +60,11 @@ private:
 
 class TCOB_API neuquant final {
 public:
-    explicit neuquant(i32 maxColors);
-
-    auto operator()(image const& img) -> image;
-
     auto static GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
 
 private:
+    explicit neuquant(i32 maxColors);
+
     struct neuron {
         f64 R {0};
         f64 G {0};
@@ -88,7 +84,7 @@ private:
 
 class TCOB_API ditherer_base {
 public:
-    ditherer_base(std::vector<color> palette);
+    explicit ditherer_base(std::vector<color> palette);
     virtual ~ditherer_base() = default;
 
     auto         operator()(image const& img) const -> image;
@@ -108,6 +104,15 @@ protected:
     };
 
     kd_tree<color_node, 3> _tree;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API nearest_neighbor_dither final : public ditherer_base {
+public:
+    using ditherer_base::ditherer_base;
+
+    auto to_indexed(image const& img) const -> std::vector<u32> override;
 };
 
 ////////////////////////////////////////////////////////////

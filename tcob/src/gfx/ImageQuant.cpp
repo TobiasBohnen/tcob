@@ -28,26 +28,6 @@ octree_quant::octree_quant(i32 maxColors)
 {
 }
 
-auto octree_quant::operator()(image const& img) -> image
-{
-    auto const& info {img.info()};
-
-    auto const [w, h] {info.Size};
-    build_tree(img);
-
-    image retValue {image::CreateEmpty(info.Size, info.Format)};
-
-    locate_service<task_manager>().run_parallel(
-        [&](par_task const& ctx) {
-            for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
-                retValue.set_pixel(pixIdx, get_quantized_color(img.get_pixel(pixIdx)));
-            }
-        },
-        w * h);
-
-    return retValue;
-}
-
 auto octree_quant::GetPalette(image const& img, i32 maxColors) -> std::vector<color>
 {
     octree_quant quant {maxColors};
@@ -217,31 +197,6 @@ neuquant::neuquant(i32 maxColors)
     }
 }
 
-auto neuquant::operator()(image const& img) -> image
-{
-    train(img);
-
-    auto const& info {img.info()};
-    image       retValue {image::CreateEmpty(info.Size, info.Format)};
-
-    locate_service<task_manager>().run_parallel(
-        [&](par_task const& ctx) {
-            for (isize i {ctx.Start}; i < ctx.End; ++i) {
-                color const c {img.get_pixel(i)};
-                i32 const   bmu {find_bmu(c)};
-
-                color const quant {static_cast<u8>(_network[bmu].R),
-                                   static_cast<u8>(_network[bmu].G),
-                                   static_cast<u8>(_network[bmu].B)};
-
-                retValue.set_pixel(i, quant);
-            }
-        },
-        info.Size.area());
-
-    return retValue;
-}
-
 auto neuquant::GetPalette(image const& img, i32 maxColors) -> std::vector<color>
 {
     neuquant quant {maxColors};
@@ -358,6 +313,30 @@ auto ditherer_base::find_nearest(f64 r, f64 g, f64 b) const -> u32
 auto ditherer_base::get_color(u32 idx) const -> color
 {
     return _palette[idx];
+}
+
+////////////////////////////////////////////////////////////
+
+auto nearest_neighbor_dither ::to_indexed(image const& img) const -> std::vector<u32>
+{
+    auto const& info {img.info()};
+    auto const  area {info.Size.area()};
+
+    std::vector<u32> retValue(area);
+
+    locate_service<task_manager>().run_parallel(
+        [&](par_task const& ctx) {
+            for (isize i {ctx.Start}; i < ctx.End; ++i) {
+                color const c {img.get_pixel(i)};
+                retValue[i] = find_nearest(
+                    static_cast<f64>(c.R),
+                    static_cast<f64>(c.G),
+                    static_cast<f64>(c.B));
+            }
+        },
+        area);
+
+    return retValue;
 }
 
 ////////////////////////////////////////////////////////////
