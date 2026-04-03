@@ -192,7 +192,7 @@ auto png_decoder::decode(io::istream& in) -> std::optional<image>
     auto         retValue {image::Create(size, image::format::RGBA, _data)};
 
     if (phys && phys->Value != 1.0f) {
-        resize_nearest_neighbor filter;
+        nearest_neighbor_resizer filter;
         filter.NewSize = phys->Value > 1.0f
             ? size_i {size.Width, static_cast<i32>(static_cast<f32>(size.Height) * phys->Value)}
             : size_i {static_cast<i32>(static_cast<f32>(size.Width) / phys->Value), size.Height};
@@ -900,8 +900,8 @@ auto png_anim_encoder::finish() -> bool
     if (_accFrameDuration > milliseconds::zero() && _frameCount > 0) {
         rect_i const fullRect {point_i::Zero, _prevFrame.info().Size};
         auto const   finalFrame {image_frame {
-              .Image    = _prevFrame,
-              .Duration = _accFrameDuration}};
+            .Image    = _prevFrame,
+            .Duration = _accFrameDuration}};
 
         write_fctl(_seq++, fullRect, finalFrame, str);
         write_fdat(_seq, finalFrame.Image, str);

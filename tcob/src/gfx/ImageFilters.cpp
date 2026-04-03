@@ -171,7 +171,7 @@ auto grayscale_filter::operator()(image const& img) const -> image
 
 ////////////////////////////////////////////////////////////
 
-auto resize_nearest_neighbor::operator()(image const& img) const -> image
+auto nearest_neighbor_resizer::operator()(image const& img) const -> image
 {
     auto const [newWidth, newHeight] {NewSize};
 
@@ -202,7 +202,7 @@ auto resize_nearest_neighbor::operator()(image const& img) const -> image
 
 ////////////////////////////////////////////////////////////
 
-auto resize_bilinear::operator()(image const& img) const -> image
+auto bilinear_resizer::operator()(image const& img) const -> image
 {
     auto const [newWidth, newHeight] {NewSize};
 
@@ -255,7 +255,7 @@ auto resize_bilinear::operator()(image const& img) const -> image
 
 ////////////////////////////////////////////////////////////
 
-auto remove_alpha::operator()(image const& img) const -> image
+auto alpha_remover::operator()(image const& img) const -> image
 {
     if (!image::information::HasAlpha(img.info().Format)) {
         return img;

@@ -98,7 +98,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API resize_nearest_neighbor {
+class TCOB_API nearest_neighbor_resizer {
 public:
     size_i NewSize {};
 
@@ -107,7 +107,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API resize_bilinear final {
+class TCOB_API bilinear_resizer final {
 public:
     size_i NewSize {};
 
@@ -116,7 +116,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API remove_alpha final {
+class TCOB_API alpha_remover final {
 public:
     auto operator()(image const& img) const -> image;
 };

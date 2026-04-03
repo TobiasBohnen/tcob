@@ -202,7 +202,7 @@ auto neuquant::GetPalette(image const& img, i32 maxColors) -> std::vector<color>
     neuquant quant {maxColors};
     quant.train(img);
     std::vector<color> palette;
-    palette.reserve(quant._maxColors);
+    palette.reserve(maxColors);
 
     for (auto const& n : quant._network) {
         palette.emplace_back(
