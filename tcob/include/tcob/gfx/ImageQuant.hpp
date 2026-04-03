@@ -108,7 +108,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API nearest_neighbor_dither final : public ditherer_base {
+class TCOB_API no_dither final : public ditherer_base {
 public:
     using ditherer_base::ditherer_base;
 

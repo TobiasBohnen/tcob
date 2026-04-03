@@ -317,7 +317,7 @@ auto ditherer_base::get_color(u32 idx) const -> color
 
 ////////////////////////////////////////////////////////////
 
-auto nearest_neighbor_dither ::to_indexed(image const& img) const -> std::vector<u32>
+auto no_dither::to_indexed(image const& img) const -> std::vector<u32>
 {
     auto const& info {img.info()};
     auto const  area {info.Size.area()};
