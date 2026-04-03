@@ -116,8 +116,8 @@ auto constexpr point<T>::equals(point<U> const& other, T tol) const -> bool
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator+=(point<T>& left, point<R> const& right) -> point<T>&
 {
-    left.X += right.X;
-    left.Y += right.Y;
+    left.X += static_cast<T>(right.X);
+    left.Y += static_cast<T>(right.Y);
 
     return left;
 }
@@ -125,7 +125,7 @@ auto constexpr operator+=(point<T>& left, point<R> const& right) -> point<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator+(point<T> const& left, point<R> const& right) -> point<T>
 {
-    return {static_cast<T>(left.X + right.X), static_cast<T>(left.Y + right.Y)};
+    return {left.X + static_cast<T>(right.X), left.Y + static_cast<T>(right.Y)};
 }
 
 template <Arithmetic T>
@@ -137,8 +137,8 @@ auto constexpr operator-(point<T> const& right) -> point<T>
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator-=(point<T>& left, point<R> const& right) -> point<T>&
 {
-    left.X -= right.X;
-    left.Y -= right.Y;
+    left.X -= static_cast<T>(right.X);
+    left.Y -= static_cast<T>(right.Y);
 
     return left;
 }
@@ -146,13 +146,13 @@ auto constexpr operator-=(point<T>& left, point<R> const& right) -> point<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator-(point<T> const& left, point<R> const& right) -> point<T>
 {
-    return {static_cast<T>(left.X - right.X), static_cast<T>(left.Y - right.Y)};
+    return {left.X - static_cast<T>(right.X), left.Y - static_cast<T>(right.Y)};
 }
 
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator*(point<T> const& left, point<R> const& right) -> point<T>
 {
-    return {static_cast<T>(left.X * right.X), static_cast<T>(left.Y * right.Y)};
+    return {left.X * static_cast<T>(right.X), left.Y * static_cast<T>(right.Y)};
 }
 
 template <Arithmetic T, Arithmetic R>
@@ -164,8 +164,8 @@ auto constexpr operator*(point<T> const& left, R const& right) -> point<T>
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator*=(point<T>& left, R const right) -> point<T>&
 {
-    left.X *= right;
-    left.Y *= right;
+    left.X *= static_cast<T>(right);
+    left.Y *= static_cast<T>(right);
 
     return left;
 }
@@ -173,8 +173,8 @@ auto constexpr operator*=(point<T>& left, R const right) -> point<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator*=(point<T>& left, point<R> const& right) -> point<T>&
 {
-    left.X *= right.X;
-    left.Y *= right.Y;
+    left.X *= static_cast<T>(right.X);
+    left.Y *= static_cast<T>(right.Y);
 
     return left;
 }
@@ -182,7 +182,7 @@ auto constexpr operator*=(point<T>& left, point<R> const& right) -> point<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator/(point<T> const& left, point<R> const& right) -> point<T>
 {
-    return {static_cast<T>(left.X / right.X), static_cast<T>(left.Y / right.Y)};
+    return {left.X / static_cast<T>(right.X), left.Y / static_cast<T>(right.Y)};
 }
 
 template <Arithmetic T, Arithmetic R>
@@ -194,8 +194,8 @@ auto constexpr operator/(point<T> const& left, R const right) -> point<T>
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator/=(point<T>& left, R const right) -> point<T>&
 {
-    left.X /= right;
-    left.Y /= right;
+    left.X /= static_cast<T>(right);
+    left.Y /= static_cast<T>(right);
 
     return left;
 }
@@ -203,8 +203,8 @@ auto constexpr operator/=(point<T>& left, R const right) -> point<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator/=(point<T>& left, point<R> const& right) -> point<T>&
 {
-    left.X /= right.X;
-    left.Y /= right.Y;
+    left.X /= static_cast<T>(right.X);
+    left.Y /= static_cast<T>(right.Y);
 
     return left;
 }
