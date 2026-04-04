@@ -4,15 +4,18 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/tcob_config.hpp"
 
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -65,6 +68,10 @@ public:
 protected:
     void on_draw(widget_painter& painter) override;
 
+    void on_mouse_drag(input::mouse::motion_event const& ev) override;
+    void on_mouse_button_down(input::mouse::button_event const& ev) override;
+    void on_mouse_button_up(input::mouse::button_event const& ev) override;
+
     void on_update(milliseconds deltaTime) override;
 
 private:
@@ -85,8 +92,19 @@ private:
         uid DstPort {0};
     };
 
+    struct drag_state {
+        uid     NodeID;
+        point_f Offset;
+    };
+
+    auto find_node(uid id) -> node*;
     auto find_node(uid id) const -> node const*;
+
     auto find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*;
+
+    std::unordered_map<uid, rect_f> _headerRectCache;
+
+    std::optional<drag_state> _drag;
 
     std::vector<node>       _nodes;
     std::vector<connection> _connections;

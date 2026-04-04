@@ -15,6 +15,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/core/random/Random.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -134,9 +135,11 @@ void node_graph::on_draw(widget_painter& painter)
     }
 
     // nodes
+    _headerRectCache.clear();
     for (auto const& n : _nodes) {
         rect_f const nodeRect {getNodeRect(n)};
         rect_f const headerRect {nodeRect.Position, {nodeWidth, rowHeight}};
+        _headerRectCache[n.ID] = headerRect;
         rect_f const bodyRect {{nodeRect.left(), nodeRect.top() + rowHeight},
                                {nodeWidth, nodeRect.height() - rowHeight}};
 
@@ -188,9 +191,54 @@ void node_graph::on_draw(widget_painter& painter)
         }
     }
 }
+void node_graph::on_mouse_drag(input::mouse::motion_event const& ev)
+{
+    if (!_drag) { return; }
+
+    auto* n {find_node(_drag->NodeID)};
+    if (!n) { return; }
+
+    rect_f const  bounds {content_bounds()};
+    auto const    mp {screen_to_local(*this, ev.Position)};
+    point_f const newPos {mp - _drag->Offset};
+
+    n->Position = {newPos.X / bounds.width(), newPos.Y / bounds.height()};
+    ev.Handled  = true;
+    queue_redraw();
+}
+
+void node_graph::on_mouse_button_down(input::mouse::button_event const& ev)
+{
+    if (ev.Button != controls().PrimaryMouseButton) { return; }
+
+    auto const mp {screen_to_local(*this, ev.Position)};
+    for (auto const& n : _nodes) {
+        auto it {_headerRectCache.find(n.ID)};
+        if (it == _headerRectCache.end() || !it->second.contains(mp)) { continue; }
+
+        _drag      = {.NodeID = n.ID, .Offset = mp - it->second.Position};
+        ev.Handled = true;
+        return;
+    }
+}
+
+void node_graph::on_mouse_button_up(input::mouse::button_event const& ev)
+{
+    if (ev.Button != controls().PrimaryMouseButton) { return; }
+    if (!_drag) { return; }
+
+    _drag      = std::nullopt;
+    ev.Handled = true;
+}
 
 void node_graph::on_update(milliseconds /* deltaTime */)
 {
+}
+
+auto node_graph::find_node(uid id) -> node*
+{
+    auto it {std::ranges::find(_nodes, id, &node::ID)};
+    return it != _nodes.end() ? &*it : nullptr;
 }
 
 auto node_graph::find_node(uid id) const -> node const*
