@@ -125,6 +125,8 @@ void slider::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void slider::on_mouse_button_up(input::mouse::button_event const& ev)
 {
+    if (ev.Button != controls().PrimaryMouseButton) { return; }
+
     _dragOffset = point_i::Zero;
     _isDragging = false;
 
@@ -138,15 +140,15 @@ void slider::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     _isDragging = false;
 
-    if (ev.Button == controls().PrimaryMouseButton) {
-        if (!_overThumb) {
-            calculate_value(screen_to_content(*this, ev.Position));
-        } else {
-            _dragOffset = point_i {screen_to_local(*this, ev.Position) - _barRectCache.Thumb.center()};
-            _isDragging = true;
-        }
-        ev.Handled = true;
+    if (ev.Button != controls().PrimaryMouseButton) { return; }
+
+    if (!_overThumb) {
+        calculate_value(screen_to_content(*this, ev.Position));
+    } else {
+        _dragOffset = point_i {screen_to_local(*this, ev.Position) - _barRectCache.Thumb.center()};
+        _isDragging = true;
     }
+    ev.Handled = true;
 }
 
 void slider::on_mouse_wheel(input::mouse::wheel_event const& ev)

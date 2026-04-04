@@ -243,26 +243,26 @@ void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void drop_down_list::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    if (ev.Button == controls().PrimaryMouseButton) {
-        _vScrollbar.mouse_down(*this, ev.Position);
-        if (_mouseOverBox) {
-            set_extended(!_isExtended);
-        } else if (HoveredItemIndex != INVALID_INDEX) {
-            if (SelectedItemIndex != HoveredItemIndex) {
-                SelectedItemIndex = *HoveredItemIndex;
-            }
-        }
+    if (ev.Button != controls().PrimaryMouseButton) { return; }
 
-        ev.Handled = true;
+    _vScrollbar.mouse_down(*this, ev.Position);
+    if (_mouseOverBox) {
+        set_extended(!_isExtended);
+    } else if (HoveredItemIndex != INVALID_INDEX) {
+        if (SelectedItemIndex != HoveredItemIndex) {
+            SelectedItemIndex = *HoveredItemIndex;
+        }
     }
+
+    ev.Handled = true;
 }
 
 void drop_down_list::on_mouse_button_up(input::mouse::button_event const& ev)
 {
-    if (ev.Button == controls().PrimaryMouseButton) {
-        _vScrollbar.mouse_up(*this, ev.Position);
-        ev.Handled = true;
-    }
+    if (ev.Button != controls().PrimaryMouseButton) { return; }
+
+    _vScrollbar.mouse_up(*this, ev.Position);
+    ev.Handled = true;
 }
 
 void drop_down_list::on_double_click()

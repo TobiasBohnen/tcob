@@ -162,6 +162,8 @@ void image_box::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void image_box::on_mouse_button_up(input::mouse::button_event const& ev)
 {
+    if (ev.Button != controls().PrimaryMouseButton) { return; }
+
     if (_dragPosition) {
         _dragPosition = std::nullopt;
         Dropped({.Sender = this, .Target = form().find_widget_at(ev.Position), .Position = ev.Position});
@@ -172,7 +174,9 @@ void image_box::on_mouse_button_up(input::mouse::button_event const& ev)
 
 void image_box::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    if (Draggable && ev.Button == controls().PrimaryMouseButton) {
+    if (ev.Button != controls().PrimaryMouseButton) { return; }
+
+    if (Draggable) {
         _dragStart = screen_to_local(*this, ev.Position);
         ev.Handled = true;
     }

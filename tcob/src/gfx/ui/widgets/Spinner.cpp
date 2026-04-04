@@ -106,6 +106,8 @@ void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void spinner::on_mouse_button_down(input::mouse::button_event const& ev)
 {
+    if (ev.Button != controls().PrimaryMouseButton) { return; }
+
     if (_hoverArrow == arrow::None) { return; }
 
     if (_hoverArrow == arrow::Increase) {
@@ -119,8 +121,10 @@ void spinner::on_mouse_button_down(input::mouse::button_event const& ev)
     _holdTime.restart();
 }
 
-void spinner::on_mouse_button_up(input::mouse::button_event const& /* ev */)
+void spinner::on_mouse_button_up(input::mouse::button_event const& ev)
 {
+    if (ev.Button != controls().PrimaryMouseButton) { return; }
+
     _mouseDown = false;
     _holdCount = 1;
 }
