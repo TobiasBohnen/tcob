@@ -26,7 +26,7 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API panel : public widget_container { // TODO: convert to template
+class TCOB_API panel : public widget_container {
 public:
     using default_layout = manual_layout;
 

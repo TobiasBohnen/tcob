@@ -32,7 +32,7 @@ public:
 
         text_element Text;
 
-        length ItemHeight {0.20f, length::type::Relative};
+        length ItemHeight {1.0f, length::type::Relative};
         f32    MaxVisibleItems {5};
 
         scrollbar_element VScrollBar;
