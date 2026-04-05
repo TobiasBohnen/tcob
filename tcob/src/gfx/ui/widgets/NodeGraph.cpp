@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <cstdlib>
 #include <optional>
+#include <ranges>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -48,36 +50,49 @@ node_graph::node_graph(init const& wi)
 auto node_graph::create_node(node_def const& def, point_f pos) -> uid
 {
     auto& node {_nodes.emplace_back(get_random_ID(), def, pos)};
+
+    _portPosCache.clear();
+    _drag = std::nullopt;
+
     return node.ID;
 }
 
 auto node_graph::remove_node(uid node) -> bool
 {
     if (!helper::erase_first(_nodes, [node](auto const& n) { return n.ID == node; })) { return false; }
-    std::erase_if(_connections, [node](connection const& c) {
-        return c.SrcNode == node || c.DstNode == node;
-    });
+    std::erase_if(_connections, [node](connection const& c) { return c.OutputNodeID == node || c.InputNodeID == node; });
+
+    _portPosCache.clear();
+    _drag = std::nullopt;
+
     return true;
 }
 
-auto node_graph::can_connect(uid srcNode, uid srcPort, uid dstNode, uid dstPort) const -> bool
+auto node_graph::can_connect(uid outNode, uid outPort, uid inNode, uid inPort) const -> bool
 {
-    auto const* src {find_node(srcNode)};
-    auto const* dst {find_node(dstNode)};
-    if (!src || !dst) { return false; }
-    if (srcNode == dstNode) { return false; }
+    if (outNode == inNode) { return false; }
 
-    auto const* out {find_port(src->Def.Outputs, srcPort)};
-    auto const* in {find_port(dst->Def.Inputs, dstPort)};
+    auto const* outN {find_node(outNode)};
+    auto const* inN {find_node(inNode)};
+    if (!outN || !inN) { return false; }
+
+    auto const* out {find_port(outN->Def.Outputs, outPort)};
+    auto const* in {find_port(inN->Def.Inputs, inPort)};
     if (!out || !in) { return false; }
 
-    return out->Type & in->Type;
+    if (!(out->Type & in->Type)) { return false; }
+
+    return !std::ranges::any_of(_connections, [&](connection const& c) {
+        return c.InputNodeID == inNode && c.InputPortID == inPort;
+    });
 }
 
-auto node_graph::create_connection(uid srcNode, uid srcPort, uid dstNode, uid dstPort, color color) -> std::optional<uid>
+auto node_graph::create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>
 {
-    if (!can_connect(srcNode, srcPort, dstNode, dstPort)) { return std::nullopt; }
-    auto& con {_connections.emplace_back(get_random_ID(), color, srcNode, srcPort, dstNode, dstPort)};
+    if (!can_connect(outNode, outPort, inNode, inPort)) { return std::nullopt; }
+    auto const* colorNode {find_node(outNode)};
+    auto const* colorPort {colorNode ? find_port(colorNode->Def.Outputs, outPort) : nullptr};
+    auto&       con {_connections.emplace_back(get_random_ID(), colorPort ? colorPort->Color : colors::White, outNode, outPort, inNode, inPort)};
     return con.ID;
 }
 
@@ -118,12 +133,12 @@ void node_graph::on_draw(widget_painter& painter)
 
     // connections
     for (auto const& con : _connections) {
-        auto const* src {find_node(con.SrcNode)};
-        auto const* dst {find_node(con.DstNode)};
-        if (!src || !dst) { continue; }
+        auto const* out {find_node(con.OutputNodeID)};
+        auto const* in {find_node(con.InputNodeID)};
+        if (!out || !in) { continue; }
 
-        point_f const p0 {getPortPosition(*src, con.SrcPort, false)};
-        point_f const p1 {getPortPosition(*dst, con.DstPort, true)};
+        point_f const p0 {getPortPosition(*out, con.OutputPortID, false)};
+        point_f const p1 {getPortPosition(*in, con.InputPortID, true)};
         f32 const     dx {std::abs(p1.X - p0.X) * 0.5f};
 
         cv.set_stroke_style(con.Color);
@@ -134,14 +149,23 @@ void node_graph::on_draw(widget_painter& painter)
         cv.stroke();
     }
 
+    // pending connection
+    if (_pendingConnection) {
+        cv.set_stroke_style(_pendingConnection->PortColor);
+        cv.set_stroke_width(_style.ConnectionWidth.calc(bounds.width()));
+        cv.begin_path();
+        cv.move_to(_pendingConnection->StartPos);
+        cv.line_to(_pendingConnection->MousePos);
+        cv.stroke();
+    }
+
     // nodes
     _headerRectCache.clear();
+    _portPosCache.clear();
     for (auto const& n : _nodes) {
         rect_f const nodeRect {getNodeRect(n)};
         rect_f const headerRect {nodeRect.Position, {nodeWidth, rowHeight}};
         _headerRectCache[n.ID] = headerRect;
-        rect_f const bodyRect {{nodeRect.left(), nodeRect.top() + rowHeight},
-                               {nodeWidth, nodeRect.height() - rowHeight}};
 
         // body
         cv.set_fill_style(n.Def.Color);
@@ -160,13 +184,16 @@ void node_graph::on_draw(widget_painter& painter)
 
         // input ports
         for (usize i {0}; i < n.Def.Inputs.size(); ++i) {
-            auto const& port {n.Def.Inputs[i]};
-            f32 const   y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight * 0.5f)};
-            f32 const   rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
+            auto const&   port {n.Def.Inputs[i]};
+            f32 const     y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight * 0.5f)};
+            f32 const     rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
+            point_f const pos {nodeRect.left(), y};
+
+            _portPosCache.emplace_back(port_key {.NodeID = n.ID, .PortID = port.ID, .IsInput = true}, pos);
 
             cv.set_fill_style(port.Color);
             cv.begin_path();
-            cv.circle({nodeRect.left(), y}, portRadius);
+            cv.circle(pos, portRadius);
             cv.fill();
 
             rect_f const labelRect {{nodeRect.left() + (portRadius * 2.0f), rowTop},
@@ -176,13 +203,16 @@ void node_graph::on_draw(widget_painter& painter)
 
         // output ports
         for (usize i {0}; i < n.Def.Outputs.size(); ++i) {
-            auto const& port {n.Def.Outputs[i]};
-            f32 const   y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight * 0.5f)};
-            f32 const   rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
+            auto const&   port {n.Def.Outputs[i]};
+            f32 const     y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight * 0.5f)};
+            f32 const     rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
+            point_f const pos {nodeRect.right(), y};
+
+            _portPosCache.emplace_back(port_key {.NodeID = n.ID, .PortID = port.ID, .IsInput = false}, pos);
 
             cv.set_fill_style(port.Color);
             cv.begin_path();
-            cv.circle({nodeRect.right(), y}, portRadius);
+            cv.circle(pos, portRadius);
             cv.fill();
 
             rect_f const labelRect {{nodeRect.left() + (nodeWidth * 0.5f), rowTop},
@@ -191,19 +221,24 @@ void node_graph::on_draw(widget_painter& painter)
         }
     }
 }
+
 void node_graph::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    if (!_drag) { return; }
+    auto const mp {screen_to_local(*this, ev.Position)};
 
-    auto* n {find_node(_drag->NodeID)};
-    if (!n) { return; }
+    if (_pendingConnection) {
+        _pendingConnection->MousePos = mp;
+        ev.Handled                   = true;
+        queue_redraw();
+        return;
+    }
+
+    if (!_drag || !_drag->Node) { return; }
 
     rect_f const  bounds {content_bounds()};
-    auto const    mp {screen_to_local(*this, ev.Position)};
     point_f const newPos {mp - _drag->Offset};
-
-    n->Position = {newPos.X / bounds.width(), newPos.Y / bounds.height()};
-    ev.Handled  = true;
+    _drag->Node->Position = {newPos.X / bounds.width(), newPos.Y / bounds.height()};
+    ev.Handled            = true;
     queue_redraw();
 }
 
@@ -211,12 +246,49 @@ void node_graph::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (ev.Button != controls().PrimaryMouseButton) { return; }
 
-    auto const mp {screen_to_local(*this, ev.Position)};
+    auto const   mp {screen_to_local(*this, ev.Position)};
+    rect_f const bounds {content_bounds()};
+    f32 const    portRadius {_style.NodeSize.Height.calc(bounds.height()) * 0.25f};
+
+    auto const getPort {[&](uid nodeID, uid portID, bool isInput) -> node_port const* {
+        auto const* n {find_node(nodeID)};
+        return n ? find_port(isInput ? n->Def.Inputs : n->Def.Outputs, portID) : nullptr;
+    }};
+
+    auto const portHit {std::ranges::find_if(_portPosCache, [&](auto const& p) { return p.second.distance_to(mp) <= portRadius; })};
+    if (portHit != _portPosCache.end()) {
+        auto const& key {portHit->first};
+        auto const& pos {portHit->second};
+
+        if (key.IsInput) {
+            auto const it {std::ranges::find_if(_connections, [&key](connection const& c) {
+                return c.InputNodeID == key.NodeID && c.InputPortID == key.PortID;
+            })};
+            if (it != _connections.end()) {
+                auto const    srcIt {std::ranges::find_if(_portPosCache, [&](auto const& p) {
+                    return p.first.NodeID == it->OutputNodeID && p.first.PortID == it->OutputPortID && !p.first.IsInput;
+                })};
+                point_f const startPos {srcIt != _portPosCache.end() ? srcIt->second : pos};
+                _pendingConnection = {.Key       = {.NodeID = it->OutputNodeID, .PortID = it->OutputPortID, .IsInput = false},
+                                      .PortColor = getPort(it->OutputNodeID, it->OutputPortID, false)->Color,
+                                      .StartPos  = startPos,
+                                      .MousePos  = mp};
+                remove_connection(it->ID);
+                ev.Handled = true;
+                return;
+            }
+        }
+
+        _pendingConnection = {.Key = key, .PortColor = getPort(key.NodeID, key.PortID, key.IsInput)->Color, .StartPos = pos, .MousePos = mp};
+        ev.Handled         = true;
+        return;
+    }
+
     for (auto const& n : _nodes) {
         auto it {_headerRectCache.find(n.ID)};
         if (it == _headerRectCache.end() || !it->second.contains(mp)) { continue; }
 
-        _drag      = {.NodeID = n.ID, .Offset = mp - it->second.Position};
+        _drag      = {.Node = find_node(n.ID), .Offset = mp - it->second.Position};
         ev.Handled = true;
         return;
     }
@@ -225,6 +297,33 @@ void node_graph::on_mouse_button_down(input::mouse::button_event const& ev)
 void node_graph::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (ev.Button != controls().PrimaryMouseButton) { return; }
+
+    if (_pendingConnection) {
+        auto const   mp {screen_to_local(*this, ev.Position)};
+        rect_f const bounds {content_bounds()};
+        f32 const    portRadius {_style.NodeSize.Height.calc(bounds.height()) * 0.25f};
+
+        auto const it {std::ranges::find_if(_portPosCache, [&](auto const& p) {
+            return p.first.IsInput != _pendingConnection->Key.IsInput
+                && p.first.NodeID != _pendingConnection->Key.NodeID
+                && p.second.distance_to(mp) <= portRadius;
+        })};
+
+        if (it != _portPosCache.end()) {
+            auto const& [key, pos] {*it};
+            uid const srcNode {_pendingConnection->Key.IsInput ? key.NodeID : _pendingConnection->Key.NodeID};
+            uid const srcPort {_pendingConnection->Key.IsInput ? key.PortID : _pendingConnection->Key.PortID};
+            uid const dstNode {_pendingConnection->Key.IsInput ? _pendingConnection->Key.NodeID : key.NodeID};
+            uid const dstPort {_pendingConnection->Key.IsInput ? _pendingConnection->Key.PortID : key.PortID};
+            create_connection(srcNode, srcPort, dstNode, dstPort);
+        }
+
+        _pendingConnection = std::nullopt;
+        ev.Handled         = true;
+        queue_redraw();
+        return;
+    }
+
     if (!_drag) { return; }
 
     _drag      = std::nullopt;

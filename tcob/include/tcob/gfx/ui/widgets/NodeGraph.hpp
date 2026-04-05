@@ -8,6 +8,7 @@
 
 #include <optional>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -61,8 +62,8 @@ public:
     auto create_node(node_def const& def, point_f pos) -> uid;
     auto remove_node(uid node) -> bool;
 
-    auto can_connect(uid srcNode, uid srcPort, uid dstNode, uid dstPort) const -> bool;
-    auto create_connection(uid srcNode, uid srcPort, uid dstNode, uid dstPort, color color) -> std::optional<uid>;
+    auto can_connect(uid outNode, uid outPort, uid inNode, uid inPort) const -> bool;
+    auto create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>;
     auto remove_connection(uid connection) -> bool;
 
 protected:
@@ -86,14 +87,27 @@ private:
 
         color Color {colors::White};
 
-        uid SrcNode {0};
-        uid SrcPort {0};
-        uid DstNode {0};
-        uid DstPort {0};
+        uid OutputNodeID {0};
+        uid OutputPortID {0};
+        uid InputNodeID {0};
+        uid InputPortID {0};
+    };
+
+    struct port_key {
+        uid  NodeID;
+        uid  PortID;
+        bool IsInput;
+    };
+
+    struct pending_connection {
+        port_key Key;
+        color    PortColor;
+        point_f  StartPos;
+        point_f  MousePos;
     };
 
     struct drag_state {
-        uid     NodeID;
+        node*   Node;
         point_f Offset;
     };
 
@@ -102,12 +116,14 @@ private:
 
     auto find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*;
 
-    std::unordered_map<uid, rect_f> _headerRectCache;
+    std::unordered_map<uid, rect_f>           _headerRectCache;
+    std::vector<std::pair<port_key, point_f>> _portPosCache;
 
     std::optional<drag_state> _drag;
 
-    std::vector<node>       _nodes;
-    std::vector<connection> _connections;
+    std::vector<node>                 _nodes;
+    std::vector<connection>           _connections;
+    std::optional<pending_connection> _pendingConnection;
 
     node_graph::style _style;
 };
