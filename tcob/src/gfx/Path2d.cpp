@@ -196,7 +196,7 @@ void path2d::arc_to(f32 radiusX, f32 radiusY, degree_f rotX, bool largeArc, bool
     }};
     static auto const nsvg_sqr {[](f32 x) -> f32 { return x * x; }};
     static auto const nsvg_vecang {[](f32 ux, f32 uy, f32 vx, f32 vy) -> f32 {
-        f32 const r {(ux * vx + uy * vy) / (std::sqrt((ux * ux) + (uy * uy)) * std::sqrt((vx * vx) + (vy * vy)))};
+        f32 const r {((ux * vx) + (uy * vy)) / (std::sqrt((ux * ux) + (uy * uy)) * std::sqrt((vx * vx) + (vy * vy)))};
         return ((ux * vy < uy * vx) ? -1.0f : 1.0f) * std::acos(std::clamp(r, -1.0f, 1.0f));
     }};
 
