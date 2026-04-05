@@ -28,8 +28,12 @@ struct node_port {
     uid ID {0};
 
     string Name;
-    color  Color {colors::White};
     u32    Type {0xFFFFFFFF};
+
+    color Color {colors::White};
+    color HoverColor {colors::White};
+    color PossibleConnectionColor {colors::Blue};
+    color AcceptConnectionColor {colors::Green};
 };
 
 struct node_def {
@@ -69,6 +73,7 @@ public:
 protected:
     void on_draw(widget_painter& painter) override;
 
+    void on_mouse_hover(input::mouse::motion_event const& ev) override;
     void on_mouse_drag(input::mouse::motion_event const& ev) override;
     void on_mouse_button_down(input::mouse::button_event const& ev) override;
     void on_mouse_button_up(input::mouse::button_event const& ev) override;
@@ -97,6 +102,8 @@ private:
         uid  NodeID;
         uid  PortID;
         bool IsInput;
+
+        auto operator==(port_key const& other) const -> bool = default;
     };
 
     struct pending_connection {
@@ -119,7 +126,8 @@ private:
     std::unordered_map<uid, rect_f>           _headerRectCache;
     std::vector<std::pair<port_key, point_f>> _portPosCache;
 
-    std::optional<drag_state> _drag;
+    std::optional<drag_state>                   _drag;
+    std::optional<std::pair<port_key, point_f>> _hoveredPort;
 
     std::vector<node>                 _nodes;
     std::vector<connection>           _connections;
