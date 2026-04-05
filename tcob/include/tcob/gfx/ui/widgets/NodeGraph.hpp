@@ -6,14 +6,17 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <functional>
 #include <optional>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -33,10 +36,13 @@ struct node_port {
     color Color {colors::White};
 };
 
+using node_value_types = std::variant<float, int, bool>;
+
 struct node_def {
-    string                 Title;
-    std::vector<node_port> Inputs;
-    std::vector<node_port> Outputs;
+    string                                                                             Title;
+    std::vector<node_port>                                                             Inputs;
+    std::vector<node_port>                                                             Outputs;
+    std::function<std::vector<node_value_types>(std::vector<node_value_types> const&)> Compute;
 
     color HeaderColor {colors::Black};
     color Color {colors::White};
@@ -64,6 +70,8 @@ public:
 
     explicit node_graph(init const& wi);
 
+    signal<widget_event const> Changed;
+
     auto create_node(node_def const& def, point_f pos) -> uid;
     auto remove_node(uid node) -> bool;
 
@@ -71,7 +79,11 @@ public:
     auto create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>;
     auto remove_connection(uid connection) -> bool;
 
+    auto evaluate(uid nodeID) const -> std::vector<node_value_types>;
+
 protected:
+    auto evaluate(uid nodeID, std::unordered_map<uid, std::vector<node_value_types>>& cache) const -> std::vector<node_value_types>;
+
     void on_draw(widget_painter& painter) override;
 
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
@@ -108,10 +120,11 @@ private:
     };
 
     struct pending_connection {
-        port_key Key;
-        color    PortColor;
-        point_f  StartPos;
-        point_f  MousePos;
+        port_key                               Key;
+        color                                  PortColor;
+        point_f                                StartPos;
+        point_f                                MousePos;
+        std::vector<std::pair<port_key, bool>> CompatibilityCache {};
     };
 
     struct drag_state {

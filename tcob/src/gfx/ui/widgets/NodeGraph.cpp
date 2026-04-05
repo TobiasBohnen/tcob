@@ -7,8 +7,10 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <functional>
 #include <optional>
 #include <ranges>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -58,6 +60,7 @@ auto node_graph::create_node(node_def const& def, point_f pos) -> uid
     _portPosCache.clear();
     _drag = std::nullopt;
 
+    Changed({this});
     return node.ID;
 }
 
@@ -69,6 +72,7 @@ auto node_graph::remove_node(uid node) -> bool
     _portPosCache.clear();
     _drag = std::nullopt;
 
+    Changed({this});
     return true;
 }
 
@@ -86,9 +90,15 @@ auto node_graph::can_connect(uid outNode, uid outPort, uid inNode, uid inPort) c
 
     if (!(out->Type & in->Type)) { return false; }
 
-    return !std::ranges::any_of(_connections, [&](connection const& c) {
-        return c.InputNodeID == inNode && c.InputPortID == inPort;
-    });
+    if (std::ranges::any_of(_connections, [&](connection const& c) { return c.InputNodeID == inNode && c.InputPortID == inPort; })) { return false; }
+
+    std::function<bool(uid)> const hasPath {[&](uid from) -> bool {
+        return from == outNode || std::ranges::any_of(_connections, [&](connection const& c) {
+                   return c.OutputNodeID == from && hasPath(c.InputNodeID);
+               });
+    }};
+
+    return !hasPath(inNode);
 }
 
 auto node_graph::create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>
@@ -97,12 +107,47 @@ auto node_graph::create_connection(uid outNode, uid outPort, uid inNode, uid inP
     auto const* colorNode {find_node(outNode)};
     auto const* colorPort {colorNode ? find_port(colorNode->Def.Outputs, outPort) : nullptr};
     auto&       con {_connections.emplace_back(get_random_ID(), colorPort ? colorPort->Color : colors::White, outNode, outPort, inNode, inPort)};
+    Changed({this});
     return con.ID;
 }
 
 auto node_graph::remove_connection(uid connection) -> bool
 {
-    return helper::erase_first(_connections, [connection](auto const& c) { return c.ID == connection; });
+    auto const retValue {helper::erase_first(_connections, [connection](auto const& c) { return c.ID == connection; })};
+    Changed({this});
+    return retValue;
+}
+
+auto node_graph::evaluate(uid nodeID) const -> std::vector<node_value_types>
+{
+    std::unordered_map<uid, std::vector<node_value_types>> cache;
+    return evaluate(nodeID, cache);
+}
+
+auto node_graph::evaluate(uid nodeID, std::unordered_map<uid, std::vector<node_value_types>>& cache) const -> std::vector<node_value_types>
+{
+    if (auto it {cache.find(nodeID)}; it != cache.end()) { return it->second; }
+
+    auto const* n {find_node(nodeID)};
+    if (!n || !n->Def.Compute) { return {}; }
+
+    std::vector<node_value_types> inputs(n->Def.Inputs.size());
+    for (auto const& c : _connections) {
+        if (c.InputNodeID != nodeID) { continue; }
+        auto const* src {find_node(c.OutputNodeID)};
+        if (!src) { continue; }
+        auto const& upstream {cache.contains(c.OutputNodeID)
+                                  ? cache[c.OutputNodeID]
+                                  : cache[c.OutputNodeID] = evaluate(c.OutputNodeID, cache)};
+        for (usize i {0}; i < n->Def.Inputs.size(); ++i) {
+            if (n->Def.Inputs[i].ID != c.InputPortID) { continue; }
+            for (usize j {0}; j < src->Def.Outputs.size(); ++j) {
+                if (src->Def.Outputs[j].ID == c.OutputPortID) { inputs[i] = upstream[j]; }
+            }
+        }
+    }
+
+    return cache[nodeID] = n->Def.Compute(inputs);
 }
 
 void node_graph::on_draw(widget_painter& painter)
@@ -168,7 +213,7 @@ void node_graph::on_draw(widget_painter& painter)
     _headerRectCache.clear();
     _portPosCache.clear();
 
-    for (auto const& n : _nodes) {
+    auto const drawNode {[&](auto const& n) {
         rect_f const nodeRect {getNodeRect(n)};
         rect_f const headerRect {nodeRect.Position, {nodeWidth, rowHeight}};
         _headerRectCache[n.ID] = headerRect;
@@ -197,18 +242,11 @@ void node_graph::on_draw(widget_painter& painter)
 
             std::optional<color> ringColor;
             if (_pendingConnection && key != _pendingConnection->Key) {
-                if (key.IsInput != _pendingConnection->Key.IsInput && key.NodeID != _pendingConnection->Key.NodeID) {
-                    uid const srcNode {_pendingConnection->Key.IsInput ? key.NodeID : _pendingConnection->Key.NodeID};
-                    uid const srcPort {_pendingConnection->Key.IsInput ? key.PortID : _pendingConnection->Key.PortID};
-                    uid const dstNode {_pendingConnection->Key.IsInput ? _pendingConnection->Key.NodeID : key.NodeID};
-                    uid const dstPort {_pendingConnection->Key.IsInput ? _pendingConnection->Key.PortID : key.PortID};
-                    if (can_connect(srcNode, srcPort, dstNode, dstPort)) {
-                        if (_hoveredPort && key == _hoveredPort->first) {
-                            ringColor = _style.PortAcceptColor;
-                        } else {
-                            ringColor = _style.PortCompatibleColor;
-                        }
-                    }
+                auto const compatIt {std::ranges::find_if(_pendingConnection->CompatibilityCache, [&](auto const& p) { return p.first == key; })};
+                if (compatIt != _pendingConnection->CompatibilityCache.end() && compatIt->second) {
+                    ringColor = _hoveredPort && key == _hoveredPort->first
+                        ? _style.PortAcceptColor
+                        : _style.PortCompatibleColor;
                 }
             } else if (_hoveredPort && key == _hoveredPort->first) {
                 ringColor = _style.PortHoverColor;
@@ -251,6 +289,14 @@ void node_graph::on_draw(widget_painter& painter)
                                     {(nodeWidth * 0.5f) - (portRadius * 2.0f), rowHeight}};
             painter.draw_text(_style.OutputPortText, labelRect, port.Name);
         }
+    }};
+
+    for (auto const& n : _nodes) {
+        if (_drag && &n == _drag->Node) { continue; }
+        drawNode(n);
+    }
+    if (_drag) {
+        drawNode(*_drag->Node);
     }
 }
 
@@ -302,6 +348,18 @@ void node_graph::on_mouse_button_down(input::mouse::button_event const& ev)
         return n ? find_port(isInput ? n->Def.Inputs : n->Def.Outputs, portID) : nullptr;
     }};
 
+    auto const checkCompatibility {[&]() {
+        for (auto const& [key, pos] : _portPosCache) {
+            if (key.IsInput == _pendingConnection->Key.IsInput) { continue; }
+            if (key.NodeID == _pendingConnection->Key.NodeID) { continue; }
+            uid const srcNode {_pendingConnection->Key.IsInput ? key.NodeID : _pendingConnection->Key.NodeID};
+            uid const srcPort {_pendingConnection->Key.IsInput ? key.PortID : _pendingConnection->Key.PortID};
+            uid const dstNode {_pendingConnection->Key.IsInput ? _pendingConnection->Key.NodeID : key.NodeID};
+            uid const dstPort {_pendingConnection->Key.IsInput ? _pendingConnection->Key.PortID : key.PortID};
+            _pendingConnection->CompatibilityCache.emplace_back(key, can_connect(srcNode, srcPort, dstNode, dstPort));
+        }
+    }};
+
     if (_hoveredPort) {
         auto const& key {_hoveredPort->first};
         auto const& pos {_hoveredPort->second};
@@ -320,13 +378,15 @@ void node_graph::on_mouse_button_down(input::mouse::button_event const& ev)
                                       .StartPos  = startPos,
                                       .MousePos  = mp};
                 remove_connection(it->ID);
+                checkCompatibility();
                 ev.Handled = true;
                 return;
             }
         }
 
         _pendingConnection = {.Key = key, .PortColor = getPort(key.NodeID, key.PortID, key.IsInput)->Color, .StartPos = pos, .MousePos = mp};
-        ev.Handled         = true;
+        checkCompatibility();
+        ev.Handled = true;
         return;
     }
 
