@@ -38,6 +38,10 @@ void node_graph::style::Transition(style& target, style const& from, style const
     target.InputPortText.lerp(from.InputPortText, to.InputPortText, step);
     target.OutputPortText.lerp(from.OutputPortText, to.OutputPortText, step);
 
+    target.PortHoverColor      = helper::lerp(from.PortHoverColor, to.PortHoverColor, step);
+    target.PortCompatibleColor = helper::lerp(from.PortCompatibleColor, to.PortCompatibleColor, step);
+    target.PortAcceptColor     = helper::lerp(from.PortAcceptColor, to.PortAcceptColor, step);
+
     target.ConnectionWidth = helper::lerp(from.ConnectionWidth, to.ConnectionWidth, step);
 }
 
@@ -200,14 +204,14 @@ void node_graph::on_draw(widget_painter& painter)
                     uid const dstPort {_pendingConnection->Key.IsInput ? _pendingConnection->Key.PortID : key.PortID};
                     if (can_connect(srcNode, srcPort, dstNode, dstPort)) {
                         if (_hoveredPort && key == _hoveredPort->first) {
-                            ringColor = port.AcceptConnectionColor;
+                            ringColor = _style.PortAcceptColor;
                         } else {
-                            ringColor = port.PossibleConnectionColor;
+                            ringColor = _style.PortCompatibleColor;
                         }
                     }
                 }
             } else if (_hoveredPort && key == _hoveredPort->first) {
-                ringColor = port.HoverColor;
+                ringColor = _style.PortHoverColor;
             }
 
             if (ringColor) {

@@ -31,9 +31,6 @@ struct node_port {
     u32    Type {0xFFFFFFFF};
 
     color Color {colors::White};
-    color HoverColor {colors::White};
-    color PossibleConnectionColor {colors::Blue};
-    color AcceptConnectionColor {colors::Green};
 };
 
 struct node_def {
@@ -57,6 +54,10 @@ public:
         text_element OutputPortText;
 
         length ConnectionWidth {3, length::type::Absolute};
+
+        color PortHoverColor {colors::White};
+        color PortCompatibleColor {colors::Blue};
+        color PortAcceptColor {colors::Green};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
