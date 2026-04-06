@@ -36,13 +36,42 @@ struct node_port {
     color Color {colors::White};
 };
 
-using node_value_types = std::variant<float, int, bool>;
+using node_value_types = std::variant<f32, i32, bool>;
+
+struct node_param_float {
+    string Name;
+    f32    Value;
+    f32    Min {0};
+    f32    Max {1};
+    f32    Step {0.01f};
+};
+
+struct node_param_int {
+    string Name;
+    i32    Value;
+    i32    Min {-100};
+    i32    Max {100};
+    i32    Step {1};
+};
+
+struct node_param_bool {
+    string Name;
+    bool   Value;
+};
+
+using node_param_types = std::variant<node_param_float, node_param_int, node_param_bool>;
 
 struct node_def {
-    string                                                                             Title;
-    std::vector<node_port>                                                             Inputs;
-    std::vector<node_port>                                                             Outputs;
-    std::function<std::vector<node_value_types>(std::vector<node_value_types> const&)> Compute;
+    string Title;
+
+    std::vector<node_port>        Inputs;
+    std::vector<node_port>        Outputs;
+    std::vector<node_param_types> Parameters;
+
+    std::function<std::vector<node_value_types>(
+        std::vector<node_value_types> const&,
+        std::vector<node_value_types> const&)>
+        Compute;
 
     color HeaderColor {colors::Black};
     color Color {colors::White};
@@ -58,12 +87,15 @@ public:
 
         text_element InputPortText;
         text_element OutputPortText;
+        text_element ParamText;
 
         length ConnectionWidth {3, length::type::Absolute};
 
         color PortHoverColor {colors::White};
         color PortCompatibleColor {colors::Blue};
         color PortAcceptColor {colors::Green};
+
+        color ParamWidgetColor {colors::Black};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
@@ -137,8 +169,9 @@ private:
 
     auto find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*;
 
-    std::unordered_map<uid, rect_f>           _headerRectCache;
-    std::vector<std::pair<port_key, point_f>> _portPosCache;
+    std::unordered_map<uid, rect_f>                       _headerRectCache;
+    std::vector<std::pair<port_key, point_f>>             _portPosCache;
+    std::vector<std::pair<std::pair<uid, usize>, rect_f>> _paramRectCache;
 
     std::optional<drag_state>                   _drag;
     std::optional<std::pair<port_key, point_f>> _hoveredPort;

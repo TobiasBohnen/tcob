@@ -7,11 +7,13 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <format>
 #include <functional>
 #include <optional>
 #include <ranges>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -39,10 +41,13 @@ void node_graph::style::Transition(style& target, style const& from, style const
 
     target.InputPortText.lerp(from.InputPortText, to.InputPortText, step);
     target.OutputPortText.lerp(from.OutputPortText, to.OutputPortText, step);
+    target.ParamText.lerp(from.ParamText, to.ParamText, step);
 
     target.PortHoverColor      = helper::lerp(from.PortHoverColor, to.PortHoverColor, step);
     target.PortCompatibleColor = helper::lerp(from.PortCompatibleColor, to.PortCompatibleColor, step);
     target.PortAcceptColor     = helper::lerp(from.PortAcceptColor, to.PortAcceptColor, step);
+
+    target.ParamWidgetColor = helper::lerp(from.ParamWidgetColor, to.ParamWidgetColor, step);
 
     target.ConnectionWidth = helper::lerp(from.ConnectionWidth, to.ConnectionWidth, step);
 }
@@ -147,7 +152,12 @@ auto node_graph::evaluate(uid nodeID, std::unordered_map<uid, std::vector<node_v
         }
     }
 
-    return cache[nodeID] = n->Def.Compute(inputs);
+    std::vector<node_value_types> values;
+    values.reserve(n->Def.Parameters.size());
+    for (auto const& entry : n->Def.Parameters) {
+        std::visit([&](auto const& val) { values.emplace_back(val.Value); }, entry);
+    }
+    return cache[nodeID] = n->Def.Compute(inputs, values);
 }
 
 void node_graph::on_draw(widget_painter& painter)
@@ -162,7 +172,7 @@ void node_graph::on_draw(widget_painter& painter)
     f32 const conWidth {_style.ConnectionWidth.calc(bounds.width())};
 
     auto const getNodeRect {[&](node const& n) -> rect_f {
-        usize const  rows {1 + std::max(n.Def.Inputs.size(), n.Def.Outputs.size())};
+        usize const  rows {1 + std::max(n.Def.Inputs.size(), n.Def.Outputs.size()) + n.Def.Parameters.size()};
         size_f const size {nodeWidth, rowHeight * static_cast<f32>(rows)};
         return {{n.Position.X * bounds.width(), n.Position.Y * bounds.height()}, size};
     }};
@@ -212,8 +222,30 @@ void node_graph::on_draw(widget_painter& painter)
     // nodes
     _headerRectCache.clear();
     _portPosCache.clear();
+    _paramRectCache.clear();
 
-    auto const drawNode {[&](auto const& n) {
+    auto const drawChevrons {[&](rect_f const& controlRect) {
+        f32 const cx {controlRect.right() - (rowHeight * 0.5f)};
+        f32 const cy {controlRect.top() + (rowHeight * 0.5f)};
+        f32 const sz {rowHeight * 0.2f};
+
+        cv.set_stroke_style(_style.ParamWidgetColor);
+        cv.set_stroke_width(conWidth);
+
+        cv.begin_path();
+        cv.move_to({cx - sz, cy - (sz * 0.5f)});
+        cv.line_to({cx, cy - (sz * 1.5f)});
+        cv.line_to({cx + sz, cy - (sz * 0.5f)});
+        cv.stroke();
+
+        cv.begin_path();
+        cv.move_to({cx - sz, cy + (sz * 0.5f)});
+        cv.line_to({cx, cy + (sz * 1.5f)});
+        cv.line_to({cx + sz, cy + (sz * 0.5f)});
+        cv.stroke();
+    }};
+
+    auto const drawNode {[&](node const& n) {
         rect_f const nodeRect {getNodeRect(n)};
         rect_f const headerRect {nodeRect.Position, {nodeWidth, rowHeight}};
         _headerRectCache[n.ID] = headerRect;
@@ -289,15 +321,55 @@ void node_graph::on_draw(widget_painter& painter)
                                     {(nodeWidth * 0.5f) - (portRadius * 2.0f), rowHeight}};
             painter.draw_text(_style.OutputPortText, labelRect, port.Name);
         }
+
+        // parameter rows
+        usize const portRows {1 + std::max(n.Def.Inputs.size(), n.Def.Outputs.size())};
+        for (usize i {0}; i < n.Def.Parameters.size(); ++i) {
+            auto const&  entry {n.Def.Parameters[i]};
+            rect_f const rowRect {{nodeRect.left(), nodeRect.top() + (rowHeight * static_cast<f32>(portRows + i))},
+                                  {nodeWidth, rowHeight}};
+
+            _paramRectCache.emplace_back(std::pair {n.ID, i}, rowRect);
+
+            rect_f const labelRect {rowRect.Position, {nodeWidth, rowHeight}};
+            rect_f const controlRect {{rowRect.left() + (nodeWidth * 0.5f), rowRect.top()},
+                                      {nodeWidth * 0.5f, rowHeight}};
+
+            std::visit(
+                overloaded {
+                    [&](node_param_float const& val) {
+                        painter.draw_text(_style.ParamText, labelRect, std::format("{}: {:.3f}", val.Name, val.Value));
+                        drawChevrons(controlRect);
+                    },
+                    [&](node_param_int const& val) {
+                        painter.draw_text(_style.ParamText, labelRect, std::format("{}: {}", val.Name, val.Value));
+                        drawChevrons(controlRect);
+                    },
+                    [&](node_param_bool const& val) {
+                        painter.draw_text(_style.ParamText, labelRect, std::format("{}", val.Name));
+                        f32 const     size {rowHeight * 0.4f};
+                        point_f const center {controlRect.center()};
+                        rect_f const  box {{center.X, center.Y - (size * 0.5f)}, {size, size}};
+                        cv.set_stroke_style(_style.ParamWidgetColor);
+                        cv.set_stroke_width(conWidth);
+                        cv.begin_path();
+                        cv.rect(box);
+                        if (val.Value) {
+                            cv.set_fill_style(_style.ParamWidgetColor);
+                            cv.fill();
+                        }
+                        cv.stroke();
+                    },
+                    [&](auto const&) { }},
+                entry);
+        }
     }};
 
     for (auto const& n : _nodes) {
         if (_drag && &n == _drag->Node) { continue; }
         drawNode(n);
     }
-    if (_drag) {
-        drawNode(*_drag->Node);
-    }
+    if (_drag) { drawNode(*_drag->Node); }
 }
 
 void node_graph::on_mouse_hover(input::mouse::motion_event const& ev)
@@ -343,24 +415,35 @@ void node_graph::on_mouse_button_down(input::mouse::button_event const& ev)
 
     auto const mp {screen_to_local(*this, ev.Position)};
 
-    auto const getPort {[&](uid nodeID, uid portID, bool isInput) -> node_port const* {
-        auto const* n {find_node(nodeID)};
-        return n ? find_port(isInput ? n->Def.Inputs : n->Def.Outputs, portID) : nullptr;
-    }};
+    // header hit -> node drag
+    for (auto const& n : _nodes) {
+        auto it {_headerRectCache.find(n.ID)};
+        if (it == _headerRectCache.end() || !it->second.contains(mp)) { continue; }
 
-    auto const checkCompatibility {[&]() {
-        for (auto const& [key, pos] : _portPosCache) {
-            if (key.IsInput == _pendingConnection->Key.IsInput) { continue; }
-            if (key.NodeID == _pendingConnection->Key.NodeID) { continue; }
-            uid const srcNode {_pendingConnection->Key.IsInput ? key.NodeID : _pendingConnection->Key.NodeID};
-            uid const srcPort {_pendingConnection->Key.IsInput ? key.PortID : _pendingConnection->Key.PortID};
-            uid const dstNode {_pendingConnection->Key.IsInput ? _pendingConnection->Key.NodeID : key.NodeID};
-            uid const dstPort {_pendingConnection->Key.IsInput ? _pendingConnection->Key.PortID : key.PortID};
-            _pendingConnection->CompatibilityCache.emplace_back(key, can_connect(srcNode, srcPort, dstNode, dstPort));
-        }
-    }};
+        _drag      = {.Node = find_node(n.ID), .Offset = mp - it->second.Position};
+        ev.Handled = true;
+        return;
+    }
 
+    // port hit
     if (_hoveredPort) {
+        auto const getPort {[&](uid nodeID, uid portID, bool isInput) -> node_port const* {
+            auto const* n {find_node(nodeID)};
+            return n ? find_port(isInput ? n->Def.Inputs : n->Def.Outputs, portID) : nullptr;
+        }};
+
+        auto const checkCompatibility {[&]() {
+            for (auto const& [key, pos] : _portPosCache) {
+                if (key.IsInput == _pendingConnection->Key.IsInput) { continue; }
+                if (key.NodeID == _pendingConnection->Key.NodeID) { continue; }
+                uid const srcNode {_pendingConnection->Key.IsInput ? key.NodeID : _pendingConnection->Key.NodeID};
+                uid const srcPort {_pendingConnection->Key.IsInput ? key.PortID : _pendingConnection->Key.PortID};
+                uid const dstNode {_pendingConnection->Key.IsInput ? _pendingConnection->Key.NodeID : key.NodeID};
+                uid const dstPort {_pendingConnection->Key.IsInput ? _pendingConnection->Key.PortID : key.PortID};
+                _pendingConnection->CompatibilityCache.emplace_back(key, can_connect(srcNode, srcPort, dstNode, dstPort));
+            }
+        }};
+
         auto const& key {_hoveredPort->first};
         auto const& pos {_hoveredPort->second};
 
@@ -390,11 +473,46 @@ void node_graph::on_mouse_button_down(input::mouse::button_event const& ev)
         return;
     }
 
-    for (auto const& n : _nodes) {
-        auto it {_headerRectCache.find(n.ID)};
-        if (it == _headerRectCache.end() || !it->second.contains(mp)) { continue; }
+    // parameter row hit
+    rect_f const bounds {content_bounds()};
+    f32 const    rowHeight {_style.NodeSize.Height.calc(bounds.height())};
+    f32 const    nodeWidth {_style.NodeSize.Width.calc(bounds.width())};
 
-        _drag      = {.Node = find_node(n.ID), .Offset = mp - it->second.Position};
+    for (auto const& [keyPair, rowRect] : _paramRectCache) {
+        if (!rowRect.contains(mp)) { continue; }
+        auto* n {find_node(keyPair.first)};
+        if (!n || keyPair.second >= n->Def.Parameters.size()) { continue; }
+        auto& entry {n->Def.Parameters[keyPair.second]};
+
+        rect_f const controlRect {{rowRect.left() + (nodeWidth * 0.5f), rowRect.top()},
+                                  {nodeWidth * 0.5f, rowHeight}};
+        rect_f const chevronRect {{controlRect.right() - rowHeight, controlRect.top()},
+                                  {rowHeight, rowHeight}};
+
+        if (chevronRect.contains(mp)) {
+            bool const isUp {mp.Y < chevronRect.top() + (chevronRect.height() * 0.5f)};
+            std::visit(overloaded {
+                           [&](auto& val) {
+                               val.Value += isUp ? val.Step : -val.Step;
+                               val.Value  = std::clamp(val.Value, val.Min, val.Max);
+                               ev.Handled = true;
+                               queue_redraw();
+                               Changed({this});
+                               return;
+                           },
+                           [&](node_param_bool&) { }},
+                       entry);
+        }
+
+        // bool toggle — click anywhere in the row
+        if (std::holds_alternative<node_param_bool>(entry)) {
+            std::get<node_param_bool>(entry).Value = !std::get<node_param_bool>(entry).Value;
+            ev.Handled                             = true;
+            queue_redraw();
+            Changed({this});
+            return;
+        }
+
         ev.Handled = true;
         return;
     }
