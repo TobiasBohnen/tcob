@@ -332,8 +332,8 @@ void node_graph::on_draw(widget_painter& painter)
             _paramRectCache.emplace_back(std::pair {n.ID, i}, rowRect);
 
             rect_f const labelRect {rowRect.Position, {nodeWidth, rowHeight}};
-            rect_f const controlRect {{rowRect.left() + (nodeWidth * 0.5f), rowRect.top()},
-                                      {nodeWidth * 0.5f, rowHeight}};
+            rect_f const controlRect {{rowRect.right() - rowHeight, rowRect.top()},
+                                      {rowHeight, rowHeight}};
 
             std::visit(
                 overloaded {
@@ -491,17 +491,21 @@ void node_graph::on_mouse_button_down(input::mouse::button_event const& ev)
 
         if (chevronRect.contains(mp)) {
             bool const isUp {mp.Y < chevronRect.top() + (chevronRect.height() * 0.5f)};
+            bool       handled {false};
             std::visit(overloaded {
                            [&](auto& val) {
-                               val.Value += isUp ? val.Step : -val.Step;
-                               val.Value  = std::clamp(val.Value, val.Min, val.Max);
-                               ev.Handled = true;
-                               queue_redraw();
-                               Changed({this});
-                               return;
+                               val.Value = std::clamp(val.Value + (isUp ? val.Step : -val.Step), val.Min, val.Max);
+                               handled   = true;
                            },
                            [&](node_param_bool&) { }},
                        entry);
+
+            if (handled) {
+                ev.Handled = true;
+                queue_redraw();
+                Changed({this});
+                return;
+            }
         }
 
         // bool toggle — click anywhere in the row
