@@ -123,41 +123,59 @@ auto node_graph::remove_connection(uid connection) -> bool
     return retValue;
 }
 
-auto node_graph::evaluate(uid nodeID) const -> std::vector<node_value_types>
+auto node_graph::evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> std::vector<node_value_types>
 {
-    std::unordered_map<uid, std::vector<node_value_types>> cache;
-    return evaluate(nodeID, cache);
-}
-
-auto node_graph::evaluate(uid nodeID, std::unordered_map<uid, std::vector<node_value_types>>& cache) const -> std::vector<node_value_types>
-{
-    if (auto it {cache.find(nodeID)}; it != cache.end()) { return it->second; }
+    eval_cache cache;
 
     auto const* n {find_node(nodeID)};
-    if (!n || !n->Def.Compute) { return {}; }
+    if (!n) { return {}; }
+
+    node_value_types inputVal {0.0f};
+    for (auto const& c : _connections) {
+        if (c.InputNodeID != nodeID || c.InputPortID != portID) { continue; }
+        inputVal = evaluate_port(c.OutputNodeID, c.OutputPortID, cache);
+        break;
+    }
+
+    std::vector<node_value_types> params;
+    for (auto const& p : n->Def.Parameters) {
+        std::visit([&](auto const& val) { params.emplace_back(val.Value); }, p);
+    }
+
+    return fn({inputVal}, params);
+}
+
+auto node_graph::evaluate_port(uid nodeID, uid portID, eval_cache& cache) const -> node_value_types
+{
+    if (auto nit {cache.find(nodeID)}; nit != cache.end()) {
+        if (auto pit {nit->second.find(portID)}; pit != nit->second.end()) {
+            return pit->second;
+        }
+    }
+
+    auto const* n {find_node(nodeID)};
+    if (!n) { return 0.0f; }
+    auto const* port {find_port(n->Def.Outputs, portID)};
+    if (!port || !port->Compute) { return 0.0f; }
 
     std::vector<node_value_types> inputs(n->Def.Inputs.size());
     for (auto const& c : _connections) {
         if (c.InputNodeID != nodeID) { continue; }
-        auto const* src {find_node(c.OutputNodeID)};
-        if (!src) { continue; }
-        auto const& upstream {cache.contains(c.OutputNodeID)
-                                  ? cache[c.OutputNodeID]
-                                  : cache[c.OutputNodeID] = evaluate(c.OutputNodeID, cache)};
         for (usize i {0}; i < n->Def.Inputs.size(); ++i) {
             if (n->Def.Inputs[i].ID != c.InputPortID) { continue; }
-            for (usize j {0}; j < src->Def.Outputs.size(); ++j) {
-                if (src->Def.Outputs[j].ID == c.OutputPortID) { inputs[i] = upstream[j]; }
-            }
+            inputs[i] = evaluate_port(c.OutputNodeID, c.OutputPortID, cache);
         }
     }
 
-    std::vector<node_value_types> values;
-    values.reserve(n->Def.Parameters.size());
-    for (auto const& entry : n->Def.Parameters) {
-        std::visit([&](auto const& val) { values.emplace_back(val.Value); }, entry);
+    std::vector<node_value_types> params;
+    params.reserve(n->Def.Parameters.size());
+    for (auto const& p : n->Def.Parameters) {
+        std::visit([&](auto const& val) { params.emplace_back(val.Value); }, p);
     }
-    return cache[nodeID] = n->Def.Compute(inputs, values);
+
+    auto const result {port->Compute(inputs, params)};
+    auto const value {result.empty() ? node_value_types {0.0f} : result[0]};
+    return cache[nodeID][portID] = value;
 }
 
 void node_graph::on_draw(widget_painter& painter)

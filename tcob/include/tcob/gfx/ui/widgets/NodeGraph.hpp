@@ -27,15 +27,6 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-struct node_port {
-    uid ID {0};
-
-    string Name;
-    u32    Type {0xFFFFFFFF};
-
-    color Color {colors::White};
-};
-
 using node_value_types = std::variant<f32, i32, bool>;
 
 struct node_param_float {
@@ -59,7 +50,19 @@ struct node_param_bool {
     bool   Value;
 };
 
-using node_param_types = std::variant<node_param_float, node_param_int, node_param_bool>;
+using node_param_types  = std::variant<node_param_float, node_param_int, node_param_bool>;
+using node_compute_func = std::function<std::vector<node_value_types>(std::vector<node_value_types> const&, std::vector<node_value_types> const&)>;
+
+struct node_port {
+    uid ID {0};
+
+    string Name;
+    u32    Type {0xFFFFFFFF};
+
+    color Color {colors::White};
+
+    node_compute_func Compute;
+};
 
 struct node_def {
     string Title;
@@ -67,11 +70,6 @@ struct node_def {
     std::vector<node_port>        Inputs;
     std::vector<node_port>        Outputs;
     std::vector<node_param_types> Parameters;
-
-    std::function<std::vector<node_value_types>(
-        std::vector<node_value_types> const&,
-        std::vector<node_value_types> const&)>
-        Compute;
 
     color HeaderColor {colors::Black};
     color Color {colors::White};
@@ -111,11 +109,9 @@ public:
     auto create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>;
     auto remove_connection(uid connection) -> bool;
 
-    auto evaluate(uid nodeID) const -> std::vector<node_value_types>;
+    auto evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> std::vector<node_value_types>;
 
 protected:
-    auto evaluate(uid nodeID, std::unordered_map<uid, std::vector<node_value_types>>& cache) const -> std::vector<node_value_types>;
-
     void on_draw(widget_painter& painter) override;
 
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
@@ -126,6 +122,9 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
 private:
+    using eval_cache = std::unordered_map<uid, std::unordered_map<uid, node_value_types>>;
+    auto evaluate_port(uid nodeID, uid portID, eval_cache& cache) const -> node_value_types;
+
     struct node {
         uid      ID {0};
         node_def Def;
