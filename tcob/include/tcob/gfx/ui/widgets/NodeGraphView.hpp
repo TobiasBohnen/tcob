@@ -80,7 +80,7 @@ struct node_def {
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-class TCOB_API node_graph : public widget {
+class TCOB_API node_graph_view : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
@@ -103,7 +103,7 @@ public:
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
-    explicit node_graph(init const& wi);
+    explicit node_graph_view(init const& wi);
 
     signal<widget_event const> Changed;
 
@@ -196,7 +196,7 @@ private:
     std::vector<connection>           _connections;
     std::optional<pending_connection> _pendingConnection;
 
-    node_graph::style _style;
+    node_graph_view::style _style;
 };
 
 }

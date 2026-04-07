@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/ui/widgets/NodeGraph.hpp"
+#include "tcob/gfx/ui/widgets/NodeGraphView.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -31,7 +31,7 @@
 
 namespace tcob::ui {
 
-void node_graph::style::Transition(style& target, style const& from, style const& to, f64 step)
+void node_graph_view::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
     widget_style::Transition(target, from, to, step);
 
@@ -52,13 +52,13 @@ void node_graph::style::Transition(style& target, style const& from, style const
     target.ConnectionWidth = helper::lerp(from.ConnectionWidth, to.ConnectionWidth, step);
 }
 
-node_graph::node_graph(init const& wi)
+node_graph_view::node_graph_view(init const& wi)
     : widget {wi}
 {
-    Class("node_graph");
+    Class("node_graph_view");
 }
 
-auto node_graph::create_node(node_def const& def, point_f pos) -> uid
+auto node_graph_view::create_node(node_def const& def, point_f pos) -> uid
 {
     auto& node {_nodes.emplace_back(get_random_ID(), def, pos)};
 
@@ -69,7 +69,7 @@ auto node_graph::create_node(node_def const& def, point_f pos) -> uid
     return node.ID;
 }
 
-auto node_graph::remove_node(uid node) -> bool
+auto node_graph_view::remove_node(uid node) -> bool
 {
     if (!helper::erase_first(_nodes, [node](auto const& n) { return n.ID == node; })) { return false; }
     std::erase_if(_connections, [node](connection const& c) { return c.OutputNodeID == node || c.InputNodeID == node; });
@@ -81,7 +81,7 @@ auto node_graph::remove_node(uid node) -> bool
     return true;
 }
 
-auto node_graph::can_connect(uid outNode, uid outPort, uid inNode, uid inPort) const -> bool
+auto node_graph_view::can_connect(uid outNode, uid outPort, uid inNode, uid inPort) const -> bool
 {
     if (outNode == inNode) { return false; }
 
@@ -106,7 +106,7 @@ auto node_graph::can_connect(uid outNode, uid outPort, uid inNode, uid inPort) c
     return !hasPath(inNode);
 }
 
-auto node_graph::create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>
+auto node_graph_view::create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>
 {
     if (!can_connect(outNode, outPort, inNode, inPort)) { return std::nullopt; }
     auto const* colorNode {find_node(outNode)};
@@ -116,14 +116,14 @@ auto node_graph::create_connection(uid outNode, uid outPort, uid inNode, uid inP
     return con.ID;
 }
 
-auto node_graph::remove_connection(uid connection) -> bool
+auto node_graph_view::remove_connection(uid connection) -> bool
 {
     auto const retValue {helper::erase_first(_connections, [connection](auto const& c) { return c.ID == connection; })};
     Changed({this});
     return retValue;
 }
 
-auto node_graph::evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> node_value_types
+auto node_graph_view::evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> node_value_types
 {
     eval_cache  cache;
     auto const* n {find_node(nodeID)};
@@ -139,7 +139,7 @@ auto node_graph::evaluate(uid nodeID, uid portID, node_compute_func const& fn) c
     return fn({evaluate_port(output.NodeID, output.PortID, cache)}, gather_params(*n));
 }
 
-auto node_graph::evaluate_port(uid nodeID, uid portID, eval_cache& cache) const -> node_value_types
+auto node_graph_view::evaluate_port(uid nodeID, uid portID, eval_cache& cache) const -> node_value_types
 {
     if (auto nit {cache.find(nodeID)}; nit != cache.end()) {
         if (auto pit {nit->second.find(portID)}; pit != nit->second.end()) {
@@ -155,7 +155,7 @@ auto node_graph::evaluate_port(uid nodeID, uid portID, eval_cache& cache) const 
     return cache[nodeID][portID] = port->Compute(gather_inputs(nodeID, cache), gather_params(*n));
 }
 
-auto node_graph::gather_inputs(uid nodeID, eval_cache& cache) const -> std::vector<node_value_types>
+auto node_graph_view::gather_inputs(uid nodeID, eval_cache& cache) const -> std::vector<node_value_types>
 {
     auto const* n {find_node(nodeID)};
     if (!n) { return {}; }
@@ -170,7 +170,7 @@ auto node_graph::gather_inputs(uid nodeID, eval_cache& cache) const -> std::vect
     return inputs;
 }
 
-auto node_graph::gather_params(node const& n) const -> std::vector<node_value_types>
+auto node_graph_view::gather_params(node const& n) const -> std::vector<node_value_types>
 {
     std::vector<node_value_types> params;
     params.reserve(n.Def.Parameters.size());
@@ -180,7 +180,7 @@ auto node_graph::gather_params(node const& n) const -> std::vector<node_value_ty
     return params;
 }
 
-void node_graph::on_draw(widget_painter& painter)
+void node_graph_view::on_draw(widget_painter& painter)
 {
     rect_f const bounds {draw_base(_style, painter)};
     auto&        cv {painter.canvas()};
@@ -386,7 +386,7 @@ void node_graph::on_draw(widget_painter& painter)
     }
 }
 
-void node_graph::on_mouse_hover(input::mouse::motion_event const& ev)
+void node_graph_view::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     auto const mp {screen_to_local(*this, ev.Position)};
     f32 const  portRadius {get_port_radius()};
@@ -402,7 +402,7 @@ void node_graph::on_mouse_hover(input::mouse::motion_event const& ev)
     ev.Handled = true;
 }
 
-void node_graph::on_mouse_drag(input::mouse::motion_event const& ev)
+void node_graph_view::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     auto const mp {screen_to_local(*this, ev.Position)};
 
@@ -423,14 +423,14 @@ void node_graph::on_mouse_drag(input::mouse::motion_event const& ev)
     }
 }
 
-void node_graph::on_mouse_button_down(input::mouse::button_event const& ev)
+void node_graph_view::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (ev.Button != controls().PrimaryMouseButton) { return; }
     auto const mp {screen_to_local(*this, ev.Position)};
     ev.Handled = try_drag_node(mp) || try_start_connection(mp) || try_param_hit(mp);
 }
 
-void node_graph::on_mouse_button_up(input::mouse::button_event const& ev)
+void node_graph_view::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (ev.Button != controls().PrimaryMouseButton) { return; }
     if (_pendingConnection) {
@@ -442,11 +442,11 @@ void node_graph::on_mouse_button_up(input::mouse::button_event const& ev)
     }
 }
 
-void node_graph::on_update(milliseconds /* deltaTime */)
+void node_graph_view::on_update(milliseconds /* deltaTime */)
 {
 }
 
-auto node_graph::try_drag_node(point_f mp) -> bool
+auto node_graph_view::try_drag_node(point_f mp) -> bool
 {
     auto const it {std::ranges::find_if(_nodes, [&](node const& n) {
         auto const hit {_headerRectCache.find(n.ID)};
@@ -460,7 +460,7 @@ auto node_graph::try_drag_node(point_f mp) -> bool
     return true;
 }
 
-auto node_graph::try_start_connection(point_f mp) -> bool
+auto node_graph_view::try_start_connection(point_f mp) -> bool
 {
     if (!_hoveredPort) { return false; }
 
@@ -508,7 +508,7 @@ auto node_graph::try_start_connection(point_f mp) -> bool
     return true;
 }
 
-void node_graph::finish_connection(point_f mp)
+void node_graph_view::finish_connection(point_f mp)
 {
     auto const it {std::ranges::find_if(_portPosCache, [&](auto const& p) {
         return p.first.IsInput != _pendingConnection->Key.IsInput
@@ -529,7 +529,7 @@ void node_graph::finish_connection(point_f mp)
     queue_redraw();
 }
 
-auto node_graph::try_param_hit(point_f mp) -> bool
+auto node_graph_view::try_param_hit(point_f mp) -> bool
 {
     rect_f const bounds {content_bounds()};
     f32 const    rowHeight {_style.NodeSize.Height.calc(bounds.height())};
@@ -568,27 +568,27 @@ auto node_graph::try_param_hit(point_f mp) -> bool
     return false;
 }
 
-auto node_graph::get_port_radius() const -> f32 { return _style.NodeSize.Height.calc(content_bounds().height()) * 0.25f; }
+auto node_graph_view::get_port_radius() const -> f32 { return _style.NodeSize.Height.calc(content_bounds().height()) * 0.25f; }
 
-void node_graph::notify_changed()
+void node_graph_view::notify_changed()
 {
     queue_redraw();
     Changed({this});
 }
 
-auto node_graph::find_node(uid id) -> node*
+auto node_graph_view::find_node(uid id) -> node*
 {
     auto it {std::ranges::find(_nodes, id, &node::ID)};
     return it != _nodes.end() ? &*it : nullptr;
 }
 
-auto node_graph::find_node(uid id) const -> node const*
+auto node_graph_view::find_node(uid id) const -> node const*
 {
     auto it {std::ranges::find(_nodes, id, &node::ID)};
     return it != _nodes.end() ? &*it : nullptr;
 }
 
-auto node_graph::find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*
+auto node_graph_view::find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*
 {
     auto it {std::ranges::find(ports, id, &node_port::ID)};
     return it != ports.end() ? &*it : nullptr;

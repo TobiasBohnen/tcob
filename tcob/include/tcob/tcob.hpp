@@ -145,7 +145,7 @@
 #include <tcob/gfx/ui/widgets/ImageBox.hpp>
 #include <tcob/gfx/ui/widgets/Label.hpp>
 #include <tcob/gfx/ui/widgets/ListBox.hpp>
-#include <tcob/gfx/ui/widgets/NodeGraph.hpp>
+#include <tcob/gfx/ui/widgets/NodeGraphView.hpp>
 #include <tcob/gfx/ui/widgets/Panel.hpp>
 #include <tcob/gfx/ui/widgets/Progressbar.hpp>
 #include <tcob/gfx/ui/widgets/Radiobutton.hpp>

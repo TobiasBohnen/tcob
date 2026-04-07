@@ -36,7 +36,7 @@ class grid_view;
 class image_box;
 class label;
 class list_box;
-class node_graph;
+class node_graph_view;
 class progress_bar;
 class radio_button;
 class range_slider;
