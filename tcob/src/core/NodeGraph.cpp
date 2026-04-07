@@ -10,6 +10,7 @@
 #include <optional>
 #include <span>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -36,56 +37,68 @@ auto node_graph::create_node(node_def const& def) -> uid
     return node.ID;
 }
 
-auto node_graph::remove_node(uid node) -> bool
+auto node_graph::remove_node(uid nodeID) -> bool
 {
-    if (!helper::erase_first(_nodes, [node](auto const& n) { return n.ID == node; })) { return false; }
-    std::erase_if(_connections, [node](connection const& c) { return c.OutputNodeID == node || c.InputNodeID == node; });
+    if (!helper::erase_first(_nodes, [nodeID](auto const& n) { return n.ID == nodeID; })) { return false; }
+    std::erase_if(_connections, [nodeID](connection const& c) { return c.OutputNodeID == nodeID || c.InputNodeID == nodeID; });
 
-    NodeRemoved(node);
+    NodeRemoved(nodeID);
     Dirty();
     return true;
 }
 
-auto node_graph::can_connect(uid outNode, uid outPort, uid inNode, uid inPort) const -> bool
+auto node_graph::can_connect(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) const -> bool
 {
-    if (outNode == inNode) { return false; }
+    if (outNodeID == inNodeID) { return false; }
 
-    auto const* outN {find_node(outNode)};
-    auto const* inN {find_node(inNode)};
+    auto const* outN {find_node(outNodeID)};
+    auto const* inN {find_node(inNodeID)};
     if (!outN || !inN) { return false; }
 
-    auto const* out {find_port(outN->Def.Outputs, outPort)};
-    auto const* in {find_port(inN->Def.Inputs, inPort)};
+    auto const* out {find_port(outN->Def.Outputs, outPortID)};
+    auto const* in {find_port(inN->Def.Inputs, inPortID)};
     if (!out || !in) { return false; }
 
     if (!(out->Type & in->Type)) { return false; }
 
-    if (std::ranges::any_of(_connections, [&](connection const& c) { return c.InputNodeID == inNode && c.InputPortID == inPort; })) { return false; }
+    if (std::ranges::any_of(_connections, [&](connection const& c) { return c.InputNodeID == inNodeID && c.InputPortID == inPortID; })) { return false; }
 
-    std::function<bool(uid)> const hasPath {[&](uid from) -> bool {
-        return from == outNode || std::ranges::any_of(_connections, [&](connection const& c) {
-                   return c.OutputNodeID == from && hasPath(c.InputNodeID);
-               });
-    }};
+    std::vector<uid>        stack {inNodeID};
+    std::unordered_set<uid> visited;
 
-    return !hasPath(inNode);
+    while (!stack.empty()) {
+        uid const current {stack.back()};
+        stack.pop_back();
+
+        if (current == outNodeID) { return false; }
+        if (visited.contains(current)) { continue; }
+        visited.insert(current);
+
+        for (auto const& con : _connections) {
+            if (con.OutputNodeID == current) {
+                stack.push_back(con.InputNodeID);
+            }
+        }
+    }
+
+    return true;
 }
 
-auto node_graph::create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>
+auto node_graph::create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>
 {
-    if (!can_connect(outNode, outPort, inNode, inPort)) { return std::nullopt; }
-    auto const* colorNode {find_node(outNode)};
-    auto const* colorPort {colorNode ? find_port(colorNode->Def.Outputs, outPort) : nullptr};
-    auto&       con {_connections.emplace_back(get_random_ID(), colorPort ? colorPort->Color : colors::White, outNode, outPort, inNode, inPort)};
+    if (!can_connect(outNodeID, outPortID, inNodeID, inPortID)) { return std::nullopt; }
+    auto const* colorNode {find_node(outNodeID)};
+    auto const* colorPort {colorNode ? find_port(colorNode->Def.Outputs, outPortID) : nullptr};
+    auto&       con {_connections.emplace_back(get_random_ID(), colorPort ? colorPort->Color : colors::White, outNodeID, outPortID, inNodeID, inPortID)};
     ConnectionAdded(con.ID);
     Dirty();
     return con.ID;
 }
 
-auto node_graph::remove_connection(uid connection) -> bool
+auto node_graph::remove_connection(uid connectionID) -> bool
 {
-    auto const retValue {helper::erase_first(_connections, [connection](auto const& c) { return c.ID == connection; })};
-    ConnectionRemoved(connection);
+    auto const retValue {helper::erase_first(_connections, [connectionID](auto const& c) { return c.ID == connectionID; })};
+    ConnectionRemoved(connectionID);
     Dirty();
     return retValue;
 }
@@ -149,15 +162,15 @@ auto node_graph::gather_params(node const& n) const -> std::vector<node_value_ty
     return params;
 }
 
-auto node_graph::find_node(uid id) -> node*
+auto node_graph::find_node(uid nodeID) -> node*
 {
-    auto it {std::ranges::find(_nodes, id, &node::ID)};
+    auto it {std::ranges::find(_nodes, nodeID, &node::ID)};
     return it != _nodes.end() ? &*it : nullptr;
 }
 
-auto node_graph::find_node(uid id) const -> node const*
+auto node_graph::find_node(uid nodeID) const -> node const*
 {
-    auto it {std::ranges::find(_nodes, id, &node::ID)};
+    auto it {std::ranges::find(_nodes, nodeID, &node::ID)};
     return it != _nodes.end() ? &*it : nullptr;
 }
 

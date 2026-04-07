@@ -93,6 +93,7 @@ private:
     auto try_drag_node(point_f mp) -> bool;
     auto try_param_hit(point_f mp) -> bool;
     auto try_start_connection(point_f mp) -> bool;
+    auto try_remove_connections() -> bool;
 
     void finish_connection(point_f mp);
 

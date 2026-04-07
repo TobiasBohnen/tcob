@@ -103,16 +103,16 @@ public:
     auto connections() const -> std::span<connection const>;
 
     auto create_node(node_def const& def) -> uid;
-    auto remove_node(uid node) -> bool;
+    auto remove_node(uid nodeID) -> bool;
 
-    auto can_connect(uid outNode, uid outPort, uid inNode, uid inPort) const -> bool;
-    auto create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>;
-    auto remove_connection(uid connection) -> bool;
+    auto can_connect(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) const -> bool;
+    auto create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>;
+    auto remove_connection(uid connectionID) -> bool;
 
     auto evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> node_value_types;
 
-    auto find_node(uid id) const -> node const*;
-    auto find_node(uid id) -> node*;
+    auto find_node(uid nodeID) const -> node const*;
+    auto find_node(uid nodeID) -> node*;
 
     auto find_port(uid nodeID, uid portID, bool isInput) const -> node_port const*;
 

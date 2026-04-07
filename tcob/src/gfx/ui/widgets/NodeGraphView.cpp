@@ -56,9 +56,8 @@ node_graph_view::node_graph_view(init const& wi)
 {
     Graph.Changed.connect([&] { notify_dirty(); });
     Graph->Dirty.connect([&] {
-        _drag              = std::nullopt;
-        _hoveredPort       = std::nullopt;
-        _pendingConnection = std::nullopt;
+        _drag        = std::nullopt;
+        _hoveredPort = std::nullopt;
         notify_dirty();
     });
     Graph->NodeRemoved.connect([&](uid node) {
@@ -68,6 +67,7 @@ node_graph_view::node_graph_view(init const& wi)
         if (_drag && _drag->NodeID == node) {
             _drag = std::nullopt;
         }
+        _pendingConnection = std::nullopt;
     });
 
     Class("node_graph_view");
@@ -331,14 +331,18 @@ void node_graph_view::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void node_graph_view::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    if (ev.Button != controls().PrimaryMouseButton) { return; }
-    auto const mp {screen_to_local(*this, ev.Position)};
-    ev.Handled = try_drag_node(mp) || try_start_connection(mp) || try_param_hit(mp);
+    if (ev.Button == controls().PrimaryMouseButton) {
+        auto const mp {screen_to_local(*this, ev.Position)};
+        ev.Handled = try_drag_node(mp) || try_start_connection(mp) || try_param_hit(mp);
+    } else if (ev.Button == controls().SecondaryMouseButton) {
+        ev.Handled = try_remove_connections();
+    }
 }
 
 void node_graph_view::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (ev.Button != controls().PrimaryMouseButton) { return; }
+
     if (_pendingConnection) {
         finish_connection(screen_to_local(*this, ev.Position));
         ev.Handled = true;
@@ -407,6 +411,24 @@ auto node_graph_view::try_start_connection(point_f mp) -> bool
     _pendingConnection = {.Key = key, .PortColor = Graph->find_port(key.NodeID, key.PortID, key.IsInput)->Color, .StartPos = pos, .MousePos = mp};
     checkCompatibility();
     return true;
+}
+
+auto node_graph_view::try_remove_connections() -> bool
+{
+    if (!_hoveredPort) { return false; }
+
+    auto const connections {Graph->connections()};
+    auto const it {std::ranges::find_if(connections, [&](auto const& c) {
+        return _hoveredPort->first.IsInput
+            ? c.InputNodeID == _hoveredPort->first.NodeID && c.InputPortID == _hoveredPort->first.PortID
+            : c.OutputNodeID == _hoveredPort->first.NodeID && c.OutputPortID == _hoveredPort->first.PortID;
+    })};
+    if (it != connections.end()) {
+        Graph.mutate([&](auto& graph) { graph.remove_connection(it->ID); });
+        return true;
+    }
+
+    return false;
 }
 
 void node_graph_view::finish_connection(point_f mp)
