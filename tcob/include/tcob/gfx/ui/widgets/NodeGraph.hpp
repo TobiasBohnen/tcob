@@ -51,7 +51,9 @@ struct node_param_bool {
 };
 
 using node_param_types  = std::variant<node_param_float, node_param_int, node_param_bool>;
-using node_compute_func = std::function<std::vector<node_value_types>(std::vector<node_value_types> const&, std::vector<node_value_types> const&)>;
+using node_compute_func = std::function<node_value_types(std::vector<node_value_types> const&, std::vector<node_value_types> const&)>;
+
+////////////////////////////////////////////////////////////
 
 struct node_port {
     uid ID {0};
@@ -74,6 +76,9 @@ struct node_def {
     color HeaderColor {colors::Black};
     color Color {colors::White};
 };
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 class TCOB_API node_graph : public widget {
 public:
@@ -109,7 +114,7 @@ public:
     auto create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>;
     auto remove_connection(uid connection) -> bool;
 
-    auto evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> std::vector<node_value_types>;
+    auto evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> node_value_types;
 
 protected:
     void on_draw(widget_painter& painter) override;
@@ -124,6 +129,12 @@ protected:
 private:
     using eval_cache = std::unordered_map<uid, std::unordered_map<uid, node_value_types>>;
     auto evaluate_port(uid nodeID, uid portID, eval_cache& cache) const -> node_value_types;
+
+    auto try_drag_node(point_f mp) -> bool;
+    auto try_pending_connection(point_f mp) -> bool;
+    auto try_param_hit(point_f mp) -> bool;
+    auto try_finish_connection(point_f mp) -> bool;
+    auto try_release_drag() -> bool;
 
     struct node {
         uid      ID {0};
