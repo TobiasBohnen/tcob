@@ -6,15 +6,15 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <functional>
 #include <optional>
 #include <unordered_map>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/NodeGraph.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -25,59 +25,6 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
-////////////////////////////////////////////////////////////
-
-using node_value_types = std::variant<f32, i32, bool>;
-
-struct node_param_float {
-    string Name;
-    f32    Value;
-    f32    Min {0};
-    f32    Max {1};
-    f32    Step {0.01f};
-};
-
-struct node_param_int {
-    string Name;
-    i32    Value;
-    i32    Min {-100};
-    i32    Max {100};
-    i32    Step {1};
-};
-
-struct node_param_bool {
-    string Name;
-    bool   Value;
-};
-
-using node_param_types  = std::variant<node_param_float, node_param_int, node_param_bool>;
-using node_compute_func = std::function<node_value_types(std::vector<node_value_types> const&, std::vector<node_value_types> const&)>;
-
-////////////////////////////////////////////////////////////
-
-struct node_port {
-    uid ID {0};
-
-    string Name;
-    u32    Type {0xFFFFFFFF};
-
-    color Color {colors::White};
-
-    node_compute_func Compute;
-};
-
-struct node_def {
-    string Title;
-
-    std::vector<node_port>        Inputs;
-    std::vector<node_port>        Outputs;
-    std::vector<node_param_types> Parameters;
-
-    color HeaderColor {colors::Black};
-    color Color {colors::White};
-};
-
-////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
 class TCOB_API node_graph_view : public widget {
@@ -105,16 +52,11 @@ public:
 
     explicit node_graph_view(init const& wi);
 
-    signal<widget_event const> Changed;
+    signal<> GraphDirty;
 
-    auto create_node(node_def const& def, point_f pos) -> uid;
-    auto remove_node(uid node) -> bool;
+    prop<node_graph const> Graph;
 
-    auto can_connect(uid outNode, uid outPort, uid inNode, uid inPort) const -> bool;
-    auto create_connection(uid outNode, uid outPort, uid inNode, uid inPort) -> std::optional<uid>;
-    auto remove_connection(uid connection) -> bool;
-
-    auto evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> node_value_types;
+    void set_node_position(uid nodeID, point_f pos);
 
 protected:
     void on_draw(widget_painter& painter) override;
@@ -127,46 +69,26 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
 private:
-    struct node {
-        uid      ID {0};
-        node_def Def;
-        point_f  Position;
-    };
-
-    struct connection {
-        uid ID {0};
-
-        color Color {colors::White};
-
-        uid OutputNodeID {0};
-        uid OutputPortID {0};
-        uid InputNodeID {0};
-        uid InputPortID {0};
-    };
-
-    struct port_key {
+    struct node_port_key {
         uid  NodeID;
         uid  PortID;
         bool IsInput;
 
-        auto operator==(port_key const& other) const -> bool = default;
+        auto operator==(node_port_key const& other) const -> bool = default;
     };
 
     struct pending_connection {
-        port_key                               Key;
-        color                                  PortColor;
-        point_f                                StartPos;
-        point_f                                MousePos;
-        std::vector<std::pair<port_key, bool>> CompatibilityCache {};
+        node_port_key                               Key;
+        color                                       PortColor;
+        point_f                                     StartPos;
+        point_f                                     MousePos;
+        std::vector<std::pair<node_port_key, bool>> CompatibilityCache {};
     };
 
     struct drag_state {
-        node*   Node;
+        uid     NodeID;
         point_f Offset;
     };
-
-    using eval_cache = std::unordered_map<uid, std::unordered_map<uid, node_value_types>>;
-    auto evaluate_port(uid nodeID, uid portID, eval_cache& cache) const -> node_value_types;
 
     auto try_drag_node(point_f mp) -> bool;
     auto try_param_hit(point_f mp) -> bool;
@@ -174,26 +96,19 @@ private:
 
     void finish_connection(point_f mp);
 
-    auto gather_inputs(uid nodeID, eval_cache& cache) const -> std::vector<node_value_types>;
-    auto gather_params(node const& n) const -> std::vector<node_value_types>;
-
     auto get_port_radius() const -> f32;
-    void notify_changed();
 
-    auto find_node(uid id) -> node*;
-    auto find_node(uid id) const -> node const*;
+    void notify_dirty();
 
-    auto find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*;
+    std::unordered_map<uid, point_f> _nodePos;
 
     std::unordered_map<uid, rect_f>                       _headerRectCache;
-    std::vector<std::pair<port_key, point_f>>             _portPosCache;
+    std::vector<std::pair<node_port_key, point_f>>        _portPosCache;
     std::vector<std::pair<std::pair<uid, usize>, rect_f>> _paramRectCache;
 
-    std::optional<drag_state>                   _drag;
-    std::optional<std::pair<port_key, point_f>> _hoveredPort;
+    std::optional<drag_state>                        _drag;
+    std::optional<std::pair<node_port_key, point_f>> _hoveredPort;
 
-    std::vector<node>                 _nodes;
-    std::vector<connection>           _connections;
     std::optional<pending_connection> _pendingConnection;
 
     node_graph_view::style _style;

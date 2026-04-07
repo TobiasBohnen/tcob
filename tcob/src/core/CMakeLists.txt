@@ -21,6 +21,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Common.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Logger.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/NodeGraph.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ServiceLocator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Signal.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Stopwatch.cpp
@@ -75,6 +76,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Interfaces.hpp
     ${TCOB_INC_DIR}/tcob/core/Logger.hpp
     ${TCOB_INC_DIR}/tcob/core/Logger.inl
+    ${TCOB_INC_DIR}/tcob/core/NodeGraph.hpp
     ${TCOB_INC_DIR}/tcob/core/Point.hpp
     ${TCOB_INC_DIR}/tcob/core/Point.inl
     ${TCOB_INC_DIR}/tcob/core/Property.hpp
