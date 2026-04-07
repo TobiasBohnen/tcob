@@ -127,15 +127,6 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
 private:
-    using eval_cache = std::unordered_map<uid, std::unordered_map<uid, node_value_types>>;
-    auto evaluate_port(uid nodeID, uid portID, eval_cache& cache) const -> node_value_types;
-
-    auto try_drag_node(point_f mp) -> bool;
-    auto try_pending_connection(point_f mp) -> bool;
-    auto try_param_hit(point_f mp) -> bool;
-    auto try_finish_connection(point_f mp) -> bool;
-    auto try_release_drag() -> bool;
-
     struct node {
         uid      ID {0};
         node_def Def;
@@ -173,6 +164,21 @@ private:
         node*   Node;
         point_f Offset;
     };
+
+    using eval_cache = std::unordered_map<uid, std::unordered_map<uid, node_value_types>>;
+    auto evaluate_port(uid nodeID, uid portID, eval_cache& cache) const -> node_value_types;
+
+    auto try_drag_node(point_f mp) -> bool;
+    auto try_param_hit(point_f mp) -> bool;
+    auto try_start_connection(point_f mp) -> bool;
+
+    void finish_connection(point_f mp);
+
+    auto gather_inputs(uid nodeID, eval_cache& cache) const -> std::vector<node_value_types>;
+    auto gather_params(node const& n) const -> std::vector<node_value_types>;
+
+    auto get_port_radius() const -> f32;
+    void notify_changed();
 
     auto find_node(uid id) -> node*;
     auto find_node(uid id) const -> node const*;
