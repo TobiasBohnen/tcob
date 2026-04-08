@@ -43,13 +43,25 @@ void node_graph_view::style::Transition(style& target, style const& from, style 
     target.OutputPortText.lerp(from.OutputPortText, to.OutputPortText, step);
     target.ParamText.lerp(from.ParamText, to.ParamText, step);
 
+    target.ConnectionWidth = helper::lerp(from.ConnectionWidth, to.ConnectionWidth, step);
+
+    target.NodeColor       = helper::lerp(from.NodeColor, to.NodeColor, step);
+    target.NodeHeaderColor = helper::lerp(from.NodeHeaderColor, to.NodeHeaderColor, step);
+
+    if (from.PortColors.size() == to.PortColors.size()) {
+        for (auto const& [k, v] : from.PortColors) {
+            if (to.PortColors.contains(k)) {
+                target.PortColors[k] = helper::lerp(v, to.PortColors.at(k), step);
+            }
+        }
+    }
+
     target.PortHoverColor      = helper::lerp(from.PortHoverColor, to.PortHoverColor, step);
     target.PortCompatibleColor = helper::lerp(from.PortCompatibleColor, to.PortCompatibleColor, step);
     target.PortAcceptColor     = helper::lerp(from.PortAcceptColor, to.PortAcceptColor, step);
 
+    target.ParamColor       = helper::lerp(from.ParamColor, to.ParamColor, step);
     target.ParamWidgetColor = helper::lerp(from.ParamWidgetColor, to.ParamWidgetColor, step);
-
-    target.ConnectionWidth = helper::lerp(from.ConnectionWidth, to.ConnectionWidth, step);
 }
 
 node_graph_view::node_graph_view(init const& wi)
@@ -86,7 +98,7 @@ void node_graph_view::set_node_position(uid nodeID, point_f pos)
 void node_graph_view::on_draw(widget_painter& painter)
 {
     rect_f const bounds {draw_base(_style, painter)};
-    auto&        cv {painter.canvas()};
+    auto&        canvas {painter.canvas()};
 
     f32 const rowHeight {_style.NodeSize.Height.calc(bounds.height())};
     f32 const nodeWidth {_style.NodeSize.Width.calc(bounds.width())};
@@ -125,22 +137,22 @@ void node_graph_view::on_draw(widget_painter& painter)
         point_f const p1 {getPortPosition(*in, con.InputPortID, true)};
         f32 const     dx {std::abs(p1.X - p0.X) * 0.5f};
 
-        cv.set_stroke_style(con.Color);
-        cv.set_stroke_width(conWidth);
-        cv.begin_path();
-        cv.move_to(p0);
-        cv.cubic_bezier_to({p0.X + dx, p0.Y}, {p1.X - dx, p1.Y}, p1);
-        cv.stroke();
+        canvas.set_stroke_style(get_port_color(_graph.find_port(con.InputNodeID, con.InputPortID, true)->Type));
+        canvas.set_stroke_width(conWidth);
+        canvas.begin_path();
+        canvas.move_to(p0);
+        canvas.cubic_bezier_to({p0.X + dx, p0.Y}, {p1.X - dx, p1.Y}, p1);
+        canvas.stroke();
     }
 
     // pending connection
     if (_pendingConnection) {
-        cv.set_stroke_style(_pendingConnection->PortColor);
-        cv.set_stroke_width(conWidth);
-        cv.begin_path();
-        cv.move_to(_pendingConnection->StartPos);
-        cv.line_to(_pendingConnection->MousePos);
-        cv.stroke();
+        canvas.set_stroke_style(_pendingConnection->PortColor);
+        canvas.set_stroke_width(conWidth);
+        canvas.begin_path();
+        canvas.move_to(_pendingConnection->StartPos);
+        canvas.line_to(_pendingConnection->MousePos);
+        canvas.stroke();
     }
 
     // nodes
@@ -153,20 +165,20 @@ void node_graph_view::on_draw(widget_painter& painter)
         f32 const cy {controlRect.top() + (rowHeight * 0.5f)};
         f32 const sz {rowHeight * 0.2f};
 
-        cv.set_stroke_style(_style.ParamWidgetColor);
-        cv.set_stroke_width(conWidth);
+        canvas.set_stroke_style(_style.ParamWidgetColor);
+        canvas.set_stroke_width(conWidth);
 
-        cv.begin_path();
-        cv.move_to({cx - sz, cy - (sz * 0.5f)});
-        cv.line_to({cx, cy - (sz * 1.5f)});
-        cv.line_to({cx + sz, cy - (sz * 0.5f)});
-        cv.stroke();
+        canvas.begin_path();
+        canvas.move_to({cx - sz, cy - (sz * 0.5f)});
+        canvas.line_to({cx, cy - (sz * 1.5f)});
+        canvas.line_to({cx + sz, cy - (sz * 0.5f)});
+        canvas.stroke();
 
-        cv.begin_path();
-        cv.move_to({cx - sz, cy + (sz * 0.5f)});
-        cv.line_to({cx, cy + (sz * 1.5f)});
-        cv.line_to({cx + sz, cy + (sz * 0.5f)});
-        cv.stroke();
+        canvas.begin_path();
+        canvas.move_to({cx - sz, cy + (sz * 0.5f)});
+        canvas.line_to({cx, cy + (sz * 1.5f)});
+        canvas.line_to({cx + sz, cy + (sz * 0.5f)});
+        canvas.stroke();
     }};
 
     auto const drawNode {[&](auto const& n) {
@@ -175,26 +187,26 @@ void node_graph_view::on_draw(widget_painter& painter)
         _headerRectCache[n.ID] = headerRect;
 
         // body
-        cv.set_fill_style(n.Def.Color);
-        cv.begin_path();
-        cv.rounded_rect(nodeRect, nodeRadius);
-        cv.fill();
+        canvas.set_fill_style(_style.NodeColor);
+        canvas.begin_path();
+        canvas.rounded_rect(nodeRect, nodeRadius);
+        canvas.fill();
 
         // header
-        cv.set_fill_style(n.Def.HeaderColor);
-        cv.begin_path();
-        cv.rounded_rect_varying(headerRect, nodeRadius, nodeRadius, 0.0f, 0.0f);
-        cv.fill();
+        canvas.set_fill_style(_style.NodeHeaderColor);
+        canvas.begin_path();
+        canvas.rounded_rect_varying(headerRect, nodeRadius, nodeRadius, 0.0f, 0.0f);
+        canvas.fill();
 
         // header title
         painter.draw_text(_style.NodeText, headerRect, n.Def.Title);
 
         // ports
         auto const drawPort {[&](node_port_key const& key, node_port const& port, point_f const& pos) {
-            cv.set_fill_style(port.Color);
-            cv.begin_path();
-            cv.circle(pos, portRadius);
-            cv.fill();
+            canvas.set_fill_style(get_port_color(port.Type));
+            canvas.begin_path();
+            canvas.circle(pos, portRadius);
+            canvas.fill();
 
             std::optional<color> ringColor;
             if (_pendingConnection && key != _pendingConnection->Key) {
@@ -209,9 +221,9 @@ void node_graph_view::on_draw(widget_painter& painter)
             }
 
             if (ringColor) {
-                cv.set_stroke_style(*ringColor);
-                cv.set_stroke_width(conWidth);
-                cv.stroke();
+                canvas.set_stroke_style(*ringColor);
+                canvas.set_stroke_width(conWidth);
+                canvas.stroke();
             }
         }};
         // input ports
@@ -259,6 +271,11 @@ void node_graph_view::on_draw(widget_painter& painter)
             rect_f const controlRect {{rowRect.right() - rowHeight, rowRect.top()},
                                       {rowHeight, rowHeight}};
 
+            canvas.set_fill_style(_style.ParamColor);
+            canvas.begin_path();
+            canvas.rounded_rect(rowRect, nodeRadius);
+            canvas.fill();
+
             std::visit(
                 overloaded {
                     [&](node_param_float const& val) {
@@ -274,15 +291,15 @@ void node_graph_view::on_draw(widget_painter& painter)
                         f32 const     size {rowHeight * 0.4f};
                         point_f const center {controlRect.center()};
                         rect_f const  box {{center.X, center.Y - (size * 0.5f)}, {size, size}};
-                        cv.set_stroke_style(_style.ParamWidgetColor);
-                        cv.set_stroke_width(conWidth);
-                        cv.begin_path();
-                        cv.rect(box);
+                        canvas.set_stroke_style(_style.ParamWidgetColor);
+                        canvas.set_stroke_width(conWidth);
+                        canvas.begin_path();
+                        canvas.rect(box);
                         if (val.Value) {
-                            cv.set_fill_style(_style.ParamWidgetColor);
-                            cv.fill();
+                            canvas.set_fill_style(_style.ParamWidgetColor);
+                            canvas.fill();
                         }
-                        cv.stroke();
+                        canvas.stroke();
                     },
                     [&](node_param_string const& val) {
                         painter.draw_text(_style.ParamText, labelRect, std::format("{}: {}", val.Name, val.Value));
@@ -408,7 +425,7 @@ auto node_graph_view::try_start_connection(point_f mp) -> bool
             })};
             point_f const startPos {srcIt != _portPosCache.end() ? srcIt->second : pos};
             _pendingConnection = {.Key       = {.NodeID = it->OutputNodeID, .PortID = it->OutputPortID, .IsInput = false},
-                                  .PortColor = _graph.find_port(it->OutputNodeID, it->OutputPortID, false)->Color,
+                                  .PortColor = get_port_color(_graph.find_port(it->OutputNodeID, it->OutputPortID, false)->Type),
                                   .StartPos  = startPos,
                                   .MousePos  = mp};
             _graph.remove_connection(it->ID);
@@ -417,7 +434,7 @@ auto node_graph_view::try_start_connection(point_f mp) -> bool
         }
     }
 
-    _pendingConnection = {.Key = key, .PortColor = _graph.find_port(key.NodeID, key.PortID, key.IsInput)->Color, .StartPos = pos, .MousePos = mp};
+    _pendingConnection = {.Key = key, .PortColor = get_port_color(_graph.find_port(key.NodeID, key.PortID, key.IsInput)->Type), .StartPos = pos, .MousePos = mp};
     checkCompatibility();
     return true;
 }
@@ -516,6 +533,7 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
 }
 
 auto node_graph_view::get_port_radius() const -> f32 { return _style.NodeSize.Height.calc(content_bounds().height()) * 0.25f; }
+auto node_graph_view::get_port_color(u32 type) const -> color { return _style.PortColors.contains(type) ? _style.PortColors.at(type) : colors::Black; }
 
 void node_graph_view::notify_dirty()
 {

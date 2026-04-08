@@ -14,7 +14,6 @@
 #include <variant>
 #include <vector>
 
-#include "tcob/core/Color.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
 
@@ -76,8 +75,6 @@ struct node_port {
     string Name;
     u32    Type {0xFFFFFFFF};
 
-    color Color {colors::White};
-
     node_compute_func Compute;
 };
 
@@ -87,9 +84,6 @@ struct node_def {
     std::vector<node_port>        Inputs;
     std::vector<node_port>        Outputs;
     std::vector<node_param_types> Parameters;
-
-    color HeaderColor {colors::Black};
-    color Color {colors::White};
 };
 
 ////////////////////////////////////////////////////////////
@@ -104,8 +98,6 @@ public:
 
     struct connection {
         uid ID {0};
-
-        color Color {colors::White};
 
         uid OutputNodeID {0};
         uid OutputPortID {0};

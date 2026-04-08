@@ -87,9 +87,7 @@ auto node_graph::can_connect(uid outNodeID, uid outPortID, uid inNodeID, uid inP
 auto node_graph::create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>
 {
     if (!can_connect(outNodeID, outPortID, inNodeID, inPortID)) { return std::nullopt; }
-    auto const* colorNode {find_node(outNodeID)};
-    auto const* colorPort {colorNode ? find_port(colorNode->Def.Outputs, outPortID) : nullptr};
-    auto&       con {_connections.emplace_back(get_random_ID(), colorPort ? colorPort->Color : colors::White, outNodeID, outPortID, inNodeID, inPortID)};
+    auto& con {_connections.emplace_back(get_random_ID(), outNodeID, outPortID, inNodeID, inPortID)};
     ConnectionAdded(con.ID);
     Changed();
     return con.ID;

@@ -40,10 +40,16 @@ public:
 
         length ConnectionWidth {3, length::type::Absolute};
 
+        color NodeColor {colors::White};
+        color NodeHeaderColor {colors::Black};
+
+        std::unordered_map<u32, color> PortColors;
+
         color PortHoverColor {colors::White};
         color PortCompatibleColor {colors::Blue};
         color PortAcceptColor {colors::Green};
 
+        color ParamColor {colors::White};
         color ParamWidgetColor {colors::Black};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
@@ -84,6 +90,7 @@ private:
     void finish_connection(point_f mp);
 
     auto get_port_radius() const -> f32;
+    auto get_port_color(u32 type) const -> color;
 
     void notify_dirty();
 
