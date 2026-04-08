@@ -76,19 +76,6 @@ private:
         auto operator==(node_port_key const& other) const -> bool = default;
     };
 
-    struct pending_connection {
-        node_port_key                               Key;
-        color                                       PortColor;
-        point_f                                     StartPos;
-        point_f                                     MousePos;
-        std::vector<std::pair<node_port_key, bool>> CompatibilityCache {};
-    };
-
-    struct drag_state {
-        uid     NodeID;
-        point_f Offset;
-    };
-
     auto try_drag_node(point_f mp) -> bool;
     auto try_param_hit(point_f mp) -> bool;
     auto try_start_connection(point_f mp) -> bool;
@@ -106,10 +93,22 @@ private:
     std::vector<std::pair<node_port_key, point_f>>        _portPosCache;
     std::vector<std::pair<std::pair<uid, usize>, rect_f>> _paramRectCache;
 
-    std::optional<drag_state>                        _drag;
-    std::optional<std::pair<node_port_key, point_f>> _hoveredPort;
+    struct drag_state {
+        uid     NodeID;
+        point_f Offset;
+    };
+    std::optional<drag_state> _drag;
 
+    struct pending_connection {
+        node_port_key                               Key;
+        color                                       PortColor;
+        point_f                                     StartPos;
+        point_f                                     MousePos;
+        std::vector<std::pair<node_port_key, bool>> CompatibilityCache {};
+    };
     std::optional<pending_connection> _pendingConnection;
+
+    std::optional<std::pair<node_port_key, point_f>> _hoveredPort;
 
     node_graph_view::style _style;
 
