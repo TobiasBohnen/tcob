@@ -33,7 +33,7 @@ auto node_graph::create_node(node_def const& def) -> uid
     auto& node {_nodes.emplace_back(get_random_ID(), def)};
 
     NodeAdded(node.ID);
-    Dirty();
+    Changed();
     return node.ID;
 }
 
@@ -43,7 +43,7 @@ auto node_graph::remove_node(uid nodeID) -> bool
     std::erase_if(_connections, [nodeID](connection const& c) { return c.OutputNodeID == nodeID || c.InputNodeID == nodeID; });
 
     NodeRemoved(nodeID);
-    Dirty();
+    Changed();
     return true;
 }
 
@@ -91,7 +91,7 @@ auto node_graph::create_connection(uid outNodeID, uid outPortID, uid inNodeID, u
     auto const* colorPort {colorNode ? find_port(colorNode->Def.Outputs, outPortID) : nullptr};
     auto&       con {_connections.emplace_back(get_random_ID(), colorPort ? colorPort->Color : colors::White, outNodeID, outPortID, inNodeID, inPortID)};
     ConnectionAdded(con.ID);
-    Dirty();
+    Changed();
     return con.ID;
 }
 
@@ -99,7 +99,7 @@ auto node_graph::remove_connection(uid connectionID) -> bool
 {
     auto const retValue {helper::erase_first(_connections, [connectionID](auto const& c) { return c.ID == connectionID; })};
     ConnectionRemoved(connectionID);
-    Dirty();
+    Changed();
     return retValue;
 }
 
@@ -160,6 +160,17 @@ auto node_graph::gather_params(node const& n) const -> std::vector<node_value_ty
         std::visit([&](auto const& val) { params.emplace_back(val.Value); }, p);
     }
     return params;
+}
+
+auto node_graph::mutate_param(uid nodeID, usize paramIndex, std::function<bool(node_param_types&)> const& fn) -> bool
+{
+    auto* n {find_node(nodeID)};
+    if (!n || paramIndex >= n->Def.Parameters.size()) { return false; }
+    if (fn(n->Def.Parameters[paramIndex])) {
+        Changed();
+        return true;
+    }
+    return false;
 }
 
 auto node_graph::find_node(uid nodeID) -> node*

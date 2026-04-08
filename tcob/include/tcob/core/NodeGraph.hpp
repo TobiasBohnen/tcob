@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <algorithm>
 #include <functional>
 #include <optional>
 #include <span>
@@ -14,6 +15,7 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
 
 namespace tcob {
@@ -21,25 +23,38 @@ namespace tcob {
 
 using node_value_types = std::variant<f32, i32, bool>;
 
-struct node_param_float {
+class TCOB_API node_param_float {
+public:
     string Name;
     f32    Value;
-    f32    Min {0};
-    f32    Max {1};
-    f32    Step {0.01f};
+
+    f32 Min {0};
+    f32 Max {1};
+    f32 Step {0.01f};
+
+    void increment() { Value = std::clamp(Value + Step, Min, Max); }
+    void decrement() { Value = std::clamp(Value - Step, Min, Max); }
 };
 
-struct node_param_int {
+class TCOB_API node_param_int {
+public:
     string Name;
     i32    Value;
-    i32    Min {-100};
-    i32    Max {100};
-    i32    Step {1};
+
+    i32 Min {-100};
+    i32 Max {100};
+    i32 Step {1};
+
+    void increment() { Value = std::clamp(Value + Step, Min, Max); }
+    void decrement() { Value = std::clamp(Value - Step, Min, Max); }
 };
 
-struct node_param_bool {
+class TCOB_API node_param_bool {
+public:
     string Name;
     bool   Value;
+
+    void toggle() { Value = !Value; }
 };
 
 using node_param_types  = std::variant<node_param_float, node_param_int, node_param_bool>;
@@ -72,7 +87,7 @@ struct node_def {
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-class TCOB_API node_graph {
+class TCOB_API node_graph final : public non_copyable {
 public:
     struct node {
         uid      ID {0};
@@ -90,7 +105,7 @@ public:
         uid InputPortID {0};
     };
 
-    signal<> Dirty;
+    signal<> Changed;
 
     signal<uid> NodeAdded;
     signal<uid> NodeRemoved;
@@ -110,6 +125,8 @@ public:
     auto remove_connection(uid connectionID) -> bool;
 
     auto evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> node_value_types;
+
+    auto mutate_param(uid nodeID, usize paramIndex, std::function<bool(node_param_types&)> const& fn) -> bool;
 
     auto find_node(uid nodeID) const -> node const*;
     auto find_node(uid nodeID) -> node*;

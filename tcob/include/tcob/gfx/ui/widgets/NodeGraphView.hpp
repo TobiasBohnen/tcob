@@ -14,7 +14,6 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/NodeGraph.hpp"
 #include "tcob/core/Point.hpp"
-#include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -52,9 +51,9 @@ public:
 
     explicit node_graph_view(init const& wi);
 
-    signal<> GraphDirty;
+    signal<> GraphChanged;
 
-    prop<node_graph const> Graph;
+    auto graph() -> node_graph&;
 
     void set_node_position(uid nodeID, point_f pos);
 
@@ -113,6 +112,8 @@ private:
     std::optional<pending_connection> _pendingConnection;
 
     node_graph_view::style _style;
+
+    node_graph _graph;
 };
 
 }
