@@ -21,7 +21,7 @@
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-using node_value_types = std::variant<f32, i32, bool>;
+using node_value_types = std::variant<f32, i32, bool, string>;
 
 class TCOB_API node_param_float {
 public:
@@ -57,7 +57,15 @@ public:
     void toggle() { Value = !Value; }
 };
 
-using node_param_types  = std::variant<node_param_float, node_param_int, node_param_bool>;
+class TCOB_API node_param_string {
+public:
+    string Name;
+    string Value;
+
+    std::vector<string> Options;
+};
+
+using node_param_types  = std::variant<node_param_float, node_param_int, node_param_bool, node_param_string>;
 using node_compute_func = std::function<node_value_types(std::vector<node_value_types> const&, std::vector<node_value_types> const&)>;
 
 ////////////////////////////////////////////////////////////

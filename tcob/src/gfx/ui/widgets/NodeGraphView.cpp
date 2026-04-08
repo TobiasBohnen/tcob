@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <format>
+#include <iterator>
 #include <optional>
 #include <ranges>
 #include <unordered_map>
@@ -283,6 +284,10 @@ void node_graph_view::on_draw(widget_painter& painter)
                         }
                         cv.stroke();
                     },
+                    [&](node_param_string const& val) {
+                        painter.draw_text(_style.ParamText, labelRect, std::format("{}: {}", val.Name, val.Value));
+                        if (!val.Options.empty()) { drawChevrons(controlRect); }
+                    },
                     [&](auto const&) { }},
                 entry);
         }
@@ -472,10 +477,6 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
         _graph.mutate_param(keyPair.first, keyPair.second, [&](auto& entry) {
             return std::visit(
                 overloaded {
-                    [](node_param_bool& val) -> bool {
-                        val.toggle();
-                        return true;
-                    },
                     [&](auto& val) -> bool {
                         rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
                         if (chevronRect.contains(mp)) {
@@ -484,6 +485,27 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
                             return true;
                         }
                         return false;
+                    },
+                    [](node_param_bool& val) -> bool {
+                        val.toggle();
+                        return true;
+                    },
+                    [&](node_param_string& val) -> bool {
+                        if (val.Options.empty()) { return false; }
+                        rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
+                        if (!chevronRect.contains(mp)) { return false; }
+                        bool const isUp {mp.Y < chevronRect.top() + (chevronRect.height() * 0.5f)};
+                        auto       it {std::ranges::find(val.Options, val.Value)};
+                        if (isUp) {
+                            val.Value = (it == val.Options.end() || std::next(it) == val.Options.end())
+                                ? val.Options.front()
+                                : *std::next(it);
+                        } else {
+                            val.Value = (it == val.Options.end() || it == val.Options.begin())
+                                ? val.Options.back()
+                                : *std::prev(it);
+                        }
+                        return true;
                     }},
                 entry);
         });
