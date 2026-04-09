@@ -47,7 +47,7 @@ class TCOB_API bar_chart : public grid_chart<std::vector<f32>> {
 public:
     class TCOB_API style : public grid_chart_style {
     public:
-        length BarSize {1.f, length::type::Relative};
+        length BarSize {1.0f, length::type::Relative};
         length BarRadius {0, length::type::Relative};
         bool   StackBars {false};
 
