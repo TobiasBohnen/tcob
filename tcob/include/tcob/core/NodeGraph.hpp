@@ -66,11 +66,11 @@ struct node_port {
 struct node_def {
     string Title;
 
-    std::vector<node_port>        Inputs;
-    std::vector<node_port>        Outputs;
-    std::vector<node_param_types> Parameters;
+    std::vector<node_port>        Inputs {};
+    std::vector<node_port>        Outputs {};
+    std::vector<node_param_types> Parameters {};
 
-    node_compute_func Compute;
+    node_compute_func Compute {};
 };
 
 ////////////////////////////////////////////////////////////
