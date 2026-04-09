@@ -85,14 +85,22 @@ node_graph_view::node_graph_view(init const& wi)
     Class("node_graph_view");
 }
 
-auto node_graph_view::graph() -> node_graph&
+auto node_graph_view::create_node(node_def const& def, point_f pos) -> uid
 {
-    return _graph;
+    uid const id {_graph.create_node(def)};
+    _nodePos[id] = pos;
+    return id;
 }
 
-void node_graph_view::set_node_position(uid nodeID, point_f pos)
+auto node_graph_view::create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>
 {
-    _nodePos[nodeID] = pos;
+    auto const id {_graph.create_connection(outNodeID, outPortID, inNodeID, inPortID)};
+    return id;
+}
+
+auto node_graph_view::evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> node_value_types
+{
+    return _graph.evaluate(nodeID, portID, fn);
 }
 
 void node_graph_view::on_draw(widget_painter& painter)
