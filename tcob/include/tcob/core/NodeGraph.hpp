@@ -116,11 +116,11 @@ public:
     auto mutate_param(uid nodeID, usize paramIndex, std::function<bool(node_param_types&)> const& fn) -> bool;
 
     auto find_node(uid nodeID) const -> node const*;
-    auto find_node(uid nodeID) -> node*;
 
-    auto find_port(uid nodeID, uid portID, bool isInput) const -> node_port const*;
+    auto get_port_type(uid nodeID, uid portID, bool isInput) const -> u32;
 
 private:
+    auto find_port(uid nodeID, uid portID, bool isInput) const -> node_port const*;
     auto find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*;
 
     using cache = std::unordered_map<uid, std::unordered_map<uid, node_value_types>>;

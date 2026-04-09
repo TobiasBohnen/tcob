@@ -44,10 +44,9 @@ public:
         color NodeHeaderColor {colors::Black};
 
         std::unordered_map<u32, color> PortColors;
-
-        color PortHoverColor {colors::White};
-        color PortCompatibleColor {colors::Blue};
-        color PortAcceptColor {colors::Green};
+        color                          PortHoverColor {colors::White};
+        color                          PortCompatibleColor {colors::Blue};
+        color                          PortAcceptColor {colors::Green};
 
         color ParamColor {colors::White};
         color ParamWidgetColor {colors::Black};

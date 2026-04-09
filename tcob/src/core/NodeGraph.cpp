@@ -127,7 +127,7 @@ auto node_graph::compute_node(uid nodeID, uid portID, cache& cache) const -> nod
         cache[nodeID][k] = v;
     }
 
-    if (auto pit {cache[nodeID].find(portID)}; pit != cache[nodeID].end()) {
+    if (auto const pit {cache[nodeID].find(portID)}; pit != cache[nodeID].end()) {
         return pit->second;
     }
     return 0.0f;
@@ -158,15 +158,16 @@ auto node_graph::gather_params(node const& n) const -> std::vector<node_value_ty
 
 auto node_graph::mutate_param(uid nodeID, usize paramIndex, std::function<bool(node_param_types&)> const& fn) -> bool
 {
-    auto* n {find_node(nodeID)};
-    if (!n || paramIndex >= n->Def.Parameters.size()) { return false; }
+    auto it {std::ranges::find(_nodes, nodeID, &node::ID)};
+    if (it == _nodes.end()) { return false; }
+    if (paramIndex >= it->Def.Parameters.size()) { return false; }
 
-    auto& param {n->Def.Parameters[paramIndex]};
+    auto param {it->Def.Parameters[paramIndex]}; // COPY here
     if (!fn(param)) { return false; }
 
     std::visit(overloaded {
-                   [](node_param_numeric<f32>& p) { p.Value = std::clamp(p.Value, p.Min, p.Max); },
-                   [](node_param_numeric<i32>& p) { p.Value = std::clamp(p.Value, p.Min, p.Max); },
+                   [](node_param_float& p) { p.Value = std::clamp(p.Value, p.Min, p.Max); },
+                   [](node_param_int& p) { p.Value = std::clamp(p.Value, p.Min, p.Max); },
                    [](node_param_string& p) {
                        if (!p.Options.empty() && !std::ranges::contains(p.Options, p.Value)) {
                            p.Value = p.Options.front();
@@ -175,20 +176,21 @@ auto node_graph::mutate_param(uid nodeID, usize paramIndex, std::function<bool(n
                    [](auto&) { }},
                param);
 
+    it->Def.Parameters[paramIndex] = param;
+
     Changed();
     return true;
-}
-
-auto node_graph::find_node(uid nodeID) -> node*
-{
-    auto it {std::ranges::find(_nodes, nodeID, &node::ID)};
-    return it != _nodes.end() ? &*it : nullptr;
 }
 
 auto node_graph::find_node(uid nodeID) const -> node const*
 {
     auto it {std::ranges::find(_nodes, nodeID, &node::ID)};
     return it != _nodes.end() ? &*it : nullptr;
+}
+
+auto node_graph::get_port_type(uid nodeID, uid portID, bool isInput) const -> u32
+{
+    return find_port(nodeID, portID, isInput)->Type;
 }
 
 auto node_graph::find_port(uid nodeID, uid portID, bool isInput) const -> node_port const*

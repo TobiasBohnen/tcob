@@ -113,6 +113,7 @@ void node_graph_view::on_draw(widget_painter& painter)
     f32 const portRadius {rowHeight * 0.25f};
     f32 const nodeRadius {_style.NodeRadius.calc(rowHeight)};
     f32 const conWidth {_style.ConnectionWidth.calc(bounds.width())};
+    f32 const borderWidth {conWidth * 0.5f};
 
     auto const getNodeRect {[&](node_graph::node const& n) -> rect_f {
         usize const   rows {1 + std::max(n.Def.Inputs.size(), n.Def.Outputs.size()) + n.Def.Parameters.size()};
@@ -145,7 +146,7 @@ void node_graph_view::on_draw(widget_painter& painter)
         point_f const p1 {getPortPosition(*in, con.InputPortID, true)};
         f32 const     dx {std::abs(p1.X - p0.X) * 0.5f};
 
-        canvas.set_stroke_style(get_port_color(_graph.find_port(con.OutputNodeID, con.OutputPortID, false)->Type));
+        canvas.set_stroke_style(get_port_color(_graph.get_port_type(con.OutputNodeID, con.OutputPortID, false)));
         canvas.set_stroke_width(conWidth);
         canvas.begin_path();
         canvas.move_to(p0);
@@ -199,6 +200,9 @@ void node_graph_view::on_draw(widget_painter& painter)
         canvas.begin_path();
         canvas.rounded_rect(nodeRect, nodeRadius);
         canvas.fill();
+        canvas.set_stroke_style(colors::Black);
+        canvas.set_stroke_width(borderWidth);
+        canvas.stroke();
 
         // header
         canvas.set_fill_style(_style.NodeHeaderColor);
@@ -281,8 +285,19 @@ void node_graph_view::on_draw(widget_painter& painter)
 
             canvas.set_fill_style(_style.ParamColor);
             canvas.begin_path();
-            canvas.rounded_rect(rowRect, nodeRadius);
+            if (n.Def.Parameters.size() == 1) {
+                canvas.rounded_rect(rowRect, nodeRadius);
+            } else if (i == 0) {
+                canvas.rounded_rect_varying(rowRect, nodeRadius, nodeRadius, 0, 0);
+            } else if (i < n.Def.Parameters.size() - 1) {
+                canvas.rect(rowRect);
+            } else {
+                canvas.rounded_rect_varying(rowRect, 0, 0, nodeRadius, nodeRadius);
+            }
             canvas.fill();
+            canvas.set_stroke_style(colors::Black);
+            canvas.set_stroke_width(borderWidth);
+            canvas.stroke();
 
             std::visit(
                 overloaded {
@@ -433,7 +448,7 @@ auto node_graph_view::try_start_connection(point_f mp) -> bool
             })};
             point_f const startPos {srcIt != _portPosCache.end() ? srcIt->second : pos};
             _pendingConnection = {.Key       = {.NodeID = it->OutputNodeID, .PortID = it->OutputPortID, .IsInput = false},
-                                  .PortColor = get_port_color(_graph.find_port(it->OutputNodeID, it->OutputPortID, false)->Type),
+                                  .PortColor = get_port_color(_graph.get_port_type(it->OutputNodeID, it->OutputPortID, false)),
                                   .StartPos  = startPos,
                                   .MousePos  = mp};
             _graph.remove_connection(it->ID);
@@ -442,7 +457,10 @@ auto node_graph_view::try_start_connection(point_f mp) -> bool
         }
     }
 
-    _pendingConnection = {.Key = key, .PortColor = get_port_color(_graph.find_port(key.NodeID, key.PortID, key.IsInput)->Type), .StartPos = pos, .MousePos = mp};
+    _pendingConnection = {.Key       = key,
+                          .PortColor = get_port_color(_graph.get_port_type(key.NodeID, key.PortID, key.IsInput)),
+                          .StartPos  = pos,
+                          .MousePos  = mp};
     checkCompatibility();
     return true;
 }
