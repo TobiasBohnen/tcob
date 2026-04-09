@@ -87,6 +87,7 @@ auto node_graph::can_connect(uid outNodeID, uid outPortID, uid inNodeID, uid inP
 auto node_graph::create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>
 {
     if (!can_connect(outNodeID, outPortID, inNodeID, inPortID)) { return std::nullopt; }
+
     auto& con {_connections.emplace_back(get_random_ID(), outNodeID, outPortID, inNodeID, inPortID)};
     ConnectionAdded(con.ID);
     Changed();
@@ -95,28 +96,20 @@ auto node_graph::create_connection(uid outNodeID, uid outPortID, uid inNodeID, u
 
 auto node_graph::remove_connection(uid connectionID) -> bool
 {
-    auto const retValue {helper::erase_first(_connections, [connectionID](auto const& c) { return c.ID == connectionID; })};
+    if (!helper::erase_first(_connections, [connectionID](auto const& c) { return c.ID == connectionID; })) { return false; }
+
     ConnectionRemoved(connectionID);
     Changed();
-    return retValue;
+    return true;
 }
 
-auto node_graph::evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> node_value_types
+auto node_graph::evaluate(uid nodeID, node_compute_func const& fn) const -> node_value_types
 {
     eval_cache  cache;
     auto const* n {find_node(nodeID)};
     if (!n) { return 0.0f; }
 
-    uid outputNodeID {};
-    uid outputPortID {};
-    for (auto const& c : _connections) {
-        if (c.InputNodeID != nodeID || c.InputPortID != portID) { continue; }
-        outputNodeID = c.OutputNodeID;
-        outputPortID = c.OutputPortID;
-        break;
-    }
-
-    return fn({evaluate_port(outputNodeID, outputPortID, cache)}, gather_params(*n));
+    return fn(gather_inputs(nodeID, cache), gather_params(*n));
 }
 
 auto node_graph::evaluate_port(uid nodeID, uid portID, eval_cache& cache) const -> node_value_types
@@ -164,11 +157,23 @@ auto node_graph::mutate_param(uid nodeID, usize paramIndex, std::function<bool(n
 {
     auto* n {find_node(nodeID)};
     if (!n || paramIndex >= n->Def.Parameters.size()) { return false; }
-    if (fn(n->Def.Parameters[paramIndex])) {
-        Changed();
-        return true;
-    }
-    return false;
+
+    auto& param {n->Def.Parameters[paramIndex]};
+    if (!fn(param)) { return false; }
+
+    std::visit(overloaded {
+                   [](node_param_numeric<f32>& p) { p.Value = std::clamp(p.Value, p.Min, p.Max); },
+                   [](node_param_numeric<i32>& p) { p.Value = std::clamp(p.Value, p.Min, p.Max); },
+                   [](node_param_string& p) {
+                       if (!p.Options.empty() && !std::ranges::contains(p.Options, p.Value)) {
+                           p.Value = p.Options.front();
+                       }
+                   },
+                   [](auto&) { }},
+               param);
+
+    Changed();
+    return true;
 }
 
 auto node_graph::find_node(uid nodeID) -> node*

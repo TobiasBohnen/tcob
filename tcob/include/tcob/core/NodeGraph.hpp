@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <algorithm>
 #include <functional>
 #include <optional>
 #include <span>
@@ -14,46 +13,31 @@
 #include <variant>
 #include <vector>
 
+#include "tcob/core/Concepts.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
 
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-using node_value_types = std::variant<f32, i32, bool, string>;
-
-class TCOB_API node_param_float {
+template <Arithmetic T>
+class TCOB_API node_param_numeric {
 public:
     string Name;
-    f32    Value;
+    T      Value {};
 
-    f32 Min {0};
-    f32 Max {1};
-    f32 Step {0.01f};
-
-    void increment() { Value = std::clamp(Value + Step, Min, Max); }
-    void decrement() { Value = std::clamp(Value - Step, Min, Max); }
+    T Min {0};
+    T Max {1};
+    T Step {1};
 };
 
-class TCOB_API node_param_int {
-public:
-    string Name;
-    i32    Value;
-
-    i32 Min {-100};
-    i32 Max {100};
-    i32 Step {1};
-
-    void increment() { Value = std::clamp(Value + Step, Min, Max); }
-    void decrement() { Value = std::clamp(Value - Step, Min, Max); }
-};
+using node_param_float = node_param_numeric<f32>;
+using node_param_int   = node_param_numeric<i32>;
 
 class TCOB_API node_param_bool {
 public:
     string Name;
     bool   Value;
-
-    void toggle() { Value = !Value; }
 };
 
 class TCOB_API node_param_string {
@@ -65,7 +49,8 @@ public:
 };
 
 using node_param_types  = std::variant<node_param_float, node_param_int, node_param_bool, node_param_string>;
-using node_compute_func = std::function<node_value_types(std::vector<node_value_types> const&, std::vector<node_value_types> const&)>;
+using node_value_types  = std::variant<f32, i32, bool, string>;
+using node_compute_func = std::function<node_value_types(std::span<node_value_types const>, std::span<node_value_types const>)>;
 
 ////////////////////////////////////////////////////////////
 
@@ -124,7 +109,7 @@ public:
     auto create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>;
     auto remove_connection(uid connectionID) -> bool;
 
-    auto evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> node_value_types;
+    auto evaluate(uid nodeID, node_compute_func const& fn) const -> node_value_types;
 
     auto mutate_param(uid nodeID, usize paramIndex, std::function<bool(node_param_types&)> const& fn) -> bool;
 

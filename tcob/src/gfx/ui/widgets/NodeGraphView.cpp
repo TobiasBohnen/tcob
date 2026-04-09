@@ -98,9 +98,9 @@ auto node_graph_view::create_connection(uid outNodeID, uid outPortID, uid inNode
     return id;
 }
 
-auto node_graph_view::evaluate(uid nodeID, uid portID, node_compute_func const& fn) const -> node_value_types
+auto node_graph_view::evaluate(uid nodeID, node_compute_func const& fn) const -> node_value_types
 {
-    return _graph.evaluate(nodeID, portID, fn);
+    return _graph.evaluate(nodeID, fn);
 }
 
 void node_graph_view::on_draw(widget_painter& painter)
@@ -145,7 +145,7 @@ void node_graph_view::on_draw(widget_painter& painter)
         point_f const p1 {getPortPosition(*in, con.InputPortID, true)};
         f32 const     dx {std::abs(p1.X - p0.X) * 0.5f};
 
-        canvas.set_stroke_style(get_port_color(_graph.find_port(con.InputNodeID, con.InputPortID, true)->Type));
+        canvas.set_stroke_style(get_port_color(_graph.find_port(con.OutputNodeID, con.OutputPortID, false)->Type));
         canvas.set_stroke_width(conWidth);
         canvas.begin_path();
         canvas.move_to(p0);
@@ -506,13 +506,13 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
                         rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
                         if (chevronRect.contains(mp)) {
                             bool const isUp {mp.Y < chevronRect.top() + (chevronRect.height() * 0.5f)};
-                            isUp ? val.increment() : val.decrement();
+                            isUp ? val.Value = val.Value + val.Step : val.Value = val.Value - val.Step;
                             return true;
                         }
                         return false;
                     },
                     [](node_param_bool& val) -> bool {
-                        val.toggle();
+                        val.Value = !val.Value;
                         return true;
                     },
                     [&](node_param_string& val) -> bool {
