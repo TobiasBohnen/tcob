@@ -108,18 +108,18 @@ void node_graph_view::on_draw(widget_painter& painter)
     rect_f const bounds {draw_base(_style, painter)};
     auto&        canvas {painter.canvas()};
 
-    f32 const rowHeight {_style.NodeSize.Height.calc(bounds.height())};
-    f32 const nodeWidth {_style.NodeSize.Width.calc(bounds.width())};
+    f32 const rowHeight {_style.NodeSize.Height.calc(bounds.height()) * _zoom};
+    f32 const nodeWidth {_style.NodeSize.Width.calc(bounds.width()) * _zoom};
     f32 const portRadius {rowHeight * 0.25f};
     f32 const nodeRadius {_style.NodeRadius.calc(rowHeight)};
-    f32 const conWidth {_style.ConnectionWidth.calc(bounds.width())};
+    f32 const conWidth {_style.ConnectionWidth.calc(bounds.width()) * _zoom};
     f32 const borderWidth {conWidth * 0.5f};
 
     auto const getNodeRect {[&](node_graph::node const& n) -> rect_f {
         usize const   rows {1 + std::max(n.Def.Inputs.size(), n.Def.Outputs.size()) + n.Def.Parameters.size()};
         size_f const  size {nodeWidth, rowHeight * static_cast<f32>(rows)};
         point_f const nodePos {_nodePos[n.ID]};
-        return {{nodePos.X * bounds.width(), nodePos.Y * bounds.height()}, size};
+        return {{(nodePos.X * bounds.width() * _zoom) + _pan.X, (nodePos.Y * bounds.height() * _zoom) + _pan.Y}, size};
     }};
 
     auto const getPortPosition {[&](node_graph::node const& n, uid portID, bool isInput) -> point_f {
@@ -376,6 +376,14 @@ void node_graph_view::on_mouse_drag(input::mouse::motion_event const& ev)
         ev.Handled = true;
         return;
     }
+
+    if (_panning) {
+        _pan.X += static_cast<f32>(ev.RelativeMotion.X);
+        _pan.Y += static_cast<f32>(ev.RelativeMotion.Y);
+        queue_redraw();
+        ev.Handled = true;
+        return;
+    }
 }
 
 void node_graph_view::on_mouse_button_down(input::mouse::button_event const& ev)
@@ -383,6 +391,10 @@ void node_graph_view::on_mouse_button_down(input::mouse::button_event const& ev)
     if (ev.Button == controls().PrimaryMouseButton) {
         auto const mp {screen_to_local(*this, ev.Position)};
         ev.Handled = try_drag_node(mp) || try_start_connection(mp) || try_param_hit(mp);
+        if (!ev.Handled) {
+            _panning   = true;
+            ev.Handled = true;
+        }
     } else if (ev.Button == controls().SecondaryMouseButton) {
         ev.Handled = try_remove_connections();
     }
@@ -392,6 +404,8 @@ void node_graph_view::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (ev.Button != controls().PrimaryMouseButton) { return; }
 
+    _panning = false;
+
     if (_pendingConnection) {
         finish_connection(screen_to_local(*this, ev.Position));
         ev.Handled = true;
@@ -399,6 +413,19 @@ void node_graph_view::on_mouse_button_up(input::mouse::button_event const& ev)
         _drag      = std::nullopt;
         ev.Handled = true;
     }
+}
+void node_graph_view::on_mouse_wheel(input::mouse::wheel_event const& ev)
+{
+    f32 const     factor {ev.Scroll.Y > 0 ? 1.1f : 1.0f / 1.1f};
+    point_f const mp {screen_to_local(*this, ev.Position)};
+
+    _pan.X = mp.X + ((_pan.X - mp.X) * factor);
+    _pan.Y = mp.Y + ((_pan.Y - mp.Y) * factor);
+    _zoom *= factor;
+    _zoom = std::clamp(_zoom, 0.25f, 4.0f);
+
+    queue_redraw();
+    ev.Handled = true;
 }
 
 void node_graph_view::on_update(milliseconds /* deltaTime */)

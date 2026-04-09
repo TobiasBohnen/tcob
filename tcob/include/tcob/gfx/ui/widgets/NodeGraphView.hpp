@@ -70,6 +70,7 @@ protected:
     void on_mouse_drag(input::mouse::motion_event const& ev) override;
     void on_mouse_button_down(input::mouse::button_event const& ev) override;
     void on_mouse_button_up(input::mouse::button_event const& ev) override;
+    void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
 
     void on_update(milliseconds deltaTime) override;
 
@@ -117,9 +118,12 @@ private:
 
     std::optional<std::pair<node_port_key, point_f>> _hoveredPort;
 
-    node_graph_view::style _style;
+    bool    _panning {false};
+    point_f _pan {point_f::Zero};
+    f32     _zoom {1.0f};
 
-    node_graph _graph;
+    node_graph_view::style _style;
+    node_graph             _graph;
 };
 
 }
