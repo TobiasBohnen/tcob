@@ -103,41 +103,44 @@ auto node_graph::remove_connection(uid connectionID) -> bool
     return true;
 }
 
-auto node_graph::evaluate(uid nodeID, node_compute_func const& fn) const -> node_value_types
+auto node_graph::evaluate(uid nodeID, node_compute_func const& fn) const -> void
 {
-    eval_cache  cache;
+    cache       cache;
     auto const* n {find_node(nodeID)};
-    if (!n) { return 0.0f; }
+    if (!n) { return; }
 
-    return fn(gather_inputs(nodeID, cache), gather_params(*n));
+    fn(gather_inputs(*n, cache), gather_params(*n));
 }
 
-auto node_graph::evaluate_port(uid nodeID, uid portID, eval_cache& cache) const -> node_value_types
+auto node_graph::compute_node(uid nodeID, uid portID, cache& cache) const -> node_value_types
 {
     if (auto nit {cache.find(nodeID)}; nit != cache.end()) {
-        if (auto pit {nit->second.find(portID)}; pit != nit->second.end()) {
-            return pit->second;
-        }
+        auto pit {nit->second.find(portID)};
+        return pit != nit->second.end() ? pit->second : 0.0f;
     }
 
     auto const* n {find_node(nodeID)};
-    if (!n) { return 0.0f; }
-    auto const* port {find_port(n->Def.Outputs, portID)};
-    if (!port || !port->Compute) { return 0.0f; }
+    if (!n || !n->Def.Compute) { return 0.0f; }
 
-    return cache[nodeID][portID] = port->Compute(gather_inputs(nodeID, cache), gather_params(*n));
+    auto const results {n->Def.Compute(gather_inputs(*n, cache), gather_params(*n))};
+    for (auto const& [k, v] : results) {
+        cache[nodeID][k] = v;
+    }
+
+    if (auto pit {cache[nodeID].find(portID)}; pit != cache[nodeID].end()) {
+        return pit->second;
+    }
+    return 0.0f;
 }
 
-auto node_graph::gather_inputs(uid nodeID, eval_cache& cache) const -> std::vector<node_value_types>
+auto node_graph::gather_inputs(node const& n, cache& cache) const -> std::vector<node_value_types>
 {
-    auto const* n {find_node(nodeID)};
-    if (!n) { return {}; }
-    std::vector<node_value_types> inputs(n->Def.Inputs.size());
+    std::vector<node_value_types> inputs(n.Def.Inputs.size());
     for (auto const& c : _connections) {
-        if (c.InputNodeID != nodeID) { continue; }
-        for (usize i {0}; i < n->Def.Inputs.size(); ++i) {
-            if (n->Def.Inputs[i].ID != c.InputPortID) { continue; }
-            inputs[i] = evaluate_port(c.OutputNodeID, c.OutputPortID, cache);
+        if (c.InputNodeID != n.ID) { continue; }
+        for (usize i {0}; i < n.Def.Inputs.size(); ++i) {
+            if (n.Def.Inputs[i].ID != c.InputPortID) { continue; }
+            inputs[i] = compute_node(c.OutputNodeID, c.OutputPortID, cache);
         }
     }
     return inputs;

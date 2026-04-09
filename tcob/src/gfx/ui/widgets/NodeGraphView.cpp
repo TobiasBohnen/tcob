@@ -98,9 +98,9 @@ auto node_graph_view::create_connection(uid outNodeID, uid outPortID, uid inNode
     return id;
 }
 
-auto node_graph_view::evaluate(uid nodeID, node_compute_func const& fn) const -> node_value_types
+void node_graph_view::evaluate(uid nodeID, node_compute_func const& fn) const
 {
-    return _graph.evaluate(nodeID, fn);
+    _graph.evaluate(nodeID, fn);
 }
 
 void node_graph_view::on_draw(widget_painter& painter)

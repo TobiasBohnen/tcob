@@ -62,7 +62,7 @@ public:
     auto create_node(node_def const& def, point_f pos) -> uid;
     auto create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>;
 
-    auto evaluate(uid nodeID, node_compute_func const& fn) const -> node_value_types;
+    void evaluate(uid nodeID, node_compute_func const& fn) const;
 
 protected:
     void on_draw(widget_painter& painter) override;
