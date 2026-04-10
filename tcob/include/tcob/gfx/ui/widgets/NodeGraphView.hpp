@@ -15,9 +15,11 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/NodeGraph.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -52,12 +54,19 @@ public:
         color ParamColor {colors::White};
         color ParamWidgetColor {colors::Black};
 
+        dimensions MinimapSize {.Width = {0, length::type::Relative}, .Height = {0, length::type::Relative}};
+        f32        MinimapAlpha {0.5f};
+        color      MinimapBackgroundColor {colors::Silver};
+        color      MinimapViewportColor {colors::Black};
+
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit node_graph_view(init const& wi);
 
     signal<> GraphChanged;
+
+    prop<gfx::alignment> MinimapAlignment;
 
     auto create_node(node_def const& def, point_f pos) -> uid;
     auto remove_node(uid nodeID) -> bool;
@@ -68,6 +77,7 @@ public:
 
 protected:
     void on_draw(widget_painter& painter) override;
+    void draw_minimap(gfx::canvas& canvas, rect_f const& bounds);
 
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
     void on_mouse_drag(input::mouse::motion_event const& ev) override;
@@ -97,9 +107,8 @@ private:
     auto try_start_connection(point_f mp) -> bool;
     auto try_remove_connections() -> bool;
 
-    void finish_connection(point_f mp);
+    void finish_connection();
 
-    auto get_port_radius() const -> f32;
     auto get_port_color(u32 type) const -> color;
 
     void notify_dirty();
