@@ -100,7 +100,7 @@ auto node_graph_view::remove_node(uid nodeID) -> bool
 auto node_graph_view::create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>
 {
     auto const id {_graph.create_connection(outNodeID, outPortID, inNodeID, inPortID)};
-    GraphChanged({this});
+    if (id) { GraphChanged({this}); }
     return id;
 }
 
@@ -682,14 +682,13 @@ auto node_graph_view::remove_connection(uid connectionID) -> bool
 
 auto node_graph_view::try_param_hit(point_f mp) -> bool
 {
-    rect_f const bounds {content_bounds()};
-    f32 const    rowHeight {_style.NodeSize.Height.calc(bounds.height())};
-
     for (auto const& [nodeID, idx, rowRect] : _paramRectCache) {
         if (!rowRect.contains(mp)) { continue; }
 
         auto const* cn {_graph.find_node(nodeID)};
         if (!cn || idx >= cn->Def.Parameters.size()) { continue; }
+
+        f32 const rowHeight {rowRect.height()};
 
         if (_graph.mutate_param(nodeID, idx, [&](auto& entry) {
                 return std::visit(
@@ -697,7 +696,7 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
                         [&](auto& val) -> bool {
                             rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
                             if (chevronRect.contains(mp)) {
-                                bool const isUp {mp.Y < chevronRect.top() + (chevronRect.height() / 2.0f)};
+                                bool const isUp {mp.Y < chevronRect.top() + (rowHeight / 2.0f)};
                                 isUp ? val.Value = val.Value + val.Step : val.Value = val.Value - val.Step;
                                 return true;
                             }
@@ -711,7 +710,7 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
                             if (val.Options.empty()) { return false; }
                             rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
                             if (!chevronRect.contains(mp)) { return false; }
-                            bool const isUp {mp.Y < chevronRect.top() + (chevronRect.height() / 2.0f)};
+                            bool const isUp {mp.Y < chevronRect.top() + (rowHeight / 2.0f)};
                             auto       it {std::ranges::find(val.Options, val.Value)};
                             if (isUp) {
                                 val.Value = (it == val.Options.end() || std::next(it) == val.Options.end())
