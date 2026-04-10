@@ -64,7 +64,7 @@ public:
 
     explicit node_graph_view(init const& wi);
 
-    signal<> GraphChanged;
+    signal<widget_event const> GraphChanged;
 
     prop<gfx::alignment> MinimapAlignment;
 
@@ -109,9 +109,8 @@ private:
 
     void finish_connection();
 
+    auto remove_connection(uid connectionID) -> bool;
     auto get_port_color(u32 type) const -> color;
-
-    void notify_dirty();
 
     std::unordered_map<uid, point_f> _nodePos;
     std::vector<uid>                 _nodeOrder;

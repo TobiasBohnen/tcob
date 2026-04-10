@@ -83,6 +83,7 @@ auto node_graph_view::create_node(node_def const& def, point_f pos) -> uid
     uid const id {_graph.create_node(def)};
     _nodePos[id] = pos;
     _nodeOrder.push_back(id);
+    GraphChanged({this});
     return id;
 }
 auto node_graph_view::remove_node(uid nodeID) -> bool
@@ -92,12 +93,14 @@ auto node_graph_view::remove_node(uid nodeID) -> bool
     std::erase(_nodeOrder, nodeID);
     if (_drag && _drag->NodeID == nodeID) { _drag = std::nullopt; }
     _pendingConnection = std::nullopt;
+    GraphChanged({this});
     return true;
 }
 
 auto node_graph_view::create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>
 {
     auto const id {_graph.create_connection(outNodeID, outPortID, inNodeID, inPortID)};
+    GraphChanged({this});
     return id;
 }
 
@@ -606,7 +609,7 @@ auto node_graph_view::try_start_connection(point_f mp) -> bool
                                   .PortColor = get_port_color(_graph.get_port_type(it->OutputNodeID, it->OutputPortID, false)),
                                   .StartPos  = startPos,
                                   .MousePos  = mp};
-            _graph.remove_connection(it->ID);
+            remove_connection(it->ID);
             checkCompatibility();
             return true;
         }
@@ -637,6 +640,7 @@ auto node_graph_view::try_remove_connections() -> bool
     if (ids.empty()) { return false; }
 
     for (uid id : ids) { _graph.remove_connection(id); }
+    GraphChanged({this});
     return true;
 }
 
@@ -655,15 +659,25 @@ void node_graph_view::finish_connection()
                 return c.InputNodeID == key.NodeID && c.InputPortID == key.PortID;
             })};
             if (existing != connections.end() && _graph.can_connect(srcNode, srcPort, dstNode, dstPort)) {
-                _graph.remove_connection(existing->ID);
+                remove_connection(existing->ID);
             }
         }
 
-        _graph.create_connection(srcNode, srcPort, dstNode, dstPort);
+        create_connection(srcNode, srcPort, dstNode, dstPort);
     }
 
     _pendingConnection = std::nullopt;
     queue_redraw();
+}
+
+auto node_graph_view::remove_connection(uid connectionID) -> bool
+{
+    if (_graph.remove_connection(connectionID)) {
+        GraphChanged({this});
+        return true;
+    }
+
+    return false;
 }
 
 auto node_graph_view::try_param_hit(point_f mp) -> bool
@@ -715,7 +729,8 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
 
             _drag        = std::nullopt;
             _hoveredPort = std::nullopt;
-            notify_dirty();
+            queue_redraw();
+            GraphChanged({this});
 
             return true;
         }
@@ -725,9 +740,4 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
 
 auto node_graph_view::get_port_color(u32 type) const -> color { return _style.PortColors.contains(type) ? _style.PortColors.at(type) : colors::Black; }
 
-void node_graph_view::notify_dirty()
-{
-    queue_redraw();
-    GraphChanged();
-}
 }
