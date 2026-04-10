@@ -266,8 +266,8 @@ void box_layout::do_layout(size_f size)
             f32 const widgetWidth {widget->Flex->Width.calc(horiSize)};
             f32 const widgetHeight {widget->Flex->Height.calc(vertSize)};
 
-            widget->Bounds = {cellX + ((horiSize - widgetWidth) * 0.5f),
-                              cellY + ((vertSize - widgetHeight) * 0.5f),
+            widget->Bounds = {cellX + ((horiSize - widgetWidth) / 2.0f),
+                              cellY + ((vertSize - widgetHeight) / 2.0f),
                               widgetWidth,
                               widgetHeight};
         } else {

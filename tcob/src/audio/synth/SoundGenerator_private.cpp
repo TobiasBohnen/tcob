@@ -156,7 +156,7 @@ auto vibrato::operator()(f64 fperiod) -> f32
 {
     if (_amplitude > 0.0f) {
         _phase += _speed;
-        return static_cast<f32>(fperiod * (1.0f + std::sin(_phase) * _amplitude));
+        return static_cast<f32>(fperiod * (1.0f + (std::sin(_phase) * _amplitude)));
     }
 
     return static_cast<f32>(fperiod);
@@ -202,8 +202,8 @@ auto square_duty::operator()() -> f32
 ////////////////////////////////////////////////////////////
 
 period::period(sound_wave const& wave)
-    : _period {100.0 / (wave.StartFrequency * wave.StartFrequency + 0.001)}
-    , _maxperiod {100.0 / (wave.MinFrequency * wave.MinFrequency + 0.001)}
+    : _period {100.0 / ((wave.StartFrequency * wave.StartFrequency) + 0.001)}
+    , _maxperiod {100.0 / ((wave.MinFrequency * wave.MinFrequency) + 0.001)}
     , _slide {1.0 - (std::pow(static_cast<f64>(wave.Slide), 3.0) * 0.01)}
     , _deltaSlide {-std::pow(static_cast<f64>(wave.DeltaSlide), 3.0) * 0.000001}
     , _arpeggio {wave}

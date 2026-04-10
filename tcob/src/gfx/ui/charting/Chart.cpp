@@ -116,10 +116,10 @@ void line_chart::on_draw_chart(widget_painter& painter, std::vector<string> cons
                 auto const& p2 {points[j + 1]};
                 auto const& p3 {(j + 2 < points.size()) ? points[j + 2] : points[j + 1]};
 
-                point_f const c1 {p1.X + ((p2.X - p0.X) * 0.5f / 3.0f),
-                                  p1.Y + ((p2.Y - p0.Y) * 0.5f / 3.0f)};
-                point_f const c2 {p2.X - ((p3.X - p1.X) * 0.5f / 3.0f),
-                                  p2.Y - ((p3.Y - p1.Y) * 0.5f / 3.0f)};
+                point_f const c1 {p1.X + ((p2.X - p0.X) / 2.0f / 3.0f),
+                                  p1.Y + ((p2.Y - p0.Y) / 2.0f / 3.0f)};
+                point_f const c2 {p2.X - ((p3.X - p1.X) / 2.0f / 3.0f),
+                                  p2.Y - ((p3.Y - p1.Y) / 2.0f / 3.0f)};
 
                 canvas.cubic_bezier_to(c1, c2, p2);
             }
