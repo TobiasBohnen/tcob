@@ -12,7 +12,6 @@
 #include <optional>
 #include <ranges>
 #include <unordered_map>
-#include <utility>
 #include <variant>
 #include <vector>
 
@@ -209,7 +208,7 @@ void node_graph_view::on_draw(widget_painter& painter)
         painter.draw_text(_style.NodeText, headerRect, n.Def.Title);
 
         // ports
-        auto const drawPort {[&](node_port_key const& key, node_port const& port, point_f const& pos) {
+        auto const drawPort {[&](port_key const& key, node_port const& port, point_f const& pos) {
             canvas.set_fill_style(get_port_color(port.Type));
             canvas.begin_path();
             canvas.circle(pos, portRadius);
@@ -217,13 +216,12 @@ void node_graph_view::on_draw(widget_painter& painter)
 
             std::optional<color> ringColor;
             if (_pendingConnection && key != _pendingConnection->Key) {
-                auto const compatIt {std::ranges::find_if(_pendingConnection->CompatibilityCache, [&](auto const& p) { return p.first == key; })};
-                if (compatIt != _pendingConnection->CompatibilityCache.end() && compatIt->second) {
-                    ringColor = _hoveredPort && key == _hoveredPort->first
+                if (_pendingConnection->CompatibilityCache.contains(key)) {
+                    ringColor = _hoveredPort && key == _hoveredPort->NodePort
                         ? _style.PortAcceptColor
                         : _style.PortCompatibleColor;
                 }
-            } else if (_hoveredPort && key == _hoveredPort->first) {
+            } else if (_hoveredPort && key == _hoveredPort->NodePort) {
                 ringColor = _style.PortHoverColor;
             }
 
@@ -235,11 +233,11 @@ void node_graph_view::on_draw(widget_painter& painter)
         }};
         // input ports
         for (usize i {0}; i < n.Def.Inputs.size(); ++i) {
-            auto const&         port {n.Def.Inputs[i]};
-            f32 const           y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight * 0.5f)};
-            f32 const           rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
-            point_f const       pos {nodeRect.left(), y};
-            node_port_key const key {.NodeID = n.ID, .PortID = port.ID, .IsInput = true};
+            auto const&    port {n.Def.Inputs[i]};
+            f32 const      y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight * 0.5f)};
+            f32 const      rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
+            point_f const  pos {nodeRect.left(), y};
+            port_key const key {.NodeID = n.ID, .PortID = port.ID, .IsInput = true};
 
             _portPosCache.emplace_back(key, pos);
             drawPort(key, port, pos);
@@ -251,11 +249,11 @@ void node_graph_view::on_draw(widget_painter& painter)
 
         // output ports
         for (usize i {0}; i < n.Def.Outputs.size(); ++i) {
-            auto const&         port {n.Def.Outputs[i]};
-            f32 const           y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight * 0.5f)};
-            f32 const           rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
-            point_f const       pos {nodeRect.right(), y};
-            node_port_key const key {.NodeID = n.ID, .PortID = port.ID, .IsInput = false};
+            auto const&    port {n.Def.Outputs[i]};
+            f32 const      y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight * 0.5f)};
+            f32 const      rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
+            point_f const  pos {nodeRect.right(), y};
+            port_key const key {.NodeID = n.ID, .PortID = port.ID, .IsInput = false};
 
             _portPosCache.emplace_back(key, pos);
             drawPort(key, port, pos);
@@ -272,7 +270,7 @@ void node_graph_view::on_draw(widget_painter& painter)
             rect_f const rowRect {{nodeRect.left(), nodeRect.top() + (rowHeight * static_cast<f32>(portRows + i))},
                                   {nodeWidth, rowHeight}};
 
-            _paramRectCache.emplace_back(std::pair {n.ID, i}, rowRect);
+            _paramRectCache.emplace_back(n.ID, i, rowRect);
 
             rect_f const labelRect {rowRect.Position, {nodeWidth, rowHeight}};
             rect_f const controlRect {{rowRect.right() - rowHeight, rowRect.top()},
@@ -338,7 +336,7 @@ void node_graph_view::on_mouse_hover(input::mouse::motion_event const& ev)
     auto const mp {screen_to_local(*this, ev.Position)};
     f32 const  portRadius {get_port_radius()};
 
-    auto const portHit {std::ranges::find_if(_portPosCache, [&](auto const& p) { return p.second.distance_to(mp) <= portRadius; })};
+    auto const portHit {std::ranges::find_if(_portPosCache, [&](auto const& p) { return p.Pos.distance_to(mp) <= portRadius; })};
     auto const newHover {portHit != _portPosCache.end() ? std::optional {*portHit} : std::nullopt};
 
     if (newHover != _hoveredPort) {
@@ -451,12 +449,14 @@ auto node_graph_view::try_start_connection(point_f mp) -> bool
             uid const srcPort {_pendingConnection->Key.IsInput ? key.PortID : _pendingConnection->Key.PortID};
             uid const dstNode {_pendingConnection->Key.IsInput ? _pendingConnection->Key.NodeID : key.NodeID};
             uid const dstPort {_pendingConnection->Key.IsInput ? _pendingConnection->Key.PortID : key.PortID};
-            _pendingConnection->CompatibilityCache.emplace_back(key, _graph.can_connect(srcNode, srcPort, dstNode, dstPort));
+            if (_graph.can_connect(srcNode, srcPort, dstNode, dstPort)) {
+                _pendingConnection->CompatibilityCache.insert(key);
+            }
         }
     }};
 
-    auto const& key {_hoveredPort->first};
-    auto const& pos {_hoveredPort->second};
+    auto const& key {_hoveredPort->NodePort};
+    auto const& pos {_hoveredPort->Pos};
 
     if (key.IsInput) {
         auto const connections {_graph.connections()};
@@ -465,9 +465,9 @@ auto node_graph_view::try_start_connection(point_f mp) -> bool
         })};
         if (it != connections.end()) {
             auto const    srcIt {std::ranges::find_if(_portPosCache, [&](auto const& p) {
-                return p.first.NodeID == it->OutputNodeID && p.first.PortID == it->OutputPortID && !p.first.IsInput;
+                return p.NodePort.NodeID == it->OutputNodeID && p.NodePort.PortID == it->OutputPortID && !p.NodePort.IsInput;
             })};
-            point_f const startPos {srcIt != _portPosCache.end() ? srcIt->second : pos};
+            point_f const startPos {srcIt != _portPosCache.end() ? srcIt->Pos : pos};
             _pendingConnection = {.Key       = {.NodeID = it->OutputNodeID, .PortID = it->OutputPortID, .IsInput = false},
                                   .PortColor = get_port_color(_graph.get_port_type(it->OutputNodeID, it->OutputPortID, false)),
                                   .StartPos  = startPos,
@@ -490,7 +490,7 @@ auto node_graph_view::try_remove_connections() -> bool
 {
     if (!_hoveredPort) { return false; }
 
-    auto const& key {_hoveredPort->first};
+    auto const& key {_hoveredPort->NodePort};
     auto const  ids {_graph.connections()
                      | std::views::filter([&](auto const& c) {
                           return key.IsInput
@@ -509,9 +509,9 @@ auto node_graph_view::try_remove_connections() -> bool
 void node_graph_view::finish_connection(point_f mp)
 {
     auto const it {std::ranges::find_if(_portPosCache, [&](auto const& p) {
-        return p.first.IsInput != _pendingConnection->Key.IsInput
-            && p.first.NodeID != _pendingConnection->Key.NodeID
-            && p.second.distance_to(mp) <= get_port_radius();
+        return p.NodePort.IsInput != _pendingConnection->Key.IsInput
+            && p.NodePort.NodeID != _pendingConnection->Key.NodeID
+            && p.Pos.distance_to(mp) <= get_port_radius();
     })};
 
     if (it != _portPosCache.end()) {
@@ -543,13 +543,13 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
     rect_f const bounds {content_bounds()};
     f32 const    rowHeight {_style.NodeSize.Height.calc(bounds.height())};
 
-    for (auto const& [keyPair, rowRect] : _paramRectCache) {
+    for (auto const& [nodeID, idx, rowRect] : _paramRectCache) {
         if (!rowRect.contains(mp)) { continue; }
 
-        auto const* cn {_graph.find_node(keyPair.first)};
-        if (!cn || keyPair.second >= cn->Def.Parameters.size()) { continue; }
+        auto const* cn {_graph.find_node(nodeID)};
+        if (!cn || idx >= cn->Def.Parameters.size()) { continue; }
 
-        if (_graph.mutate_param(keyPair.first, keyPair.second, [&](auto& entry) {
+        if (_graph.mutate_param(nodeID, idx, [&](auto& entry) {
                 return std::visit(
                     overloaded {
                         [&](auto& val) -> bool {

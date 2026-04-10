@@ -8,10 +8,11 @@
 
 #include <optional>
 #include <unordered_map>
-#include <utility>
+#include <unordered_set>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/NodeGraph.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -77,12 +78,18 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
 private:
-    struct node_port_key {
+    struct port_key {
         uid  NodeID;
         uid  PortID;
         bool IsInput;
 
-        auto operator==(node_port_key const& other) const -> bool = default;
+        auto operator==(port_key const& other) const -> bool = default;
+    };
+    struct port_key_hash {
+        auto operator()(port_key const& k) const -> usize
+        {
+            return helper::hash_combine(0, k.NodeID, k.PortID, k.IsInput);
+        }
     };
 
     auto try_drag_node(point_f mp) -> bool;
@@ -100,27 +107,39 @@ private:
     std::unordered_map<uid, point_f> _nodePos;
     std::vector<uid>                 _nodeOrder;
 
-    std::unordered_map<uid, rect_f>
-                                                          _headerRectCache;
-    std::vector<std::pair<node_port_key, point_f>>        _portPosCache;
-    std::vector<std::pair<std::pair<uid, usize>, rect_f>> _paramRectCache;
+    std::unordered_map<uid, rect_f> _headerRectCache;
+
+    struct port_pos {
+        port_key NodePort {};
+        point_f  Pos {};
+
+        auto operator==(port_pos const& other) const -> bool = default;
+    };
+    std::vector<port_pos> _portPosCache;
+
+    struct param_rect {
+        uid    NodeID {};
+        usize  Index {};
+        rect_f Rect {};
+    };
+    std::vector<param_rect> _paramRectCache;
 
     struct drag_state {
-        uid     NodeID;
-        point_f Offset;
+        uid     NodeID {};
+        point_f Offset {};
     };
     std::optional<drag_state> _drag;
 
     struct pending_connection {
-        node_port_key                               Key;
-        color                                       PortColor;
-        point_f                                     StartPos;
-        point_f                                     MousePos;
-        std::vector<std::pair<node_port_key, bool>> CompatibilityCache {};
+        port_key                                    Key {};
+        color                                       PortColor {};
+        point_f                                     StartPos {};
+        point_f                                     MousePos {};
+        std::unordered_set<port_key, port_key_hash> CompatibilityCache {};
     };
     std::optional<pending_connection> _pendingConnection;
 
-    std::optional<std::pair<node_port_key, point_f>> _hoveredPort;
+    std::optional<port_pos> _hoveredPort;
 
     bool    _panning {false};
     point_f _pan {point_f::Zero};
