@@ -125,7 +125,7 @@ void node_graph_view::on_draw(widget_painter& painter)
     auto const getNodeRect {[&](node_graph::node const& n) -> rect_f {
         usize const   rows {1 + std::max(n.Def.Inputs.size(), n.Def.Outputs.size()) + n.Def.Parameters.size()};
         size_f const  size {nodeWidth, rowHeight * static_cast<f32>(rows)};
-        point_f const nodePos {_nodePos[n.ID]};
+        point_f const nodePos {_nodePos.at(n.ID)};
         return {{(nodePos.X * bounds.width() * _zoom) + _pan.X, (nodePos.Y * bounds.height() * _zoom) + _pan.Y}, size};
     }};
 
