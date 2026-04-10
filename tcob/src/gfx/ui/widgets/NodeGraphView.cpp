@@ -371,7 +371,7 @@ void node_graph_view::on_mouse_drag(input::mouse::motion_event const& ev)
     if (_drag) {
         rect_f const  bounds {content_bounds()};
         point_f const newPos {mp - _drag->Offset};
-        _nodePos[_drag->NodeID] = {newPos.X / bounds.width(), newPos.Y / bounds.height()};
+        _nodePos[_drag->NodeID] = {(newPos.X - _pan.X) / (bounds.width() * _zoom), (newPos.Y - _pan.Y) / (bounds.height() * _zoom)};
         queue_redraw();
         ev.Handled = true;
         return;
@@ -441,7 +441,7 @@ auto node_graph_view::try_drag_node(point_f mp) -> bool
     })};
     if (it == nodes.end()) { return false; }
 
-    _drag = {.NodeID = it->ID, .Offset = mp - _headerRectCache.at(it->ID).Position};
+    _drag = {.NodeID = it->ID, .Offset = (mp - _headerRectCache.at(it->ID).Position)};
     return true;
 }
 
@@ -526,6 +526,17 @@ void node_graph_view::finish_connection(point_f mp)
         uid const srcPort {_pendingConnection->Key.IsInput ? key.PortID : _pendingConnection->Key.PortID};
         uid const dstNode {_pendingConnection->Key.IsInput ? _pendingConnection->Key.NodeID : key.NodeID};
         uid const dstPort {_pendingConnection->Key.IsInput ? _pendingConnection->Key.PortID : key.PortID};
+
+        if (key.IsInput) { // remove exisiting connection form input node
+            auto const connections {_graph.connections()};
+            auto const existing {std::ranges::find_if(connections, [&](auto const& c) {
+                return c.InputNodeID == key.NodeID && c.InputPortID == key.PortID;
+            })};
+            if (existing != connections.end() && _graph.can_connect(srcNode, srcPort, dstNode, dstPort)) {
+                _graph.remove_connection(existing->ID);
+            }
+        }
+
         _graph.create_connection(srcNode, srcPort, dstNode, dstPort);
     }
 

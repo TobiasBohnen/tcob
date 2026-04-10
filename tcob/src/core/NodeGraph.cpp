@@ -59,10 +59,10 @@ auto node_graph::can_connect(uid outNodeID, uid outPortID, uid inNodeID, uid inP
     auto const* in {find_port(inN->Def.Inputs, inPortID)};
     if (!out || !in) { return false; }
 
+    // type check
     if (!(out->Type & in->Type)) { return false; }
 
-    if (std::ranges::any_of(_connections, [&](connection const& c) { return c.InputNodeID == inNodeID && c.InputPortID == inPortID; })) { return false; }
-
+    // cycle check
     std::vector<uid>        stack {inNodeID};
     std::unordered_set<uid> visited;
 
@@ -86,6 +86,7 @@ auto node_graph::can_connect(uid outNodeID, uid outPortID, uid inNodeID, uid inP
 
 auto node_graph::create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>
 {
+    if (std::ranges::any_of(_connections, [&](connection const& c) { return c.InputNodeID == inNodeID && c.InputPortID == inPortID; })) { return std::nullopt; }
     if (!can_connect(outNodeID, outPortID, inNodeID, inPortID)) { return std::nullopt; }
 
     auto& con {_connections.emplace_back(get_random_ID(), outNodeID, outPortID, inNodeID, inPortID)};
