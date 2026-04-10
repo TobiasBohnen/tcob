@@ -30,11 +30,7 @@ auto node_graph::connections() const -> std::span<connection const>
 
 auto node_graph::create_node(node_def const& def) -> uid
 {
-    auto& node {_nodes.emplace_back(get_random_ID(), def)};
-
-    NodeAdded(node.ID);
-    Changed();
-    return node.ID;
+    return _nodes.emplace_back(get_random_ID(), def).ID;
 }
 
 auto node_graph::remove_node(uid nodeID) -> bool
@@ -42,8 +38,6 @@ auto node_graph::remove_node(uid nodeID) -> bool
     if (!helper::erase_first(_nodes, [nodeID](auto const& n) { return n.ID == nodeID; })) { return false; }
     std::erase_if(_connections, [nodeID](connection const& c) { return c.OutputNodeID == nodeID || c.InputNodeID == nodeID; });
 
-    NodeRemoved(nodeID);
-    Changed();
     return true;
 }
 
@@ -89,19 +83,12 @@ auto node_graph::create_connection(uid outNodeID, uid outPortID, uid inNodeID, u
     if (std::ranges::any_of(_connections, [&](connection const& c) { return c.InputNodeID == inNodeID && c.InputPortID == inPortID; })) { return std::nullopt; }
     if (!can_connect(outNodeID, outPortID, inNodeID, inPortID)) { return std::nullopt; }
 
-    auto& con {_connections.emplace_back(get_random_ID(), outNodeID, outPortID, inNodeID, inPortID)};
-    ConnectionAdded(con.ID);
-    Changed();
-    return con.ID;
+    return _connections.emplace_back(get_random_ID(), outNodeID, outPortID, inNodeID, inPortID).ID;
 }
 
 auto node_graph::remove_connection(uid connectionID) -> bool
 {
-    if (!helper::erase_first(_connections, [connectionID](auto const& c) { return c.ID == connectionID; })) { return false; }
-
-    ConnectionRemoved(connectionID);
-    Changed();
-    return true;
+    return helper::erase_first(_connections, [connectionID](auto const& c) { return c.ID == connectionID; });
 }
 
 auto node_graph::evaluate(uid nodeID, node_compute_func const& fn) const -> void
@@ -179,7 +166,6 @@ auto node_graph::mutate_param(uid nodeID, usize paramIndex, std::function<bool(n
 
     it->Def.Parameters[paramIndex] = param;
 
-    Changed();
     return true;
 }
 

@@ -15,7 +15,6 @@
 
 #include "tcob/core/Concepts.hpp"
 #include "tcob/core/Interfaces.hpp"
-#include "tcob/core/Signal.hpp"
 
 namespace tcob {
 ////////////////////////////////////////////////////////////
@@ -91,14 +90,6 @@ public:
         uid InputNodeID {0};
         uid InputPortID {0};
     };
-
-    signal<> Changed;
-
-    signal<uid> NodeAdded;
-    signal<uid> NodeRemoved;
-
-    signal<uid> ConnectionAdded;
-    signal<uid> ConnectionRemoved;
 
     auto nodes() const -> std::span<node const>;
 

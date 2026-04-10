@@ -67,21 +67,6 @@ void node_graph_view::style::Transition(style& target, style const& from, style 
 node_graph_view::node_graph_view(init const& wi)
     : widget {wi}
 {
-    _graph.Changed.connect([&] {
-        _drag        = std::nullopt;
-        _hoveredPort = std::nullopt;
-        notify_dirty();
-    });
-    _graph.NodeRemoved.connect([&](uid node) {
-        if (_nodePos.contains(node)) {
-            _nodePos.erase(node);
-        }
-        if (_drag && _drag->NodeID == node) {
-            _drag = std::nullopt;
-        }
-        _pendingConnection = std::nullopt;
-    });
-
     Class("node_graph_view");
 }
 
@@ -89,7 +74,17 @@ auto node_graph_view::create_node(node_def const& def, point_f pos) -> uid
 {
     uid const id {_graph.create_node(def)};
     _nodePos[id] = pos;
+    _nodeOrder.push_back(id);
     return id;
+}
+auto node_graph_view::remove_node(uid nodeID) -> bool
+{
+    if (!_graph.remove_node(nodeID)) { return false; }
+    _nodePos.erase(nodeID);
+    std::erase(_nodeOrder, nodeID);
+    if (_drag && _drag->NodeID == nodeID) { _drag = std::nullopt; }
+    _pendingConnection = std::nullopt;
+    return true;
 }
 
 auto node_graph_view::create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>
@@ -333,12 +328,9 @@ void node_graph_view::on_draw(widget_painter& painter)
         }
     }};
 
-    auto nodes {_graph.nodes()};
-    for (auto const& n : nodes) {
-        if (_drag && n.ID == _drag->NodeID) { continue; }
-        drawNode(n);
+    for (uid id : _nodeOrder) {
+        if (auto const* n {_graph.find_node(id)}) { drawNode(*n); }
     }
-    if (_drag) { drawNode(*_graph.find_node(_drag->NodeID)); }
 }
 
 void node_graph_view::on_mouse_hover(input::mouse::motion_event const& ev)
@@ -442,6 +434,8 @@ auto node_graph_view::try_drag_node(point_f mp) -> bool
     if (it == nodes.end()) { return false; }
 
     _drag = {.NodeID = it->ID, .Offset = (mp - _headerRectCache.at(it->ID).Position)};
+    std::erase(_nodeOrder, it->ID);
+    _nodeOrder.push_back(it->ID);
     return true;
 }
 
@@ -555,43 +549,48 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
         auto const* cn {_graph.find_node(keyPair.first)};
         if (!cn || keyPair.second >= cn->Def.Parameters.size()) { continue; }
 
-        _graph.mutate_param(keyPair.first, keyPair.second, [&](auto& entry) {
-            return std::visit(
-                overloaded {
-                    [&](auto& val) -> bool {
-                        rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
-                        if (chevronRect.contains(mp)) {
-                            bool const isUp {mp.Y < chevronRect.top() + (chevronRect.height() * 0.5f)};
-                            isUp ? val.Value = val.Value + val.Step : val.Value = val.Value - val.Step;
+        if (_graph.mutate_param(keyPair.first, keyPair.second, [&](auto& entry) {
+                return std::visit(
+                    overloaded {
+                        [&](auto& val) -> bool {
+                            rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
+                            if (chevronRect.contains(mp)) {
+                                bool const isUp {mp.Y < chevronRect.top() + (chevronRect.height() * 0.5f)};
+                                isUp ? val.Value = val.Value + val.Step : val.Value = val.Value - val.Step;
+                                return true;
+                            }
+                            return false;
+                        },
+                        [](node_param_bool& val) -> bool {
+                            val.Value = !val.Value;
                             return true;
-                        }
-                        return false;
-                    },
-                    [](node_param_bool& val) -> bool {
-                        val.Value = !val.Value;
-                        return true;
-                    },
-                    [&](node_param_string& val) -> bool {
-                        if (val.Options.empty()) { return false; }
-                        rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
-                        if (!chevronRect.contains(mp)) { return false; }
-                        bool const isUp {mp.Y < chevronRect.top() + (chevronRect.height() * 0.5f)};
-                        auto       it {std::ranges::find(val.Options, val.Value)};
-                        if (isUp) {
-                            val.Value = (it == val.Options.end() || std::next(it) == val.Options.end())
-                                ? val.Options.front()
-                                : *std::next(it);
-                        } else {
-                            val.Value = (it == val.Options.end() || it == val.Options.begin())
-                                ? val.Options.back()
-                                : *std::prev(it);
-                        }
-                        return true;
-                    }},
-                entry);
-        });
+                        },
+                        [&](node_param_string& val) -> bool {
+                            if (val.Options.empty()) { return false; }
+                            rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
+                            if (!chevronRect.contains(mp)) { return false; }
+                            bool const isUp {mp.Y < chevronRect.top() + (chevronRect.height() * 0.5f)};
+                            auto       it {std::ranges::find(val.Options, val.Value)};
+                            if (isUp) {
+                                val.Value = (it == val.Options.end() || std::next(it) == val.Options.end())
+                                    ? val.Options.front()
+                                    : *std::next(it);
+                            } else {
+                                val.Value = (it == val.Options.end() || it == val.Options.begin())
+                                    ? val.Options.back()
+                                    : *std::prev(it);
+                            }
+                            return true;
+                        }},
+                    entry);
+            })) {
 
-        return true;
+            _drag        = std::nullopt;
+            _hoveredPort = std::nullopt;
+            notify_dirty();
+
+            return true;
+        }
     }
     return false;
 }

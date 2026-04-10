@@ -59,6 +59,8 @@ public:
     signal<> GraphChanged;
 
     auto create_node(node_def const& def, point_f pos) -> uid;
+    auto remove_node(uid nodeID) -> bool;
+
     auto create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>;
 
     void evaluate(uid nodeID, node_compute_func const& fn) const;
@@ -96,8 +98,10 @@ private:
     void notify_dirty();
 
     std::unordered_map<uid, point_f> _nodePos;
+    std::vector<uid>                 _nodeOrder;
 
-    std::unordered_map<uid, rect_f>                       _headerRectCache;
+    std::unordered_map<uid, rect_f>
+                                                          _headerRectCache;
     std::vector<std::pair<node_port_key, point_f>>        _portPosCache;
     std::vector<std::pair<std::pair<uid, usize>, rect_f>> _paramRectCache;
 
