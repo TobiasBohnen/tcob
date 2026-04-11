@@ -28,9 +28,9 @@ auto node_graph::connections() const -> std::span<connection const>
     return _connections;
 }
 
-auto node_graph::create_node(node_def const& def) -> uid
+void node_graph::create_node(node const& def)
 {
-    return _nodes.emplace_back(get_random_ID(), def).ID;
+    _nodes.emplace_back(def);
 }
 
 auto node_graph::remove_node(uid nodeID) -> bool
@@ -49,8 +49,8 @@ auto node_graph::can_connect(uid outNodeID, uid outPortID, uid inNodeID, uid inP
     auto const* inN {find_node(inNodeID)};
     if (!outN || !inN) { return false; }
 
-    auto const* out {find_port(outN->Def.Outputs, outPortID)};
-    auto const* in {find_port(inN->Def.Inputs, inPortID)};
+    auto const* out {find_port(outN->Outputs, outPortID)};
+    auto const* in {find_port(inN->Inputs, inPortID)};
     if (!out || !in) { return false; }
 
     // type check
@@ -108,9 +108,9 @@ auto node_graph::compute_node(uid nodeID, uid portID, cache& cache) const -> nod
     }
 
     auto const* n {find_node(nodeID)};
-    if (!n || !n->Def.Compute) { return 0.0f; }
+    if (!n || !n->Compute) { return 0.0f; }
 
-    auto const results {n->Def.Compute(gather_inputs(*n, cache), gather_params(*n))};
+    auto const results {n->Compute(gather_inputs(*n, cache), gather_params(*n))};
     for (auto const& [k, v] : results) {
         cache[nodeID][k] = v;
     }
@@ -123,11 +123,11 @@ auto node_graph::compute_node(uid nodeID, uid portID, cache& cache) const -> nod
 
 auto node_graph::gather_inputs(node const& n, cache& cache) const -> std::vector<node_value_types>
 {
-    std::vector<node_value_types> inputs(n.Def.Inputs.size());
+    std::vector<node_value_types> inputs(n.Inputs.size());
     for (auto const& c : _connections) {
         if (c.InputNodeID != n.ID) { continue; }
-        for (usize i {0}; i < n.Def.Inputs.size(); ++i) {
-            if (n.Def.Inputs[i].ID != c.InputPortID) { continue; }
+        for (usize i {0}; i < n.Inputs.size(); ++i) {
+            if (n.Inputs[i].ID != c.InputPortID) { continue; }
             inputs[i] = compute_node(c.OutputNodeID, c.OutputPortID, cache);
         }
     }
@@ -137,8 +137,8 @@ auto node_graph::gather_inputs(node const& n, cache& cache) const -> std::vector
 auto node_graph::gather_params(node const& n) const -> std::vector<node_value_types>
 {
     std::vector<node_value_types> params;
-    params.reserve(n.Def.Parameters.size());
-    for (auto const& p : n.Def.Parameters) {
+    params.reserve(n.Parameters.size());
+    for (auto const& p : n.Parameters) {
         std::visit([&](auto const& val) { params.emplace_back(val.Value); }, p);
     }
     return params;
@@ -148,9 +148,9 @@ auto node_graph::mutate_param(uid nodeID, usize paramIndex, std::function<bool(n
 {
     auto it {std::ranges::find(_nodes, nodeID, &node::ID)};
     if (it == _nodes.end()) { return false; }
-    if (paramIndex >= it->Def.Parameters.size()) { return false; }
+    if (paramIndex >= it->Parameters.size()) { return false; }
 
-    auto param {it->Def.Parameters[paramIndex]}; // COPY here
+    auto param {it->Parameters[paramIndex]}; // COPY here
     if (!fn(param)) { return false; }
 
     std::visit(overloaded {
@@ -164,7 +164,7 @@ auto node_graph::mutate_param(uid nodeID, usize paramIndex, std::function<bool(n
                    [](auto&) { }},
                param);
 
-    it->Def.Parameters[paramIndex] = param;
+    it->Parameters[paramIndex] = param;
 
     return true;
 }
@@ -183,7 +183,7 @@ auto node_graph::get_port_type(uid nodeID, uid portID, bool isInput) const -> u3
 auto node_graph::find_port(uid nodeID, uid portID, bool isInput) const -> node_port const*
 {
     auto const* n {find_node(nodeID)};
-    return n ? find_port(isInput ? n->Def.Inputs : n->Def.Outputs, portID) : nullptr;
+    return n ? find_port(isInput ? n->Inputs : n->Outputs, portID) : nullptr;
 }
 
 auto node_graph::find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*

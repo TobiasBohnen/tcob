@@ -68,7 +68,7 @@ public:
 
     prop<gfx::alignment> MinimapAlignment;
 
-    auto create_node(node_def const& def, point_f pos) -> uid;
+    void create_node(node const& def, point_f pos);
     auto remove_node(uid nodeID) -> bool;
 
     auto create_connection(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) -> std::optional<uid>;

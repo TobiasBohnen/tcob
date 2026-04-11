@@ -62,7 +62,9 @@ struct node_port {
     u32    Type {0xFFFFFFFF};
 };
 
-struct node_def {
+struct node {
+    uid ID {0};
+
     string Title;
 
     std::vector<node_port>        Inputs {};
@@ -77,11 +79,6 @@ struct node_def {
 
 class TCOB_API node_graph final : public non_copyable {
 public:
-    struct node {
-        uid      ID {0};
-        node_def Def;
-    };
-
     struct connection {
         uid ID {0};
 
@@ -95,7 +92,7 @@ public:
 
     auto connections() const -> std::span<connection const>;
 
-    auto create_node(node_def const& def) -> uid;
+    void create_node(node const& def);
     auto remove_node(uid nodeID) -> bool;
 
     auto can_connect(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) const -> bool;

@@ -78,14 +78,14 @@ node_graph_view::node_graph_view(init const& wi)
     Class("node_graph_view");
 }
 
-auto node_graph_view::create_node(node_def const& def, point_f pos) -> uid
+void node_graph_view::create_node(node const& def, point_f pos)
 {
-    uid const id {_graph.create_node(def)};
-    _nodePos[id] = pos;
-    _nodeOrder.push_back(id);
+    _graph.create_node(def);
+    _nodePos[def.ID] = pos;
+    _nodeOrder.push_back(def.ID);
     GraphChanged({this});
-    return id;
 }
+
 auto node_graph_view::remove_node(uid nodeID) -> bool
 {
     if (!_graph.remove_node(nodeID)) { return false; }
@@ -125,16 +125,16 @@ void node_graph_view::on_draw(widget_painter& painter)
     f32 const conWidth {_style.ConnectionWidth.calc(bounds.width()) * _zoom};
     f32 const borderWidth {conWidth * BORDER_SCALE};
 
-    auto const getNodeRect {[&](node_graph::node const& n) -> rect_f {
-        usize const   rows {1 + std::max(n.Def.Inputs.size(), n.Def.Outputs.size()) + n.Def.Parameters.size()};
+    auto const getNodeRect {[&](node const& n) -> rect_f {
+        usize const   rows {1 + std::max(n.Inputs.size(), n.Outputs.size()) + n.Parameters.size()};
         size_f const  size {nodeWidth, rowHeight * static_cast<f32>(rows)};
         point_f const nodePos {_nodePos.at(n.ID)};
         return {{(nodePos.X * bounds.width() * _zoom) + _pan.X, (nodePos.Y * bounds.height() * _zoom) + _pan.Y}, size};
     }};
 
-    auto const getPortPosition {[&](node_graph::node const& n, uid portID, bool isInput) -> point_f {
+    auto const getPortPosition {[&](node const& n, uid portID, bool isInput) -> point_f {
         rect_f const nodeRect {getNodeRect(n)};
-        auto const&  ports {isInput ? n.Def.Inputs : n.Def.Outputs};
+        auto const&  ports {isInput ? n.Inputs : n.Outputs};
         f32 const    x {isInput ? nodeRect.left() : nodeRect.right()};
         for (usize i {0}; i < ports.size(); ++i) {
             if (ports[i].ID == portID) {
@@ -221,7 +221,7 @@ void node_graph_view::on_draw(widget_painter& painter)
         canvas.fill();
 
         // header title
-        painter.draw_text(_style.NodeText, headerRect, n.Def.Title);
+        painter.draw_text(_style.NodeText, headerRect, n.Title);
 
         // ports
         auto const drawPort {[&](port_key const& key, node_port const& port, point_f const& pos) {
@@ -248,8 +248,8 @@ void node_graph_view::on_draw(widget_painter& painter)
             }
         }};
         // input ports
-        for (usize i {0}; i < n.Def.Inputs.size(); ++i) {
-            auto const&    port {n.Def.Inputs[i]};
+        for (usize i {0}; i < n.Inputs.size(); ++i) {
+            auto const&    port {n.Inputs[i]};
             f32 const      y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight / 2.0f)};
             f32 const      rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
             point_f const  pos {nodeRect.left(), y};
@@ -264,8 +264,8 @@ void node_graph_view::on_draw(widget_painter& painter)
         }
 
         // output ports
-        for (usize i {0}; i < n.Def.Outputs.size(); ++i) {
-            auto const&    port {n.Def.Outputs[i]};
+        for (usize i {0}; i < n.Outputs.size(); ++i) {
+            auto const&    port {n.Outputs[i]};
             f32 const      y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight / 2.0f)};
             f32 const      rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
             point_f const  pos {nodeRect.right(), y};
@@ -280,9 +280,9 @@ void node_graph_view::on_draw(widget_painter& painter)
         }
 
         // parameter rows
-        usize const portRows {1 + std::max(n.Def.Inputs.size(), n.Def.Outputs.size())};
-        for (usize i {0}; i < n.Def.Parameters.size(); ++i) {
-            auto const&  entry {n.Def.Parameters[i]};
+        usize const portRows {1 + std::max(n.Inputs.size(), n.Outputs.size())};
+        for (usize i {0}; i < n.Parameters.size(); ++i) {
+            auto const&  entry {n.Parameters[i]};
             rect_f const rowRect {{nodeRect.left(), nodeRect.top() + (rowHeight * static_cast<f32>(portRows + i))},
                                   {nodeWidth, rowHeight}};
 
@@ -294,11 +294,11 @@ void node_graph_view::on_draw(widget_painter& painter)
 
             canvas.set_fill_style(_style.ParamColor);
             canvas.begin_path();
-            if (n.Def.Parameters.size() == 1) {
+            if (n.Parameters.size() == 1) {
                 canvas.rounded_rect(rowRect, nodeRadius);
             } else if (i == 0) {
                 canvas.rounded_rect_varying(rowRect, nodeRadius, nodeRadius, 0, 0);
-            } else if (i < n.Def.Parameters.size() - 1) {
+            } else if (i < n.Parameters.size() - 1) {
                 canvas.rect(rowRect);
             } else {
                 canvas.rounded_rect_varying(rowRect, 0, 0, nodeRadius, nodeRadius);
@@ -389,7 +389,7 @@ void node_graph_view::draw_minimap(gfx::canvas& canvas, rect_f const& bounds)
         auto const* n {_graph.find_node(id)};
         if (!n) { continue; }
         point_f const pos {_nodePos[id]};
-        usize const   rows {1 + std::max(n->Def.Inputs.size(), n->Def.Outputs.size()) + n->Def.Parameters.size()};
+        usize const   rows {1 + std::max(n->Inputs.size(), n->Outputs.size()) + n->Parameters.size()};
         f32 const     w {_style.NodeSize.Width.calc(bounds.width())};
         f32 const     h {_style.NodeSize.Height.calc(bounds.height()) * static_cast<f32>(rows)};
         f32 const     nx {pos.X * bounds.width()};
@@ -440,7 +440,7 @@ void node_graph_view::draw_minimap(gfx::canvas& canvas, rect_f const& bounds)
         auto const* n {_graph.find_node(id)};
         if (!n) { continue; }
         point_f const pos {_nodePos[id]};
-        usize const   rows {1 + std::max(n->Def.Inputs.size(), n->Def.Outputs.size()) + n->Def.Parameters.size()};
+        usize const   rows {1 + std::max(n->Inputs.size(), n->Outputs.size()) + n->Parameters.size()};
         f32 const     w {_style.NodeSize.Width.calc(bounds.width())};
         f32 const     h {_style.NodeSize.Height.calc(bounds.height()) * static_cast<f32>(rows)};
         rect_f const  nr {toMMRect(pos.X * bounds.width(), pos.Y * bounds.height(), w, h)};
@@ -562,7 +562,7 @@ void node_graph_view::on_update(milliseconds /* deltaTime */)
 auto node_graph_view::try_drag_node(point_f mp) -> bool
 {
     auto const nodes {_graph.nodes()};
-    auto const it {std::ranges::find_if(nodes, [&](node_graph::node const& n) {
+    auto const it {std::ranges::find_if(nodes, [&](node const& n) {
         auto const hit {_headerRectCache.find(n.ID)};
         return hit != _headerRectCache.end() && hit->second.contains(mp);
     })};
@@ -686,7 +686,7 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
         if (!rowRect.contains(mp)) { continue; }
 
         auto const* cn {_graph.find_node(nodeID)};
-        if (!cn || idx >= cn->Def.Parameters.size()) { continue; }
+        if (!cn || idx >= cn->Parameters.size()) { continue; }
 
         f32 const rowHeight {rowRect.height()};
 
