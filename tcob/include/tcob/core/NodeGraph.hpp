@@ -54,31 +54,29 @@ using node_compute_result = std::unordered_map<uid, node_value_types>;
 using node_compute_func   = std::function<node_compute_result(std::vector<node_value_types> const&, std::vector<node_value_types> const&)>;
 
 ////////////////////////////////////////////////////////////
-
-struct node_port {
-    uid ID {0};
-
-    string Name;
-    u32    Type {0xFFFFFFFF};
-};
-
-struct node {
-    uid ID {0};
-
-    string Title;
-
-    std::vector<node_port>        Inputs {};
-    std::vector<node_port>        Outputs {};
-    std::vector<node_param_types> Parameters {};
-
-    node_compute_func Compute {};
-};
-
-////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
 class TCOB_API node_graph final : public non_copyable {
 public:
+    struct node_port {
+        uid ID {0};
+
+        string Name;
+        u32    Type {0xFFFFFFFF};
+    };
+
+    struct node {
+        uid ID {0};
+
+        string Title;
+
+        std::vector<node_port>        Inputs {};
+        std::vector<node_port>        Outputs {};
+        std::vector<node_param_types> Parameters {};
+
+        node_compute_func Compute {};
+    };
+
     struct connection {
         uid ID {0};
 

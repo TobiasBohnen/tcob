@@ -78,7 +78,7 @@ node_graph_view::node_graph_view(init const& wi)
     Class("node_graph_view");
 }
 
-void node_graph_view::create_node(node const& def, point_f pos)
+void node_graph_view::create_node(node_graph::node const& def, point_f pos)
 {
     _graph.create_node(def);
     _nodePos[def.ID] = pos;
@@ -125,14 +125,14 @@ void node_graph_view::on_draw(widget_painter& painter)
     f32 const conWidth {_style.ConnectionWidth.calc(bounds.width()) * _zoom};
     f32 const borderWidth {conWidth * BORDER_SCALE};
 
-    auto const getNodeRect {[&](node const& n) -> rect_f {
+    auto const getNodeRect {[&](auto const& n) -> rect_f {
         usize const   rows {1 + std::max(n.Inputs.size(), n.Outputs.size()) + n.Parameters.size()};
         size_f const  size {nodeWidth, rowHeight * static_cast<f32>(rows)};
         point_f const nodePos {_nodePos.at(n.ID)};
         return {{(nodePos.X * bounds.width() * _zoom) + _pan.X, (nodePos.Y * bounds.height() * _zoom) + _pan.Y}, size};
     }};
 
-    auto const getPortPosition {[&](node const& n, uid portID, bool isInput) -> point_f {
+    auto const getPortPosition {[&](auto const& n, uid portID, bool isInput) -> point_f {
         rect_f const nodeRect {getNodeRect(n)};
         auto const&  ports {isInput ? n.Inputs : n.Outputs};
         f32 const    x {isInput ? nodeRect.left() : nodeRect.right()};
@@ -224,7 +224,7 @@ void node_graph_view::on_draw(widget_painter& painter)
         painter.draw_text(_style.NodeText, headerRect, n.Title);
 
         // ports
-        auto const drawPort {[&](port_key const& key, node_port const& port, point_f const& pos) {
+        auto const drawPort {[&](port_key const& key, auto const& port, point_f const& pos) {
             canvas.set_fill_style(get_port_color(port.Type));
             canvas.begin_path();
             canvas.circle(pos, portRadius);
@@ -562,7 +562,7 @@ void node_graph_view::on_update(milliseconds /* deltaTime */)
 auto node_graph_view::try_drag_node(point_f mp) -> bool
 {
     auto const nodes {_graph.nodes()};
-    auto const it {std::ranges::find_if(nodes, [&](node const& n) {
+    auto const it {std::ranges::find_if(nodes, [&](auto const& n) {
         auto const hit {_headerRectCache.find(n.ID)};
         return hit != _headerRectCache.end() && hit->second.contains(mp);
     })};
