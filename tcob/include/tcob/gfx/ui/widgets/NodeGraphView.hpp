@@ -31,28 +31,34 @@ namespace tcob::ui {
 
 class TCOB_API node_graph_view : public widget {
 public:
+    enum class connection_style : u8 {
+        Bezier,
+        Line,
+        Elbow,
+    };
+
     class TCOB_API style : public widget_style {
     public:
         text_element NodeText;
         dimensions   NodeSize {};
         length       NodeRadius {10, length::type::Absolute};
 
-        text_element InputPortText;
-        text_element OutputPortText;
-        text_element ParamText;
-
-        length ConnectionWidth {3, length::type::Absolute};
+        connection_style ConnectionStyle {connection_style::Bezier};
+        length           ConnectionWidth {3, length::type::Absolute};
 
         color NodeColor {colors::White};
         color NodeHeaderColor {colors::Black};
 
+        text_element                   InputPortText;
+        text_element                   OutputPortText;
         std::unordered_map<u32, color> PortColors;
         color                          PortHoverColor {colors::White};
         color                          PortCompatibleColor {colors::Blue};
         color                          PortAcceptColor {colors::Green};
 
-        color ParamColor {colors::White};
-        color ParamWidgetColor {colors::Black};
+        text_element ParamText;
+        color        ParamColor {colors::White};
+        color        ParamWidgetColor {colors::Black};
 
         dimensions MinimapSize {.Width = {0, length::type::Relative}, .Height = {0, length::type::Relative}};
         f32        MinimapAlpha {0.5f};

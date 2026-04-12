@@ -45,15 +45,14 @@ void node_graph_view::style::Transition(style& target, style const& from, style 
     target.NodeSize   = helper::lerp(from.NodeSize, to.NodeSize, step);
     target.NodeRadius = helper::lerp(from.NodeRadius, to.NodeRadius, step);
 
-    target.InputPortText.lerp(from.InputPortText, to.InputPortText, step);
-    target.OutputPortText.lerp(from.OutputPortText, to.OutputPortText, step);
-    target.ParamText.lerp(from.ParamText, to.ParamText, step);
-
+    target.ConnectionStyle = helper::lerp(from.ConnectionStyle, to.ConnectionStyle, step);
     target.ConnectionWidth = helper::lerp(from.ConnectionWidth, to.ConnectionWidth, step);
 
     target.NodeColor       = helper::lerp(from.NodeColor, to.NodeColor, step);
     target.NodeHeaderColor = helper::lerp(from.NodeHeaderColor, to.NodeHeaderColor, step);
 
+    target.InputPortText.lerp(from.InputPortText, to.InputPortText, step);
+    target.OutputPortText.lerp(from.OutputPortText, to.OutputPortText, step);
     if (from.PortColors.size() == to.PortColors.size()) {
         for (auto const& [k, v] : from.PortColors) {
             if (to.PortColors.contains(k)) {
@@ -61,11 +60,11 @@ void node_graph_view::style::Transition(style& target, style const& from, style 
             }
         }
     }
-
     target.PortHoverColor      = helper::lerp(from.PortHoverColor, to.PortHoverColor, step);
     target.PortCompatibleColor = helper::lerp(from.PortCompatibleColor, to.PortCompatibleColor, step);
     target.PortAcceptColor     = helper::lerp(from.PortAcceptColor, to.PortAcceptColor, step);
 
+    target.ParamText.lerp(from.ParamText, to.ParamText, step);
     target.ParamColor       = helper::lerp(from.ParamColor, to.ParamColor, step);
     target.ParamWidgetColor = helper::lerp(from.ParamWidgetColor, to.ParamWidgetColor, step);
 
@@ -159,13 +158,23 @@ void node_graph_view::on_draw(widget_painter& painter)
 
         point_f const p0 {getPortPosition(out, con.OutputPortID, false)};
         point_f const p1 {getPortPosition(in, con.InputPortID, true)};
-        f32 const     dx {std::abs(p1.X - p0.X) / 2.0f};
 
-        canvas.set_stroke_style(get_port_color(_graph.get_port_type(con.OutputNodeID, con.OutputPortID, false)));
-        canvas.set_stroke_width(conWidth);
         canvas.begin_path();
         canvas.move_to(p0);
-        canvas.cubic_bezier_to({p0.X + dx, p0.Y}, {p1.X - dx, p1.Y}, p1);
+        switch (_style.ConnectionStyle) {
+        case connection_style::Bezier: {
+            f32 const dx {std::abs(p1.X - p0.X) / 2.0f};
+            canvas.cubic_bezier_to({p0.X + dx, p0.Y}, {p1.X - dx, p1.Y}, p1);
+        } break;
+        case connection_style::Line:  canvas.line_to(p1); break;
+        case connection_style::Elbow: {
+            f32 const mx {(p1.X + p0.X) / 2.0f};
+            canvas.line_to({mx, p0.Y});
+            canvas.line_to({mx, p1.Y});
+            canvas.line_to(p1);
+            break;
+        }
+        }
         canvas.stroke();
     }
 
