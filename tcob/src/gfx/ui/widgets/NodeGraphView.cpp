@@ -32,6 +32,11 @@
 
 namespace tcob::ui {
 
+auto overloaded_visit(auto&& v, auto&&... handlers)
+{
+    return std::visit(overloaded {handlers...}, v);
+}
+
 void node_graph_view::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
     widget_style::Transition(target, from, to, step);
@@ -118,9 +123,6 @@ void node_graph_view::on_draw(widget_painter& painter)
     rect_f const rect {draw_base(_style, painter)};
     auto&        canvas {painter.canvas()};
 
-    canvas.save();
-    canvas.translate(rect.top_left());
-
     f32 const rowHeight {_style.NodeSize.Height.calc(rect.height()) * _zoom};
     f32 const nodeWidth {_style.NodeSize.Width.calc(rect.width()) * _zoom};
     f32 const portRadius {rowHeight * PORT_SCALE};
@@ -128,16 +130,16 @@ void node_graph_view::on_draw(widget_painter& painter)
     f32 const conWidth {_style.ConnectionWidth.calc(rect.width()) * _zoom};
     f32 const borderWidth {conWidth * BORDER_SCALE};
 
-    auto const getNodeRect {[&](auto const& n) -> rect_f {
-        usize const   rows {1 + std::max(n.Inputs.size(), n.Outputs.size()) + n.Parameters.size()};
+    auto const getNodeRect {[&](auto const* n) -> rect_f {
+        usize const   rows {1 + std::max(n->Inputs.size(), n->Outputs.size()) + n->Parameters.size()};
         size_f const  size {nodeWidth, rowHeight * static_cast<f32>(rows)};
-        point_f const nodePos {_nodePos.at(n.ID)};
-        return {{((nodePos.X * rect.width()) * _zoom) + _pan.X, ((nodePos.Y * rect.height()) * _zoom) + _pan.Y}, size};
+        point_f const nodePos {_nodePos.at(n->ID)};
+        return {{(((nodePos.X * rect.width()) + rect.left()) * _zoom) + _pan.X, (((nodePos.Y * rect.height()) + rect.top()) * _zoom) + _pan.Y}, size};
     }};
 
-    auto const getPortPosition {[&](auto const& n, uid portID, bool isInput) -> point_f {
+    auto const getPortPosition {[&](auto const* n, uid portID, bool isInput) -> point_f {
         rect_f const nodeRect {getNodeRect(n)};
-        auto const&  ports {isInput ? n.Inputs : n.Outputs};
+        auto const&  ports {isInput ? n->Inputs : n->Outputs};
         f32 const    x {isInput ? nodeRect.left() : nodeRect.right()};
         for (usize i {0}; i < ports.size(); ++i) {
             if (ports[i].ID == portID) {
@@ -155,8 +157,8 @@ void node_graph_view::on_draw(widget_painter& painter)
         auto const* in {_graph.find_node(con.InputNodeID)};
         if (!out || !in) { continue; }
 
-        point_f const p0 {getPortPosition(*out, con.OutputPortID, false)};
-        point_f const p1 {getPortPosition(*in, con.InputPortID, true)};
+        point_f const p0 {getPortPosition(out, con.OutputPortID, false)};
+        point_f const p1 {getPortPosition(in, con.InputPortID, true)};
         f32 const     dx {std::abs(p1.X - p0.X) / 2.0f};
 
         canvas.set_stroke_style(get_port_color(_graph.get_port_type(con.OutputNodeID, con.OutputPortID, false)));
@@ -203,10 +205,13 @@ void node_graph_view::on_draw(widget_painter& painter)
         canvas.stroke();
     }};
 
-    auto const drawNode {[&](auto const& n) {
+    for (uid id : _nodeOrder) {
+        auto const* n {_graph.find_node(id)};
+        if (!n) { continue; }
+
         rect_f const nodeRect {getNodeRect(n)};
         rect_f const headerRect {nodeRect.Position, {nodeWidth, rowHeight}};
-        _headerRectCache[n.ID] = headerRect;
+        _headerRectCache[n->ID] = headerRect;
 
         // body
         canvas.set_fill_style(_style.NodeColor);
@@ -224,7 +229,7 @@ void node_graph_view::on_draw(widget_painter& painter)
         canvas.fill();
 
         // header title
-        painter.draw_text(_style.NodeText, headerRect, n.Title);
+        painter.draw_text(_style.NodeText, headerRect, n->Title);
 
         // ports
         auto const drawPort {[&](port_key const& key, auto const& port, point_f const& pos) {
@@ -251,12 +256,12 @@ void node_graph_view::on_draw(widget_painter& painter)
             }
         }};
         // input ports
-        for (usize i {0}; i < n.Inputs.size(); ++i) {
-            auto const&    port {n.Inputs[i]};
+        for (usize i {0}; i < n->Inputs.size(); ++i) {
+            auto const&    port {n->Inputs[i]};
             f32 const      y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight / 2.0f)};
             f32 const      rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
             point_f const  pos {nodeRect.left(), y};
-            port_key const key {.NodeID = n.ID, .PortID = port.ID, .IsInput = true};
+            port_key const key {.NodeID = n->ID, .PortID = port.ID, .IsInput = true};
 
             _portPosCache.emplace_back(key, pos);
             drawPort(key, port, pos);
@@ -267,12 +272,12 @@ void node_graph_view::on_draw(widget_painter& painter)
         }
 
         // output ports
-        for (usize i {0}; i < n.Outputs.size(); ++i) {
-            auto const&    port {n.Outputs[i]};
+        for (usize i {0}; i < n->Outputs.size(); ++i) {
+            auto const&    port {n->Outputs[i]};
             f32 const      y {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1)) + (rowHeight / 2.0f)};
             f32 const      rowTop {nodeRect.top() + (rowHeight * static_cast<f32>(i + 1))};
             point_f const  pos {nodeRect.right(), y};
-            port_key const key {.NodeID = n.ID, .PortID = port.ID, .IsInput = false};
+            port_key const key {.NodeID = n->ID, .PortID = port.ID, .IsInput = false};
 
             _portPosCache.emplace_back(key, pos);
             drawPort(key, port, pos);
@@ -283,13 +288,13 @@ void node_graph_view::on_draw(widget_painter& painter)
         }
 
         // parameter rows
-        usize const portRows {1 + std::max(n.Inputs.size(), n.Outputs.size())};
-        for (usize i {0}; i < n.Parameters.size(); ++i) {
-            auto const&  entry {n.Parameters[i]};
+        usize const portRows {1 + std::max(n->Inputs.size(), n->Outputs.size())};
+        for (usize i {0}; i < n->Parameters.size(); ++i) {
+            auto const&  entry {n->Parameters[i]};
             rect_f const rowRect {{nodeRect.left(), nodeRect.top() + (rowHeight * static_cast<f32>(portRows + i))},
                                   {nodeWidth, rowHeight}};
 
-            _paramRectCache.emplace_back(n.ID, i, rowRect);
+            _paramRectCache.emplace_back(n->ID, i, rowRect);
 
             rect_f const labelRect {rowRect.Position, {nodeWidth, rowHeight}};
             rect_f const controlRect {{rowRect.right() - rowHeight, rowRect.top()},
@@ -297,11 +302,11 @@ void node_graph_view::on_draw(widget_painter& painter)
 
             canvas.set_fill_style(_style.ParamColor);
             canvas.begin_path();
-            if (n.Parameters.size() == 1) {
+            if (n->Parameters.size() == 1) {
                 canvas.rounded_rect(rowRect, nodeRadius);
             } else if (i == 0) {
                 canvas.rounded_rect_varying(rowRect, nodeRadius, nodeRadius, 0, 0);
-            } else if (i < n.Parameters.size() - 1) {
+            } else if (i < n->Parameters.size() - 1) {
                 canvas.rect(rowRect);
             } else {
                 canvas.rounded_rect_varying(rowRect, 0, 0, nodeRadius, nodeRadius);
@@ -311,50 +316,46 @@ void node_graph_view::on_draw(widget_painter& painter)
             canvas.set_stroke_width(borderWidth);
             canvas.stroke();
 
-            std::visit(
-                overloaded {
-                    [&](node_param_float const& val) {
-                        painter.draw_text(_style.ParamText, labelRect, std::format("{}: {:.3f}", val.Name, val.Value));
-                        drawChevrons(controlRect);
-                    },
-                    [&](node_param_int const& val) {
-                        painter.draw_text(_style.ParamText, labelRect, std::format("{}: {}", val.Name, val.Value));
-                        drawChevrons(controlRect);
-                    },
-                    [&](node_param_bool const& val) {
-                        painter.draw_text(_style.ParamText, labelRect, std::format("{}", val.Name));
-                        f32 const     size {rowHeight * 0.4f};
-                        point_f const center {controlRect.center()};
-                        rect_f const  box {{center.X, center.Y - (size / 2.0f)}, {size, size}};
-                        canvas.set_stroke_style(_style.ParamWidgetColor);
-                        canvas.set_stroke_width(conWidth);
-                        canvas.begin_path();
-                        canvas.rect(box);
-                        if (val.Value) {
-                            canvas.set_fill_style(_style.ParamWidgetColor);
-                            canvas.fill();
-                        }
-                        canvas.stroke();
-                    },
-                    [&](node_param_string const& val) {
-                        painter.draw_text(_style.ParamText, labelRect, std::format("{}: {}", val.Name, val.Value));
-                        if (!val.Options.empty()) { drawChevrons(controlRect); }
-                    },
-                    [&](auto const&) { }},
-                entry);
+            overloaded_visit(
+                entry,
+                [&](node_param_float const& val) {
+                    painter.draw_text(_style.ParamText, labelRect, std::format("{}: {:.3f}", val.Name, val.Value));
+                    drawChevrons(controlRect);
+                },
+                [&](node_param_int const& val) {
+                    painter.draw_text(_style.ParamText, labelRect, std::format("{}: {}", val.Name, val.Value));
+                    drawChevrons(controlRect);
+                },
+                [&](node_param_bool const& val) {
+                    painter.draw_text(_style.ParamText, labelRect, std::format("{}", val.Name));
+                    f32 const     size {rowHeight * 0.4f};
+                    point_f const center {controlRect.center()};
+                    rect_f const  box {{center.X, center.Y - (size / 2.0f)}, {size, size}};
+                    canvas.set_stroke_style(_style.ParamWidgetColor);
+                    canvas.set_stroke_width(conWidth);
+                    canvas.begin_path();
+                    canvas.rect(box);
+                    if (val.Value) {
+                        canvas.set_fill_style(_style.ParamWidgetColor);
+                        canvas.fill();
+                    }
+                    canvas.stroke();
+                },
+                [&](node_param_string const& val) {
+                    painter.draw_text(_style.ParamText, labelRect, std::format("{}: {}", val.Name, val.Value));
+                    if (!val.Options.empty()) { drawChevrons(controlRect); }
+                },
+                [&](auto const&) { });
         }
-    }};
-
-    for (uid id : _nodeOrder) {
-        if (auto const* n {_graph.find_node(id)}) { drawNode(*n); }
     }
 
-    canvas.restore();
     draw_minimap(canvas, rect);
 }
 
 void node_graph_view::draw_minimap(gfx::canvas& canvas, rect_f const& bounds)
 {
+    canvas.save();
+
     if (_style.MinimapAlpha == 0) { return; }
     canvas.set_global_alpha(_style.MinimapAlpha);
 
@@ -374,6 +375,7 @@ void node_graph_view::draw_minimap(gfx::canvas& canvas, rect_f const& bounds)
                        : bounds.top()};
 
     rect_f const mmRect {{mmX, mmY}, {mmWidth, mmHeight}};
+    canvas.set_scissor(mmRect, true);
 
     // background
     canvas.set_fill_style(_style.MinimapBackgroundColor);
@@ -470,6 +472,8 @@ void node_graph_view::draw_minimap(gfx::canvas& canvas, rect_f const& bounds)
     canvas.begin_path();
     canvas.rect(vpRect);
     canvas.stroke();
+
+    canvas.restore();
 }
 
 void node_graph_view::on_mouse_hover(input::mouse::motion_event const& ev)
@@ -501,7 +505,7 @@ void node_graph_view::on_mouse_drag(input::mouse::motion_event const& ev)
 
     if (_drag) {
         rect_f const  bounds {content_bounds()};
-        point_f const newPos {mp - _drag->Offset};
+        point_f const newPos {mp - _drag->Offset - bounds.top_left()};
         _nodePos[_drag->NodeID] = {(newPos.X - _pan.X) / (bounds.width() * _zoom), (newPos.Y - _pan.Y) / (bounds.height() * _zoom)};
         queue_redraw();
         ev.Handled = true;
@@ -694,42 +698,42 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
 
         f32 const rowHeight {rowRect.height()};
 
-        if (_graph.mutate_param(nodeID, idx, [&](auto& entry) {
-                return std::visit(
-                    overloaded {
-                        [&](auto& val) -> bool {
-                            rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
-                            if (chevronRect.contains(mp)) {
-                                bool const isUp {mp.Y < chevronRect.top() + (rowHeight / 2.0f)};
-                                isUp ? val.Value = val.Value + val.Step : val.Value = val.Value - val.Step;
-                                return true;
-                            }
-                            return false;
-                        },
-                        [](node_param_bool& val) -> bool {
-                            val.Value = !val.Value;
-                            return true;
-                        },
-                        [&](node_param_string& val) -> bool {
-                            if (val.Options.empty()) { return false; }
-                            rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
-                            if (!chevronRect.contains(mp)) { return false; }
-                            bool const isUp {mp.Y < chevronRect.top() + (rowHeight / 2.0f)};
-                            auto       it {std::ranges::find(val.Options, val.Value)};
-                            if (isUp) {
-                                val.Value = (it == val.Options.end() || std::next(it) == val.Options.end())
-                                    ? val.Options.front()
-                                    : *std::next(it);
-                            } else {
-                                val.Value = (it == val.Options.end() || it == val.Options.begin())
-                                    ? val.Options.back()
-                                    : *std::prev(it);
-                            }
-                            return true;
-                        }},
-                    entry);
-            })) {
+        auto const paramMutator {[&](auto& entry) {
+            return overloaded_visit(
+                entry,
+                [&](auto& val) -> bool {
+                    rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
+                    if (chevronRect.contains(mp)) {
+                        bool const isUp {mp.Y < chevronRect.top() + (rowHeight / 2.0f)};
+                        isUp ? val.Value = val.Value + val.Step : val.Value = val.Value - val.Step;
+                        return true;
+                    }
+                    return false;
+                },
+                [](node_param_bool& val) -> bool {
+                    val.Value = !val.Value;
+                    return true;
+                },
+                [&](node_param_string& val) -> bool {
+                    if (val.Options.empty()) { return false; }
+                    rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
+                    if (!chevronRect.contains(mp)) { return false; }
+                    bool const isUp {mp.Y < chevronRect.top() + (rowHeight / 2.0f)};
+                    auto       it {std::ranges::find(val.Options, val.Value)};
+                    if (isUp) {
+                        val.Value = (it == val.Options.end() || std::next(it) == val.Options.end())
+                            ? val.Options.front()
+                            : *std::next(it);
+                    } else {
+                        val.Value = (it == val.Options.end() || it == val.Options.begin())
+                            ? val.Options.back()
+                            : *std::prev(it);
+                    }
+                    return true;
+                });
+        }};
 
+        if (_graph.mutate_param(nodeID, idx, paramMutator)) {
             _drag        = std::nullopt;
             _hoveredPort = std::nullopt;
             queue_redraw();
