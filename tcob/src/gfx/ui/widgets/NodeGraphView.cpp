@@ -458,14 +458,12 @@ void node_graph_view::draw_minimap(gfx::canvas& canvas, rect_f const& bounds)
     }
 
     // viewport rect
-    f32 const vpWorldX0 {(0.0f - _pan.X) / (bounds.width() * _zoom)};
-    f32 const vpWorldY0 {(0.0f - _pan.Y) / (bounds.height() * _zoom)};
-    f32 const vpWorldX1 {(bounds.width() - _pan.X) / (bounds.width() * _zoom)};
-    f32 const vpWorldY1 {(bounds.height() - _pan.Y) / (bounds.height() * _zoom)};
+    f32 const vpX {(-_pan.X) / _zoom};
+    f32 const vpY {(-_pan.Y) / _zoom};
+    f32 const vpW {bounds.width() / _zoom};
+    f32 const vpH {bounds.height() / _zoom};
 
-    f32 const    vpW {(vpWorldX1 - vpWorldX0) * bounds.width()};
-    f32 const    vpH {(vpWorldY1 - vpWorldY0) * bounds.height()};
-    rect_f const vpRect {toMMRect(vpWorldX0 * bounds.width(), vpWorldY0 * bounds.height(), vpW, vpH)};
+    rect_f const vpRect {toMMRect(vpX, vpY, vpW, vpH)};
 
     canvas.set_stroke_style(_style.MinimapViewportColor);
     canvas.set_stroke_width(1.0f);
@@ -513,8 +511,15 @@ void node_graph_view::on_mouse_drag(input::mouse::motion_event const& ev)
     }
 
     if (_panning) {
-        _pan.X += static_cast<f32>(ev.RelativeMotion.X);
-        _pan.Y += static_cast<f32>(ev.RelativeMotion.Y);
+        size_f const bounds {content_bounds().Size};
+        _pan.X = std::clamp(
+            _pan.X + static_cast<f32>(ev.RelativeMotion.X),
+            -bounds.Width * _zoom,
+            bounds.Width * _zoom);
+        _pan.Y = std::clamp(
+            _pan.Y + static_cast<f32>(ev.RelativeMotion.Y),
+            -bounds.Height * _zoom,
+            bounds.Height * _zoom);
         queue_redraw();
         ev.Handled = true;
         return;
