@@ -115,21 +115,24 @@ constexpr f32 BORDER_SCALE {0.5f};
 
 void node_graph_view::on_draw(widget_painter& painter)
 {
-    rect_f const bounds {draw_base(_style, painter)};
+    rect_f const rect {draw_base(_style, painter)};
     auto&        canvas {painter.canvas()};
 
-    f32 const rowHeight {_style.NodeSize.Height.calc(bounds.height()) * _zoom};
-    f32 const nodeWidth {_style.NodeSize.Width.calc(bounds.width()) * _zoom};
+    canvas.save();
+    canvas.translate(rect.top_left());
+
+    f32 const rowHeight {_style.NodeSize.Height.calc(rect.height()) * _zoom};
+    f32 const nodeWidth {_style.NodeSize.Width.calc(rect.width()) * _zoom};
     f32 const portRadius {rowHeight * PORT_SCALE};
     f32 const nodeRadius {_style.NodeRadius.calc(rowHeight)};
-    f32 const conWidth {_style.ConnectionWidth.calc(bounds.width()) * _zoom};
+    f32 const conWidth {_style.ConnectionWidth.calc(rect.width()) * _zoom};
     f32 const borderWidth {conWidth * BORDER_SCALE};
 
     auto const getNodeRect {[&](auto const& n) -> rect_f {
         usize const   rows {1 + std::max(n.Inputs.size(), n.Outputs.size()) + n.Parameters.size()};
         size_f const  size {nodeWidth, rowHeight * static_cast<f32>(rows)};
         point_f const nodePos {_nodePos.at(n.ID)};
-        return {{(nodePos.X * bounds.width() * _zoom) + _pan.X, (nodePos.Y * bounds.height() * _zoom) + _pan.Y}, size};
+        return {{((nodePos.X * rect.width()) * _zoom) + _pan.X, ((nodePos.Y * rect.height()) * _zoom) + _pan.Y}, size};
     }};
 
     auto const getPortPosition {[&](auto const& n, uid portID, bool isInput) -> point_f {
@@ -346,7 +349,8 @@ void node_graph_view::on_draw(widget_painter& painter)
         if (auto const* n {_graph.find_node(id)}) { drawNode(*n); }
     }
 
-    draw_minimap(canvas, bounds);
+    canvas.restore();
+    draw_minimap(canvas, rect);
 }
 
 void node_graph_view::draw_minimap(gfx::canvas& canvas, rect_f const& bounds)
