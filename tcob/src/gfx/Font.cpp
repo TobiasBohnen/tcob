@@ -11,7 +11,6 @@
 #include <span>
 #include <string>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include "Font_private.hpp"
@@ -144,12 +143,12 @@ void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbac
 
         auto const& result {_decomposeCache[cp0]};
         for (auto const& command : result.Commands) {
-            std::visit(
-                overloaded {[&](decompose_move const& cmd) { funcs.MoveTo(cmd.Point); },
-                            [&](decompose_line const& cmd) { funcs.LineTo(cmd.Point); },
-                            [&](decompose_conic const& cmd) { funcs.ConicTo(cmd.Point0, cmd.Point1); },
-                            [&](decompose_cubic const& cmd) { funcs.CubicTo(cmd.Point0, cmd.Point1, cmd.Point2); }},
-                command);
+            overloaded_visit(
+                command,
+                [&](decompose_move const& cmd) { funcs.MoveTo(cmd.Point); },
+                [&](decompose_line const& cmd) { funcs.LineTo(cmd.Point); },
+                [&](decompose_conic const& cmd) { funcs.ConicTo(cmd.Point0, cmd.Point1); },
+                [&](decompose_cubic const& cmd) { funcs.CubicTo(cmd.Point0, cmd.Point1, cmd.Point2); });
         }
 
         funcs.Offset.X += _glyphCache[result.CodePoint].AdvanceX;

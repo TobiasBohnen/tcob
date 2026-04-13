@@ -11,6 +11,7 @@
 #include <functional>
 #include <type_traits>
 #include <utility>
+#include <variant>
 
 #include "tcob/core/Concepts.hpp"
 
@@ -123,6 +124,11 @@ template <typename... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;
 };
+
+auto overloaded_visit(auto&& v, auto&&... handlers)
+{
+    return std::visit(overloaded {handlers...}, v);
+}
 
 template <typename T, typename... Args>
 struct arg_list;

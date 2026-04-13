@@ -732,42 +732,40 @@ void widget_painter::do_shadow(shadow_element const& element, rect_f const& rect
 
 auto widget_painter::get_paint(paint const& p, rect_f const& rect) -> gfx::canvas::paint
 {
-    return std::visit(
-        overloaded {
-            [&](color const& arg) {
-                return gfx::canvas::paint {
-                    .Feather = 1.0f,
-                    .Color   = arg,
-                };
-            },
-            [&](linear_gradient const& arg) {
-                degree_f const angle {arg.Angle + degree_f {90}};
-                return _canvas.create_linear_gradient(
-                    rect.find_edge(angle),
-                    rect.find_edge(angle - degree_f {180}),
-                    arg.Colors);
-            },
-            [&](radial_gradient const& arg) {
-                return _canvas.create_radial_gradient(
-                    rect.center(),
-                    arg.InnerRadius.calc(rect.width()), arg.OuterRadius.calc(rect.width()),
-                    arg.Scale, arg.Colors);
-            },
-            [&](box_gradient const& arg) {
-                return _canvas.create_box_gradient(
-                    rect,
-                    arg.Radius.calc(rect.width()), arg.Feather.calc(rect.width()), arg.Colors);
-            },
-            [&](conic_gradient const& arg) {
-                return _canvas.create_conic_gradient(
-                    rect.center(),
-                    arg.Colors);
-            },
-            [&](nine_patch const&) -> gfx::canvas::paint {
-                return {};
-            },
+    return overloaded_visit(
+        p,
+        [&](color const& arg) {
+            return gfx::canvas::paint {
+                .Feather = 1.0f,
+                .Color   = arg,
+            };
         },
-        p);
+        [&](linear_gradient const& arg) {
+            degree_f const angle {arg.Angle + degree_f {90}};
+            return _canvas.create_linear_gradient(
+                rect.find_edge(angle),
+                rect.find_edge(angle - degree_f {180}),
+                arg.Colors);
+        },
+        [&](radial_gradient const& arg) {
+            return _canvas.create_radial_gradient(
+                rect.center(),
+                arg.InnerRadius.calc(rect.width()), arg.OuterRadius.calc(rect.width()),
+                arg.Scale, arg.Colors);
+        },
+        [&](box_gradient const& arg) {
+            return _canvas.create_box_gradient(
+                rect,
+                arg.Radius.calc(rect.width()), arg.Feather.calc(rect.width()), arg.Colors);
+        },
+        [&](conic_gradient const& arg) {
+            return _canvas.create_conic_gradient(
+                rect.center(),
+                arg.Colors);
+        },
+        [&](nine_patch const&) -> gfx::canvas::paint {
+            return {};
+        });
 }
 
 auto widget_painter::do_format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result

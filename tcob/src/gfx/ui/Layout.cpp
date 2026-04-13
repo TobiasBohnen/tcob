@@ -10,7 +10,6 @@
 #include <iterator>
 #include <memory>
 #include <span>
-#include <variant>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -102,19 +101,18 @@ auto layout::create_init(string const& name) const -> widget::init
         retValue.Name = name;
     }
 
-    std::visit(
-        overloaded {
-            [this, &retValue](widget_container* parent) {
-                retValue.Form   = &parent->form();
-                retValue.Parent = parent;
-                Changed();
-            },
-            [this, &retValue](form_base* parent) {
-                retValue.Form   = parent;
-                retValue.Parent = nullptr;
-                Changed();
-            }},
-        _parent);
+    overloaded_visit(
+        _parent,
+        [this, &retValue](widget_container* parent) {
+            retValue.Form   = &parent->form();
+            retValue.Parent = parent;
+            Changed();
+        },
+        [this, &retValue](form_base* parent) {
+            retValue.Form   = parent;
+            retValue.Parent = nullptr;
+            Changed();
+        });
 
     return retValue;
 }
