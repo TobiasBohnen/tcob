@@ -142,13 +142,11 @@ template <typename T>
 inline auto node_graph::GetObject(std::span<node_value_types const> in, usize i) -> T const*
 {
     if (i >= in.size()) { return nullptr; }
-
-    if (auto const* obj = std::get_if<user_object>(&in[i])) {
-        if (obj->TypeHash == typeid(T).hash_code()) {
-            return std::static_pointer_cast<T>(obj->Data).get();
+    if (auto const* obj {std::get_if<user_object>(&in[i])}) {
+        if (obj->Type == typeid(T)) {
+            return static_cast<T*>(obj->Data.get());
         }
     }
-
     return nullptr;
 }
 

@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <typeindex>
 #include <unordered_map>
 #include <utility>
 
@@ -114,9 +115,9 @@ public:
     void destroy();
 
 private:
-    string                                                          _name;
-    std::unordered_map<usize, std::unique_ptr<detail::bucket_base>> _buckets;
-    std::unordered_map<string, std::unique_ptr<loader_manager>>     _loaderManagers;
+    string                                                                    _name;
+    std::unordered_map<std::type_index, std::unique_ptr<detail::bucket_base>> _buckets;
+    std::unordered_map<string, std::unique_ptr<loader_manager>>               _loaderManagers;
 };
 
 }

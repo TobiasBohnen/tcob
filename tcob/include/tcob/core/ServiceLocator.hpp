@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <memory>
+#include <typeindex>
 #include <unordered_map>
 
 #include "tcob/core/Interfaces.hpp"
@@ -35,7 +36,7 @@ public:
     auto name() const -> string;
 
 private:
-    std::unordered_map<usize, std::shared_ptr<void>> _services;
+    std::unordered_map<std::type_index, std::shared_ptr<void>> _services;
 };
 
 template <typename T, typename R = T>

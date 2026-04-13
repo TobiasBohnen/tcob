@@ -11,6 +11,7 @@
 #include <functional>
 #include <memory>
 #include <type_traits>
+#include <typeindex>
 #include <utility>
 #include <variant>
 
@@ -22,22 +23,22 @@ namespace tcob {
 class TCOB_API user_object {
 public:
     std::shared_ptr<void> Data;
-    usize                 TypeHash {0};
+    std::type_index       Type {typeid(void)};
 
     template <typename T>
     static auto Create(std::shared_ptr<T> ptr) -> user_object
     {
         return {
-            .Data     = std::move(ptr),
-            .TypeHash = typeid(T).hash_code()};
+            .Data = std::move(ptr),
+            .Type = typeid(T)};
     }
 
     template <typename T>
     static auto Make(auto&&... args) -> user_object
     {
         return {
-            .Data     = std::make_shared<T>(args...),
-            .TypeHash = typeid(T).hash_code()};
+            .Data = std::make_shared<T>(args...),
+            .Type = typeid(T)};
     }
 };
 
