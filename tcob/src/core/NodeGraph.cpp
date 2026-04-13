@@ -153,16 +153,17 @@ auto node_graph::mutate_param(uid nodeID, usize paramIndex, std::function<bool(n
     auto param {it->Parameters[paramIndex]}; // COPY here
     if (!fn(param)) { return false; }
 
-    std::visit(overloaded {
-                   [](node_param_float& p) { p.Value = std::clamp(p.Value, p.Min, p.Max); },
-                   [](node_param_int& p) { p.Value = std::clamp(p.Value, p.Min, p.Max); },
-                   [](node_param_string& p) {
-                       if (!p.Options.empty() && !std::ranges::contains(p.Options, p.Value)) {
-                           p.Value = p.Options.front();
-                       }
-                   },
-                   [](auto&) { }},
-               param);
+    overloaded_visit(
+        param,
+        [](node_param_float& p) { p.Value = std::clamp(p.Value, p.Min, p.Max); },
+        [](node_param_int& p) { p.Value = std::clamp(p.Value, p.Min, p.Max); },
+        [](node_param_string& p) {
+            if (!p.Options.empty() && !std::ranges::contains(p.Options, p.Value)) {
+                p.Value = p.Options.front();
+            }
+        },
+        [](node_param_bool&) { },
+        [](node_param_user_object&) { });
 
     it->Parameters[paramIndex] = param;
 
@@ -190,6 +191,40 @@ auto node_graph::find_port(std::vector<node_port> const& ports, uid id) const ->
 {
     auto it {std::ranges::find(ports, id, &node_port::ID)};
     return it != ports.end() ? &*it : nullptr;
+}
+
+auto node_graph::GetFloat(std::span<node_value_types const> in, usize i) -> std::optional<f32>
+{
+    if (i >= in.size()) { return std::nullopt; }
+    return overloaded_visit(
+        in[i],
+        [](f32 v) -> std::optional<f32> { return v; },
+        [](i32 v) -> std::optional<f32> { return static_cast<f32>(v); },
+        [](auto const&) -> std::optional<f32> { return std::nullopt; });
+}
+
+auto node_graph::GetInt(std::span<node_value_types const> in, usize i) -> std::optional<i32>
+{
+    if (i >= in.size()) { return std::nullopt; }
+    return overloaded_visit(
+        in[i],
+        [](i32 v) -> std::optional<i32> { return v; },
+        [](f32 v) -> std::optional<i32> { return static_cast<i32>(v); },
+        [](auto const&) -> std::optional<i32> { return std::nullopt; });
+}
+
+auto node_graph::GetBool(std::span<node_value_types const> in, usize i) -> std::optional<bool>
+{
+    if (i >= in.size()) { return std::nullopt; }
+    auto const* b {std::get_if<bool>(&in[i])};
+    return b ? std::optional {*b} : std::nullopt;
+}
+
+auto node_graph::GetString(std::span<node_value_types const> in, usize i) -> std::optional<string>
+{
+    if (i >= in.size()) { return std::nullopt; }
+    auto const* s {std::get_if<string>(&in[i])};
+    return s ? std::optional {*s} : std::nullopt;
 }
 
 }

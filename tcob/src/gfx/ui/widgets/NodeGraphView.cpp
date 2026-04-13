@@ -13,7 +13,6 @@
 #include <optional>
 #include <ranges>
 #include <unordered_map>
-#include <variant>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -31,11 +30,6 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
-
-auto overloaded_visit(auto&& v, auto&&... handlers)
-{
-    return std::visit(overloaded {handlers...}, v);
-}
 
 void node_graph_view::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
@@ -158,6 +152,9 @@ void node_graph_view::on_draw(widget_painter& painter)
 
         point_f const p0 {getPortPosition(out, con.OutputPortID, false)};
         point_f const p1 {getPortPosition(in, con.InputPortID, true)};
+
+        canvas.set_stroke_style(get_port_color(_graph.get_port_type(con.OutputNodeID, con.OutputPortID, false)));
+        canvas.set_stroke_width(conWidth);
 
         canvas.begin_path();
         canvas.move_to(p0);
@@ -353,6 +350,9 @@ void node_graph_view::on_draw(widget_painter& painter)
                 [&](node_param_string const& val) {
                     painter.draw_text(_style.ParamText, labelRect, std::format("{}: {}", val.Name, val.Value));
                     if (!val.Options.empty()) { drawChevrons(controlRect); }
+                },
+                [&](node_param_user_object const& /* val */) {
+
                 },
                 [&](auto const&) { });
         }
@@ -715,7 +715,7 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
         auto const paramMutator {[&](auto& entry) {
             return overloaded_visit(
                 entry,
-                [&](auto& val) -> bool {
+                [&]<Arithmetic T>(node_param_numeric<T>& val) -> bool {
                     rect_f const chevronRect {{rowRect.right() - rowHeight, rowRect.top()}, {rowHeight, rowHeight}};
                     if (chevronRect.contains(mp)) {
                         bool const isUp {mp.Y < chevronRect.top() + (rowHeight / 2.0f)};
@@ -744,6 +744,9 @@ auto node_graph_view::try_param_hit(point_f mp) -> bool
                             : *std::prev(it);
                     }
                     return true;
+                },
+                [&](node_param_user_object& /* val */) -> bool {
+                    return false;
                 });
         }};
 

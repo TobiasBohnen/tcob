@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <memory>
 #include <type_traits>
 #include <utility>
 #include <variant>
@@ -16,6 +17,29 @@
 #include "tcob/core/Concepts.hpp"
 
 namespace tcob {
+////////////////////////////////////////////////////////////
+
+class TCOB_API user_object {
+public:
+    std::shared_ptr<void> Data;
+    usize                 TypeHash {0};
+
+    template <typename T>
+    static auto Create(std::shared_ptr<T> ptr) -> user_object
+    {
+        return {
+            .Data     = std::move(ptr),
+            .TypeHash = typeid(T).hash_code()};
+    }
+
+    template <typename T>
+    static auto Make(auto&&... args) -> user_object
+    {
+        return {
+            .Data     = std::make_shared<T>(args...),
+            .TypeHash = typeid(T).hash_code()};
+    }
+};
 
 ////////////////////////////////////////////////////////////
 

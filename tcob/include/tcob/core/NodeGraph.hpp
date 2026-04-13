@@ -7,12 +7,14 @@
 #include "tcob/tcob_config.hpp"
 
 #include <functional>
+#include <memory>
 #include <optional>
 #include <span>
 #include <unordered_map>
 #include <variant>
 #include <vector>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Concepts.hpp"
 #include "tcob/core/Interfaces.hpp"
 
@@ -47,8 +49,17 @@ public:
     std::vector<string> Options;
 };
 
-using node_param_types = std::variant<node_param_float, node_param_int, node_param_bool, node_param_string>;
-using node_value_types = std::variant<f32, i32, bool, string>;
+class TCOB_API node_param_user_object {
+public:
+    string      Name;
+    user_object Value;
+
+    // TODO: draw func
+    // TODO: validate func
+};
+
+using node_param_types = std::variant<node_param_float, node_param_int, node_param_bool, node_param_string, node_param_user_object>;
+using node_value_types = std::variant<f32, i32, bool, string, user_object>;
 
 using node_compute_result = std::unordered_map<uid, node_value_types>;
 using node_compute_func   = std::function<node_compute_result(std::vector<node_value_types> const&, std::vector<node_value_types> const&)>;
@@ -105,6 +116,14 @@ public:
 
     auto get_port_type(uid nodeID, uid portID, bool isInput) const -> u32;
 
+    static auto GetFloat(std::span<node_value_types const> in, usize i) -> std::optional<f32>;
+    static auto GetInt(std::span<node_value_types const> in, usize i) -> std::optional<i32>;
+    static auto GetBool(std::span<node_value_types const> in, usize i) -> std::optional<bool>;
+    static auto GetString(std::span<node_value_types const> in, usize i) -> std::optional<string>;
+
+    template <typename T>
+    static auto GetObject(std::span<node_value_types const> in, usize i) -> T const*;
+
 private:
     auto find_port(uid nodeID, uid portID, bool isInput) const -> node_port const*;
     auto find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*;
@@ -118,4 +137,19 @@ private:
     std::vector<node>       _nodes;
     std::vector<connection> _connections;
 };
+
+template <typename T>
+inline auto node_graph::GetObject(std::span<node_value_types const> in, usize i) -> T const*
+{
+    if (i >= in.size()) { return nullptr; }
+
+    if (auto const* obj = std::get_if<user_object>(&in[i])) {
+        if (obj->TypeHash == typeid(T).hash_code()) {
+            return std::static_pointer_cast<T>(obj->Data).get();
+        }
+    }
+
+    return nullptr;
+}
+
 }
