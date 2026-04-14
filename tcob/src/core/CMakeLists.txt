@@ -29,6 +29,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/TaskManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Transform.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/UserObject.cpp
 )
 
 list(APPEND HDR
@@ -102,6 +103,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Transform.inl
     ${TCOB_INC_DIR}/tcob/core/TypeFactory.hpp
     ${TCOB_INC_DIR}/tcob/core/TypeFactory.inl
+    ${TCOB_INC_DIR}/tcob/core/UserObject.hpp
     ${TCOB_INC_DIR}/tcob/core/magic_enum_reduced.hpp
 )
 

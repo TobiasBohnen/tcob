@@ -42,6 +42,7 @@
 #include <tcob/core/Timer.hpp>
 #include <tcob/core/Transform.hpp>
 #include <tcob/core/TypeFactory.hpp>
+#include <tcob/core/UserObject.hpp>
 #include <tcob/core/assets/Asset.hpp>
 #include <tcob/core/assets/AssetGroup.hpp>
 #include <tcob/core/assets/AssetLibrary.hpp>

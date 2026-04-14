@@ -9,39 +9,13 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
-#include <memory>
 #include <type_traits>
-#include <typeindex>
 #include <utility>
 #include <variant>
 
 #include "tcob/core/Concepts.hpp"
 
 namespace tcob {
-////////////////////////////////////////////////////////////
-
-class TCOB_API user_object {
-public:
-    std::shared_ptr<void> Data;
-    std::type_index       Type {typeid(void)};
-
-    template <typename T>
-    static auto Create(std::shared_ptr<T> ptr) -> user_object
-    {
-        return {
-            .Data = std::move(ptr),
-            .Type = typeid(T)};
-    }
-
-    template <typename T>
-    static auto Make(auto&&... args) -> user_object
-    {
-        return {
-            .Data = std::make_shared<T>(args...),
-            .Type = typeid(T)};
-    }
-};
-
 ////////////////////////////////////////////////////////////
 
 namespace helper {

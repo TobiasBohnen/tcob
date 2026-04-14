@@ -7,16 +7,15 @@
 #include "tcob/tcob_config.hpp"
 
 #include <functional>
-#include <memory>
 #include <optional>
 #include <span>
 #include <unordered_map>
 #include <variant>
 #include <vector>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Concepts.hpp"
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/UserObject.hpp"
 
 namespace tcob {
 ////////////////////////////////////////////////////////////
@@ -143,9 +142,7 @@ inline auto node_graph::GetObject(std::span<node_value_types const> in, usize i)
 {
     if (i >= in.size()) { return nullptr; }
     if (auto const* obj {std::get_if<user_object>(&in[i])}) {
-        if (obj->Type == typeid(T)) {
-            return static_cast<T*>(obj->Data.get());
-        }
+        return obj->get<T>();
     }
     return nullptr;
 }
