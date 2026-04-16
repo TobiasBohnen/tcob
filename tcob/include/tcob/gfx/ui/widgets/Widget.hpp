@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <any>
 #include <memory>
 #include <unordered_map>
 
@@ -50,8 +49,6 @@ public:
 
     signal<widget_event const> FocusGained;
     signal<widget_event const> FocusLost;
-
-    std::any UserData;
 
     prop<string>       Class;
     prop_fn<f32>       Alpha;

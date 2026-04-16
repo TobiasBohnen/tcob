@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <any>
 #include <map>
 #include <memory>
 #include <optional>
@@ -47,8 +46,6 @@ public:
     prop<color> Color {colors::White};
 
     prop<std::optional<point_f>> Pivot;
-
-    std::any UserData;
 
     u32 IntersectMask {0xFFFFFFFF};
 

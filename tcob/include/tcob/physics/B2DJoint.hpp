@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <any>
 #include <memory>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -36,8 +35,6 @@ public:
     virtual ~joint();
 
     prop_fn<bool> IsCollideConnected;
-
-    std::any UserData;
 
     auto parent() -> world&;
 

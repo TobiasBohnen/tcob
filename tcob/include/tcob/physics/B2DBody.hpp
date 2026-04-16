@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <any>
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -119,8 +118,6 @@ public:
     prop_fn<bool>           Enabled;
     prop_fn<string>         Name;
     prop_fn<body_transform> Transform;
-
-    std::any UserData;
 
     auto operator==(body const& other) const -> bool;
 

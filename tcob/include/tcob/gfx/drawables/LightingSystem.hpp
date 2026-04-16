@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <any>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -56,8 +55,6 @@ class TCOB_API light_source : public non_copyable {
 public:
     virtual ~light_source() = default;
 
-    std::any UserData;
-
     prop<color>                   Color {colors::White};
     prop<point_f>                 Position;
     prop<std::optional<f32>>      Range;
@@ -85,8 +82,6 @@ class TCOB_API shadow_caster : public non_copyable {
 
 public:
     virtual ~shadow_caster() = default;
-
-    std::any UserData;
 
     signal<light_collision const> Hit;
     prop<polyline>                Polygon;

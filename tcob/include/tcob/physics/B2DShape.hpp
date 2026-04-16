@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <any>
 #include <memory>
 #include <span>
 #include <vector>
@@ -63,8 +62,6 @@ public:
     prop_fn<f32> Friction;
     prop_fn<f32> Restitution;
     prop_fn<f32> Density;
-
-    std::any UserData;
 
     auto parent() -> body&;
 
@@ -215,8 +212,6 @@ public:
 
     prop_fn<f32> Friction;
     prop_fn<f32> Restitution;
-
-    std::any UserData;
 
     auto parent() -> body&;
 
