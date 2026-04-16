@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <any>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -89,7 +88,7 @@ public:
 
     ////////////////////////////////////////////////////////////
 
-    std::any UserData;
+    uid ID {};
 
     point_f Velocity {point_f::Zero};
     point_f LinearAcceleration {point_f::Zero};
@@ -117,7 +116,7 @@ public:
 
     void update(milliseconds deltaTime);
 
-    void init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen);
+    void init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& rng);
 
     void convert_to(quad* quad) const;
 

@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/drawables/ParticleSystem.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <functional>
@@ -228,29 +229,6 @@ static auto minmax_rng(min_max<milliseconds> const& range, auto&& rng) -> millis
     return milliseconds {rng(range.first.count(), range.second.count())};
 }
 
-static void SetupParticleBase(particle& particle, auto&& tmpl, auto&& rng)
-{
-    auto const dir {point_f::FromDirection(minmax_rng(tmpl.Direction, rng))};
-    particle.Velocity               = dir * minmax_rng(tmpl.Speed, rng);
-    particle.LinearAcceleration     = dir * minmax_rng(tmpl.LinearAcceleration, rng);
-    particle.LinearDamping          = minmax_rng(tmpl.LinearDamping, rng);
-    particle.RadialAcceleration     = minmax_rng(tmpl.RadialAcceleration, rng);
-    particle.TangentialAcceleration = minmax_rng(tmpl.TangentialAcceleration, rng);
-    particle.Gravity                = minmax_rng(tmpl.Gravity, rng);
-
-    auto const col {tmpl.Colors.empty() ? colors::White : tmpl.Colors[rng(usize {0}, tmpl.Colors.size() - 1)]};
-    u8 const   alpha {static_cast<u8>(col.A * (1.0f - std::clamp(minmax_rng(tmpl.Transparency, rng), 0.0f, 1.0f)))};
-    particle.Color = color {col.R, col.G, col.B, alpha};
-
-    // reset userdata
-    particle.UserData.reset();
-
-    // set life
-    auto const life {minmax_rng(tmpl.Lifetime, rng)};
-    particle.RemainingLife = life;
-    particle.StartingLife  = life;
-}
-
 ////////////////////////////////////////////////////////////
 
 static void CalcVelocity(auto&& particle, point_f pos, f32 seconds)
@@ -285,23 +263,41 @@ void particle::update(milliseconds deltaTime)
     if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation, origin); }
 }
 
-void particle::init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& randomGen)
+void particle::init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& rng)
 {
     Region = texRegion;
 
-    SetupParticleBase(*this, tmpl, randomGen);
+    auto const dir {point_f::FromDirection(minmax_rng(tmpl.Direction, rng))};
+    Velocity               = dir * minmax_rng(tmpl.Speed, rng);
+    LinearAcceleration     = dir * minmax_rng(tmpl.LinearAcceleration, rng);
+    LinearDamping          = minmax_rng(tmpl.LinearDamping, rng);
+    RadialAcceleration     = minmax_rng(tmpl.RadialAcceleration, rng);
+    TangentialAcceleration = minmax_rng(tmpl.TangentialAcceleration, rng);
+    Gravity                = minmax_rng(tmpl.Gravity, rng);
+
+    auto const col {tmpl.Colors.empty() ? colors::White : tmpl.Colors[rng(usize {0}, tmpl.Colors.size() - 1)]};
+    u8 const   alpha {static_cast<u8>(col.A * (1.0f - std::clamp(minmax_rng(tmpl.Transparency, rng), 0.0f, 1.0f)))};
+    Color = color {col.R, col.G, col.B, alpha};
+
+    // get id
+    ID = get_random_ID();
+
+    // set life
+    auto const life {minmax_rng(tmpl.Lifetime, rng)};
+    RemainingLife = life;
+    StartingLife  = life;
 
     // set scale
-    f32 const scaleF {minmax_rng(tmpl.Scale, randomGen)};
+    f32 const scaleF {minmax_rng(tmpl.Scale, rng)};
     Scale = {scaleF, scaleF};
 
     // set spin and rotation
-    Spin     = minmax_rng(tmpl.Spin, randomGen);
-    Rotation = minmax_rng(tmpl.Rotation, randomGen);
+    Spin     = minmax_rng(tmpl.Spin, rng);
+    Rotation = minmax_rng(tmpl.Rotation, rng);
 
     // calculate random postion
-    f32 const x {randomGen(spawnArea.left(), spawnArea.right()) - (tmpl.Size.Width / 2)};
-    f32 const y {randomGen(spawnArea.top(), spawnArea.bottom()) - (tmpl.Size.Height / 2)};
+    f32 const x {rng(spawnArea.left(), spawnArea.right()) - (tmpl.Size.Width / 2)};
+    f32 const y {rng(spawnArea.top(), spawnArea.bottom()) - (tmpl.Size.Height / 2)};
 
     // set bounds
     Bounds = {{x, y}, tmpl.Size};
