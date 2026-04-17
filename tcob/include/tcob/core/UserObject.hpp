@@ -11,6 +11,8 @@
 #include <typeindex>
 #include <utility>
 
+#include "tcob/core/Concepts.hpp"
+
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
@@ -38,9 +40,6 @@ public:
     auto type() const -> std::type_index;
     void reset();
 
-    template <typename T>
-    static auto Make(auto&&... args) -> user_object;
-
 private:
     user_object(std::shared_ptr<void> ptr, std::type_index type);
 
@@ -62,9 +61,13 @@ template <typename T>
 inline auto user_object::operator=(T&& value) -> user_object&
 {
     using U = std::decay_t<T>;
-
-    _data = std::make_shared<U>(std::forward<T>(value));
-    _type = typeid(U);
+    if constexpr (SharedPtr<U>) {
+        _data = value;
+        _type = typeid(typename U::element_type);
+    } else {
+        _data = std::make_shared<U>(std::forward<T>(value));
+        _type = typeid(U);
+    }
     return *this;
 }
 
@@ -72,12 +75,6 @@ template <typename T>
 inline auto user_object::get() const -> T*
 {
     return _type == typeid(T) ? static_cast<T*>(_data.get()) : nullptr;
-}
-
-template <typename T>
-inline auto user_object::Make(auto&&... args) -> user_object
-{
-    return {std::make_shared<T>(args...), typeid(T)};
 }
 
 }

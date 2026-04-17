@@ -10,6 +10,7 @@
 
 #include <concepts>
 #include <iterator>
+#include <memory>
 #include <span>
 #include <type_traits>
 
@@ -128,5 +129,9 @@ concept Container =
         { container.size() } -> std::convertible_to<usize>;
         { container.operator[](usize {}) };
     } && !StringLike<T>;
+
+template <typename T>
+concept SharedPtr = requires { typename T::element_type; }
+    && std::same_as<T, std::shared_ptr<typename T::element_type>>;
 
 }
