@@ -74,7 +74,8 @@ inline auto user_object::operator=(T&& value) -> user_object&
 template <typename T>
 inline auto user_object::get() const -> T*
 {
-    return _type == typeid(T) ? static_cast<T*>(_data.get()) : nullptr;
+    using U = std::remove_const_t<T>;
+    return _type == typeid(U) ? static_cast<T*>(_data.get()) : nullptr;
 }
 
 }
