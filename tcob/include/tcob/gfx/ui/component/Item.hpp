@@ -6,8 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <any>
-
+#include "tcob/core/UserObject.hpp"
 #include "tcob/gfx/ui/component/Icon.hpp"
 
 namespace tcob::ui {
@@ -17,7 +16,7 @@ class TCOB_API item {
 public:
     utf8_string Text;
     icon        Icon {};
-    std::any    UserData {};
+    user_object UserData {};
 
     auto operator==(item const& other) const -> bool
     {

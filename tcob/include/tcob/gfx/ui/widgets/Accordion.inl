@@ -17,7 +17,7 @@ namespace tcob::ui {
 template <DerivedFrom<widget_container> T>
 inline auto accordion::create_section(utf8_string const& name) -> T&
 {
-    return create_section<T>(name, {.Text = name, .Icon = {}, .UserData = {}});
+    return create_section<T>(name, {.Text = name, .Icon = {}});
 }
 
 template <DerivedFrom<widget_container> T>

@@ -18,7 +18,7 @@ namespace tcob::ui {
 template <DerivedFrom<widget_container> T>
 inline auto tab_container::create_tab(utf8_string const& name) -> T&
 {
-    return create_tab<T>(name, {.Text = name, .Icon = {}, .UserData = {}});
+    return create_tab<T>(name, {.Text = name, .Icon = {}});
 }
 
 template <DerivedFrom<widget_container> T>
