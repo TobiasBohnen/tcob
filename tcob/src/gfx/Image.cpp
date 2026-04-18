@@ -165,7 +165,7 @@ void image::fill(rect_i const& rect, color c)
 
     for (i32 y {clipped.top() + 1}; y < clipped.bottom(); ++y) {
         u8* destRow {&_buffer[((y * _info.Size.Width) + clipped.left()) * bpp]};
-        std::memcpy(destRow, firstRow, rowBytes);
+        memcpy(destRow, firstRow, rowBytes);
     }
 }
 

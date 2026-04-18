@@ -5,7 +5,6 @@
 
 #include "tcob/core/UserObject.hpp"
 
-#include <memory>
 #include <typeindex>
 
 namespace tcob {
@@ -13,7 +12,7 @@ namespace tcob {
 
 auto user_object::has_value() const -> bool
 {
-    return _data != nullptr;
+    return _data.index() != 0;
 }
 
 auto user_object::type() const -> std::type_index
@@ -23,7 +22,7 @@ auto user_object::type() const -> std::type_index
 
 void user_object::reset()
 {
-    _data.reset();
+    _data = {};
     _type = typeid(void);
 }
 
