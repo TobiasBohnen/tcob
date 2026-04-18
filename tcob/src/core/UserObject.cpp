@@ -7,16 +7,9 @@
 
 #include <memory>
 #include <typeindex>
-#include <utility>
 
 namespace tcob {
 ////////////////////////////////////////////////////////////
-
-user_object::user_object(std::shared_ptr<void> ptr, std::type_index type)
-    : _data {std::move(ptr)}
-    , _type {type}
-{
-}
 
 auto user_object::has_value() const -> bool
 {

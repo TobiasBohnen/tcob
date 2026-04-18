@@ -41,8 +41,6 @@ public:
     void reset();
 
 private:
-    user_object(std::shared_ptr<void> ptr, std::type_index type);
-
     std::shared_ptr<void> _data;
     std::type_index       _type {typeid(void)};
 };
