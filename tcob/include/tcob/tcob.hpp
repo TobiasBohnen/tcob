@@ -28,6 +28,7 @@
 #include <tcob/core/Interfaces.hpp>
 #include <tcob/core/Logger.hpp>
 #include <tcob/core/NodeGraph.hpp>
+#include <tcob/core/OrderedMap.hpp>
 #include <tcob/core/Point.hpp>
 #include <tcob/core/Property.hpp>
 #include <tcob/core/Proxy.hpp>

@@ -78,6 +78,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Logger.hpp
     ${TCOB_INC_DIR}/tcob/core/Logger.inl
     ${TCOB_INC_DIR}/tcob/core/NodeGraph.hpp
+    ${TCOB_INC_DIR}/tcob/core/OrderedMap.hpp
+    ${TCOB_INC_DIR}/tcob/core/OrderedMap.inl
     ${TCOB_INC_DIR}/tcob/core/Point.hpp
     ${TCOB_INC_DIR}/tcob/core/Point.inl
     ${TCOB_INC_DIR}/tcob/core/Property.hpp

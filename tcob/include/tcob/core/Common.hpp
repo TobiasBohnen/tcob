@@ -169,6 +169,18 @@ namespace detail {
         using field_type = Field;
     };
 
+    ////////////////////////////////////////////////////////////
+
+    struct string_hash {
+        using is_transparent = void;
+        auto operator()(string_view sv) const noexcept -> usize { return std::hash<string_view> {}(sv); }
+    };
+
+    struct string_eq {
+        using is_transparent = void;
+        auto operator()(string_view a, string_view b) const noexcept -> bool { return a == b; }
+    };
+
 }
 
 ////////////////////////////////////////////////////////////

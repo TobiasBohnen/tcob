@@ -5,7 +5,6 @@
 
 #include "tcob/data/ConfigTypes.hpp"
 
-#include <algorithm>
 #include <cstddef>
 #include <initializer_list>
 #include <memory>
@@ -178,25 +177,22 @@ void object::set_entry(index_type key, entry const& entry)
 
 void object::add_entry(index_type key, entry const& entry)
 {
-    values()->emplace_back(key, entry);
+    values()->set(string {key}, entry);
 }
 
 void object::remove_entry(index_type key)
 {
-    auto* v {values()};
-    if (auto it {find(key)}; it != v->end()) {
-        v->erase(it);
-    }
+    values()->erase(key);
 }
 
 auto object::find(index_type key) -> cfg_object_entries::iterator
 {
-    return std::ranges::find_if(*this, [&key](auto const& p) { return p.first == key; });
+    return values()->find(key);
 }
 
 auto object::find(index_type key) const -> cfg_object_entries::const_iterator
 {
-    return std::ranges::find_if(*this, [&key](auto const& p) { return p.first == key; });
+    return values()->find(key);
 }
 
 ////////////////////////////////////////////////////////////

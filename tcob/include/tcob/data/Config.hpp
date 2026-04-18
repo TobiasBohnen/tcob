@@ -9,11 +9,12 @@
 #include <memory>
 #include <optional>
 #include <type_traits>
-#include <utility>
 #include <variant>
 #include <vector>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/OrderedMap.hpp"
 #include "tcob/core/TypeFactory.hpp"
 
 namespace tcob::data {
@@ -24,7 +25,7 @@ class array;
 class object;
 
 using cfg_array_entries  = std::vector<entry>;
-using cfg_object_entries = std::vector<std::pair<string, entry>>;
+using cfg_object_entries = ordered_map<string, entry, detail::string_hash, detail::string_eq>;
 using cfg_value          = std::variant<std::monostate, i64, f64, bool, utf8_string, array, object>;
 
 ////////////////////////////////////////////////////////////
