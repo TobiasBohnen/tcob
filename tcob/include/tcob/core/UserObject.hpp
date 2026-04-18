@@ -34,6 +34,9 @@ public:
     auto operator=(T&& value) -> user_object&;
 
     template <typename T>
+    auto is() const -> bool;
+
+    template <typename T>
     auto get() const -> T*;
 
     auto has_value() const -> bool;
@@ -70,10 +73,17 @@ inline auto user_object::operator=(T&& value) -> user_object&
 }
 
 template <typename T>
-inline auto user_object::get() const -> T*
+inline auto user_object::is() const -> bool
 {
     using U = std::remove_const_t<T>;
-    return _type == typeid(U) ? static_cast<T*>(_data.get()) : nullptr;
+    return has_value() && _type == typeid(U);
+}
+
+template <typename T>
+inline auto user_object::get() const -> T*
+{
+    return is<T>() ? static_cast<T*>(_data.get())
+                   : nullptr;
 }
 
 }
