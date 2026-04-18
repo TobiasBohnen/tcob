@@ -22,46 +22,42 @@ inline auto split_for_each(string_view str, char delim, auto&& f) -> bool
         start = end + 1;
         end   = str.find(delim, start);
     }
-    if (start < str.size()) {
-        if (!f(str.substr(start))) { return false; }
-    }
-
-    return true;
+    return f(str.substr(start));
 }
 
 inline auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> bool
 {
-    bool inQuote {false};
-
-    char topBracket {0};
+    bool inDouble {false};
+    bool inSingle {false};
+    char activeBracket {0};
     i32  bracketCount {0};
 
     usize start {0};
     char  prevC {0};
     for (usize i {0}; i < str.size(); ++i) {
         char const c {str[i]};
-        if (c == '"' && prevC != '\\') {
-            inQuote = !inQuote;
-        } else {
+        if (!inSingle && c == '"' && prevC != '\\') {
+            inDouble = !inDouble;
+        } else if (!inDouble && c == '\'' && prevC != '\\') {
+            inSingle = !inSingle;
+        } else if (!inDouble && !inSingle) {
             switch (c) {
             case '(':
             case '[':
             case '{':
-            case '<':
-                if (topBracket == 0) { topBracket = c; }
-                if (c == topBracket) { ++bracketCount; }
+                if (activeBracket == 0) { activeBracket = c; }
+                if (c == activeBracket) { ++bracketCount; }
                 break;
             case ')':
             case ']':
             case '}':
-            case '>':
                 if (bracketCount > 0) {
-                    if ((topBracket == '(' && c == ')')
-                        || (topBracket == '[' && c == ']')
-                        || (topBracket == '{' && c == '}')
-                        || (topBracket == '<' && c == '>')) {
+                    if ((activeBracket == '(' && c == ')')
+                        || (activeBracket == '[' && c == ']')
+                        || (activeBracket == '{' && c == '}')
+                        || (activeBracket == '<' && c == '>')) {
                         --bracketCount;
-                        if (bracketCount == 0) { topBracket = 0; }
+                        if (bracketCount == 0) { activeBracket = 0; }
                     }
                 }
                 break;
@@ -70,24 +66,17 @@ inline auto split_preserve_brackets_for_each(string_view str, char delim, auto&&
             }
         }
 
-        if (c == delim && !inQuote && bracketCount == 0) {
-            if (start <= i) {
-                if (!f(str.substr(start, i - start))) {
-                    return false;
-                }
+        if (c == delim && !inDouble && !inSingle && bracketCount == 0) {
+            if (!f(str.substr(start, i - start))) {
+                return false;
             }
+
             start = i + 1;
         }
         prevC = c;
     }
 
-    if (start <= str.size()) {
-        if (!f(str.substr(start))) {
-            return false;
-        }
-    }
-
-    return true;
+    return f(str.substr(start));
 }
 
 template <typename T>
