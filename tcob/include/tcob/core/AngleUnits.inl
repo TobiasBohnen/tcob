@@ -138,7 +138,7 @@ template <FloatingPoint ValueType, f64 OneTurn>
 auto constexpr angle_unit<ValueType, OneTurn>::equals(angle_unit const& other, value_type tol) const -> bool
 {
     if (*this == other) { return true; }
-    auto const diff {std::abs((*this - other).as_normalized().Value)};
+    auto const diff {(*this - other).as_normalized(angle_normalize::PositiveFullTurn).Value};
     return diff <= tol || diff >= (OneTurn - tol);
 }
 

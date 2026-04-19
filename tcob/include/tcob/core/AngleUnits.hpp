@@ -15,7 +15,7 @@ namespace tcob {
 
 enum class angle_normalize : u8 {
     FullTurnSymmetric, // [-OneTurn, OneTurn)
-    HalfTurnSymmetric, // [-HalfTurn, +HalfTurn)
+    HalfTurnSymmetric, // [-OneTurn/2, +OneTurn/2)
     PositiveFullTurn   // [0, OneTurn)
 };
 
