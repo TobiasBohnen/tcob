@@ -36,7 +36,7 @@ public:
         action_func OnExit {};
         tick_func   OnUpdate {};
 
-        std::vector<transition> Transitions;
+        std::vector<transition> Transitions {};
     };
 
     struct transition_event {

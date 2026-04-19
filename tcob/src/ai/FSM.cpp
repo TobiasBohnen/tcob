@@ -50,6 +50,7 @@ void fsm::stop()
 void fsm::update(milliseconds dt)
 {
     if (!_running) { return; }
+    _timeInState += dt;
 
     for (auto const& t : _globalTransitions) {
         if (t.Condition && t.Condition(_data)) {
@@ -69,7 +70,6 @@ void fsm::update(milliseconds dt)
         }
 
         if (s->OnUpdate) { s->OnUpdate(_data, dt); }
-        _timeInState += dt;
     }
 }
 
