@@ -9,6 +9,7 @@
 #include <tcob/app/Platform.hpp>
 #include <tcob/app/Scene.hpp>
 
+#include <tcob/ai/FSM.hpp>
 #include <tcob/ai/Pathfinding.hpp>
 
 #include <tcob/audio/Buffer.hpp>

@@ -1,9 +1,11 @@
 # ai
 list(APPEND SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/FSM.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Pathfinding.cpp
 )
 
 list(APPEND HDR
+    ${TCOB_INC_DIR}/tcob/ai/FSM.hpp
     ${TCOB_INC_DIR}/tcob/ai/Pathfinding.hpp
     ${TCOB_INC_DIR}/tcob/ai/Pathfinding.inl
 )
