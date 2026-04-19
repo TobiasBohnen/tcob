@@ -18,6 +18,11 @@ void fsm::add_state(state const& s)
     _states[s.ID] = s;
 }
 
+void fsm::add_global_transition(transition const& t)
+{
+    _globalTransitions.push_back(t);
+}
+
 void fsm::start(uid initialStateID, user_object data)
 {
     if (_running) { return; }
@@ -43,24 +48,25 @@ void fsm::tick(milliseconds dt)
 {
     if (!_running) { return; }
 
+    for (auto const& t : _globalTransitions) {
+        if (t.Condition && t.Condition(_data)) {
+            apply_transition(t);
+            return;
+        }
+    }
+
     if (auto const* s {find_state(_current)}) {
         for (auto const& t : s->Transitions) {
-            if (!t.Condition) { continue; }
-
-            if (t.Condition(_data)) {
-                auto const from {_current};
-                auto const to {t.TargetStateID};
-
-                exit_state(_current);
-                if (t.OnTransition) { t.OnTransition(_data); }
-                enter_state(to);
-
-                StateChanged({.From = from, .To = to});
+            bool const timedOut {t.Timeout && _timeInState >= *t.Timeout};
+            bool const condMet {t.Condition && t.Condition(_data)};
+            if (timedOut || condMet) {
+                apply_transition(t);
                 return;
             }
         }
 
         if (s->OnTick) { s->OnTick(_data, dt); }
+        _timeInState += dt;
     }
 }
 
@@ -76,7 +82,8 @@ auto fsm::find_state(uid id) const -> state const*
 void fsm::enter_state(uid id)
 {
     if (auto const* s {find_state(id)}) {
-        _current = id;
+        _current     = id;
+        _timeInState = milliseconds::zero();
         if (s->OnEnter) { s->OnEnter(_data); }
     }
 }
@@ -88,4 +95,21 @@ void fsm::exit_state(uid id)
     }
     _current = INVALID_ID;
 }
+
+void fsm::apply_transition(transition const& t)
+{
+    auto const from {_current};
+    auto const to {t.TargetStateID};
+
+    exit_state(_current);
+
+    if (t.OnTransition) {
+        t.OnTransition(_data);
+    }
+
+    enter_state(to);
+
+    StateChanged({.From = from, .To = to});
+}
+
 }
