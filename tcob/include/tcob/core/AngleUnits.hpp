@@ -7,6 +7,9 @@
 #include "tcob/tcob_config.hpp"
 
 #include <compare>
+#include <cstddef>
+#include <format>
+#include <functional>
 
 #include "tcob/core/Concepts.hpp"
 
@@ -142,3 +145,17 @@ namespace literals {
 }
 
 #include "AngleUnits.inl"
+
+template <tcob::FloatingPoint ValueType, tcob::f64 OneTurn>
+struct std::formatter<tcob::angle_unit<ValueType, OneTurn>> {
+    auto constexpr parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(tcob::angle_unit<ValueType, OneTurn> val, format_context& ctx) const { return format_to(ctx.out(), "(value:{})", val.Value); }
+};
+
+template <tcob::FloatingPoint ValueType, tcob::f64 OneTurn>
+struct std::hash<tcob::angle_unit<ValueType, OneTurn>> {
+    auto operator()(tcob::angle_unit<ValueType, OneTurn> const& s) const -> std::size_t
+    {
+        return std::hash<ValueType> {}(s.Value);
+    }
+};

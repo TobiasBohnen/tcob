@@ -185,7 +185,7 @@ struct std::formatter<tcob::gfx::font::style> {
         case tcob::gfx::font::weight::ExtraBold:  weight = "ExtraBold"; break;
         case tcob::gfx::font::weight::Heavy:      weight = "Heavy"; break;
         }
-        return format_to(ctx.out(), "(IsItalic:{},Weight:{})", val.IsItalic, weight);
+        return format_to(ctx.out(), "(is_italic:{},weight:{})", val.IsItalic, weight);
     }
 };
 
