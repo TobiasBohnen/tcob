@@ -117,13 +117,9 @@ void fsm::apply_transition(transition const& t)
     auto const to {t.TargetStateID};
 
     exit_current_state();
-
     _previous = from;
-
     if (t.OnTransition) { t.OnTransition(_data); }
-
     enter_state(to);
-
     StateChanged({.From = from, .To = to});
 }
 
