@@ -26,8 +26,10 @@ void fsm::add_global_transition(transition const& t)
 void fsm::start(uid initialStateID, user_object data)
 {
     if (_running) { return; }
-    _data    = std::move(data);
-    _running = true;
+
+    _data     = std::move(data);
+    _previous = INVALID_ID;
+    _running  = true;
     enter_state(initialStateID);
 
     StateChanged({.From = INVALID_ID, .To = initialStateID});
@@ -38,13 +40,14 @@ void fsm::stop()
     if (!_running) { return; }
 
     auto const from {_current};
-    exit_state(_current);
-    _running = false;
+    exit_current_state();
+    _previous = from;
+    _running  = false;
 
     StateChanged({.From = from, .To = INVALID_ID});
 }
 
-void fsm::tick(milliseconds dt)
+void fsm::update(milliseconds dt)
 {
     if (!_running) { return; }
 
@@ -65,12 +68,26 @@ void fsm::tick(milliseconds dt)
             }
         }
 
-        if (s->OnTick) { s->OnTick(_data, dt); }
+        if (s->OnUpdate) { s->OnUpdate(_data, dt); }
         _timeInState += dt;
     }
 }
 
+void fsm::force_state(uid stateID)
+{
+    auto const from {_current};
+    exit_current_state();
+    _previous = from;
+    enter_state(stateID);
+    StateChanged({.From = from, .To = stateID});
+}
+
 auto fsm::current_state() const -> uid { return _current; }
+
+auto fsm::previous_state() const -> uid { return _previous; }
+
+auto fsm::time_in_state() const -> milliseconds { return _timeInState; }
+
 auto fsm::is_running() const -> bool { return _running; }
 
 auto fsm::find_state(uid id) const -> state const*
@@ -88,9 +105,9 @@ void fsm::enter_state(uid id)
     }
 }
 
-void fsm::exit_state(uid id)
+void fsm::exit_current_state()
 {
-    if (auto const* s {find_state(id)}) {
+    if (auto const* s {find_state(_current)}) {
         if (s->OnExit) { s->OnExit(_data); }
     }
     _current = INVALID_ID;
@@ -100,8 +117,11 @@ void fsm::apply_transition(transition const& t)
 {
     auto const from {_current};
     auto const to {t.TargetStateID};
+    if (from == to) { return; }
 
-    exit_state(_current);
+    exit_current_state();
+
+    _previous = from;
 
     if (t.OnTransition) {
         t.OnTransition(_data);

@@ -34,7 +34,7 @@ public:
         uid         ID {INVALID_ID};
         action_func OnEnter {};
         action_func OnExit {};
-        tick_func   OnTick {};
+        tick_func   OnUpdate {};
 
         std::vector<transition> Transitions;
     };
@@ -50,9 +50,13 @@ public:
 
     void start(uid initialStateID, user_object data);
     void stop();
-    void tick(milliseconds dt);
+    void update(milliseconds dt);
+
+    void force_state(uid stateID);
 
     auto current_state() const -> uid;
+    auto previous_state() const -> uid;
+    auto time_in_state() const -> milliseconds;
     auto is_running() const -> bool;
 
     template <typename T>
@@ -63,7 +67,7 @@ public:
 private:
     auto find_state(uid id) const -> state const*;
     void enter_state(uid id);
-    void exit_state(uid id);
+    void exit_current_state();
 
     void apply_transition(transition const& t);
 
@@ -71,6 +75,7 @@ private:
     std::vector<transition>        _globalTransitions {};
 
     uid          _current {INVALID_ID};
+    uid          _previous {INVALID_ID};
     milliseconds _timeInState {0};
 
     user_object _data {};
