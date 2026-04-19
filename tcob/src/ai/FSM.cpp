@@ -61,9 +61,7 @@ void fsm::update(milliseconds dt)
 
     if (auto const* s {find_state(_current)}) {
         for (auto const& t : s->Transitions) {
-            bool const timedOut {t.Timeout && _timeInState >= *t.Timeout};
-            bool const condMet {t.Condition && t.Condition(_data)};
-            if (timedOut || condMet) {
+            if (t.Condition && t.Condition(_data)) {
                 apply_transition(t);
                 return;
             }
@@ -117,15 +115,12 @@ void fsm::apply_transition(transition const& t)
 {
     auto const from {_current};
     auto const to {t.TargetStateID};
-    if (from == to) { return; }
 
     exit_current_state();
 
     _previous = from;
 
-    if (t.OnTransition) {
-        t.OnTransition(_data);
-    }
+    if (t.OnTransition) { t.OnTransition(_data); }
 
     enter_state(to);
 

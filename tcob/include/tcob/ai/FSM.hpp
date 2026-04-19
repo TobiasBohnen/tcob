@@ -7,7 +7,6 @@
 #include "tcob/tcob_config.hpp"
 
 #include <functional>
-#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -24,10 +23,9 @@ public:
     using tick_func      = std::function<void(user_object&, milliseconds)>;
 
     struct transition {
-        uid                         TargetStateID {INVALID_ID};
-        condition_func              Condition {};
-        action_func                 OnTransition {};
-        std::optional<milliseconds> Timeout {};
+        uid            TargetStateID {INVALID_ID};
+        condition_func Condition {};
+        action_func    OnTransition {};
     };
 
     struct state {
