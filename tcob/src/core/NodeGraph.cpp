@@ -28,7 +28,7 @@ auto node_graph::connections() const -> std::span<connection const>
     return _connections;
 }
 
-void node_graph::create_node(node const& def)
+void node_graph::add_node(node const& def)
 {
     _nodes.emplace_back(def);
 }

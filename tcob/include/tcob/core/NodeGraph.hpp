@@ -100,7 +100,7 @@ public:
 
     auto connections() const -> std::span<connection const>;
 
-    void create_node(node const& def);
+    void add_node(node const& def);
     auto remove_node(uid nodeID) -> bool;
 
     auto can_connect(uid outNodeID, uid outPortID, uid inNodeID, uid inPortID) const -> bool;

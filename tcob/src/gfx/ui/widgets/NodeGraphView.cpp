@@ -76,9 +76,9 @@ node_graph_view::node_graph_view(init const& wi)
     Class("node_graph_view");
 }
 
-void node_graph_view::create_node(node_graph::node const& def, point_f pos)
+void node_graph_view::add_node(node_graph::node const& def, point_f pos)
 {
-    _graph.create_node(def);
+    _graph.add_node(def);
     _nodePos[def.ID] = pos;
     _nodeOrder.push_back(def.ID);
     GraphChanged({this});
