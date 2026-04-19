@@ -12,29 +12,21 @@
 
 namespace tcob::ai {
 
-void fsm::add_state(state const& s)
-{
-    _states.push_back(s);
-}
+void fsm::add_state(state const& s) { _states.push_back(s); }
 
-void fsm::add_transition(transition const& t)
-{
-    _transitions.push_back(t);
-}
-
-void fsm::start(uid initalStateID, user_object data)
+void fsm::start(uid initialStateID, user_object data)
 {
     if (_running) { return; }
     _data    = std::move(data);
     _running = true;
-    enter_state(initalStateID);
+    enter_state(initialStateID);
 }
 
 void fsm::stop()
 {
     if (!_running) { return; }
     exit_state(_current);
-    _current = {};
+    _current = INVALID_ID;
     _running = false;
 }
 
@@ -42,25 +34,25 @@ void fsm::tick(milliseconds dt)
 {
     if (!_running) { return; }
 
-    for (auto const& t : _transitions) {
-        if (t.FromID != _current) { continue; }
-        if (!t.Condition || t.Condition(_data)) {
-            exit_state(_current);
-            if (t.OnTransition) { t.OnTransition(_data); }
-            enter_state(t.ToID);
-            return;
-        }
-    }
-
     if (auto const* s {find_state(_current)}) {
+        for (auto const& t : s->Transitions) {
+            if (!t.Condition) { continue; }
+
+            uid const next {t.Condition(_data)};
+            if (next != INVALID_ID) {
+                exit_state(_current);
+                if (t.OnTransition) { t.OnTransition(_data); }
+                enter_state(next);
+                return;
+            }
+        }
+
         if (s->OnTick) { s->OnTick(_data, dt); }
     }
 }
 
 auto fsm::current_state() const -> uid { return _current; }
 auto fsm::is_running() const -> bool { return _running; }
-auto fsm::data() const -> user_object const& { return _data; }
-auto fsm::data() -> user_object& { return _data; }
 
 auto fsm::find_state(uid id) const -> state const*
 {
