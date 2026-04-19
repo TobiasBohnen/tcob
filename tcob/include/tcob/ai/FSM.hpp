@@ -7,8 +7,10 @@
 #include "tcob/tcob_config.hpp"
 
 #include <functional>
+#include <unordered_map>
 #include <vector>
 
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/UserObject.hpp"
 
 namespace tcob::ai {
@@ -16,18 +18,18 @@ namespace tcob::ai {
 
 class TCOB_API fsm final {
 public:
-    using condition_func = std::function<uid(user_object const&)>;
+    using condition_func = std::function<bool(user_object const&)>;
     using action_func    = std::function<void(user_object&)>;
     using tick_func      = std::function<void(user_object&, milliseconds)>;
 
     struct transition {
-        uid            ID {};
+        uid            TargetStateID {INVALID_ID};
         condition_func Condition {};
         action_func    OnTransition {};
     };
 
     struct state {
-        uid         ID {};
+        uid         ID {INVALID_ID};
         action_func OnEnter {};
         action_func OnExit {};
         tick_func   OnTick {};
@@ -35,9 +37,15 @@ public:
         std::vector<transition> Transitions;
     };
 
+    struct transition_event {
+        uid From;
+        uid To;
+    };
+    signal<transition_event const> StateChanged;
+
     void add_state(state const& s);
 
-    void start(uid initialStateID, user_object data = {});
+    void start(uid initialStateID, user_object data);
     void stop();
     void tick(milliseconds dt);
 
@@ -54,10 +62,10 @@ private:
     void enter_state(uid id);
     void exit_state(uid id);
 
-    std::vector<state> _states {};
-    uid                _current {};
-    user_object        _data {};
-    bool               _running {false};
+    std::unordered_map<uid, state> _states {};
+    uid                            _current {INVALID_ID};
+    user_object                    _data {};
+    bool                           _running {false};
 };
 
 ////////////////////////////////////////////////////////////

@@ -6,13 +6,17 @@
 #include "tcob/ai/FSM.hpp"
 #include "tcob/core/UserObject.hpp"
 
-#include <algorithm>
+#include <cassert>
 #include <utility>
-#include <vector>
 
 namespace tcob::ai {
 
-void fsm::add_state(state const& s) { _states.push_back(s); }
+void fsm::add_state(state const& s)
+{
+    assert(s.ID != INVALID_ID);
+    assert(!_states.contains(s.ID));
+    _states[s.ID] = s;
+}
 
 void fsm::start(uid initialStateID, user_object data)
 {
@@ -20,14 +24,19 @@ void fsm::start(uid initialStateID, user_object data)
     _data    = std::move(data);
     _running = true;
     enter_state(initialStateID);
+
+    StateChanged({.From = INVALID_ID, .To = initialStateID});
 }
 
 void fsm::stop()
 {
     if (!_running) { return; }
+
+    auto const from {_current};
     exit_state(_current);
-    _current = INVALID_ID;
     _running = false;
+
+    StateChanged({.From = from, .To = INVALID_ID});
 }
 
 void fsm::tick(milliseconds dt)
@@ -38,11 +47,15 @@ void fsm::tick(milliseconds dt)
         for (auto const& t : s->Transitions) {
             if (!t.Condition) { continue; }
 
-            uid const next {t.Condition(_data)};
-            if (next != INVALID_ID) {
+            if (t.Condition(_data)) {
+                auto const from {_current};
+                auto const to {t.TargetStateID};
+
                 exit_state(_current);
                 if (t.OnTransition) { t.OnTransition(_data); }
-                enter_state(next);
+                enter_state(to);
+
+                StateChanged({.From = from, .To = to});
                 return;
             }
         }
@@ -56,14 +69,14 @@ auto fsm::is_running() const -> bool { return _running; }
 
 auto fsm::find_state(uid id) const -> state const*
 {
-    auto it {std::ranges::find(_states, id, &state::ID)};
-    return it != _states.end() ? &*it : nullptr;
+    auto it {_states.find(id)};
+    return it != _states.end() ? &it->second : nullptr;
 }
 
 void fsm::enter_state(uid id)
 {
-    _current = id;
     if (auto const* s {find_state(id)}) {
+        _current = id;
         if (s->OnEnter) { s->OnEnter(_data); }
     }
 }
@@ -73,5 +86,6 @@ void fsm::exit_state(uid id)
     if (auto const* s {find_state(id)}) {
         if (s->OnExit) { s->OnExit(_data); }
     }
+    _current = INVALID_ID;
 }
 }
