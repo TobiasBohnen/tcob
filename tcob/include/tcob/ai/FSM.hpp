@@ -10,13 +10,14 @@
 #include <unordered_map>
 #include <vector>
 
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/UserObject.hpp"
 
 namespace tcob::ai {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API fsm final {
+class TCOB_API fsm final : public non_copyable {
 public:
     using condition_func = std::function<bool(user_object const&)>;
     using action_func    = std::function<void(user_object&)>;
