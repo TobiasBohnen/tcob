@@ -157,12 +157,12 @@ void game::step()
         fixedUpdateLoops++;
     }
 
+    _tm->process_queue(clock::now().time_since_epoch() - _lastUpdate, false);
+
     milliseconds const now {clock::now().time_since_epoch()};
     milliseconds const deltaUpdate {now - _lastUpdate};
+
     milliseconds const frameLimit {1000.0f / static_cast<f32>(_plt->FrameLimit)};
-
-    _tm->process_queue(deltaUpdate, false);
-
     if (deltaUpdate >= frameLimit) {
         // update
         Update(deltaUpdate);

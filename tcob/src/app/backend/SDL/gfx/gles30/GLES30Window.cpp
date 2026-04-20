@@ -68,8 +68,13 @@ auto gl_window::get_vsync() const -> bool
 
 void gl_window::set_vsync(bool value)
 {
-    value ? SDL_GL_SetSwapInterval(1)
-          : SDL_GL_SetSwapInterval(0);
+    if (value) {
+        if (!SDL_GL_SetSwapInterval(-1)) {
+            SDL_GL_SetSwapInterval(1);
+        }
+    } else {
+        SDL_GL_SetSwapInterval(0);
+    }
 }
 
 void gl_window::clear(color c)
