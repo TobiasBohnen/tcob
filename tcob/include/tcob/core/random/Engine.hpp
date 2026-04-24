@@ -179,4 +179,33 @@ private:
     usize _index {0};
 };
 
+////////////////////////////////////////////////////////////
+
+// Based on PCG-C-Basic by Melissa E. O'Neill
+// Copyright 2014 Melissa E. O'Neill <oneill@pcg-random.org>
+// Licensed under Apache License 2.0 / MIT License
+// https://www.pcg-random.org/download.html
+class TCOB_API pcg_32 final {
+public:
+    using state_type  = std::array<u64, 2>;
+    using seed_type   = u64;
+    using result_type = u32;
+
+    auto operator()(state_type& state) const -> result_type;
+    void seed(state_type& state, seed_type seed) const;
+};
+
+////////////////////////////////////////////////////////////
+
+// based on: https://github.com/MartyMacGyver/PractRand
+class TCOB_API sfc_64 final {
+public:
+    using state_type  = std::array<u64, 4>; // a, b, c, counter
+    using seed_type   = u64;
+    using result_type = u64;
+
+    auto operator()(state_type& state) const -> result_type;
+    void seed(state_type& state, seed_type seed) const;
+};
+
 }

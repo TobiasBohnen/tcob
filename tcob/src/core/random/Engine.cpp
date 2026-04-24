@@ -271,4 +271,41 @@ void well_512_a::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
+auto pcg_32::operator()(state_type& state) const -> result_type
+{
+    u64 const old {state[0]};
+    state[0] = (old * 6364136223846793005ULL) + state[1];
+    u32 const xorshifted {static_cast<u32>(((old >> 18u) ^ old) >> 27u)};
+    u32 const rot {static_cast<u32>(old >> 59u)};
+    return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
+}
+
+void pcg_32::seed(state_type& state, seed_type seed) const
+{
+    prng_split_mix_64 rnd {seed};
+    state[0] = rnd.next();
+    state[1] = (rnd.next() << 1u) | 1u; // increment, must be odd
+}
+
+////////////////////////////////////////////////////////////
+
+auto sfc_64::operator()(state_type& state) const -> result_type
+{
+    u64 const result {state[0] + state[1] + state[3]++};
+    state[0] = state[1] ^ (state[1] >> 11);
+    state[1] = state[2] + (state[2] << 3);
+    state[2] = std::rotl(state[2], 24) + result;
+    return result;
+}
+
+void sfc_64::seed(state_type& state, seed_type seed) const
+{
+    prng_split_mix_64 rnd {seed};
+    state[0] = rnd.next();
+    state[1] = rnd.next();
+    state[2] = rnd.next();
+    state[3] = 1;                                       // counter
+    for (int i {0}; i < 12; ++i) { operator()(state); } // warmup
+}
+
 }

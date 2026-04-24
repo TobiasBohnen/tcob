@@ -38,8 +38,8 @@ namespace random {
         auto state() const -> state_type const&;
 
     private:
-        random_engine_type _engine {};
-        state_type         _state {};
+        random_engine_type _engine;
+        state_type         _state;
         distribution_type  _distribution;
     };
 
@@ -57,6 +57,8 @@ namespace random {
     using prng_xoshiro_256_plus_plus   = prng<xoshiro_256_plus_plus, core_uniform_distribution>;
     using prng_xoshiro_256_star_star   = prng<xoshiro_256_star_star, core_uniform_distribution>;
     using prng_well_512_a              = prng<well_512_a, core_uniform_distribution>;
+    using prng_pcg_32                  = prng<pcg_32, core_uniform_distribution>;
+    using prng_sfc_64                  = prng<sfc_64, core_uniform_distribution>;
 
     ////////////////////////////////////////////////////////////
 
@@ -78,7 +80,7 @@ namespace random {
         auto roll_n_sum(usize n) -> i32;
 
     private:
-        prng<E, core_uniform_distribution> _random {};
+        prng<E, core_uniform_distribution> _random;
     };
 
     ////////////////////////////////////////////////////////////
