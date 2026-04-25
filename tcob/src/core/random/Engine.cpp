@@ -45,7 +45,7 @@ void split_mix_64::seed(state_type& state, seed_type seed) const
 
 auto game_rand::operator()(state_type& state) const -> result_type
 {
-    state[0] = (state[0] << 16) + (state[0] >> 16);
+    state[0] = std::rotl(state[0], 16);
     state[0] += state[1];
     state[1] += state[0];
     return state[0];
