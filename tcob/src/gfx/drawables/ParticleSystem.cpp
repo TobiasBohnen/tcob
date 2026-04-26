@@ -9,7 +9,6 @@
 #include <array>
 #include <cassert>
 #include <chrono>
-#include <cmath>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -219,15 +218,10 @@ void particle_system::on_update(milliseconds deltaTime)
                 auto& vel {Particles.Velocity[i]};
                 auto& origin {Particles.Origin[i]};
 
-                f32 const cx {bounds.left() + (bounds.width() * 0.5f)};
-                f32 const cy {bounds.top() + (bounds.height() * 0.5f)};
-                f32       px {cx - origin.X};
-                f32       py {cy - origin.Y};
-                f32 const len {std::sqrt((px * px) + (py * py))};
-                if (len > 0.0f) {
-                    px /= len;
-                    py /= len;
-                }
+                point_f const c {bounds.center()};
+                point_f       p {c - origin};
+                f64 const     len {p.length()};
+                if (len > 0.0) { p /= len; }
 
                 auto const& la {Particles.LinearAcceleration[i]};
                 auto const& grav {Particles.Gravity[i]};
@@ -236,11 +230,9 @@ void particle_system::on_update(milliseconds deltaTime)
                 f32 const   ld {Particles.LinearDamping[i]};
 
                 // radial + tangential + linear + gravity
-                vel.X += ((px * ra) + ((-py) * ta) + la.X + grav.X) * seconds;
-                vel.Y += ((py * ra) + (px * ta) + la.Y + grav.Y) * seconds;
+                vel += ((p * ra) + (p.as_perpendicular() * ta) + la + grav) * seconds;
                 f32 const damp {1.0f / (1.0f + (ld * seconds))};
-                vel.X *= damp;
-                vel.Y *= damp;
+                vel *= damp;
 
                 bounds = {bounds.left() + (vel.X * seconds), bounds.top() + (vel.Y * seconds), bounds.width(), bounds.height()};
 
