@@ -205,6 +205,9 @@ void particle_system::on_update(milliseconds deltaTime)
                 // age
                 Particles.RemainingLife[i] -= deltaTime;
 
+                // update
+                ParticleUpdate({.Particles = Particles, .Index = i, .DeltaTime = deltaTime});
+
                 // move
                 auto& bounds {Particles.Bounds[i]};
                 auto& vel {Particles.Velocity[i]};
@@ -290,6 +293,7 @@ void particle_system::on_draw_to(render_target& target, transform const& xform)
 }
 
 ////////////////////////////////////////////////////////
+
 static auto minmax_rng(min_max<f32> const& range, auto&& rng) -> f32
 {
     return rng(range.first, range.second);

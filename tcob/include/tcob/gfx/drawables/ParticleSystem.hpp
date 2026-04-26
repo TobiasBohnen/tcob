@@ -20,6 +20,7 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Serialization.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
@@ -130,7 +131,8 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-struct particles {
+class TCOB_API particles final {
+public:
     // hot
     std::vector<milliseconds> RemainingLife;
     std::vector<point_f>      Velocity;
@@ -158,11 +160,19 @@ struct particles {
 
 ////////////////////////////////////////////////////////////
 
+struct particle_event {
+    particles&   Particles;
+    isize        Index;
+    milliseconds DeltaTime;
+};
+
 class TCOB_API particle_system final : public drawable, public updatable {
 public:
     explicit particle_system(bool multiThreaded = false, isize reservedParticleCount = 0);
 
     ~particle_system() override = default;
+
+    signal<particle_event const> ParticleUpdate;
 
     particles Particles;
 
