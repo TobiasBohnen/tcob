@@ -254,12 +254,6 @@ void particle::update(milliseconds deltaTime)
 
     // spin
     Rotation += degree_f {Spin.Value * static_cast<f32>(seconds)};
-
-    // transform
-    point_f const origin {Bounds.center()};
-    _transform.to_identity();
-    if (Scale != size_f::One) { _transform.scale_at(Scale, origin); }
-    if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation, origin); }
 }
 
 void particle::init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& rng)
@@ -305,7 +299,12 @@ void particle::init(settings const& tmpl, texture_region const& texRegion, rect_
 
 void particle::convert_to(quad* quad) const
 {
-    geometry::set_position(*quad, Bounds, _transform);
+    point_f const origin {Bounds.center()};
+    transform     xform;
+    if (Scale != size_f::One) { xform.scale_at(Scale, origin); }
+    if (Rotation != degree_f {0}) { xform.rotate_at(Rotation, origin); }
+
+    geometry::set_position(*quad, Bounds, xform);
     geometry::set_color(*quad, Color);
     geometry::set_texcoords(*quad, Region);
 }

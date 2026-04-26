@@ -118,9 +118,6 @@ public:
     void init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& rng);
 
     void convert_to(quad* quad) const;
-
-private:
-    transform _transform {};
 };
 
 ////////////////////////////////////////////////////////////
