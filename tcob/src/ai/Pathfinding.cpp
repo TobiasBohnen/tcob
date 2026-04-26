@@ -15,9 +15,10 @@
 
 namespace tcob::ai {
 
-astar_pathfinding::astar_pathfinding(bool allowDiagonal, heuristic heuristic)
+astar_pathfinding::astar_pathfinding(bool allowDiagonal, heuristic heuristic, u64 turnPenalty)
     : _allowDiagonal {allowDiagonal}
     , _heuristic {heuristic}
+    , _turnPenalty {turnPenalty}
 {
 }
 
@@ -82,7 +83,7 @@ auto astar_pathfinding::reconstruct_path(std::unordered_map<point_i, point_i> co
 
 auto astar_pathfinding::node::operator>(node const& other) const -> bool
 {
-    return Score > other.Score;
+    return F > other.F;
 }
 
 }

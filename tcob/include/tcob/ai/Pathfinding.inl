@@ -27,13 +27,13 @@ auto astar_pathfinding::find_path(AStarGrid auto&& testGrid, size_i gridExtent, 
 
     grid<u64> gScore {gridExtent, IMPASSABLE_COST};
     gScore[start] = 0;
-    openSet.push({.Pos = start, .GScore = 0, .Score = distance(start, finish)});
+    openSet.push({.Pos = start, .Dir = {0, 0}, .G = 0, .F = distance(start, finish)});
 
     while (!openSet.empty()) {
         node const top {openSet.top()};
         openSet.pop();
 
-        if (top.GScore > gScore[top.Pos]) { continue; } // stale entry
+        if (top.G > gScore[top.Pos]) { continue; } // stale entry
 
         point_i const current {top.Pos};
 
@@ -46,16 +46,19 @@ auto astar_pathfinding::find_path(AStarGrid auto&& testGrid, size_i gridExtent, 
             if (cost == IMPASSABLE_COST) { continue; }
             if (gScore[current] > IMPASSABLE_COST - cost) { continue; } // overflow guard
 
-            u64 const tentative_gScore {gScore[current] + cost};
+            point_i const dir {neighbor.X - current.X, neighbor.Y - current.Y};
+            u64 const     turnPenalty {top.Dir != point_i {0, 0} && dir != top.Dir ? _turnPenalty : 0};
+            u64 const     tentative {gScore[current] + cost + turnPenalty};
 
-            if (tentative_gScore < gScore[neighbor]) {
+            if (tentative < gScore[neighbor]) {
                 cameFrom[neighbor] = current;
-                gScore[neighbor]   = tentative_gScore;
-                openSet.push({.Pos = neighbor, .GScore = tentative_gScore, .Score = tentative_gScore + distance(neighbor, finish)});
+                gScore[neighbor]   = tentative;
+                openSet.push({.Pos = neighbor, .Dir = dir, .G = tentative, .F = tentative + distance(neighbor, finish)});
             }
         }
     }
 
     return {}; // No path found
 }
+
 }

@@ -32,7 +32,7 @@ public:
         Chebyshev
     };
 
-    explicit astar_pathfinding(bool allowDiagonal = false, heuristic heuristic = heuristic::Manhattan);
+    explicit astar_pathfinding(bool allowDiagonal = false, heuristic heuristic = heuristic::Manhattan, u64 turnPenalty = 0);
 
     static constexpr u64 IMPASSABLE_COST {std::numeric_limits<u64>::max()};
 
@@ -42,8 +42,9 @@ private:
     class TCOB_API node {
     public:
         point_i Pos;
-        u64     GScore {};
-        u64     Score {};
+        point_i Dir;
+        u64     G {};
+        u64     F {};
 
         auto operator>(node const& other) const -> bool;
     };
@@ -54,6 +55,7 @@ private:
 
     bool      _allowDiagonal;
     heuristic _heuristic;
+    u64       _turnPenalty;
 };
 
 }
