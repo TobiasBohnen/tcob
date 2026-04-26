@@ -199,6 +199,8 @@ protected:
     void on_draw_to(render_target& target, transform const& xform) override;
 
 private:
+    void reserve(isize count);
+
     renderer          _renderer {buffer_usage_hint::DynamicDraw};
     std::vector<quad> _geometry;
 

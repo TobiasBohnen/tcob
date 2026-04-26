@@ -38,8 +38,14 @@ particle_system::particle_system(bool multiThreaded, isize reservedParticleCount
     : _multiThreaded {multiThreaded}
 {
     if (reservedParticleCount > 0) {
-        _particles.reserve(reservedParticleCount);
+        reserve(reservedParticleCount);
     }
+}
+
+void particle_system::reserve(isize count)
+{
+    _particles.reserve(count);
+    _geometry.reserve(count);
 }
 
 auto particle_system::is_running() const -> bool
