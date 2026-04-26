@@ -33,91 +33,53 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API particle final {
+class TCOB_API particle_settings final {
+
 public:
-    ////////////////////////////////////////////////////////////
+    min_max<f32>      Speed;
+    min_max<degree_f> Direction;
 
-    class settings {
-    public:
-        min_max<f32>      Speed;
-        min_max<degree_f> Direction;
+    min_max<f32> LinearAcceleration;
+    min_max<f32> LinearDamping;
+    min_max<f32> RadialAcceleration;
+    min_max<f32> TangentialAcceleration;
 
-        min_max<f32> LinearAcceleration;
-        min_max<f32> LinearDamping;
-        min_max<f32> RadialAcceleration;
-        min_max<f32> TangentialAcceleration;
+    min_max<point_f> Gravity;
 
-        min_max<point_f> Gravity;
+    string             TextureRegion;
+    std::vector<color> Colors;
+    min_max<f32>       Transparency;
 
-        string             TextureRegion;
-        std::vector<color> Colors;
-        min_max<f32>       Transparency;
+    min_max<milliseconds> Lifetime;
 
-        min_max<milliseconds> Lifetime;
+    min_max<f32> Scale;
+    size_f       Size;
 
-        min_max<f32> Scale;
-        size_f       Size;
+    min_max<degree_f> Spin;
+    min_max<degree_f> Rotation;
 
-        min_max<degree_f> Spin;
-        min_max<degree_f> Rotation;
+    auto operator==(particle_settings const& other) const -> bool = default;
 
-        auto operator==(settings const& other) const -> bool = default;
+    static auto constexpr Members()
+    {
+        return std::tuple {
+            member<&particle_settings::Speed> {"speed"},
+            member<&particle_settings::Direction> {"direction"},
 
-        static auto constexpr Members()
-        {
-            return std::tuple {
-                member<&particle::settings::Speed> {"speed"},
-                member<&particle::settings::Direction> {"direction"},
+            member<&particle_settings::LinearAcceleration> {"linear_acceleration"},
+            member<&particle_settings::LinearDamping> {"linear_dampling"},
+            member<&particle_settings::RadialAcceleration> {"radial_acceleration"},
+            member<&particle_settings::TangentialAcceleration> {"tangential_acceleration"},
 
-                member<&particle::settings::LinearAcceleration> {"linear_acceleration"},
-                member<&particle::settings::LinearDamping> {"linear_dampling"},
-                member<&particle::settings::RadialAcceleration> {"radial_acceleration"},
-                member<&particle::settings::TangentialAcceleration> {"tangential_acceleration"},
+            member<&particle_settings::Gravity> {"gravity"},
 
-                member<&particle::settings::Gravity> {"gravity"},
+            member<&particle_settings::TextureRegion> {"texture_region"},
+            member<&particle_settings::Colors> {"colors"},
+            member<&particle_settings::Transparency> {"transparency"},
 
-                member<&particle::settings::TextureRegion> {"texture_region"},
-                member<&particle::settings::Colors> {"colors"},
-                member<&particle::settings::Transparency> {"transparency"},
-
-                member<&particle::settings::Lifetime> {"lifetime"},
-            };
-        }
-    };
-
-    ////////////////////////////////////////////////////////////
-
-    uid ID {};
-
-    point_f Velocity {point_f::Zero};
-    point_f LinearAcceleration {point_f::Zero};
-    f32     LinearDamping {0.0f};
-    f32     RadialAcceleration {0.0f};
-    f32     TangentialAcceleration {0.0f};
-    point_f Gravity {point_f::Zero};
-
-    milliseconds StartingLife {0};
-    milliseconds RemainingLife {0};
-
-    color          Color {colors::White};
-    texture_region Region {};
-
-    size_f Scale {size_f::One};
-    rect_f Bounds {rect_f::Zero};
-
-    degree_f Spin {0.0f};
-    degree_f Rotation {0.0f};
-
-    point_f Position {point_f::Zero};
-    point_f Origin {point_f::Zero};
-
-    auto is_alive() const -> bool;
-
-    void update(milliseconds deltaTime);
-
-    void init(settings const& tmpl, texture_region const& texRegion, rect_f const& spawnArea, rng& rng);
-
-    void convert_to(quad* quad) const;
+            member<&particle_settings::Lifetime> {"lifetime"},
+        };
+    }
 };
 
 ////////////////////////////////////////////////////////////
@@ -128,7 +90,7 @@ public:
 
     class settings {
     public:
-        typename particle::settings Template;
+        particle_settings Template;
 
         bool                        IsExplosion {false};
         rect_f                      SpawnArea {rect_f::Zero};
@@ -168,11 +130,41 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+struct particles {
+    // hot
+    std::vector<milliseconds> RemainingLife;
+    std::vector<point_f>      Velocity;
+    std::vector<point_f>      LinearAcceleration;
+    std::vector<f32>          LinearDamping;
+    std::vector<f32>          RadialAcceleration;
+    std::vector<f32>          TangentialAcceleration;
+    std::vector<point_f>      Gravity;
+    std::vector<rect_f>       Bounds;
+    std::vector<f32>          Rotation;
+    std::vector<f32>          Spin;
+    std::vector<size_f>       Scale;
+    std::vector<point_f>      Origin;
+
+    // cold
+    std::vector<milliseconds>   StartingLife;
+    std::vector<color>          Color;
+    std::vector<texture_region> UVRegion;
+    std::vector<i64>            ID;
+
+    void reserve(isize count);
+    void push_back();
+    void swap(isize a, isize b);
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API particle_system final : public drawable, public updatable {
 public:
     explicit particle_system(bool multiThreaded = false, isize reservedParticleCount = 0);
 
     ~particle_system() override = default;
+
+    particles Particles;
 
     prop<asset_ptr<material>> Material;
 
@@ -188,8 +180,8 @@ public:
 
     auto particle_count() const -> isize;
 
-    auto activate_particle() -> particle&;
-    void deactivate_particle(particle& particle);
+    auto activate_particle() -> isize;
+    void deactivate_particle(isize index);
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -203,9 +195,9 @@ private:
 
     renderer          _renderer {buffer_usage_hint::DynamicDraw};
     std::vector<quad> _geometry;
+    std::vector<u32>  _indices {};
 
     std::vector<std::unique_ptr<particle_emitter>> _emitters {};
-    std::vector<particle>                          _particles {};
     isize                                          _aliveParticleCount {0};
 
     std::mutex _mutex {};
