@@ -82,6 +82,7 @@ auto astar_pathfinding::reconstruct_path(std::unordered_map<point_i, point_i> co
 
 auto astar_pathfinding::node::operator>(node const& other) const -> bool
 {
-    return score > other.score;
+    return Score > other.Score;
 }
+
 }

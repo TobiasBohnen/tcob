@@ -27,29 +27,31 @@ auto astar_pathfinding::find_path(AStarGrid auto&& testGrid, size_i gridExtent, 
 
     grid<u64> gScore {gridExtent, IMPASSABLE_COST};
     gScore[start] = 0;
-    openSet.push({start, distance(start, finish)});
+    openSet.push({.Pos = start, .GScore = 0, .Score = distance(start, finish)});
 
     while (!openSet.empty()) {
-        point_i const current {openSet.top().pos};
+        node const top {openSet.top()};
         openSet.pop();
+
+        if (top.GScore > gScore[top.Pos]) { continue; } // stale entry
+
+        point_i const current {top.Pos};
 
         if (current == finish) {
             return reconstruct_path(cameFrom, current);
         }
 
-        // Skip if we already found a better path to this node
-        if (gScore[current] == IMPASSABLE_COST) { continue; }
-
         for (auto const& neighbor : neighbors(gridExtent, current)) {
             auto const cost {testGrid.get_cost(current, neighbor)};
             if (cost == IMPASSABLE_COST) { continue; }
+            if (gScore[current] > IMPASSABLE_COST - cost) { continue; } // overflow guard
 
             u64 const tentative_gScore {gScore[current] + cost};
 
             if (tentative_gScore < gScore[neighbor]) {
                 cameFrom[neighbor] = current;
                 gScore[neighbor]   = tentative_gScore;
-                openSet.push({neighbor, tentative_gScore + distance(neighbor, finish)});
+                openSet.push({.Pos = neighbor, .GScore = tentative_gScore, .Score = tentative_gScore + distance(neighbor, finish)});
             }
         }
     }

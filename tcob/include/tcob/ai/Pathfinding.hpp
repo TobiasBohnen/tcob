@@ -41,8 +41,9 @@ public:
 private:
     class TCOB_API node {
     public:
-        point_i pos;
-        u64     score {};
+        point_i Pos;
+        u64     GScore {};
+        u64     Score {};
 
         auto operator>(node const& other) const -> bool;
     };
