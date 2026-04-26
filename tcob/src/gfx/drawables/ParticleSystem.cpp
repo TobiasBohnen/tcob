@@ -340,6 +340,14 @@ void particle_emitter::reset()
 {
     if (Settings.Lifetime) { _remainingLife = *Settings.Lifetime; }
     _alive = true;
+
+    overloaded_visit(
+        Settings.Pattern,
+        [&](emit_linear const&) { },
+        [&](emit_burst const& pattern) {
+            _burstTimer       = milliseconds::zero();
+            _burstRepeatsLeft = pattern.Repeats;
+        });
 }
 
 void particle_emitter::emit(particle_system& system, milliseconds deltaTime)
@@ -349,14 +357,25 @@ void particle_emitter::emit(particle_system& system, milliseconds deltaTime)
     _remainingLife -= deltaTime;
 
     i32 particleCount {0};
-    if (Settings.IsExplosion) {
-        particleCount = static_cast<i32>(Settings.SpawnRate);
-        _alive        = false;
-    } else {
-        f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};
-        particleCount = static_cast<i32>(particleAmount);
-        _emissionDiff = particleAmount - particleCount;
-    }
+
+    overloaded_visit(
+        Settings.Pattern,
+        [&](emit_linear const& pattern) {
+            f64 const particleAmount {(pattern.Rate * (deltaTime.count() / 1000)) + _linearDiff};
+            particleCount = static_cast<i32>(particleAmount);
+            _linearDiff   = particleAmount - particleCount;
+        },
+        [&](emit_burst const& pattern) {
+            _burstTimer -= deltaTime;
+            if (_burstTimer.count() <= 0) {
+                particleCount = static_cast<i32>(pattern.Count);
+                if (pattern.Repeats == -1 || --_burstRepeatsLeft > 0) {
+                    _burstTimer = pattern.Interval;
+                } else {
+                    _alive = false;
+                }
+            }
+        });
 
     auto const& tmpl {Settings.Template};
     auto const& texRegion {system.Material->first_pass().Texture->regions()[tmpl.TextureRegion]}; // TODO texRegion pass

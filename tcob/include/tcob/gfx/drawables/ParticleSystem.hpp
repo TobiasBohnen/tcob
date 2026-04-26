@@ -10,6 +10,7 @@
 #include <mutex>
 #include <optional>
 #include <tuple>
+#include <variant>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -89,15 +90,40 @@ class TCOB_API particle_emitter final : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
 
+    class emit_linear {
+    public:
+        f32 Rate {0};
+
+        auto operator==(emit_linear const& other) const -> bool = default;
+
+        static auto constexpr Members() { return std::tuple {member<&particle_emitter::emit_linear::Rate> {"rate"}}; }
+    };
+
+    class emit_burst {
+    public:
+        f32          Count {0};
+        milliseconds Interval {0};
+        i32          Repeats {1};
+
+        auto operator==(emit_burst const& other) const -> bool = default;
+
+        static auto constexpr Members() { return std::tuple {
+            member<&particle_emitter::emit_burst::Count> {"count"},
+            member<&particle_emitter::emit_burst::Interval> {"interval"},
+            member<&particle_emitter::emit_burst::Repeats> {"repeats"},
+        }; }
+    };
+
+    using emit_pattern = std::variant<emit_linear, emit_burst>;
+
     class settings {
     public:
         particle_settings Template;
 
-        bool IsExplosion {false};
         bool Transient {false};
 
-        rect_f SpawnArea {rect_f::Zero};
-        f32    SpawnRate {0};
+        emit_pattern Pattern;
+        rect_f       SpawnArea {rect_f::Zero};
 
         std::optional<milliseconds> Lifetime {};
 
@@ -107,10 +133,9 @@ public:
         {
             return std::tuple {
                 member<&particle_emitter::settings::Template> {"template"},
-                member<&particle_emitter::settings::IsExplosion> {"is_explosion"},
                 member<&particle_emitter::settings::Transient> {"transient"},
+                member<&particle_emitter::settings::Pattern> {"pattern"},
                 member<&particle_emitter::settings::SpawnArea> {"spawn_area"},
-                member<&particle_emitter::settings::SpawnRate> {"spawn_rate"},
                 member<&particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
             };
         }
@@ -134,8 +159,14 @@ private:
 
     rng          _rng;
     milliseconds _remainingLife {1000};
-    f64          _emissionDiff {0};
     bool         _alive {true};
+
+    // linear
+    f64 _linearDiff {0};
+
+    // burst
+    milliseconds _burstTimer {0};
+    i32          _burstRepeatsLeft {0};
 };
 
 ////////////////////////////////////////////////////////////
