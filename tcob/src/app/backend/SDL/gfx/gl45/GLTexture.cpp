@@ -135,7 +135,7 @@ void gl_texture::resize(size_i texsize, u32 depth, texture::format format)
     auto const [iform, _] {convert_enum(format)};
     glTextureStorage3D(ID, 1, iform, texsize.Width, texsize.Height, depth);
 
-    logger::Debug("Texture: created ID {}: width {}, height {}, depth {}", ID, texsize.Width, texsize.Height, depth);
+    logger::Debug("gl_texture: created ID {}: width {}, height {}, depth {}", ID, texsize.Width, texsize.Height, depth);
 }
 
 void gl_texture::update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment)

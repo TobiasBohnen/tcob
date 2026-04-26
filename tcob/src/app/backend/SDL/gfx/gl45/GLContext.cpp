@@ -64,17 +64,17 @@ gl_context::gl_context(SDL_Window* window)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
-    logger::Info("GLContext: want OpenGL version: {}.{}", glMajor, glMinor);
+    logger::Info("gl_context: want OpenGL version: {}.{}", glMajor, glMinor);
 
     _context = SDL_GL_CreateContext(window); // NOLINT(cppcoreguidelines-prefer-member-initializer)
     if (!_context) {
-        logger::Error("GLContext: OpenGL context creation failed!");
+        logger::Error("gl_context: OpenGL context creation failed!");
         throw std::runtime_error("OpenGL context creation failed");
     }
 
     if (!gladLoadGL(&Load)) {
         SDL_GL_DestroyContext(static_cast<SDL_GLContext>(_context));
-        logger::Error("GLContext: OpenGL loading failed!");
+        logger::Error("gl_context: OpenGL loading failed!");
         throw std::runtime_error("OpenGL loading failed");
     }
 
@@ -82,7 +82,7 @@ gl_context::gl_context(SDL_Window* window)
     glGetIntegerv(GL_MAJOR_VERSION, &checkMajor);
     glGetIntegerv(GL_MINOR_VERSION, &checkMinor);
 
-    logger::Info("GLContext: have OpenGL version: {}.{}", checkMajor, checkMinor);
+    logger::Info("gl_context: have OpenGL version: {}.{}", checkMajor, checkMinor);
 
 #if defined(TCOB_DEBUG)
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

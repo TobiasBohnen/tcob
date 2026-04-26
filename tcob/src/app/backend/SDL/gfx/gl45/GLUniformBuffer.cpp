@@ -17,7 +17,7 @@ gl_uniform_buffer::gl_uniform_buffer(usize size)
     glCreateBuffers(1, &ID);
     glNamedBufferStorage(ID, size, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-    logger::Debug("UniformBuffer: created ID {}: size {}", ID, size);
+    logger::Debug("gl_uniform_buffer: created ID {}: size {}", ID, size);
 }
 
 gl_uniform_buffer::~gl_uniform_buffer()

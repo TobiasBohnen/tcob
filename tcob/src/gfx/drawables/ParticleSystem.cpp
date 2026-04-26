@@ -20,6 +20,7 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Logger.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -174,6 +175,9 @@ auto particle_system::particle_count() const -> isize
 auto particle_system::activate_particle() -> isize
 {
     if (_aliveParticleCount == std::ssize(Particles.RemainingLife)) {
+        if (_aliveParticleCount >= static_cast<isize>(Particles.RemainingLife.capacity())) {
+            logger::Warning("particle_system: pool exceeded reserved capacity at {}", _aliveParticleCount);
+        }
         Particles.push_back();
     }
 

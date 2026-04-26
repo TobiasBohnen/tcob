@@ -47,7 +47,7 @@ auto gl_shader::compile(std::span<char const> vert, std::span<char const> frag) 
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexShader, sizeof(infoLog), nullptr, infoLog.data());
-        logger::Error("Shader: vertex shader compilation error: {}", infoLog.data());
+        logger::Error("gl_shader: vertex shader compilation error: {}", infoLog.data());
         return false;
     }
 
@@ -61,7 +61,7 @@ auto gl_shader::compile(std::span<char const> vert, std::span<char const> frag) 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(fragmentShader, sizeof(infoLog), nullptr, infoLog.data());
-        logger::Error("Shader: fragment shader compilation error: {}", infoLog.data());
+        logger::Error("gl_shader: fragment shader compilation error: {}", infoLog.data());
         return false;
     }
 
@@ -74,11 +74,11 @@ auto gl_shader::compile(std::span<char const> vert, std::span<char const> frag) 
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(ID, sizeof(infoLog), nullptr, infoLog.data());
-        logger::Error("Shader: linking error: {}", infoLog.data());
+        logger::Error("gl_shader: linking error: {}", infoLog.data());
         return false;
     }
 
-    logger::Debug("Shader: linked ID {}", ID);
+    logger::Debug("gl_shader: linked ID {}", ID);
 
     // Delete shaders
     glDeleteShader(vertexShader);

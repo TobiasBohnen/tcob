@@ -87,10 +87,10 @@ void gl_vertex_array::resize(usize vertCount, usize indCount)
         _eboSize = std::max(newEboSize, _eboSize * 2);
 
         if (creating) {
-            logger::Debug("VertexArray: created ID {}: {} vertices, {} indices",
+            logger::Debug("gl_vertex_array: created ID {}: {} vertices, {} indices",
                           ID, _vboSize / sizeof(vertex), _eboSize / sizeof(GLuint));
         } else {
-            logger::Debug("VertexArray: resized ID {}: {} vertices, {} indices",
+            logger::Debug("gl_vertex_array: resized ID {}: {} vertices, {} indices",
                           ID, _vboSize / sizeof(vertex), _eboSize / sizeof(GLuint));
         }
 

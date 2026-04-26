@@ -20,7 +20,7 @@ gl_uniform_buffer::gl_uniform_buffer(usize size)
     GLCHECK(glBindBuffer(GL_UNIFORM_BUFFER, ID));
     GLCHECK(glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW));
 
-    logger::Debug("UniformBuffer: created ID {}: size {}", ID, size);
+    logger::Debug("gles_uniform_buffer: created ID {}: size {}", ID, size);
 }
 
 gl_uniform_buffer::~gl_uniform_buffer()

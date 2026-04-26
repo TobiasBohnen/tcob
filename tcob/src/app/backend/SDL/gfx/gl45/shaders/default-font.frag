@@ -11,8 +11,6 @@ layout(location = 0)in VS_OUT
 
 layout(binding = 0)uniform sampler2DArray texture0;
 
-const float smoothing = 1.0 / 16.0;
-
 void main() {
    fragColor = fs_in.color * texture(texture0, fs_in.tex_coords).r;
 }

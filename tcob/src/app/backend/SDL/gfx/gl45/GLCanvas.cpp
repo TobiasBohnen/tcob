@@ -308,7 +308,7 @@ void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)
 {
     i32 const size {_gradientTexture.get_size().Height};
     if (idx >= size) { // grow texture
-        logger::Info("GLCanvas: gradient texture resize from {} to {}", size, size * 2);
+        logger::Info("gl_canvas: gradient texture resize from {} to {}", size, size * 2);
         auto const img {_gradientTexture.copy_to_image(0)};
         _gradientTexture.resize({color_gradient::Size, size * 2}, 1, texture::format::RGBA8);
         _gradientTexture.set_wrapping(texture::wrapping::ClampToEdge);

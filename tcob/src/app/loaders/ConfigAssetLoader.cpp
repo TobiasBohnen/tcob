@@ -225,7 +225,7 @@ void cfg_asset_loader_manager::load_script(path const& file)
     if (load.load(file)) {
         _object.merge(load, true);
     } else {
-        logger::Error("AssetLoader '{}': script loading failed.", file);
+        logger::Error("asset_loader '{}': script loading failed.", file);
     }
 }
 

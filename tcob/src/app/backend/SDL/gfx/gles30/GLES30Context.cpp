@@ -54,17 +54,17 @@ gl_context::gl_context(SDL_Window* window)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
-    logger::Info("GLESContext: want OpenGLES version: {}.{}", glMajor, glMinor);
+    logger::Info("gles_context: want OpenGLES version: {}.{}", glMajor, glMinor);
 
     _context = SDL_GL_CreateContext(window); // NOLINT(cppcoreguidelines-prefer-member-initializer)
     if (!_context) {
-        logger::Error("GLESContext: OpenGL context creation failed!");
+        logger::Error("gles_context: OpenGL context creation failed!");
         throw std::runtime_error("OpenGL context creation failed");
     }
 
     if (!gladLoadGLES2(&Load)) {
         SDL_GL_DestroyContext(static_cast<SDL_GLContext>(_context));
-        logger::Error("GLESContext: OpenGL loading failed!");
+        logger::Error("gles_context: OpenGL loading failed!");
         throw std::runtime_error("OpenGL loading failed");
     }
 
@@ -72,7 +72,7 @@ gl_context::gl_context(SDL_Window* window)
     glGetIntegerv(GL_MAJOR_VERSION, &checkMajor);
     glGetIntegerv(GL_MINOR_VERSION, &checkMinor);
 
-    logger::Info("GLESContext: have OpenGLES version: {}.{}", checkMajor, checkMinor);
+    logger::Info("gles_context: have OpenGLES version: {}.{}", checkMajor, checkMinor);
 
     // init default shaders
     _defaultShader = std::make_shared<gl_shader>();

@@ -43,11 +43,11 @@ inline void loader<T>::set_asset_status(asset_ptr<T> asset, asset_status status)
     case asset_status::Created:  break;
     case asset_status::Loading:  break;
     case asset_status::Loaded:
-        logger::Info("AssetLoader: group '{}' type '{}' -> asset '{}' successfully loaded",
+        logger::Info("asset_loader: group '{}' type '{}' -> asset '{}' successfully loaded",
                      group().name(), bucket()->name(), asset.get()->name());
         break;
     case asset_status::Error:
-        logger::Error("AssetLoader: group '{}' type '{}' -> asset '{}' loading failed",
+        logger::Error("asset_loader: group '{}' type '{}' -> asset '{}' loading failed",
                       group().name(), bucket()->name(), asset.get()->name());
         break;
     }

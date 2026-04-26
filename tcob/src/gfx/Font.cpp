@@ -100,7 +100,7 @@ auto font::shape_text(utf8_string_view text, bool kerning) -> std::vector<glyph>
     for (u32 i {0}; i < len; ++i) {
         u32 const cp0 {u32text[i]};
         if (!cache_render_glyph(cp0)) {
-            logger::Info("Font {}: texture capacity exceeded, expanding to {} layers.", _name, _textureLayerCount + 1);
+            logger::Info("font {}: texture capacity exceeded, expanding to {} layers.", _name, _textureLayerCount + 1);
             ++_textureLayerCount;
             _glyphCache.clear();
             _textureNeedsSetup = true;

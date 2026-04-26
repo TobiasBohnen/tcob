@@ -24,7 +24,7 @@ cursor::cursor()
 {
     ActiveMode.Changed.connect([this](string const& name) {
         if (!_modes.contains(name)) {
-            logger::Error("Cursor: missing mode {}", name);
+            logger::Error("cursor: missing mode {}", name);
             return;
         }
 

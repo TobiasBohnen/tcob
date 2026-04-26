@@ -117,7 +117,7 @@ auto library::asset_stats(string const& group) const -> group_stats
 {
     auto it {_groups.find(group)};
     if (it == _groups.end()) {
-        logger::Error("AssetLibrary: group '{}' not found.", group);
+        logger::Error("asset_library: group '{}' not found.", group);
         return {};
     }
 

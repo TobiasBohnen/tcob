@@ -39,12 +39,12 @@ gl_window::gl_window(size_i size)
     i32 const flags {SDL_WINDOW_OPENGL};
 
     // Create window
-    logger::Info("GLESWindow: creating window");
+    logger::Info("gles_window: creating window");
     _window = SDL_CreateWindow("", size.Width, size.Height, flags);
     SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
     if (!_window) {
-        logger::Error("GLESWindow: Window creation failed!");
+        logger::Error("gles_window: Window creation failed!");
         throw std::runtime_error("Window creation failed");
     }
 

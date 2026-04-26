@@ -104,7 +104,7 @@ auto font_family::get_font(font::style style, u32 size) -> asset_ptr<font>
 {
     auto fallbackStyle {get_style(style)};
     if (!fallbackStyle) {
-        logger::Error("FontFamily {}: no sources for font style: style {}, size {}.", _name, style, size);
+        logger::Error("font_family {}: no sources for font style: style {}, size {}.", _name, style, size);
         return {};
     }
 
@@ -125,7 +125,7 @@ auto font_family::get_font(font::style style, u32 size) -> asset_ptr<font>
         entry.Data = fs.read_all<std::byte>();
     }
 
-    logger::Info("FontFamily {}: created new font: style {}, size {}.", _name, fontStyle, size);
+    logger::Info("font_family {}: created new font: style {}, size {}.", _name, fontStyle, size);
 
     // load font
     auto const            fontName {std::format("{}-{}-{}", _name, fontStyle, size)};
@@ -143,34 +143,34 @@ void font_family::FindSources(font_family& fam, path const& source)
 {
     fam._styles.clear();
 
-    auto const files {io::enumerate(io::get_parent_folder(source), {source + "*.ttf", true}, false)};
+    auto const files {io::enumerate(io::get_parent_folder(source), {.String = source + "*.ttf", .MatchWholePath = true}, false)};
     for (auto const& file : files) {
         font::style       style;
         string_view const name {string_view {file}.substr(source.size())};
 
-        style.IsItalic = name.find("Italic") != string::npos;
+        style.IsItalic = name.contains("Italic");
 
-        if (name.find("Thin") != string::npos || name.find("Hairline") != string::npos) {   // Thin
+        if (name.contains("Thin") || name.contains("Hairline")) {   // Thin
             style.Weight = font::weight::Thin;
-        } else if (name.find("Light") != string::npos) {
-            if (name.find("Extra") != string::npos || name.find("Ultra") != string::npos) { // Light or ExtraLight
+        } else if (name.contains("Light")) {
+            if (name.contains("Extra") || name.contains("Ultra")) { // Light or ExtraLight
                 style.Weight = font::weight::ExtraLight;
             } else {
                 style.Weight = font::weight::Light;
             }
-        } else if (name.find("Medium") != string::npos) { // Medium
+        } else if (name.contains("Medium")) { // Medium
             style.Weight = font::weight::Medium;
-        } else if (name.find("Bold") != string::npos) {   // Bold or SemiBold or ExtraBold
-            if (name.find("Semi") != string::npos || name.find("Demi") != string::npos) {
+        } else if (name.contains("Bold")) {   // Bold or SemiBold or ExtraBold
+            if (name.contains("Semi") || name.contains("Demi")) {
                 style.Weight = font::weight::SemiBold;
-            } else if (name.find("Extra") != string::npos || name.find("Ultra") != string::npos) {
+            } else if (name.contains("Extra") || name.contains("Ultra")) {
                 style.Weight = font::weight::ExtraBold;
             } else {
                 style.Weight = font::weight::Bold;
             }
-        } else if (name.find("Heavy") != string::npos || name.find("Black") != string::npos) { // Heavy
+        } else if (name.contains("Heavy") || name.contains("Black")) { // Heavy
             style.Weight = font::weight::Heavy;
-        } else {                                                                               // Normal
+        } else {                                                       // Normal
             style.Weight = font::weight::Normal;
         }
 

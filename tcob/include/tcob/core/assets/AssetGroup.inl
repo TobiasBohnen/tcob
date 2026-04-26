@@ -120,7 +120,7 @@ template <typename T>
 inline auto group::get(string const& assetName) const -> asset_ptr<T>
 {
     if (!has<T>(assetName)) {
-        logger::Error("AssetGroup '{}': asset '{}' not found.", _name, assetName);
+        logger::Error("asset_group '{}': asset '{}' not found.", _name, assetName);
         return asset_ptr<T> {nullptr};
     }
 

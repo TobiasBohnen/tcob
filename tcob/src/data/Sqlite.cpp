@@ -180,7 +180,7 @@ auto database_view::close() -> bool
 auto database_view::prepare(utf8_string_view sql) const -> statement_view
 {
     assert(_db);
-    logger::Debug("SQLite: prepare: {}", sql);
+    logger::Debug("sqlite: prepare: {}", sql);
     sqlite3_stmt* stmt {};
     sqlite3_prepare_v2(_db, sql.data(), static_cast<int>(sql.size()), &stmt, nullptr);
     return statement_view {stmt};
@@ -189,7 +189,7 @@ auto database_view::prepare(utf8_string_view sql) const -> statement_view
 auto database_view::exec(utf8_string const& sql) const -> bool
 {
     assert(_db);
-    logger::Debug("SQLite: exec: {}", sql);
+    logger::Debug("sqlite: exec: {}", sql);
     [[maybe_unused]] char* err {nullptr};
     return sqlite3_exec(_db, sql.c_str(), nullptr, nullptr, &err) == SQLITE_OK;
 }
