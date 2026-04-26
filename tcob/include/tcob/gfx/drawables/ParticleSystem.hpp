@@ -93,9 +93,12 @@ public:
     public:
         particle_settings Template;
 
-        bool                        IsExplosion {false};
-        rect_f                      SpawnArea {rect_f::Zero};
-        f32                         SpawnRate {0};
+        bool IsExplosion {false};
+        bool Transient {false};
+
+        rect_f SpawnArea {rect_f::Zero};
+        f32    SpawnRate {0};
+
         std::optional<milliseconds> Lifetime {};
 
         auto operator==(settings const& other) const -> bool = default;
@@ -104,9 +107,10 @@ public:
         {
             return std::tuple {
                 member<&particle_emitter::settings::Template> {"template"},
+                member<&particle_emitter::settings::IsExplosion> {"is_explosion"},
+                member<&particle_emitter::settings::Transient> {"transient"},
                 member<&particle_emitter::settings::SpawnArea> {"spawn_area"},
                 member<&particle_emitter::settings::SpawnRate> {"spawn_rate"},
-                member<&particle_emitter::settings::IsExplosion> {"is_explosion"},
                 member<&particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
             };
         }
@@ -114,15 +118,20 @@ public:
 
     ////////////////////////////////////////////////////////////
 
+    explicit particle_emitter(uid id);
+
     settings Settings;
 
     auto is_alive() const -> bool;
+    auto id() const -> uid;
 
     void reset();
 
     void emit(particle_system& system, milliseconds deltaTime);
 
 private:
+    uid _id;
+
     rng          _rng;
     milliseconds _remainingLife {1000};
     f64          _emissionDiff {0};
@@ -151,7 +160,8 @@ public:
     std::vector<milliseconds>   StartingLife;
     std::vector<color>          Color;
     std::vector<texture_region> UVRegion;
-    std::vector<i64>            ID;
+    std::vector<uid>            EmitterID;
+    std::vector<uid>            ID;
 
     void reserve(isize count);
     void push_back();
@@ -167,12 +177,15 @@ struct particle_event {
 };
 
 class TCOB_API particle_system final : public drawable, public updatable {
+    friend class particle_emitter;
+
 public:
     explicit particle_system(bool multiThreaded = false, isize reservedParticleCount = 0);
 
     ~particle_system() override = default;
 
     signal<particle_event const> ParticleUpdate;
+    signal<particle_event const> ParticleDeath;
 
     particles Particles;
 
@@ -190,9 +203,6 @@ public:
 
     auto particle_count() const -> isize;
 
-    auto activate_particle() -> isize;
-    void deactivate_particle(isize index);
-
 protected:
     void on_update(milliseconds deltaTime) override;
 
@@ -201,6 +211,9 @@ protected:
     void on_draw_to(render_target& target, transform const& xform) override;
 
 private:
+    auto activate_particle() -> isize;
+    void deactivate_particle(isize index);
+
     void reserve(isize count);
 
     renderer          _renderer {buffer_usage_hint::DynamicDraw};

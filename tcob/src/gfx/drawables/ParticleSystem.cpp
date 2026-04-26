@@ -56,6 +56,7 @@ void particles::reserve(isize count)
     Color.reserve(count);
     UVRegion.reserve(count);
     ID.reserve(count);
+    EmitterID.reserve(count);
 }
 
 void particles::push_back()
@@ -76,6 +77,7 @@ void particles::push_back()
     Color.push_back(colors::White);
     UVRegion.push_back({});
     ID.push_back(0);
+    EmitterID.push_back(0);
 }
 
 void particles::swap(isize a, isize b)
@@ -96,6 +98,7 @@ void particles::swap(isize a, isize b)
     std::swap(Color[a], Color[b]);
     std::swap(UVRegion[a], UVRegion[b]);
     std::swap(ID[a], ID[b]);
+    std::swap(EmitterID[a], EmitterID[b]);
 }
 
 ////////////////////////////////////////////////////////////
@@ -124,6 +127,8 @@ void particle_system::start()
 {
     if (_isRunning) { return; }
 
+    std::erase_if(_emitters, [](auto const& e) { return e->Settings.Transient; });
+
     _isRunning = true;
     for (auto& emitter : _emitters) { emitter->reset(); }
 
@@ -147,7 +152,8 @@ void particle_system::stop()
 
 auto particle_system::create_emitter() -> particle_emitter&
 {
-    return *_emitters.emplace_back(std::make_unique<particle_emitter>());
+    auto& retValue {*_emitters.emplace_back(std::make_unique<particle_emitter>(get_random_ID()))};
+    return retValue;
 }
 
 auto particle_system::remove_emitter(particle_emitter const& emitter) -> bool
@@ -245,6 +251,7 @@ void particle_system::on_update(milliseconds deltaTime)
         _aliveParticleCount, _multiThreaded ? 64 : _aliveParticleCount);
 
     for (auto const& i : toBeDeactivated) {
+        ParticleDeath({.Particles = Particles, .Index = i, .DeltaTime = deltaTime});
         deactivate_particle(i);
     }
 }
@@ -314,9 +321,19 @@ static auto minmax_rng(min_max<milliseconds> const& range, auto&& rng) -> millis
     return milliseconds {rng(range.first.count(), range.second.count())};
 }
 
+particle_emitter::particle_emitter(uid id)
+    : _id {id}
+{
+}
+
 auto particle_emitter::is_alive() const -> bool
 {
     return _alive && (!Settings.Lifetime || _remainingLife > milliseconds::zero());
+}
+
+auto particle_emitter::id() const -> uid
+{
+    return _id;
 }
 
 void particle_emitter::reset()
@@ -364,7 +381,8 @@ void particle_emitter::emit(particle_system& system, milliseconds deltaTime)
         p.Color[idx] = {col.R, col.G, col.B, alpha};
 
         // get id
-        p.ID[idx] = get_random_ID();
+        p.ID[idx]        = get_random_ID();
+        p.EmitterID[idx] = _id;
 
         // set life
         milliseconds const life {minmax_rng(tmpl.Lifetime, _rng)};
