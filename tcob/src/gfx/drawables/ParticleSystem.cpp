@@ -126,7 +126,6 @@ void particle_system::on_update(milliseconds deltaTime)
             for (isize i {ctx.Start}; i < ctx.End; ++i) {
                 auto& particle {_particles[i]};
                 if (particle.is_alive()) {
-                    ParticleUpdate({.Particle = particle, .DeltaTime = deltaTime});
                     particle.update(deltaTime);
                 } else {
                     std::scoped_lock lock {_mutex};

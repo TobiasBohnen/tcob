@@ -20,7 +20,6 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Serialization.hpp"
-#include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
@@ -126,13 +125,6 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-struct particle_event {
-    particle&    Particle;
-    milliseconds DeltaTime;
-};
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API particle_emitter final : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
@@ -184,8 +176,6 @@ public:
     explicit particle_system(bool multiThreaded = false, isize reservedParticleCount = 0);
 
     ~particle_system() override = default;
-
-    signal<particle_event> ParticleUpdate;
 
     prop<asset_ptr<material>> Material;
 
