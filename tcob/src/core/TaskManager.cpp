@@ -94,9 +94,9 @@ void task_manager::add_task(task_func&& func)
 auto task_manager::process_queue(milliseconds deltaTime, bool abort) -> bool
 {
     assert(std::this_thread::get_id() == _mainThreadID);
+    std::scoped_lock lock {_deferredMutex};
     if (_deferredQueueFront.empty()) { return true; }
 
-    std::scoped_lock lock {_deferredMutex};
     std::swap(_deferredQueueFront, _deferredQueueBack);
 
     for (auto& task : _deferredQueueBack) {
@@ -108,7 +108,7 @@ auto task_manager::process_queue(milliseconds deltaTime, bool abort) -> bool
     }
     _deferredQueueBack.clear();
 
-    return false;
+    return _deferredQueueFront.empty();
 }
 
 void task_manager::worker_thread(std::stop_token const& stopToken)
