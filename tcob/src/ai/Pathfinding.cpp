@@ -15,50 +15,39 @@
 
 namespace tcob::ai {
 
-astar_pathfinding::astar_pathfinding(bool allowDiagonal, heuristic heuristic, u64 turnPenalty)
-    : _allowDiagonal {allowDiagonal}
-    , _heuristic {heuristic}
-    , _turnPenalty {turnPenalty}
+auto pathfinding::distance(heuristic h, point_i a, point_i b) -> u64
 {
-}
-
-auto astar_pathfinding::distance(point_i a, point_i b) const -> u64
-{
-    switch (_heuristic) {
+    switch (h) {
     case heuristic::Euclidean: return static_cast<u64>(euclidean_distance(a, b));
     case heuristic::Manhattan: return static_cast<u64>(manhattan_distance(a, b));
     case heuristic::Chebyshev: return static_cast<u64>(chebyshev_distance(a, b));
     }
-
     return 0;
 }
 
-auto astar_pathfinding::neighbors(size_i gridSize, point_i pos) const -> std::vector<point_i>
+auto pathfinding::neighbors(bool allowDiagonal, size_i gridSize, point_i pos) -> std::vector<point_i>
 {
     static constexpr std::array<point_i, 4> orthogonalDirections {{
-        {0, 1},  // Down
-        {1, 0},  // Right
-        {0, -1}, // Up
-        {-1, 0}, // Left
+        {0, 1},
+        {1, 0},
+        {0, -1},
+        {-1, 0},
     }};
-
     static constexpr std::array<point_i, 4> diagonalDirections {{
-        {1, 1},   // RightDown
-        {-1, -1}, // LeftUp
-        {1, -1},  // RightUp
-        {-1, 1},  // LeftDown
+        {1, 1},
+        {-1, -1},
+        {1, -1},
+        {-1, 1},
     }};
 
     std::vector<point_i> retValue;
-
     for (auto const& dir : orthogonalDirections) {
         point_i const neighbor {pos.X + dir.X, pos.Y + dir.Y};
         if (neighbor.X >= 0 && neighbor.X < gridSize.Width && neighbor.Y >= 0 && neighbor.Y < gridSize.Height) {
             retValue.push_back(neighbor);
         }
     }
-
-    if (_allowDiagonal) {
+    if (allowDiagonal) {
         for (auto const& dir : diagonalDirections) {
             point_i const neighbor {pos.X + dir.X, pos.Y + dir.Y};
             if (neighbor.X >= 0 && neighbor.X < gridSize.Width && neighbor.Y >= 0 && neighbor.Y < gridSize.Height) {
@@ -66,11 +55,10 @@ auto astar_pathfinding::neighbors(size_i gridSize, point_i pos) const -> std::ve
             }
         }
     }
-
     return retValue;
 }
 
-auto astar_pathfinding::reconstruct_path(std::unordered_map<point_i, point_i> const& cameFrom, point_i current) const -> std::vector<point_i>
+auto pathfinding::reconstruct_path(std::unordered_map<point_i, point_i> const& cameFrom, point_i current) -> std::vector<point_i>
 {
     std::vector<point_i> retValue;
     while (cameFrom.contains(current)) {
@@ -81,9 +69,19 @@ auto astar_pathfinding::reconstruct_path(std::unordered_map<point_i, point_i> co
     return retValue;
 }
 
-auto astar_pathfinding::node::operator>(node const& other) const -> bool
+////////////////////////////////////////////////////////////
+
+astar_pathfinding::astar_pathfinding(bool allowDiagonal)
+    : _allowDiagonal {allowDiagonal}
+    , _heuristic {allowDiagonal ? pathfinding::heuristic::Chebyshev : pathfinding::heuristic::Manhattan}
 {
-    return F > other.F;
+}
+
+////////////////////////////////////////////////////////////
+
+thetastar_pathfinding::thetastar_pathfinding(bool allowDiagonal)
+    : _allowDiagonal {allowDiagonal}
+{
 }
 
 }

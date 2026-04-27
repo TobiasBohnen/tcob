@@ -7,7 +7,6 @@
 #include "tcob/tcob_config.hpp"
 
 #include <chrono>
-#include <span>
 #include <vector>
 
 #include "tcob/core/Concepts.hpp"
@@ -85,7 +84,7 @@ namespace random {
 
     ////////////////////////////////////////////////////////////
 
-    template <typename T, RandomEngine E = xoroshiro_128_plus_plus>
+    template <RandomEngine E = xoroshiro_128_plus_plus>
     class shuffle final {
     public:
         using state_type = typename E::state_type;
@@ -96,7 +95,7 @@ namespace random {
 
         auto state() const -> state_type const&;
 
-        void operator()(std::span<T> span);
+        void operator()(auto&& span);
 
     private:
         prng<E, core_uniform_distribution> _random {};

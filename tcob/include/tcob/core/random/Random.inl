@@ -6,7 +6,6 @@
 #pragma once
 #include "Random.hpp"
 
-#include <span>
 #include <vector>
 
 #include "tcob/core/random/Engine.hpp"
@@ -90,26 +89,26 @@ inline auto dice<N, E>::state() const -> state_type const&
 
 ////////////////////////////////////////////////////////////
 
-template <typename T, RandomEngine E>
-inline shuffle<T, E>::shuffle(seed_type seed)
+template <RandomEngine E>
+inline shuffle<E>::shuffle(seed_type seed)
     : _random {seed}
 {
 }
 
-template <typename T, RandomEngine E>
-inline shuffle<T, E>::shuffle(state_type state)
+template <RandomEngine E>
+inline shuffle<E>::shuffle(state_type state)
     : _random {state}
 {
 }
 
-template <typename T, RandomEngine E>
-inline auto shuffle<T, E>::state() const -> state_type const&
+template <RandomEngine E>
+inline auto shuffle<E>::state() const -> state_type const&
 {
     return _random.state();
 }
 
-template <typename T, RandomEngine E>
-inline void shuffle<T, E>::operator()(std::span<T> span)
+template <RandomEngine E>
+inline void shuffle<E>::operator()(auto&& span)
 {
     if (span.size() <= 1) { return; }
 

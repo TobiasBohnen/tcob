@@ -17,45 +17,67 @@ namespace tcob::ai {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-concept AStarGrid =
+concept PathGrid =
     requires(T& t, point_i p) {
         { t.get_cost(p, p) } -> std::same_as<u64>;
     };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API astar_pathfinding final {
+class TCOB_API pathfinding final {
 public:
+    static constexpr u64 IMPASSABLE_COST {std::numeric_limits<u64>::max()};
+
     enum class heuristic : u8 {
         Euclidean,
         Manhattan,
         Chebyshev
     };
 
-    explicit astar_pathfinding(bool allowDiagonal = false, heuristic heuristic = heuristic::Manhattan, u64 turnPenalty = 0);
+    static auto distance(heuristic h, point_i a, point_i b) -> u64;
+    static auto neighbors(bool allowDiagonal, size_i gridSize, point_i pos) -> std::vector<point_i>;
+    static auto reconstruct_path(std::unordered_map<point_i, point_i> const& cameFrom, point_i current) -> std::vector<point_i>;
+};
 
-    static constexpr u64 IMPASSABLE_COST {std::numeric_limits<u64>::max()};
+////////////////////////////////////////////////////////////
 
-    auto find_path(AStarGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
+class TCOB_API astar_pathfinding final {
+public:
+    explicit astar_pathfinding(bool allowDiagonal = false);
+
+    auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
 private:
-    class TCOB_API node {
-    public:
+    struct node {
         point_i Pos;
-        point_i Dir;
         u64     G {};
         u64     F {};
-
-        auto operator>(node const& other) const -> bool;
+        auto    operator>(node const& other) const -> bool { return F > other.F; }
     };
 
-    auto distance(point_i a, point_i b) const -> u64;
-    auto neighbors(size_i gridSize, point_i pos) const -> std::vector<point_i>;
-    auto reconstruct_path(std::unordered_map<point_i, point_i> const& cameFrom, point_i current) const -> std::vector<point_i>;
+    bool                   _allowDiagonal;
+    pathfinding::heuristic _heuristic;
+};
 
-    bool      _allowDiagonal;
-    heuristic _heuristic;
-    u64       _turnPenalty;
+////////////////////////////////////////////////////////////
+
+class TCOB_API thetastar_pathfinding final {
+public:
+    explicit thetastar_pathfinding(bool allowDiagonal = true);
+
+    auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
+
+private:
+    struct node {
+        point_i Pos;
+        u64     G {};
+        u64     F {};
+        auto    operator>(node const& other) const -> bool { return F > other.F; }
+    };
+
+    auto has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) const -> bool;
+
+    bool _allowDiagonal;
 };
 
 }
