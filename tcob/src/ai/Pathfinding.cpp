@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "tcob/core/Grid.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 
@@ -69,9 +70,28 @@ auto pathfinding::reconstruct_path(std::unordered_map<point_i, point_i> const& c
     return retValue;
 }
 
+auto pathfinding::reconstruct_path(grid<point_i> const& cameFrom, point_i current, point_i sentinel) -> std::vector<point_i>
+{
+    std::vector<point_i> retValue;
+    while (cameFrom[current] != sentinel) {
+        retValue.push_back(current);
+        current = cameFrom[current];
+    }
+    std::ranges::reverse(retValue);
+    return retValue;
+}
+
 ////////////////////////////////////////////////////////////
 
 astar_pathfinding::astar_pathfinding(bool allowDiagonal)
+    : _allowDiagonal {allowDiagonal}
+    , _heuristic {allowDiagonal ? pathfinding::heuristic::Chebyshev : pathfinding::heuristic::Manhattan}
+{
+}
+
+////////////////////////////////////////////////////////////
+
+bidir_astar_pathfinding::bidir_astar_pathfinding(bool allowDiagonal)
     : _allowDiagonal {allowDiagonal}
     , _heuristic {allowDiagonal ? pathfinding::heuristic::Chebyshev : pathfinding::heuristic::Manhattan}
 {

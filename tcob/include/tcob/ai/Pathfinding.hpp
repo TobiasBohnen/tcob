@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "tcob/core/Grid.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 
@@ -36,7 +37,9 @@ public:
 
     static auto distance(heuristic h, point_i a, point_i b) -> u64;
     static auto neighbors(bool allowDiagonal, size_i gridSize, point_i pos) -> std::vector<point_i>;
+
     static auto reconstruct_path(std::unordered_map<point_i, point_i> const& cameFrom, point_i current) -> std::vector<point_i>;
+    static auto reconstruct_path(grid<point_i> const& cameFrom, point_i current, point_i sentinel) -> std::vector<point_i>;
 };
 
 ////////////////////////////////////////////////////////////
@@ -44,6 +47,26 @@ public:
 class TCOB_API astar_pathfinding final {
 public:
     explicit astar_pathfinding(bool allowDiagonal = false);
+
+    auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
+
+private:
+    struct node {
+        point_i Pos;
+        u64     G {};
+        u64     F {};
+        auto    operator>(node const& other) const -> bool { return F > other.F; }
+    };
+
+    bool                   _allowDiagonal;
+    pathfinding::heuristic _heuristic;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API bidir_astar_pathfinding final {
+public:
+    explicit bidir_astar_pathfinding(bool allowDiagonal = false);
 
     auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 

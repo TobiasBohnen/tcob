@@ -61,6 +61,91 @@ auto astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExtent, p
 
 ////////////////////////////////////////////////////////////
 
+auto bidir_astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
+{
+    if (start == finish) { return {start}; }
+    if (testGrid.get_cost(start, start) == pathfinding::IMPASSABLE_COST || testGrid.get_cost(finish, finish) == pathfinding::IMPASSABLE_COST) { return {}; }
+
+    static constexpr point_i SENTINEL {-1, -1};
+
+    using open_set = std::priority_queue<node, std::vector<node>, std::greater<>>;
+    open_set      openF, openB;
+    grid<point_i> cameFromF {gridExtent, SENTINEL};
+    grid<point_i> cameFromB {gridExtent, SENTINEL};
+    grid<u64>     gScoreF {gridExtent, pathfinding::IMPASSABLE_COST};
+    grid<u64>     gScoreB {gridExtent, pathfinding::IMPASSABLE_COST};
+
+    gScoreF[start]  = 0;
+    gScoreB[finish] = 0;
+    openF.push({.Pos = start, .G = 0, .F = pathfinding::distance(_heuristic, start, finish)});
+    openB.push({.Pos = finish, .G = 0, .F = pathfinding::distance(_heuristic, finish, start)});
+
+    u64     bestCost {pathfinding::IMPASSABLE_COST};
+    point_i meetingPt {SENTINEL};
+
+    auto const expand {[&](open_set& open, grid<u64>& gScore, grid<u64>& gScoreOther, grid<point_i>& cameFrom, point_i target) {
+        if (open.empty()) { return; }
+
+        node const top {open.top()};
+        open.pop();
+
+        if (top.G > gScore[top.Pos]) { return; }
+
+        point_i const current {top.Pos};
+
+        for (auto const& neighbor : pathfinding::neighbors(_allowDiagonal, gridExtent, current)) {
+            auto const cost {testGrid.get_cost(current, neighbor)};
+            if (cost == pathfinding::IMPASSABLE_COST) { continue; }
+            if (gScore[current] > (pathfinding::IMPASSABLE_COST - cost)) { continue; }
+
+            u64 const tentative_g {gScore[current] + cost};
+            if (tentative_g < gScore[neighbor]) {
+                cameFrom[neighbor] = current;
+                gScore[neighbor]   = tentative_g;
+                u64 const h {pathfinding::distance(_heuristic, neighbor, target)};
+                open.push({.Pos = neighbor, .G = tentative_g, .F = tentative_g + h});
+
+                if (gScoreOther[neighbor] != pathfinding::IMPASSABLE_COST) {
+                    u64 const candidate {tentative_g + gScoreOther[neighbor]};
+                    if (candidate < bestCost) {
+                        bestCost  = candidate;
+                        meetingPt = neighbor;
+                    }
+                }
+            }
+        }
+    }};
+
+    for (;;) {
+        if (openF.empty() && openB.empty()) { break; }
+
+        u64 const minF {openF.empty() ? pathfinding::IMPASSABLE_COST : openF.top().F};
+        u64 const minB {openB.empty() ? pathfinding::IMPASSABLE_COST : openB.top().F};
+        u64 const minSum {(minF > (pathfinding::IMPASSABLE_COST - minB)) ? pathfinding::IMPASSABLE_COST : minF + minB};
+        if (minSum >= bestCost) { break; }
+
+        if (minF <= minB) {
+            expand(openF, gScoreF, gScoreB, cameFromF, finish);
+        } else {
+            expand(openB, gScoreB, gScoreF, cameFromB, start);
+        }
+    }
+
+    if (meetingPt == SENTINEL) { return {}; }
+
+    std::vector<point_i> path {pathfinding::reconstruct_path(cameFromF, meetingPt, SENTINEL)};
+
+    point_i cur {meetingPt};
+    while (cameFromB[cur] != SENTINEL) {
+        cur = cameFromB[cur];
+        path.push_back(cur);
+    }
+
+    return path;
+}
+
+////////////////////////////////////////////////////////////
+
 auto thetastar_pathfinding::has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) const -> bool
 {
     auto blocked {[&](i32 x, i32 y) -> bool {
