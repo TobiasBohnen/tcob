@@ -210,24 +210,31 @@ auto thetastar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExten
         }
 
         for (auto const& neighbor : pathfinding::neighbors(_allowDiagonal, gridExtent, current)) {
-            auto const cost {testGrid.get_cost(current, neighbor)};
-            if (cost == pathfinding::IMPASSABLE_COST) { continue; }
-            if (gScore[current] > pathfinding::IMPASSABLE_COST - cost) { continue; }
+            auto const neighborCost {testGrid.get_cost(current, neighbor)};
+            if (neighborCost == pathfinding::IMPASSABLE_COST) { continue; }
 
-            point_i const parent {cameFrom.contains(current) ? cameFrom.at(current) : current};
+            auto          it {cameFrom.find(current)};
+            point_i const parent {(it != cameFrom.end()) ? it->second : current};
+
             if (has_line_of_sight(testGrid, gridExtent, parent, neighbor)) {
-                u64 const tentative_g {gScore[parent] + pathfinding::distance(pathfinding::heuristic::Euclidean, parent, neighbor)};
+                u64 const d {pathfinding::distance(pathfinding::heuristic::Euclidean, parent, neighbor)};
+                if (gScore[parent] > (pathfinding::IMPASSABLE_COST - d)) { continue; }
+                u64 const tentative_g {gScore[parent] + d};
                 if (tentative_g < gScore[neighbor]) {
                     cameFrom[neighbor] = parent;
                     gScore[neighbor]   = tentative_g;
-                    openSet.push({.Pos = neighbor, .G = tentative_g, .F = tentative_g + pathfinding::distance(pathfinding::heuristic::Euclidean, neighbor, finish)});
+                    u64 const h {pathfinding::distance(pathfinding::heuristic::Euclidean, neighbor, finish)};
+                    openSet.push({.Pos = neighbor, .G = tentative_g, .F = tentative_g + h});
                 }
             } else {
-                u64 const tentative_g {gScore[current] + cost};
+                u64 const d {pathfinding::distance(pathfinding::heuristic::Euclidean, current, neighbor)};
+                if (gScore[current] > (pathfinding::IMPASSABLE_COST - d)) { continue; }
+                u64 const tentative_g {gScore[current] + d};
                 if (tentative_g < gScore[neighbor]) {
                     cameFrom[neighbor] = current;
                     gScore[neighbor]   = tentative_g;
-                    openSet.push({.Pos = neighbor, .G = tentative_g, .F = tentative_g + pathfinding::distance(pathfinding::heuristic::Euclidean, neighbor, finish)});
+                    u64 const h {pathfinding::distance(pathfinding::heuristic::Euclidean, neighbor, finish)};
+                    openSet.push({.Pos = neighbor, .G = tentative_g, .F = tentative_g + h});
                 }
             }
         }
