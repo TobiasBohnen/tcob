@@ -277,7 +277,7 @@ auto pcg_32::operator()(state_type& state) const -> result_type
     state[0] = (old * 6364136223846793005ULL) + state[1];
     u32 const xorshifted {static_cast<u32>(((old >> 18u) ^ old) >> 27u)};
     u32 const rot {static_cast<u32>(old >> 59u)};
-    return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
+    return std::rotr(xorshifted, rot);
 }
 
 void pcg_32::seed(state_type& state, seed_type seed) const
