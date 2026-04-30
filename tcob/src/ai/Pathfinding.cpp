@@ -70,7 +70,23 @@ auto pathfinding::reconstruct_path(std::unordered_map<point_i, point_i> const& c
     return retValue;
 }
 
-auto pathfinding::reconstruct_path(grid<point_i> const& cameFrom, point_i current, point_i sentinel) -> std::vector<point_i>
+////////////////////////////////////////////////////////////
+
+astar_pathfinding::astar_pathfinding(bool allowDiagonal, pathfinding::heuristic heuristic)
+    : _allowDiagonal {allowDiagonal}
+    , _heuristic {heuristic}
+{
+}
+
+////////////////////////////////////////////////////////////
+
+bidir_astar_pathfinding::bidir_astar_pathfinding(bool allowDiagonal, pathfinding::heuristic heuristic)
+    : _allowDiagonal {allowDiagonal}
+    , _heuristic {heuristic}
+{
+}
+
+auto bidir_astar_pathfinding::reconstruct_path(grid<point_i> const& cameFrom, point_i current, point_i sentinel) -> std::vector<point_i>
 {
     std::vector<point_i> retValue;
     while (cameFrom[current] != sentinel) {
@@ -83,22 +99,6 @@ auto pathfinding::reconstruct_path(grid<point_i> const& cameFrom, point_i curren
 
 ////////////////////////////////////////////////////////////
 
-astar_pathfinding::astar_pathfinding(bool allowDiagonal)
-    : _allowDiagonal {allowDiagonal}
-    , _heuristic {allowDiagonal ? pathfinding::heuristic::Chebyshev : pathfinding::heuristic::Manhattan}
-{
-}
-
-////////////////////////////////////////////////////////////
-
-bidir_astar_pathfinding::bidir_astar_pathfinding(bool allowDiagonal)
-    : _allowDiagonal {allowDiagonal}
-    , _heuristic {allowDiagonal ? pathfinding::heuristic::Chebyshev : pathfinding::heuristic::Manhattan}
-{
-}
-
-////////////////////////////////////////////////////////////
-
 thetastar_pathfinding::thetastar_pathfinding(bool allowDiagonal)
     : _allowDiagonal {allowDiagonal}
 {
@@ -106,8 +106,9 @@ thetastar_pathfinding::thetastar_pathfinding(bool allowDiagonal)
 
 ////////////////////////////////////////////////////////////
 
-lpastar_pathfinding::lpastar_pathfinding(bool allowDiagonal)
+lpastar_pathfinding::lpastar_pathfinding(bool allowDiagonal, pathfinding::heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
+    , _heuristic {heuristic}
 {
 }
 
@@ -117,7 +118,7 @@ auto lpastar_pathfinding::calculate_key(point_i p) const -> key
     u64 const rhsVal {_rhs[p]};
     u64 const minVal {std::min(gVal, rhsVal)};
 
-    u64 const h {pathfinding::distance(pathfinding::heuristic::Euclidean, p, _finish)};
+    u64 const h {pathfinding::distance(_heuristic, p, _finish)};
 
     u64 const k1 {(minVal >= pathfinding::IMPASSABLE_COST - h)
                       ? pathfinding::IMPASSABLE_COST
@@ -154,8 +155,9 @@ auto lpastar_pathfinding::node::operator<(node const& other) const -> bool
 
 ////////////////////////////////////////////////////////////
 
-dstar_lite_pathfinding::dstar_lite_pathfinding(bool allowDiagonal)
+dstar_lite_pathfinding::dstar_lite_pathfinding(bool allowDiagonal, pathfinding::heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
+    , _heuristic {heuristic}
 {
 }
 
@@ -164,7 +166,7 @@ auto dstar_lite_pathfinding::calculate_key(point_i p) const -> key
     u64 const gVal {_g[p]};
     u64 const rhsVal {_rhs[p]};
     u64 const minVal {std::min(gVal, rhsVal)};
-    u64 const h {pathfinding::distance(pathfinding::heuristic::Euclidean, p, _current)};
+    u64 const h {pathfinding::distance(_heuristic, p, _current)};
     u64 const k1 {(minVal >= pathfinding::IMPASSABLE_COST - h)
                       ? pathfinding::IMPASSABLE_COST
                       : minVal + h + _km};
@@ -199,4 +201,10 @@ void dstar_lite_pathfinding::rebuild_path()
     if (!_path.empty()) { _path.erase(_path.begin()); }
 }
 
+auto dstar_lite_pathfinding::node::operator<(node const& other) const -> bool
+{
+    if (Key != other.Key) { return Key < other.Key; }
+    if (Pos.X != other.Pos.X) { return Pos.X < other.Pos.X; }
+    return Pos.Y < other.Pos.Y;
+}
 }
