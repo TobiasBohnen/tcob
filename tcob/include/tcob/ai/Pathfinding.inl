@@ -6,6 +6,7 @@
 #pragma once
 #include "Pathfinding.hpp"
 
+#include <algorithm>
 #include <cstdlib>
 #include <functional>
 #include <queue>
@@ -16,11 +17,11 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 
-namespace tcob::ai {
+namespace tcob::ai::pathfinding {
 
 ////////////////////////////////////////////////////////////
 
-auto astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
+auto astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
 {
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == pathfinding::IMPASSABLE_COST || testGrid.get_cost(finish, finish) == pathfinding::IMPASSABLE_COST) { return {}; }
@@ -30,7 +31,7 @@ auto astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExtent, p
     grid<u64>                                                    gScore {gridExtent, pathfinding::IMPASSABLE_COST};
 
     gScore[start] = 0;
-    openSet.push({.Pos = start, .G = 0, .F = pathfinding::distance(_heuristic, start, finish)});
+    openSet.push({.Pos = start, .G = 0, .F = pathfinding::detail::distance(_heuristic, start, finish)});
 
     while (!openSet.empty()) {
         node const top {openSet.top()};
@@ -41,10 +42,10 @@ auto astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExtent, p
         point_i const current {top.Pos};
 
         if (current == finish) {
-            return pathfinding::reconstruct_path(cameFrom, current);
+            return pathfinding::detail::reconstruct_path(cameFrom, current);
         }
 
-        for (auto const& neighbor : pathfinding::neighbors(_allowDiagonal, gridExtent, current)) {
+        for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, gridExtent, current)) {
             auto const cost {testGrid.get_cost(current, neighbor)};
             if (cost == pathfinding::IMPASSABLE_COST) { continue; }
             if (gScore[current] > pathfinding::IMPASSABLE_COST - cost) { continue; }
@@ -53,7 +54,7 @@ auto astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExtent, p
             if (tentative_g < gScore[neighbor]) {
                 cameFrom[neighbor] = current;
                 gScore[neighbor]   = tentative_g;
-                openSet.push({.Pos = neighbor, .G = tentative_g, .F = tentative_g + pathfinding::distance(_heuristic, neighbor, finish)});
+                openSet.push({.Pos = neighbor, .G = tentative_g, .F = tentative_g + pathfinding::detail::distance(_heuristic, neighbor, finish)});
             }
         }
     }
@@ -63,7 +64,7 @@ auto astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExtent, p
 
 ////////////////////////////////////////////////////////////
 
-auto bidir_astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
+auto bidir_astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
 {
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == pathfinding::IMPASSABLE_COST || testGrid.get_cost(finish, finish) == pathfinding::IMPASSABLE_COST) { return {}; }
@@ -79,8 +80,8 @@ auto bidir_astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExt
 
     gScoreF[start]  = 0;
     gScoreB[finish] = 0;
-    openF.push({.Pos = start, .G = 0, .F = pathfinding::distance(_heuristic, start, finish)});
-    openB.push({.Pos = finish, .G = 0, .F = pathfinding::distance(_heuristic, finish, start)});
+    openF.push({.Pos = start, .G = 0, .F = pathfinding::detail::distance(_heuristic, start, finish)});
+    openB.push({.Pos = finish, .G = 0, .F = pathfinding::detail::distance(_heuristic, finish, start)});
 
     u64     bestCost {pathfinding::IMPASSABLE_COST};
     point_i meetingPt {SENTINEL};
@@ -95,7 +96,7 @@ auto bidir_astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExt
 
         point_i const current {top.Pos};
 
-        for (auto const& neighbor : pathfinding::neighbors(_allowDiagonal, gridExtent, current)) {
+        for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, gridExtent, current)) {
             auto const cost {testGrid.get_cost(current, neighbor)};
             if (cost == pathfinding::IMPASSABLE_COST) { continue; }
             if (gScore[current] > (pathfinding::IMPASSABLE_COST - cost)) { continue; }
@@ -104,7 +105,7 @@ auto bidir_astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExt
             if (tentative_g < gScore[neighbor]) {
                 cameFrom[neighbor] = current;
                 gScore[neighbor]   = tentative_g;
-                u64 const h {pathfinding::distance(_heuristic, neighbor, target)};
+                u64 const h {pathfinding::detail::distance(_heuristic, neighbor, target)};
                 open.push({.Pos = neighbor, .G = tentative_g, .F = tentative_g + h});
 
                 if (gScoreOther[neighbor] != pathfinding::IMPASSABLE_COST) {
@@ -148,7 +149,7 @@ auto bidir_astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExt
 
 ////////////////////////////////////////////////////////////
 
-auto thetastar_pathfinding::has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) const -> bool
+auto thetastar::has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) const -> bool
 {
     auto blocked {[&](i32 x, i32 y) -> bool {
         if (x < 0 || x >= gridExtent.Width || y < 0 || y >= gridExtent.Height) { return true; }
@@ -187,7 +188,7 @@ auto thetastar_pathfinding::has_line_of_sight(PathGrid auto&& testGrid, size_i g
     }
 }
 
-auto thetastar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
+auto thetastar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
 {
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == pathfinding::IMPASSABLE_COST || testGrid.get_cost(finish, finish) == pathfinding::IMPASSABLE_COST) { return {}; }
@@ -197,7 +198,7 @@ auto thetastar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExten
     grid<u64>                                                    gScore {gridExtent, pathfinding::IMPASSABLE_COST};
 
     gScore[start] = 0;
-    openSet.push({.Pos = start, .G = 0, .F = pathfinding::distance(_heuristic, start, finish)});
+    openSet.push({.Pos = start, .G = 0, .F = pathfinding::detail::distance(_heuristic, start, finish)});
 
     while (!openSet.empty()) {
         node const top {openSet.top()};
@@ -208,10 +209,10 @@ auto thetastar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExten
         point_i const current {top.Pos};
 
         if (current == finish) {
-            return pathfinding::reconstruct_path(cameFrom, current);
+            return pathfinding::detail::reconstruct_path(cameFrom, current);
         }
 
-        for (auto const& neighbor : pathfinding::neighbors(_allowDiagonal, gridExtent, current)) {
+        for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, gridExtent, current)) {
             auto const neighborCost {testGrid.get_cost(current, neighbor)};
             if (neighborCost == pathfinding::IMPASSABLE_COST) { continue; }
 
@@ -219,23 +220,23 @@ auto thetastar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExten
             point_i const parent {(it != cameFrom.end()) ? it->second : current};
 
             if (has_line_of_sight(testGrid, gridExtent, parent, neighbor)) {
-                u64 const d {pathfinding::distance(_heuristic, parent, neighbor)};
+                u64 const d {pathfinding::detail::distance(_heuristic, parent, neighbor)};
                 if (gScore[parent] > (pathfinding::IMPASSABLE_COST - d)) { continue; }
                 u64 const tentative_g {gScore[parent] + d};
                 if (tentative_g < gScore[neighbor]) {
                     cameFrom[neighbor] = parent;
                     gScore[neighbor]   = tentative_g;
-                    u64 const h {pathfinding::distance(_heuristic, neighbor, finish)};
+                    u64 const h {pathfinding::detail::distance(_heuristic, neighbor, finish)};
                     openSet.push({.Pos = neighbor, .G = tentative_g, .F = tentative_g + h});
                 }
             } else {
-                u64 const d {pathfinding::distance(_heuristic, current, neighbor)};
+                u64 const d {pathfinding::detail::distance(_heuristic, current, neighbor)};
                 if (gScore[current] > (pathfinding::IMPASSABLE_COST - d)) { continue; }
                 u64 const tentative_g {gScore[current] + d};
                 if (tentative_g < gScore[neighbor]) {
                     cameFrom[neighbor] = current;
                     gScore[neighbor]   = tentative_g;
-                    u64 const h {pathfinding::distance(_heuristic, neighbor, finish)};
+                    u64 const h {pathfinding::detail::distance(_heuristic, neighbor, finish)};
                     openSet.push({.Pos = neighbor, .G = tentative_g, .F = tentative_g + h});
                 }
             }
@@ -247,7 +248,7 @@ auto thetastar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExten
 
 ////////////////////////////////////////////////////////////
 
-inline void lpastar_pathfinding::initialize(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish)
+inline void lpastar::initialize(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish)
 {
     _gridExtent = gridExtent;
     _start      = start;
@@ -269,16 +270,16 @@ inline void lpastar_pathfinding::initialize(PathGrid auto&& testGrid, size_i gri
     compute_shortest_path(testGrid);
 }
 
-inline void lpastar_pathfinding::update(PathGrid auto&& testGrid, point_i changedTile)
+inline void lpastar::update(PathGrid auto&& testGrid, point_i changedTile)
 {
     update_vertex(testGrid, changedTile);
-    for (auto const& neighbor : pathfinding::neighbors(_allowDiagonal, _gridExtent, changedTile)) {
+    for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, _gridExtent, changedTile)) {
         update_vertex(testGrid, neighbor);
     }
     compute_shortest_path(testGrid);
 }
 
-inline void lpastar_pathfinding::update_vertex(PathGrid auto&& testGrid, point_i p)
+inline void lpastar::update_vertex(PathGrid auto&& testGrid, point_i p)
 {
     if (_inOpen[p]) {
         _open.erase({.Pos = p, .Key = _nodeKey[p]});
@@ -288,7 +289,7 @@ inline void lpastar_pathfinding::update_vertex(PathGrid auto&& testGrid, point_i
     if (p != _start) {
         u64     minRhs {pathfinding::IMPASSABLE_COST};
         point_i bestPar {-1, -1};
-        for (auto const& pred : pathfinding::neighbors(_allowDiagonal, _gridExtent, p)) {
+        for (auto const& pred : pathfinding::detail::neighbors(_allowDiagonal, _gridExtent, p)) {
             u64 const cost {testGrid.get_cost(pred, p)};
             if (cost == pathfinding::IMPASSABLE_COST) { continue; }
 
@@ -313,7 +314,7 @@ inline void lpastar_pathfinding::update_vertex(PathGrid auto&& testGrid, point_i
     }
 }
 
-inline void lpastar_pathfinding::compute_shortest_path(PathGrid auto&& testGrid)
+inline void lpastar::compute_shortest_path(PathGrid auto&& testGrid)
 {
     while (!_open.empty()) {
         auto const& top {*_open.begin()};
@@ -329,13 +330,13 @@ inline void lpastar_pathfinding::compute_shortest_path(PathGrid auto&& testGrid)
 
         if (_g[u] > _rhs[u]) {
             _g[u] = _rhs[u];
-            for (auto const& s : pathfinding::neighbors(_allowDiagonal, _gridExtent, u)) {
+            for (auto const& s : pathfinding::detail::neighbors(_allowDiagonal, _gridExtent, u)) {
                 update_vertex(testGrid, s);
             }
         } else {
             _g[u] = pathfinding::IMPASSABLE_COST;
             update_vertex(testGrid, u);
-            for (auto const& s : pathfinding::neighbors(_allowDiagonal, _gridExtent, u)) {
+            for (auto const& s : pathfinding::detail::neighbors(_allowDiagonal, _gridExtent, u)) {
                 update_vertex(testGrid, s);
             }
         }
@@ -345,7 +346,7 @@ inline void lpastar_pathfinding::compute_shortest_path(PathGrid auto&& testGrid)
 
 ////////////////////////////////////////////////////////////
 
-inline void dstar_lite_pathfinding::initialize(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish)
+inline void dstar_lite::initialize(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish)
 {
     _gridExtent = gridExtent;
     _start      = start;
@@ -369,22 +370,22 @@ inline void dstar_lite_pathfinding::initialize(PathGrid auto&& testGrid, size_i 
     compute_shortest_path(testGrid);
 }
 
-inline void dstar_lite_pathfinding::update(PathGrid auto&& testGrid, point_i changedTile)
+inline void dstar_lite::update(PathGrid auto&& testGrid, point_i changedTile)
 {
     update_vertex(testGrid, changedTile);
-    for (auto const& neighbor : pathfinding::neighbors(_allowDiagonal, _gridExtent, changedTile)) {
+    for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, _gridExtent, changedTile)) {
         update_vertex(testGrid, neighbor);
     }
     compute_shortest_path(testGrid);
 }
 
-inline void dstar_lite_pathfinding::move(PathGrid auto&& testGrid)
+inline void dstar_lite::move(PathGrid auto&& testGrid)
 {
     if (_path.empty() || _current == _finish) { return; }
 
     point_i const next {_path.front()};
 
-    u64 const h {pathfinding::distance(_heuristic, _last, _current)};
+    u64 const h {pathfinding::detail::distance(_heuristic, _last, _current)};
     _km      = (_km >= pathfinding::IMPASSABLE_COST - h) ? pathfinding::IMPASSABLE_COST : _km + h;
     _last    = _current;
     _current = next;
@@ -392,7 +393,7 @@ inline void dstar_lite_pathfinding::move(PathGrid auto&& testGrid)
     compute_shortest_path(testGrid);
 }
 
-inline void dstar_lite_pathfinding::update_vertex(PathGrid auto&& testGrid, point_i p)
+inline void dstar_lite::update_vertex(PathGrid auto&& testGrid, point_i p)
 {
     if (_inOpen[p]) {
         _open.erase({.Pos = p, .Key = _nodeKey[p]});
@@ -402,7 +403,7 @@ inline void dstar_lite_pathfinding::update_vertex(PathGrid auto&& testGrid, poin
     if (p != _finish) {
         u64     minRhs {pathfinding::IMPASSABLE_COST};
         point_i bestPar {-1, -1};
-        for (auto const& succ : pathfinding::neighbors(_allowDiagonal, _gridExtent, p)) {
+        for (auto const& succ : pathfinding::detail::neighbors(_allowDiagonal, _gridExtent, p)) {
             u64 const cost {testGrid.get_cost(p, succ)}; // directed: p -> succ
             if (cost == pathfinding::IMPASSABLE_COST) { continue; }
             u64 const gVal {_g[succ]};
@@ -425,7 +426,7 @@ inline void dstar_lite_pathfinding::update_vertex(PathGrid auto&& testGrid, poin
     }
 }
 
-inline void dstar_lite_pathfinding::compute_shortest_path(PathGrid auto&& testGrid)
+inline void dstar_lite::compute_shortest_path(PathGrid auto&& testGrid)
 {
     while (!_open.empty()) {
         auto const& top {*_open.begin()};
@@ -446,18 +447,93 @@ inline void dstar_lite_pathfinding::compute_shortest_path(PathGrid auto&& testGr
             _inOpen[u] = true;
         } else if (_g[u] > _rhs[u]) {
             _g[u] = _rhs[u];
-            for (auto const& pred : pathfinding::neighbors(_allowDiagonal, _gridExtent, u)) {
+            for (auto const& pred : pathfinding::detail::neighbors(_allowDiagonal, _gridExtent, u)) {
                 update_vertex(testGrid, pred);
             }
         } else {
             _g[u] = pathfinding::IMPASSABLE_COST;
             update_vertex(testGrid, u);
-            for (auto const& pred : pathfinding::neighbors(_allowDiagonal, _gridExtent, u)) {
+            for (auto const& pred : pathfinding::detail::neighbors(_allowDiagonal, _gridExtent, u)) {
                 update_vertex(testGrid, pred);
             }
         }
     }
     rebuild_path();
+}
+
+////////////////////////////////////////////////////////////
+
+auto minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
+{
+    if (start == finish) { return {start}; }
+    if (testGrid.get_cost(start, start) == pathfinding::IMPASSABLE_COST || testGrid.get_cost(finish, finish) == pathfinding::IMPASSABLE_COST) { return {}; }
+
+    static constexpr u64     TURN_COST {1000000};
+    static constexpr point_i SENTINEL {-1, -1};
+    static constexpr i32     DIR_COUNT {8};
+
+    size_i const stateExtent {gridExtent.Width * DIR_COUNT, gridExtent.Height};
+
+    auto idx {[&](point_i pos, point_i dir) -> point_i {
+        return {(pos.X * DIR_COUNT) + dir_to_index(dir), pos.Y};
+    }};
+
+    std::priority_queue<node, std::vector<node>, std::greater<>> openSet;
+    grid<u64>                                                    gScore {stateExtent, pathfinding::IMPASSABLE_COST};
+    grid<state>                                                  cameFrom {stateExtent, {SENTINEL, {0, 0}}};
+
+    // initialize with all possible starting directions
+    for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, gridExtent, start)) {
+        auto const cost {testGrid.get_cost(start, neighbor)};
+        if (cost == pathfinding::IMPASSABLE_COST) { continue; }
+        point_i const dir {neighbor.X - start.X, neighbor.Y - start.Y};
+        state const   s {.Pos = start, .Dir = dir};
+        gScore[idx(start, dir)] = 0;
+        openSet.push({.s = s, .Cost = 0});
+    }
+
+    while (!openSet.empty()) {
+        node const top {openSet.top()};
+        openSet.pop();
+
+        state const   cur {top.s};
+        point_i const cidx {idx(cur.Pos, cur.Dir)};
+
+        if (top.Cost > gScore[cidx]) { continue; }
+
+        if (cur.Pos == finish) {
+            std::vector<point_i> path;
+            state                s {cur};
+            while (s.Pos != start) {
+                path.push_back(s.Pos);
+                s = cameFrom[idx(s.Pos, s.Dir)];
+                if (s.Pos == SENTINEL) { return {}; }
+            }
+            std::ranges::reverse(path);
+            return path;
+        }
+
+        for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, gridExtent, cur.Pos)) {
+            auto const cost {testGrid.get_cost(cur.Pos, neighbor)};
+            if (cost == pathfinding::IMPASSABLE_COST) { continue; }
+
+            point_i const dir {neighbor.X - cur.Pos.X, neighbor.Y - cur.Pos.Y};
+            u64 const     turn {dir != cur.Dir ? TURN_COST : 0};
+            if (top.Cost > pathfinding::IMPASSABLE_COST - cost - turn) { continue; }
+            u64 const tentative_g {top.Cost + cost + turn};
+
+            state const   next {.Pos = neighbor, .Dir = dir};
+            point_i const nidx {idx(neighbor, dir)};
+
+            if (tentative_g < gScore[nidx]) {
+                cameFrom[nidx] = cur;
+                gScore[nidx]   = tentative_g;
+                openSet.push({.s = next, .Cost = tentative_g});
+            }
+        }
+    }
+
+    return {};
 }
 
 }

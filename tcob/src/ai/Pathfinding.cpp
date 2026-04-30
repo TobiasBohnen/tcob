@@ -14,65 +14,67 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 
-namespace tcob::ai {
+namespace tcob::ai::pathfinding {
 
-auto pathfinding::distance(heuristic h, point_i a, point_i b) -> u64
-{
-    switch (h) {
-    case heuristic::Euclidean: return static_cast<u64>(euclidean_distance(a, b));
-    case heuristic::Manhattan: return static_cast<u64>(manhattan_distance(a, b));
-    case heuristic::Chebyshev: return static_cast<u64>(chebyshev_distance(a, b));
-    }
-    return 0;
-}
-
-auto pathfinding::neighbors(bool allowDiagonal, size_i gridSize, point_i pos) -> std::vector<point_i>
-{
-    static constexpr std::array<point_i, 4> orthogonalDirections {{
-        {0, 1},
-        {1, 0},
-        {0, -1},
-        {-1, 0},
-    }};
-    static constexpr std::array<point_i, 4> diagonalDirections {{
-        {1, 1},
-        {-1, -1},
-        {1, -1},
-        {-1, 1},
-    }};
-
-    std::vector<point_i> retValue;
-    for (auto const& dir : orthogonalDirections) {
-        point_i const neighbor {pos.X + dir.X, pos.Y + dir.Y};
-        if (neighbor.X >= 0 && neighbor.X < gridSize.Width && neighbor.Y >= 0 && neighbor.Y < gridSize.Height) {
-            retValue.push_back(neighbor);
+namespace detail {
+    auto distance(heuristic h, point_i a, point_i b) -> u64
+    {
+        switch (h) {
+        case heuristic::Euclidean: return static_cast<u64>(euclidean_distance(a, b));
+        case heuristic::Manhattan: return static_cast<u64>(manhattan_distance(a, b));
+        case heuristic::Chebyshev: return static_cast<u64>(chebyshev_distance(a, b));
         }
+        return 0;
     }
-    if (allowDiagonal) {
-        for (auto const& dir : diagonalDirections) {
+
+    auto neighbors(bool allowDiagonal, size_i gridSize, point_i pos) -> std::vector<point_i>
+    {
+        static constexpr std::array<point_i, 4> orthogonalDirections {{
+            {0, 1},
+            {1, 0},
+            {0, -1},
+            {-1, 0},
+        }};
+        static constexpr std::array<point_i, 4> diagonalDirections {{
+            {1, 1},
+            {-1, -1},
+            {1, -1},
+            {-1, 1},
+        }};
+
+        std::vector<point_i> retValue;
+        for (auto const& dir : orthogonalDirections) {
             point_i const neighbor {pos.X + dir.X, pos.Y + dir.Y};
             if (neighbor.X >= 0 && neighbor.X < gridSize.Width && neighbor.Y >= 0 && neighbor.Y < gridSize.Height) {
                 retValue.push_back(neighbor);
             }
         }
+        if (allowDiagonal) {
+            for (auto const& dir : diagonalDirections) {
+                point_i const neighbor {pos.X + dir.X, pos.Y + dir.Y};
+                if (neighbor.X >= 0 && neighbor.X < gridSize.Width && neighbor.Y >= 0 && neighbor.Y < gridSize.Height) {
+                    retValue.push_back(neighbor);
+                }
+            }
+        }
+        return retValue;
     }
-    return retValue;
-}
 
-auto pathfinding::reconstruct_path(std::unordered_map<point_i, point_i> const& cameFrom, point_i current) -> std::vector<point_i>
-{
-    std::vector<point_i> retValue;
-    while (cameFrom.contains(current)) {
-        retValue.push_back(current);
-        current = cameFrom.at(current);
+    auto reconstruct_path(std::unordered_map<point_i, point_i> const& cameFrom, point_i current) -> std::vector<point_i>
+    {
+        std::vector<point_i> retValue;
+        while (cameFrom.contains(current)) {
+            retValue.push_back(current);
+            current = cameFrom.at(current);
+        }
+        std::ranges::reverse(retValue);
+        return retValue;
     }
-    std::ranges::reverse(retValue);
-    return retValue;
 }
 
 ////////////////////////////////////////////////////////////
 
-astar_pathfinding::astar_pathfinding(bool allowDiagonal, pathfinding::heuristic heuristic)
+astar::astar(bool allowDiagonal, pathfinding::heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
     , _heuristic {heuristic}
 {
@@ -80,13 +82,13 @@ astar_pathfinding::astar_pathfinding(bool allowDiagonal, pathfinding::heuristic 
 
 ////////////////////////////////////////////////////////////
 
-bidir_astar_pathfinding::bidir_astar_pathfinding(bool allowDiagonal, pathfinding::heuristic heuristic)
+bidir_astar::bidir_astar(bool allowDiagonal, pathfinding::heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
     , _heuristic {heuristic}
 {
 }
 
-auto bidir_astar_pathfinding::reconstruct_path(grid<point_i> const& cameFrom, point_i current, point_i sentinel) -> std::vector<point_i>
+auto bidir_astar::reconstruct_path(grid<point_i> const& cameFrom, point_i current, point_i sentinel) -> std::vector<point_i>
 {
     std::vector<point_i> retValue;
     while (cameFrom[current] != sentinel) {
@@ -99,26 +101,26 @@ auto bidir_astar_pathfinding::reconstruct_path(grid<point_i> const& cameFrom, po
 
 ////////////////////////////////////////////////////////////
 
-thetastar_pathfinding::thetastar_pathfinding(bool allowDiagonal)
+thetastar::thetastar(bool allowDiagonal)
     : _allowDiagonal {allowDiagonal}
 {
 }
 
 ////////////////////////////////////////////////////////////
 
-lpastar_pathfinding::lpastar_pathfinding(bool allowDiagonal, pathfinding::heuristic heuristic)
+lpastar::lpastar(bool allowDiagonal, pathfinding::heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
     , _heuristic {heuristic}
 {
 }
 
-auto lpastar_pathfinding::calculate_key(point_i p) const -> key
+auto lpastar::calculate_key(point_i p) const -> key
 {
     u64 const gVal {_g[p]};
     u64 const rhsVal {_rhs[p]};
     u64 const minVal {std::min(gVal, rhsVal)};
 
-    u64 const h {pathfinding::distance(_heuristic, p, _finish)};
+    u64 const h {pathfinding::detail::distance(_heuristic, p, _finish)};
 
     u64 const k1 {(minVal >= pathfinding::IMPASSABLE_COST - h)
                       ? pathfinding::IMPASSABLE_COST
@@ -127,7 +129,7 @@ auto lpastar_pathfinding::calculate_key(point_i p) const -> key
     return {.K1 = k1, .K2 = minVal};
 }
 
-void lpastar_pathfinding::rebuild_path()
+void lpastar::rebuild_path()
 {
     _path.clear();
     if (_g[_finish] >= pathfinding::IMPASSABLE_COST) { return; }
@@ -144,9 +146,9 @@ void lpastar_pathfinding::rebuild_path()
     std::ranges::reverse(_path);
 }
 
-auto lpastar_pathfinding::path() const -> std::vector<point_i> const& { return _path; }
+auto lpastar::path() const -> std::vector<point_i> const& { return _path; }
 
-auto lpastar_pathfinding::node::operator<(node const& other) const -> bool
+auto lpastar::node::operator<(node const& other) const -> bool
 {
     if (Key != other.Key) { return Key < other.Key; }
     if (Pos.X != other.Pos.X) { return Pos.X < other.Pos.X; }
@@ -155,35 +157,35 @@ auto lpastar_pathfinding::node::operator<(node const& other) const -> bool
 
 ////////////////////////////////////////////////////////////
 
-dstar_lite_pathfinding::dstar_lite_pathfinding(bool allowDiagonal, pathfinding::heuristic heuristic)
+dstar_lite::dstar_lite(bool allowDiagonal, pathfinding::heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
     , _heuristic {heuristic}
 {
 }
 
-auto dstar_lite_pathfinding::calculate_key(point_i p) const -> key
+auto dstar_lite::calculate_key(point_i p) const -> key
 {
     u64 const gVal {_g[p]};
     u64 const rhsVal {_rhs[p]};
     u64 const minVal {std::min(gVal, rhsVal)};
-    u64 const h {pathfinding::distance(_heuristic, p, _current)};
+    u64 const h {pathfinding::detail::distance(_heuristic, p, _current)};
     u64 const k1 {(minVal >= pathfinding::IMPASSABLE_COST - h)
                       ? pathfinding::IMPASSABLE_COST
                       : minVal + h + _km};
     return {.K1 = k1, .K2 = minVal};
 }
 
-auto dstar_lite_pathfinding::path() const -> std::vector<point_i> const&
+auto dstar_lite::path() const -> std::vector<point_i> const&
 {
     return _path;
 }
 
-auto dstar_lite_pathfinding::position() const -> point_i
+auto dstar_lite::position() const -> point_i
 {
     return _current;
 }
 
-void dstar_lite_pathfinding::rebuild_path()
+void dstar_lite::rebuild_path()
 {
     _path.clear();
     if (_g[_current] >= pathfinding::IMPASSABLE_COST) { return; }
@@ -201,10 +203,27 @@ void dstar_lite_pathfinding::rebuild_path()
     if (!_path.empty()) { _path.erase(_path.begin()); }
 }
 
-auto dstar_lite_pathfinding::node::operator<(node const& other) const -> bool
+auto dstar_lite::node::operator<(node const& other) const -> bool
 {
     if (Key != other.Key) { return Key < other.Key; }
     if (Pos.X != other.Pos.X) { return Pos.X < other.Pos.X; }
     return Pos.Y < other.Pos.Y;
 }
+
+////////////////////////////////////////////////////////////
+
+minturns::minturns(bool allowDiagonal)
+    : _allowDiagonal {allowDiagonal}
+{
+}
+
+auto minturns::dir_to_index(point_i dir) -> i32
+{
+    static constexpr std::array<point_i, 8> DIRS {{{0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}}};
+    for (i32 i {0}; i < 8; ++i) {
+        if (DIRS[i] == dir) { return i; }
+    }
+    return 0;
+}
+
 }
