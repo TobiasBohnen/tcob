@@ -150,6 +150,58 @@ private:
     std::vector<point_i> _path;
 };
 
+////////////////////////////////////////////////////////////
+
+class TCOB_API dstar_lite_pathfinding final {
+public:
+    explicit dstar_lite_pathfinding(bool allowDiagonal = false);
+
+    void initialize(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish);
+
+    void update(PathGrid auto&& testGrid, point_i changedTile);
+
+    auto path() const -> std::vector<point_i> const&;
+
+    void move(PathGrid auto&& testGrid);
+
+    auto position() const -> point_i;
+
+private:
+    struct key {
+        u64  K1 {};
+        u64  K2 {};
+        auto operator<=>(key const& other) const -> std::strong_ordering = default;
+    };
+
+    struct node {
+        point_i Pos;
+        key     Key;
+        auto    operator<(node const& other) const -> bool;
+    };
+
+    auto calculate_key(point_i p) const -> key;
+    void update_vertex(PathGrid auto&& testGrid, point_i p);
+    void compute_shortest_path(PathGrid auto&& testGrid);
+    void rebuild_path();
+
+    size_i  _gridExtent {};
+    point_i _start {-1, -1};
+    point_i _finish {-1, -1};
+    point_i _current {-1, -1};
+    point_i _last {-1, -1};
+    bool    _allowDiagonal {false};
+    u64     _km {0};
+
+    grid<u64>     _g {};
+    grid<u64>     _rhs {};
+    grid<point_i> _parent {};
+    grid<key>     _nodeKey {};
+    grid<bool>    _inOpen {};
+
+    std::set<node>       _open;
+    std::vector<point_i> _path;
+};
+
 }
 
 #include "Pathfinding.inl"

@@ -151,4 +151,52 @@ auto lpastar_pathfinding::node::operator<(node const& other) const -> bool
     if (Pos.X != other.Pos.X) { return Pos.X < other.Pos.X; }
     return Pos.Y < other.Pos.Y;
 }
+
+////////////////////////////////////////////////////////////
+
+dstar_lite_pathfinding::dstar_lite_pathfinding(bool allowDiagonal)
+    : _allowDiagonal {allowDiagonal}
+{
+}
+
+auto dstar_lite_pathfinding::calculate_key(point_i p) const -> key
+{
+    u64 const gVal {_g[p]};
+    u64 const rhsVal {_rhs[p]};
+    u64 const minVal {std::min(gVal, rhsVal)};
+    u64 const h {pathfinding::distance(pathfinding::heuristic::Euclidean, p, _current)};
+    u64 const k1 {(minVal >= pathfinding::IMPASSABLE_COST - h)
+                      ? pathfinding::IMPASSABLE_COST
+                      : minVal + h + _km};
+    return {.K1 = k1, .K2 = minVal};
+}
+
+auto dstar_lite_pathfinding::path() const -> std::vector<point_i> const&
+{
+    return _path;
+}
+
+auto dstar_lite_pathfinding::position() const -> point_i
+{
+    return _current;
+}
+
+void dstar_lite_pathfinding::rebuild_path()
+{
+    _path.clear();
+    if (_g[_current] >= pathfinding::IMPASSABLE_COST) { return; }
+
+    point_i cur {_current};
+    while (cur != _finish) {
+        _path.push_back(cur);
+        cur = _parent[cur];
+        if (cur == point_i {-1, -1}) {
+            _path.clear();
+            return;
+        }
+    }
+
+    if (!_path.empty()) { _path.erase(_path.begin()); }
+}
+
 }

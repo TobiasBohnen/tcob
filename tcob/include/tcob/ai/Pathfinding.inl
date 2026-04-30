@@ -343,4 +343,129 @@ inline void lpastar_pathfinding::compute_shortest_path(PathGrid auto&& testGrid)
     rebuild_path();
 }
 
+////////////////////////////////////////////////////////////
+
+inline auto dstar_lite_pathfinding::node::operator<(node const& other) const -> bool
+{
+    if (Key != other.Key) { return Key < other.Key; }
+    if (Pos.X != other.Pos.X) { return Pos.X < other.Pos.X; }
+    return Pos.Y < other.Pos.Y;
+}
+
+inline void dstar_lite_pathfinding::update_vertex(PathGrid auto&& testGrid, point_i p)
+{
+    if (_inOpen[p]) {
+        _open.erase({.Pos = p, .Key = _nodeKey[p]});
+        _inOpen[p] = false;
+    }
+
+    if (p != _finish) {
+        u64     minRhs {pathfinding::IMPASSABLE_COST};
+        point_i bestPar {-1, -1};
+        for (auto const& succ : pathfinding::neighbors(_allowDiagonal, _gridExtent, p)) {
+            u64 const cost {testGrid.get_cost(p, succ)}; // directed: p -> succ
+            if (cost == pathfinding::IMPASSABLE_COST) { continue; }
+            u64 const gVal {_g[succ]};
+            u64 const tentative {(gVal >= pathfinding::IMPASSABLE_COST - cost)
+                                     ? pathfinding::IMPASSABLE_COST
+                                     : gVal + cost};
+            if (tentative < minRhs) {
+                minRhs  = tentative;
+                bestPar = succ;
+            }
+        }
+        _rhs[p]    = minRhs;
+        _parent[p] = bestPar;
+    }
+
+    if (_g[p] != _rhs[p]) {
+        _nodeKey[p] = calculate_key(p);
+        _open.insert({.Pos = p, .Key = _nodeKey[p]});
+        _inOpen[p] = true;
+    }
+}
+
+inline void dstar_lite_pathfinding::compute_shortest_path(PathGrid auto&& testGrid)
+{
+    while (!_open.empty()) {
+        auto const& top {*_open.begin()};
+        key const   startKey {calculate_key(_current)};
+
+        if (top.Key >= startKey && _rhs[_current] == _g[_current]) { break; }
+
+        point_i const u {top.Pos};
+        key const     oldKey {top.Key};
+        key const     newKey {calculate_key(u)};
+
+        _open.erase(_open.begin());
+        _inOpen[u] = false;
+
+        if (oldKey < newKey) {
+            _nodeKey[u] = newKey;
+            _open.insert({.Pos = u, .Key = newKey});
+            _inOpen[u] = true;
+        } else if (_g[u] > _rhs[u]) {
+            _g[u] = _rhs[u];
+            for (auto const& pred : pathfinding::neighbors(_allowDiagonal, _gridExtent, u)) {
+                update_vertex(testGrid, pred);
+            }
+        } else {
+            _g[u] = pathfinding::IMPASSABLE_COST;
+            update_vertex(testGrid, u);
+            for (auto const& pred : pathfinding::neighbors(_allowDiagonal, _gridExtent, u)) {
+                update_vertex(testGrid, pred);
+            }
+        }
+    }
+
+    rebuild_path();
+}
+
+inline void dstar_lite_pathfinding::initialize(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish)
+{
+    _gridExtent = gridExtent;
+    _start      = start;
+    _finish     = finish;
+    _current    = start;
+    _last       = start;
+    _km         = 0;
+
+    _g       = grid<u64> {gridExtent, pathfinding::IMPASSABLE_COST};
+    _rhs     = grid<u64> {gridExtent, pathfinding::IMPASSABLE_COST};
+    _parent  = grid<point_i> {gridExtent, {-1, -1}};
+    _nodeKey = grid<key> {gridExtent, {.K1 = pathfinding::IMPASSABLE_COST, .K2 = pathfinding::IMPASSABLE_COST}};
+    _inOpen  = grid<bool> {gridExtent, false};
+    _open.clear();
+
+    _rhs[_finish]     = 0;
+    _nodeKey[_finish] = calculate_key(_finish);
+    _open.insert({.Pos = _finish, .Key = _nodeKey[_finish]});
+    _inOpen[_finish] = true;
+
+    compute_shortest_path(testGrid);
+}
+
+inline void dstar_lite_pathfinding::update(PathGrid auto&& testGrid, point_i changedTile)
+{
+    update_vertex(testGrid, changedTile);
+    for (auto const& neighbor : pathfinding::neighbors(_allowDiagonal, _gridExtent, changedTile)) {
+        update_vertex(testGrid, neighbor);
+    }
+    compute_shortest_path(testGrid);
+}
+
+inline void dstar_lite_pathfinding::move(PathGrid auto&& testGrid)
+{
+    if (_path.empty() || _current == _finish) { return; }
+
+    point_i const next {_path.front()};
+
+    u64 const h {pathfinding::distance(pathfinding::heuristic::Euclidean, _last, _current)};
+    _km      = (_km >= pathfinding::IMPASSABLE_COST - h) ? pathfinding::IMPASSABLE_COST : _km + h;
+    _last    = _current;
+    _current = next;
+
+    compute_shortest_path(testGrid);
+}
+
 }
