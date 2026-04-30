@@ -53,7 +53,8 @@ public:
     auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
 private:
-    struct node {
+    class TCOB_API node {
+    public:
         point_i Pos;
         u64     G {};
         u64     F {};
@@ -73,7 +74,8 @@ public:
     auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
 private:
-    struct node {
+    class TCOB_API node {
+    public:
         point_i Pos;
         u64     G {};
         u64     F {};
@@ -93,7 +95,8 @@ public:
     auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
 private:
-    struct node {
+    class TCOB_API node {
+    public:
         point_i Pos;
         u64     G {};
         u64     F {};
@@ -118,13 +121,15 @@ public:
     auto path() const -> std::vector<point_i> const&;
 
 private:
-    struct key {
+    class TCOB_API key {
+    public:
         u64  K1 {};
         u64  K2 {};
         auto operator<=>(key const& other) const -> std::strong_ordering = default;
     };
 
-    struct node {
+    class TCOB_API node {
+    public:
         point_i Pos;
         key     Key;
         auto    operator<(node const& other) const -> bool;
@@ -167,13 +172,15 @@ public:
     auto position() const -> point_i;
 
 private:
-    struct key {
+    class TCOB_API key {
+    public:
         u64  K1 {};
         u64  K2 {};
         auto operator<=>(key const& other) const -> std::strong_ordering = default;
     };
 
-    struct node {
+    class TCOB_API node {
+    public:
         point_i Pos;
         key     Key;
         auto    operator<(node const& other) const -> bool;
