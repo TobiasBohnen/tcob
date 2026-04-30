@@ -101,6 +101,13 @@ auto bidir_astar::reconstruct_path(grid<point_i> const& cameFrom, point_i curren
 
 ////////////////////////////////////////////////////////////
 
+minturns::minturns(bool allowDiagonal)
+    : _allowDiagonal {allowDiagonal}
+{
+}
+
+////////////////////////////////////////////////////////////
+
 thetastar::thetastar(bool allowDiagonal)
     : _allowDiagonal {allowDiagonal}
 {
@@ -208,22 +215,6 @@ auto dstar_lite::node::operator<(node const& other) const -> bool
     if (Key != other.Key) { return Key < other.Key; }
     if (Pos.X != other.Pos.X) { return Pos.X < other.Pos.X; }
     return Pos.Y < other.Pos.Y;
-}
-
-////////////////////////////////////////////////////////////
-
-minturns::minturns(bool allowDiagonal)
-    : _allowDiagonal {allowDiagonal}
-{
-}
-
-auto minturns::dir_to_index(point_i dir) -> i32
-{
-    static constexpr std::array<point_i, 8> DIRS {{{0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}}};
-    for (i32 i {0}; i < 8; ++i) {
-        if (DIRS[i] == dir) { return i; }
-    }
-    return 0;
 }
 
 }

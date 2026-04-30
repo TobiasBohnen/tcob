@@ -7,6 +7,7 @@
 #include "Pathfinding.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <functional>
 #include <queue>
@@ -145,6 +146,87 @@ auto bidir_astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i
     }
 
     return path;
+}
+
+////////////////////////////////////////////////////////////
+
+auto minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
+{
+    if (start == finish) { return {start}; }
+    if (testGrid.get_cost(start, start) == pathfinding::IMPASSABLE_COST || testGrid.get_cost(finish, finish) == pathfinding::IMPASSABLE_COST) { return {}; }
+
+    static constexpr u64     TURN_COST {1000000};
+    static constexpr point_i SENTINEL {-1, -1};
+    static constexpr i32     DIR_COUNT {8};
+
+    size_i const stateExtent {gridExtent.Width * DIR_COUNT, gridExtent.Height};
+
+    static auto const idx {[](point_i pos, point_i dir) -> point_i {
+        static constexpr std::array<point_i, 8> DIRS {{{0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}}};
+        for (i32 i {0}; i < 8; ++i) {
+            if (DIRS[i] == dir) { return {(pos.X * DIR_COUNT) + i, pos.Y}; }
+        }
+        return {(pos.X * DIR_COUNT), pos.Y};
+    }};
+
+    std::priority_queue<node, std::vector<node>, std::greater<>> openSet;
+    grid<u64>                                                    gScore {stateExtent, pathfinding::IMPASSABLE_COST};
+    grid<state>                                                  cameFrom {stateExtent, {.Pos = SENTINEL, .Dir = {0, 0}}};
+
+    // initialize with all possible starting directions
+    for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, gridExtent, start)) {
+        auto const cost {testGrid.get_cost(start, neighbor)};
+        if (cost == pathfinding::IMPASSABLE_COST) { continue; }
+        point_i const dir {neighbor.X - start.X, neighbor.Y - start.Y};
+        state const   s {.Pos = start, .Dir = dir};
+        gScore[idx(start, dir)] = 0;
+        openSet.push({.State = s, .Cost = 0});
+    }
+
+    while (!openSet.empty()) {
+        node const top {openSet.top()};
+        openSet.pop();
+
+        state const   cur {top.State};
+        point_i const cidx {idx(cur.Pos, cur.Dir)};
+
+        if (top.Cost > gScore[cidx]) { continue; }
+
+        if (cur.Pos == finish) {
+            std::vector<point_i> path;
+            state                s {cur};
+            while (s.Pos != start) {
+                path.push_back(s.Pos);
+                s = cameFrom[idx(s.Pos, s.Dir)];
+                if (s.Pos == SENTINEL) { return {}; }
+            }
+            std::ranges::reverse(path);
+            return path;
+        }
+
+        for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, gridExtent, cur.Pos)) {
+            auto const cost {testGrid.get_cost(cur.Pos, neighbor)};
+            if (cost == pathfinding::IMPASSABLE_COST) { continue; }
+
+            point_i const dir {neighbor.X - cur.Pos.X, neighbor.Y - cur.Pos.Y};
+            u64 const     turn {dir != cur.Dir ? TURN_COST : 0};
+            if (top.Cost > pathfinding::IMPASSABLE_COST - cost - turn) { continue; }
+
+            u64 const area {static_cast<u64>(gridExtent.area()) + 1};
+            u64 const tentative_g {top.Cost + (cost * area) + turn};
+
+            state const   next {.Pos = neighbor, .Dir = dir};
+            point_i const nidx {idx(neighbor, dir)};
+
+            if (tentative_g < gScore[nidx]) {
+                cameFrom[nidx] = cur;
+                gScore[nidx]   = tentative_g;
+                openSet.push({.State = next, .Cost = tentative_g});
+            }
+        }
+    }
+
+    return {};
 }
 
 ////////////////////////////////////////////////////////////
@@ -459,81 +541,6 @@ inline void dstar_lite::compute_shortest_path(PathGrid auto&& testGrid)
         }
     }
     rebuild_path();
-}
-
-////////////////////////////////////////////////////////////
-
-auto minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
-{
-    if (start == finish) { return {start}; }
-    if (testGrid.get_cost(start, start) == pathfinding::IMPASSABLE_COST || testGrid.get_cost(finish, finish) == pathfinding::IMPASSABLE_COST) { return {}; }
-
-    static constexpr u64     TURN_COST {1000000};
-    static constexpr point_i SENTINEL {-1, -1};
-    static constexpr i32     DIR_COUNT {8};
-
-    size_i const stateExtent {gridExtent.Width * DIR_COUNT, gridExtent.Height};
-
-    auto idx {[&](point_i pos, point_i dir) -> point_i {
-        return {(pos.X * DIR_COUNT) + dir_to_index(dir), pos.Y};
-    }};
-
-    std::priority_queue<node, std::vector<node>, std::greater<>> openSet;
-    grid<u64>                                                    gScore {stateExtent, pathfinding::IMPASSABLE_COST};
-    grid<state>                                                  cameFrom {stateExtent, {SENTINEL, {0, 0}}};
-
-    // initialize with all possible starting directions
-    for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, gridExtent, start)) {
-        auto const cost {testGrid.get_cost(start, neighbor)};
-        if (cost == pathfinding::IMPASSABLE_COST) { continue; }
-        point_i const dir {neighbor.X - start.X, neighbor.Y - start.Y};
-        state const   s {.Pos = start, .Dir = dir};
-        gScore[idx(start, dir)] = 0;
-        openSet.push({.s = s, .Cost = 0});
-    }
-
-    while (!openSet.empty()) {
-        node const top {openSet.top()};
-        openSet.pop();
-
-        state const   cur {top.s};
-        point_i const cidx {idx(cur.Pos, cur.Dir)};
-
-        if (top.Cost > gScore[cidx]) { continue; }
-
-        if (cur.Pos == finish) {
-            std::vector<point_i> path;
-            state                s {cur};
-            while (s.Pos != start) {
-                path.push_back(s.Pos);
-                s = cameFrom[idx(s.Pos, s.Dir)];
-                if (s.Pos == SENTINEL) { return {}; }
-            }
-            std::ranges::reverse(path);
-            return path;
-        }
-
-        for (auto const& neighbor : pathfinding::detail::neighbors(_allowDiagonal, gridExtent, cur.Pos)) {
-            auto const cost {testGrid.get_cost(cur.Pos, neighbor)};
-            if (cost == pathfinding::IMPASSABLE_COST) { continue; }
-
-            point_i const dir {neighbor.X - cur.Pos.X, neighbor.Y - cur.Pos.Y};
-            u64 const     turn {dir != cur.Dir ? TURN_COST : 0};
-            if (top.Cost > pathfinding::IMPASSABLE_COST - cost - turn) { continue; }
-            u64 const tentative_g {top.Cost + cost + turn};
-
-            state const   next {.Pos = neighbor, .Dir = dir};
-            point_i const nidx {idx(neighbor, dir)};
-
-            if (tentative_g < gScore[nidx]) {
-                cameFrom[nidx] = cur;
-                gScore[nidx]   = tentative_g;
-                openSet.push({.s = next, .Cost = tentative_g});
-            }
-        }
-    }
-
-    return {};
 }
 
 }

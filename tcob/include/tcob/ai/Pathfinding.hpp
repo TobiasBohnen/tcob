@@ -88,6 +88,30 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+class TCOB_API minturns final {
+public:
+    explicit minturns(bool allowDiagonal = false);
+
+    auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
+
+private:
+    struct state {
+        point_i Pos;
+        point_i Dir;
+        auto    operator==(state const& other) const -> bool = default;
+    };
+
+    struct node {
+        state State;
+        u64   Cost {};
+        auto  operator>(node const& other) const -> bool { return Cost > other.Cost; }
+    };
+
+    bool _allowDiagonal;
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API thetastar final {
 public:
     explicit thetastar(bool allowDiagonal = true);
@@ -210,32 +234,6 @@ private:
 
     std::set<node>       _open;
     std::vector<point_i> _path;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API minturns final {
-public:
-    explicit minturns(bool allowDiagonal = false);
-
-    auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
-
-private:
-    struct state {
-        point_i Pos;
-        point_i Dir;
-        auto    operator==(state const& other) const -> bool = default;
-    };
-
-    struct node {
-        state s;
-        u64   Cost {};
-        auto  operator>(node const& other) const -> bool { return Cost > other.Cost; }
-    };
-
-    static auto dir_to_index(point_i dir) -> i32;
-
-    bool _allowDiagonal;
 };
 
 }
