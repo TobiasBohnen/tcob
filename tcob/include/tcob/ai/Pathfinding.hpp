@@ -6,7 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <compare>
 #include <limits>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -101,6 +103,51 @@ private:
     auto has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) const -> bool;
 
     bool _allowDiagonal;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API lpastar_pathfinding final {
+public:
+    explicit lpastar_pathfinding(bool allowDiagonal = true);
+
+    void initialize(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish);
+
+    void update(PathGrid auto&& testGrid, point_i changedTile);
+
+    auto path() const -> std::vector<point_i> const&;
+
+private:
+    struct key {
+        u64  K1 {};
+        u64  K2 {};
+        auto operator<=>(key const& other) const -> std::strong_ordering = default;
+    };
+
+    struct node {
+        point_i Pos;
+        key     Key;
+        auto    operator<(node const& other) const -> bool;
+    };
+
+    auto calculate_key(point_i p) const -> key;
+    void update_vertex(PathGrid auto&& testGrid, point_i p);
+    void compute_shortest_path(PathGrid auto&& testGrid);
+    void rebuild_path();
+
+    size_i  _gridExtent {};
+    point_i _start {-1, -1};
+    point_i _finish {-1, -1};
+    bool    _allowDiagonal {false};
+
+    grid<u64>     _g {};
+    grid<u64>     _rhs {};
+    grid<point_i> _parent {};
+    grid<key>     _nodeKey {};
+    grid<bool>    _inOpen {};
+
+    std::set<node>       _open;
+    std::vector<point_i> _path;
 };
 
 }

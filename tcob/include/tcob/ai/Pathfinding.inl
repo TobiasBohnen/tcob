@@ -18,6 +18,8 @@
 
 namespace tcob::ai {
 
+////////////////////////////////////////////////////////////
+
 auto astar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
 {
     if (start == finish) { return {start}; }
@@ -241,6 +243,104 @@ auto thetastar_pathfinding::find_path(PathGrid auto&& testGrid, size_i gridExten
     }
 
     return {};
+}
+
+////////////////////////////////////////////////////////////
+
+inline void lpastar_pathfinding::initialize(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish)
+{
+    _gridExtent = gridExtent;
+    _start      = start;
+    _finish     = finish;
+
+    _g       = grid<u64> {gridExtent, pathfinding::IMPASSABLE_COST};
+    _rhs     = grid<u64> {gridExtent, pathfinding::IMPASSABLE_COST};
+    _parent  = grid<point_i> {gridExtent, {-1, -1}};
+    _nodeKey = grid<key> {gridExtent, {.K1 = pathfinding::IMPASSABLE_COST, .K2 = pathfinding::IMPASSABLE_COST}};
+    _inOpen  = grid<bool> {gridExtent, false};
+
+    _open.clear();
+
+    _rhs[_start]     = 0;
+    _inOpen[_start]  = true;
+    _nodeKey[_start] = calculate_key(_start);
+    _open.insert({.Pos = _start, .Key = _nodeKey[_start]});
+
+    compute_shortest_path(testGrid);
+}
+
+inline void lpastar_pathfinding::update(PathGrid auto&& testGrid, point_i changedTile)
+{
+    update_vertex(testGrid, changedTile);
+    for (auto const& neighbor : pathfinding::neighbors(_allowDiagonal, _gridExtent, changedTile)) {
+        update_vertex(testGrid, neighbor);
+    }
+    compute_shortest_path(testGrid);
+}
+
+inline void lpastar_pathfinding::update_vertex(PathGrid auto&& testGrid, point_i p)
+{
+    if (_inOpen[p]) {
+        _open.erase({.Pos = p, .Key = _nodeKey[p]});
+        _inOpen[p] = false;
+    }
+
+    if (p != _start) {
+        u64     minRhs {pathfinding::IMPASSABLE_COST};
+        point_i bestPar {-1, -1};
+        for (auto const& pred : pathfinding::neighbors(_allowDiagonal, _gridExtent, p)) {
+            u64 const cost {testGrid.get_cost(pred, p)};
+            if (cost == pathfinding::IMPASSABLE_COST) { continue; }
+
+            u64 const gVal {_g[pred]};
+            u64 const tentative {(gVal >= pathfinding::IMPASSABLE_COST - cost)
+                                     ? pathfinding::IMPASSABLE_COST
+                                     : gVal + cost};
+
+            if (tentative < minRhs) {
+                minRhs  = tentative;
+                bestPar = pred;
+            }
+        }
+        _rhs[p]    = minRhs;
+        _parent[p] = bestPar;
+    }
+
+    if (_g[p] != _rhs[p]) {
+        _nodeKey[p] = calculate_key(p);
+        _open.insert({.Pos = p, .Key = _nodeKey[p]});
+        _inOpen[p] = true;
+    }
+}
+
+inline void lpastar_pathfinding::compute_shortest_path(PathGrid auto&& testGrid)
+{
+    while (!_open.empty()) {
+        auto const& top {*_open.begin()};
+        key const   finishKey {calculate_key(_finish)};
+
+        if (top.Key >= finishKey && _rhs[_finish] == _g[_finish]) {
+            break;
+        }
+
+        point_i const u {top.Pos};
+        _open.erase(_open.begin());
+        _inOpen[u] = false;
+
+        if (_g[u] > _rhs[u]) {
+            _g[u] = _rhs[u];
+            for (auto const& s : pathfinding::neighbors(_allowDiagonal, _gridExtent, u)) {
+                update_vertex(testGrid, s);
+            }
+        } else {
+            _g[u] = pathfinding::IMPASSABLE_COST;
+            update_vertex(testGrid, u);
+            for (auto const& s : pathfinding::neighbors(_allowDiagonal, _gridExtent, u)) {
+                update_vertex(testGrid, s);
+            }
+        }
+    }
+    rebuild_path();
 }
 
 }

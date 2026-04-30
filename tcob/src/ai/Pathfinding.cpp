@@ -104,4 +104,51 @@ thetastar_pathfinding::thetastar_pathfinding(bool allowDiagonal)
 {
 }
 
+////////////////////////////////////////////////////////////
+
+lpastar_pathfinding::lpastar_pathfinding(bool allowDiagonal)
+    : _allowDiagonal {allowDiagonal}
+{
+}
+
+auto lpastar_pathfinding::calculate_key(point_i p) const -> key
+{
+    u64 const gVal {_g[p]};
+    u64 const rhsVal {_rhs[p]};
+    u64 const minVal {std::min(gVal, rhsVal)};
+
+    u64 const h {pathfinding::distance(pathfinding::heuristic::Euclidean, p, _finish)};
+
+    u64 const k1 {(minVal >= pathfinding::IMPASSABLE_COST - h)
+                      ? pathfinding::IMPASSABLE_COST
+                      : minVal + h};
+
+    return {.K1 = k1, .K2 = minVal};
+}
+
+void lpastar_pathfinding::rebuild_path()
+{
+    _path.clear();
+    if (_g[_finish] >= pathfinding::IMPASSABLE_COST) { return; }
+
+    point_i cur {_finish};
+    while (cur != _start) {
+        _path.push_back(cur);
+        cur = _parent[cur];
+        if (cur == point_i {-1, -1}) {
+            _path.clear();
+            return;
+        }
+    }
+    std::ranges::reverse(_path);
+}
+
+auto lpastar_pathfinding::path() const -> std::vector<point_i> const& { return _path; }
+
+auto lpastar_pathfinding::node::operator<(node const& other) const -> bool
+{
+    if (Key != other.Key) { return Key < other.Key; }
+    if (Pos.X != other.Pos.X) { return Pos.X < other.Pos.X; }
+    return Pos.Y < other.Pos.Y;
+}
 }
