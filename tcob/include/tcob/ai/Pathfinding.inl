@@ -20,9 +20,70 @@
 
 namespace tcob::ai::pathfinding {
 
+inline auto has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) -> bool
+{
+    auto const blocked {[&](i32 x, i32 y) -> bool {
+        if (x < 0 || x >= gridExtent.Width || y < 0 || y >= gridExtent.Height) { return true; }
+        return testGrid.get_cost({x, y}, {x, y}) == IMPASSABLE_COST;
+    }};
+
+    auto [x0, y0] {a};
+    auto [x1, y1] {b};
+
+    i32 const dx {std::abs(x1 - x0)};
+    i32 const dy {std::abs(y1 - y0)};
+    i32 const sx {x0 < x1 ? 1 : -1};
+    i32 const sy {y0 < y1 ? 1 : -1};
+    i32       err {dx - dy};
+
+    for (;;) {
+        if (blocked(x0, y0)) { return false; }
+        if (x0 == x1 && y0 == y1) { return true; }
+
+        i32 const  e2 {2 * err};
+        bool const stepX {e2 > -dy};
+        bool const stepY {e2 < dx};
+
+        if (stepX && stepY) {
+            if (blocked(x0 + sx, y0) || blocked(x0, y0 + sy)) { return false; }
+        }
+
+        if (stepX) {
+            err -= dy;
+            x0 += sx;
+        }
+        if (stepY) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
+inline auto smooth_path(PathGrid auto&& testGrid, size_i gridExtent, std::vector<point_i> path) -> std::vector<point_i>
+{
+    if (path.size() < 3) { return path; }
+
+    std::vector<point_i> result;
+    result.push_back(path.front());
+
+    usize anchor {0};
+    usize i {1};
+
+    while (i < path.size()) {
+        if (!has_line_of_sight(testGrid, gridExtent, path[anchor], path[i])) {
+            result.push_back(path[i - 1]);
+            anchor = i - 1;
+        }
+        ++i;
+    }
+
+    result.push_back(path.back());
+    return result;
+}
+
 ////////////////////////////////////////////////////////////
 
-auto astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
+inline auto astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
 {
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == IMPASSABLE_COST || testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return {}; }
@@ -66,7 +127,7 @@ auto astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start
 
 ////////////////////////////////////////////////////////////
 
-auto bidir_astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
+inline auto bidir_astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
 {
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == IMPASSABLE_COST || testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return {}; }
@@ -149,7 +210,7 @@ auto bidir_astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i
 
 ////////////////////////////////////////////////////////////
 
-auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
+inline auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
 {
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == IMPASSABLE_COST || testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return {}; }
@@ -234,46 +295,7 @@ auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, poin
 
 ////////////////////////////////////////////////////////////
 
-auto thetastar::has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) const -> bool
-{
-    auto const blocked {[&](i32 x, i32 y) -> bool {
-        if (x < 0 || x >= gridExtent.Width || y < 0 || y >= gridExtent.Height) { return true; }
-        return testGrid.get_cost({x, y}, {x, y}) == IMPASSABLE_COST;
-    }};
-
-    auto [x0, y0] {a};
-    auto [x1, y1] {b};
-
-    i32 const dx {std::abs(x1 - x0)};
-    i32 const dy {std::abs(y1 - y0)};
-    i32 const sx {x0 < x1 ? 1 : -1};
-    i32 const sy {y0 < y1 ? 1 : -1};
-    i32       err {dx - dy};
-
-    for (;;) {
-        if (blocked(x0, y0)) { return false; }
-        if (x0 == x1 && y0 == y1) { return true; }
-
-        i32 const  e2 {2 * err};
-        bool const stepX {e2 > -dy};
-        bool const stepY {e2 < dx};
-
-        if (stepX && stepY) {
-            if (blocked(x0 + sx, y0) || blocked(x0, y0 + sy)) { return false; }
-        }
-
-        if (stepX) {
-            err -= dy;
-            x0 += sx;
-        }
-        if (stepY) {
-            err += dx;
-            y0 += sy;
-        }
-    }
-}
-
-auto thetastar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
+inline auto thetastar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
 {
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == IMPASSABLE_COST || testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return {}; }
@@ -544,7 +566,7 @@ inline void dstar_lite::compute_shortest_path(PathGrid auto&& testGrid)
 
 ////////////////////////////////////////////////////////////
 
-void flow_field::build(PathGrid auto&& testGrid, size_i gridExtent, point_i finish)
+inline void flow_field::build(PathGrid auto&& testGrid, size_i gridExtent, point_i finish)
 {
     if (finish == INVALID_POS) { return; }
     if (testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return; }

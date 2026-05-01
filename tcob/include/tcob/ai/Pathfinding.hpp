@@ -38,6 +38,10 @@ enum class heuristic : u8 {
     Chebyshev
 };
 
+auto has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) -> bool;
+
+auto smooth_path(PathGrid auto&& testGrid, size_i gridExtent, std::vector<point_i> path) -> std::vector<point_i>;
+
 namespace detail {
     TCOB_API auto distance(heuristic h, point_i a, point_i b) -> u64;
 
@@ -145,8 +149,6 @@ private:
         u64     F {};
         auto    operator<=>(node const& other) const -> std::strong_ordering;
     };
-
-    auto has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) const -> bool;
 
     bool                   _allowDiagonal;
     static heuristic const _heuristic {heuristic::Euclidean};
