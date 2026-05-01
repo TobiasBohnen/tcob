@@ -27,9 +27,10 @@ auto astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == IMPASSABLE_COST || testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return {}; }
 
-    std::priority_queue<node, std::vector<node>, std::greater<>> openSet;
-    std::unordered_map<point_i, point_i>                         cameFrom;
-    grid<u64>                                                    gScore {gridExtent, IMPASSABLE_COST};
+    using open_set = std::priority_queue<node, std::vector<node>, std::greater<>>;
+    open_set                             openSet;
+    std::unordered_map<point_i, point_i> cameFrom;
+    grid<u64>                            gScore {gridExtent, IMPASSABLE_COST};
 
     gScore[start] = 0;
     openSet.push({.Pos = start, .G = 0, .F = detail::distance(_heuristic, start, finish)});
@@ -169,9 +170,10 @@ auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, poin
         return {(pos.X * DIR_COUNT), pos.Y};
     }};
 
-    std::priority_queue<node, std::vector<node>, std::greater<>> openSet;
-    grid<u64>                                                    gScore {stateExtent, IMPASSABLE_COST};
-    grid<state>                                                  cameFrom {stateExtent, {.Pos = SENTINEL, .Dir = {0, 0}}};
+    using open_set = std::priority_queue<node, std::vector<node>, std::greater<>>;
+    open_set    openSet;
+    grid<u64>   gScore {stateExtent, IMPASSABLE_COST};
+    grid<state> cameFrom {stateExtent, {.Pos = SENTINEL, .Dir = {0, 0}}};
 
     for (auto const& neighbor : detail::neighbors(_allowDiagonal, gridExtent, start)) {
         auto const cost {testGrid.get_cost(start, neighbor)};
@@ -179,12 +181,11 @@ auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, poin
         point_i const dir {neighbor.X - start.X, neighbor.Y - start.Y};
         state const   next {.Pos = neighbor, .Dir = dir};
         point_i const nidx {idx(neighbor, dir)};
-        u64 const     tentative {cost}; // no turn on first step
-        if (tentative < gScore[nidx]) {
+        if (cost < gScore[nidx]) {
             cameFrom[nidx] = {.Pos = start, .Dir = dir};
-            gScore[nidx]   = tentative;
+            gScore[nidx]   = cost;
             u64 const h {detail::distance(_heuristic, neighbor, finish)};
-            openSet.push({.State = next, .G = tentative, .F = tentative + h});
+            openSet.push({.State = next, .G = cost, .F = cost + h});
         }
     }
 
@@ -280,9 +281,10 @@ auto thetastar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i s
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == IMPASSABLE_COST || testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return {}; }
 
-    std::priority_queue<node, std::vector<node>, std::greater<>> openSet;
-    std::unordered_map<point_i, point_i>                         cameFrom;
-    grid<u64>                                                    gScore {gridExtent, IMPASSABLE_COST};
+    using open_set = std::priority_queue<node, std::vector<node>, std::greater<>>;
+    open_set                             openSet;
+    std::unordered_map<point_i, point_i> cameFrom;
+    grid<u64>                            gScore {gridExtent, IMPASSABLE_COST};
 
     gScore[start] = 0;
     openSet.push({.Pos = start, .G = 0, .F = detail::distance(_heuristic, start, finish)});
