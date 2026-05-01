@@ -108,13 +108,15 @@ public:
     auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
 private:
-    struct state {
+    class TCOB_API state {
+    public:
         point_i Pos;
         point_i Dir;
         auto    operator==(state const& other) const -> bool = default;
     };
 
-    struct node {
+    class TCOB_API node {
+    public:
         state State;
         u64   G {};
         u64   F {};
