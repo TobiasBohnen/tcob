@@ -375,7 +375,7 @@ inline auto shuffled_range_distribution::operator()(auto&& rng) -> i64
 inline void shuffled_range_distribution::gen_seq(auto&& rng)
 {
     std::vector<i64> sequence;
-    sequence.reserve(_max - _min + 1);
+    sequence.reserve(static_cast<usize>(_max - _min + 1));
     for (i64 i {_min}; i <= _max; ++i) { sequence.push_back(i); }
     _seq.reserve(sequence.size() * _period);
     for (isize i {0}; i < _period; ++i) { _seq.insert(_seq.end(), sequence.begin(), sequence.end()); }
