@@ -483,9 +483,11 @@ inline void dstar_lite::update_vertex(PathGrid auto&& testGrid, point_i p)
         u64     minRhs {IMPASSABLE_COST};
         point_i bestPar {INVALID_POS};
         for (auto const& succ : detail::neighbors(_allowDiagonal, _gridExtent, p)) {
-            u64 const cost {testGrid.get_cost(p, succ)}; // directed: p -> succ
+            if (succ == p) { continue; }
+            u64 const cost {testGrid.get_cost(p, succ)};
             if (cost == IMPASSABLE_COST) { continue; }
             u64 const gVal {_g[succ]};
+            if (gVal == IMPASSABLE_COST) { continue; }
             u64 const g {(gVal >= IMPASSABLE_COST - cost)
                              ? IMPASSABLE_COST
                              : gVal + cost};
@@ -544,6 +546,7 @@ inline void dstar_lite::compute_shortest_path(PathGrid auto&& testGrid)
 
 void flow_field::build(PathGrid auto&& testGrid, size_i gridExtent, point_i finish)
 {
+    if (finish == INVALID_POS) { return; }
     if (testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return; }
 
     _gridExtent = gridExtent;

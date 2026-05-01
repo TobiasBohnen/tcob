@@ -209,8 +209,15 @@ void dstar_lite::rebuild_path()
     _path.clear();
     if (_g[_current] >= IMPASSABLE_COST) { return; }
 
-    point_i cur {_current};
+    point_i   cur {_current};
+    i32 const maxSteps {_gridExtent.area()};
+    i32       steps {0};
+
     while (cur != _finish) {
+        if (++steps > maxSteps) {
+            _path.clear();
+            return;
+        }
         _path.push_back(cur);
         cur = _parent[cur];
         if (cur == INVALID_POS) {
@@ -238,7 +245,7 @@ flow_field::flow_field(bool allowDiagonal)
 
 auto flow_field::direction(point_i from) const -> point_i
 {
-    if (_flow[from] == INVALID_DIR) { return INVALID_DIR; }
+    if (!_flow.size().contains(from)) { return INVALID_DIR; }
     return _flow[from];
 }
 
