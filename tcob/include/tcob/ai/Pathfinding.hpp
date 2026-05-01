@@ -28,7 +28,9 @@ concept PathGrid =
 
 ////////////////////////////////////////////////////////////
 
-static constexpr u64 IMPASSABLE_COST {std::numeric_limits<u64>::max()};
+static constexpr u64     IMPASSABLE_COST {std::numeric_limits<u64>::max()};
+static constexpr point_i INVALID_DIR {-2, -2};
+static constexpr point_i INVALID_POS {-1, -1};
 
 enum class heuristic : u8 {
     Euclidean,
@@ -183,8 +185,8 @@ private:
     void rebuild_path();
 
     size_i    _gridExtent {};
-    point_i   _start {-1, -1};
-    point_i   _finish {-1, -1};
+    point_i   _start {INVALID_POS};
+    point_i   _finish {INVALID_POS};
     bool      _allowDiagonal {false};
     heuristic _heuristic;
 
@@ -235,10 +237,10 @@ private:
     void rebuild_path();
 
     size_i    _gridExtent {};
-    point_i   _start {-1, -1};
-    point_i   _finish {-1, -1};
-    point_i   _current {-1, -1};
-    point_i   _last {-1, -1};
+    point_i   _start {INVALID_POS};
+    point_i   _finish {INVALID_POS};
+    point_i   _current {INVALID_POS};
+    point_i   _last {INVALID_POS};
     bool      _allowDiagonal {false};
     heuristic _heuristic;
     u64       _km {0};
@@ -257,8 +259,6 @@ private:
 
 class TCOB_API flow_field final {
 public:
-    static constexpr point_i INVALID_DIR {-2, -2};
-
     explicit flow_field(bool allowDiagonal = false);
 
     void build(PathGrid auto&& testGrid, size_i gridExtent, point_i finish);
@@ -277,7 +277,7 @@ private:
 
     bool    _allowDiagonal;
     size_i  _gridExtent {};
-    point_i _finish {-1, -1};
+    point_i _finish {INVALID_POS};
 
     grid<u64>     _cost {};
     grid<point_i> _flow {};

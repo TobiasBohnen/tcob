@@ -71,12 +71,10 @@ auto bidir_astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == IMPASSABLE_COST || testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return {}; }
 
-    static constexpr point_i SENTINEL {-1, -1};
-
     using open_set = std::priority_queue<node, std::vector<node>, std::greater<>>;
     open_set      openF, openB;
-    grid<point_i> cameFromF {gridExtent, SENTINEL};
-    grid<point_i> cameFromB {gridExtent, SENTINEL};
+    grid<point_i> cameFromF {gridExtent, INVALID_POS};
+    grid<point_i> cameFromB {gridExtent, INVALID_POS};
     grid<u64>     gScoreF {gridExtent, IMPASSABLE_COST};
     grid<u64>     gScoreB {gridExtent, IMPASSABLE_COST};
 
@@ -86,7 +84,7 @@ auto bidir_astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i
     openB.push({.Pos = finish, .G = 0, .F = detail::distance(_heuristic, finish, start)});
 
     u64     bestCost {IMPASSABLE_COST};
-    point_i meetingPt {SENTINEL};
+    point_i meetingPt {INVALID_POS};
 
     auto const expand {[&](open_set& open, grid<u64>& gScore, grid<u64>& gScoreOther, grid<point_i>& cameFrom, point_i target) {
         if (open.empty()) { return; }
@@ -136,12 +134,12 @@ auto bidir_astar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i
         }
     }
 
-    if (meetingPt == SENTINEL) { return {}; }
+    if (meetingPt == INVALID_POS) { return {}; }
 
-    std::vector<point_i> path {reconstruct_path(cameFromF, meetingPt, SENTINEL)};
+    std::vector<point_i> path {reconstruct_path(cameFromF, meetingPt, INVALID_POS)};
 
     point_i cur {meetingPt};
-    while (cameFromB[cur] != SENTINEL) {
+    while (cameFromB[cur] != INVALID_POS) {
         cur = cameFromB[cur];
         path.push_back(cur);
     }
@@ -156,8 +154,7 @@ auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, poin
     if (start == finish) { return {start}; }
     if (testGrid.get_cost(start, start) == IMPASSABLE_COST || testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return {}; }
 
-    static constexpr point_i SENTINEL {-1, -1};
-    static constexpr i32     DIR_COUNT {8};
+    static constexpr i32 DIR_COUNT {8};
 
     u64 const    area {static_cast<u64>(gridExtent.area()) + 1};
     size_i const stateExtent {gridExtent.Width * DIR_COUNT, gridExtent.Height};
@@ -173,7 +170,7 @@ auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, poin
     using open_set = std::priority_queue<node, std::vector<node>, std::greater<>>;
     open_set    openSet;
     grid<u64>   gScore {stateExtent, IMPASSABLE_COST};
-    grid<state> cameFrom {stateExtent, {.Pos = SENTINEL, .Dir = {0, 0}}};
+    grid<state> cameFrom {stateExtent, {.Pos = INVALID_POS, .Dir = {0, 0}}};
 
     for (auto const& neighbor : detail::neighbors(_allowDiagonal, gridExtent, start)) {
         auto const cost {testGrid.get_cost(start, neighbor)};
@@ -204,7 +201,7 @@ auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, poin
             while (s.Pos != start) {
                 path.push_back(s.Pos);
                 s = cameFrom[idx(s.Pos, s.Dir)];
-                if (s.Pos == SENTINEL) { return {}; }
+                if (s.Pos == INVALID_POS) { return {}; }
             }
             std::ranges::reverse(path);
             return path;
@@ -239,7 +236,7 @@ auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExtent, poin
 
 auto thetastar::has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) const -> bool
 {
-    auto blocked {[&](i32 x, i32 y) -> bool {
+    auto const blocked {[&](i32 x, i32 y) -> bool {
         if (x < 0 || x >= gridExtent.Width || y < 0 || y >= gridExtent.Height) { return true; }
         return testGrid.get_cost({x, y}, {x, y}) == IMPASSABLE_COST;
     }};
@@ -344,7 +341,7 @@ inline void lpastar::initialize(PathGrid auto&& testGrid, size_i gridExtent, poi
 
     _g       = grid<u64> {gridExtent, IMPASSABLE_COST};
     _rhs     = grid<u64> {gridExtent, IMPASSABLE_COST};
-    _parent  = grid<point_i> {gridExtent, {-1, -1}};
+    _parent  = grid<point_i> {gridExtent, INVALID_POS};
     _nodeKey = grid<key> {gridExtent, {.K1 = IMPASSABLE_COST, .K2 = IMPASSABLE_COST}};
     _inOpen  = grid<bool> {gridExtent, false};
 
@@ -376,18 +373,16 @@ inline void lpastar::update_vertex(PathGrid auto&& testGrid, point_i p)
 
     if (p != _start) {
         u64     minRhs {IMPASSABLE_COST};
-        point_i bestPar {-1, -1};
+        point_i bestPar {INVALID_POS};
         for (auto const& pred : detail::neighbors(_allowDiagonal, _gridExtent, p)) {
             u64 const cost {testGrid.get_cost(pred, p)};
             if (cost == IMPASSABLE_COST) { continue; }
 
             u64 const gVal {_g[pred]};
-            u64 const tentative {(gVal >= IMPASSABLE_COST - cost)
-                                     ? IMPASSABLE_COST
-                                     : gVal + cost};
+            u64 const g {(gVal >= IMPASSABLE_COST - cost) ? IMPASSABLE_COST : gVal + cost};
 
-            if (tentative < minRhs) {
-                minRhs  = tentative;
+            if (g < minRhs) {
+                minRhs  = g;
                 bestPar = pred;
             }
         }
@@ -445,7 +440,7 @@ inline void dstar_lite::initialize(PathGrid auto&& testGrid, size_i gridExtent, 
 
     _g       = grid<u64> {gridExtent, IMPASSABLE_COST};
     _rhs     = grid<u64> {gridExtent, IMPASSABLE_COST};
-    _parent  = grid<point_i> {gridExtent, {-1, -1}};
+    _parent  = grid<point_i> {gridExtent, INVALID_POS};
     _nodeKey = grid<key> {gridExtent, {.K1 = IMPASSABLE_COST, .K2 = IMPASSABLE_COST}};
     _inOpen  = grid<bool> {gridExtent, false};
     _open.clear();
@@ -490,16 +485,16 @@ inline void dstar_lite::update_vertex(PathGrid auto&& testGrid, point_i p)
 
     if (p != _finish) {
         u64     minRhs {IMPASSABLE_COST};
-        point_i bestPar {-1, -1};
+        point_i bestPar {INVALID_POS};
         for (auto const& succ : detail::neighbors(_allowDiagonal, _gridExtent, p)) {
             u64 const cost {testGrid.get_cost(p, succ)}; // directed: p -> succ
             if (cost == IMPASSABLE_COST) { continue; }
             u64 const gVal {_g[succ]};
-            u64 const tentative {(gVal >= IMPASSABLE_COST - cost)
-                                     ? IMPASSABLE_COST
-                                     : gVal + cost};
-            if (tentative < minRhs) {
-                minRhs  = tentative;
+            u64 const g {(gVal >= IMPASSABLE_COST - cost)
+                             ? IMPASSABLE_COST
+                             : gVal + cost};
+            if (g < minRhs) {
+                minRhs  = g;
                 bestPar = succ;
             }
         }

@@ -157,7 +157,7 @@ void lpastar::rebuild_path()
     while (cur != _start) {
         _path.push_back(cur);
         cur = _parent[cur];
-        if (cur == point_i {-1, -1}) {
+        if (cur == INVALID_POS) {
             _path.clear();
             return;
         }
@@ -213,7 +213,7 @@ void dstar_lite::rebuild_path()
     while (cur != _finish) {
         _path.push_back(cur);
         cur = _parent[cur];
-        if (cur == point_i {-1, -1}) {
+        if (cur == INVALID_POS) {
             _path.clear();
             return;
         }
