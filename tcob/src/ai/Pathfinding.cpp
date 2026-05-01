@@ -74,7 +74,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////
 
-astar::astar(bool allowDiagonal, pathfinding::heuristic heuristic)
+astar::astar(bool allowDiagonal, heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
     , _heuristic {heuristic}
 {
@@ -82,7 +82,7 @@ astar::astar(bool allowDiagonal, pathfinding::heuristic heuristic)
 
 ////////////////////////////////////////////////////////////
 
-bidir_astar::bidir_astar(bool allowDiagonal, pathfinding::heuristic heuristic)
+bidir_astar::bidir_astar(bool allowDiagonal, heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
     , _heuristic {heuristic}
 {
@@ -101,8 +101,9 @@ auto bidir_astar::reconstruct_path(grid<point_i> const& cameFrom, point_i curren
 
 ////////////////////////////////////////////////////////////
 
-minturns::minturns(bool allowDiagonal)
+astar_minturns::astar_minturns(bool allowDiagonal, heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
+    , _heuristic {heuristic}
 {
 }
 
@@ -115,7 +116,7 @@ thetastar::thetastar(bool allowDiagonal)
 
 ////////////////////////////////////////////////////////////
 
-lpastar::lpastar(bool allowDiagonal, pathfinding::heuristic heuristic)
+lpastar::lpastar(bool allowDiagonal, heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
     , _heuristic {heuristic}
 {
@@ -127,10 +128,10 @@ auto lpastar::calculate_key(point_i p) const -> key
     u64 const rhsVal {_rhs[p]};
     u64 const minVal {std::min(gVal, rhsVal)};
 
-    u64 const h {pathfinding::detail::distance(_heuristic, p, _finish)};
+    u64 const h {detail::distance(_heuristic, p, _finish)};
 
-    u64 const k1 {(minVal >= pathfinding::IMPASSABLE_COST - h)
-                      ? pathfinding::IMPASSABLE_COST
+    u64 const k1 {(minVal >= IMPASSABLE_COST - h)
+                      ? IMPASSABLE_COST
                       : minVal + h};
 
     return {.K1 = k1, .K2 = minVal};
@@ -139,7 +140,7 @@ auto lpastar::calculate_key(point_i p) const -> key
 void lpastar::rebuild_path()
 {
     _path.clear();
-    if (_g[_finish] >= pathfinding::IMPASSABLE_COST) { return; }
+    if (_g[_finish] >= IMPASSABLE_COST) { return; }
 
     point_i cur {_finish};
     while (cur != _start) {
@@ -164,7 +165,7 @@ auto lpastar::node::operator<(node const& other) const -> bool
 
 ////////////////////////////////////////////////////////////
 
-dstar_lite::dstar_lite(bool allowDiagonal, pathfinding::heuristic heuristic)
+dstar_lite::dstar_lite(bool allowDiagonal, heuristic heuristic)
     : _allowDiagonal {allowDiagonal}
     , _heuristic {heuristic}
 {
@@ -175,9 +176,9 @@ auto dstar_lite::calculate_key(point_i p) const -> key
     u64 const gVal {_g[p]};
     u64 const rhsVal {_rhs[p]};
     u64 const minVal {std::min(gVal, rhsVal)};
-    u64 const h {pathfinding::detail::distance(_heuristic, p, _current)};
-    u64 const k1 {(minVal >= pathfinding::IMPASSABLE_COST - h)
-                      ? pathfinding::IMPASSABLE_COST
+    u64 const h {detail::distance(_heuristic, p, _current)};
+    u64 const k1 {(minVal >= IMPASSABLE_COST - h)
+                      ? IMPASSABLE_COST
                       : minVal + h + _km};
     return {.K1 = k1, .K2 = minVal};
 }
@@ -195,7 +196,7 @@ auto dstar_lite::position() const -> point_i
 void dstar_lite::rebuild_path()
 {
     _path.clear();
-    if (_g[_current] >= pathfinding::IMPASSABLE_COST) { return; }
+    if (_g[_current] >= IMPASSABLE_COST) { return; }
 
     point_i cur {_current};
     while (cur != _finish) {

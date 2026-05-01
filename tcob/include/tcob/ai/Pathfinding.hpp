@@ -46,7 +46,7 @@ namespace detail {
 
 class TCOB_API astar final {
 public:
-    explicit astar(bool allowDiagonal = false, pathfinding::heuristic heuristic = pathfinding::heuristic::Manhattan);
+    explicit astar(bool allowDiagonal = false, heuristic heuristic = heuristic::Manhattan);
 
     auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
@@ -59,15 +59,15 @@ private:
         auto    operator>(node const& other) const -> bool { return F > other.F; }
     };
 
-    bool                   _allowDiagonal;
-    pathfinding::heuristic _heuristic;
+    bool      _allowDiagonal;
+    heuristic _heuristic;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API bidir_astar final {
 public:
-    explicit bidir_astar(bool allowDiagonal = false, pathfinding::heuristic heuristic = pathfinding::heuristic::Manhattan);
+    explicit bidir_astar(bool allowDiagonal = false, heuristic heuristic = heuristic::Manhattan);
 
     auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
@@ -82,15 +82,15 @@ private:
 
     auto reconstruct_path(grid<point_i> const& cameFrom, point_i current, point_i sentinel) -> std::vector<point_i>;
 
-    bool                   _allowDiagonal;
-    pathfinding::heuristic _heuristic;
+    bool      _allowDiagonal;
+    heuristic _heuristic;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API minturns final {
+class TCOB_API astar_minturns final {
 public:
-    explicit minturns(bool allowDiagonal = false);
+    explicit astar_minturns(bool allowDiagonal = false, heuristic heuristic = heuristic::Euclidean);
 
     auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
@@ -103,11 +103,15 @@ private:
 
     struct node {
         state State;
-        u64   Cost {};
-        auto  operator>(node const& other) const -> bool { return Cost > other.Cost; }
+        u64   G {};
+        u64   F {};
+        auto  operator>(node const& other) const -> bool { return F > other.F; }
     };
 
-    bool _allowDiagonal;
+    static auto dir_to_index(point_i dir) -> i32;
+
+    bool      _allowDiagonal;
+    heuristic _heuristic;
 };
 
 ////////////////////////////////////////////////////////////
@@ -129,15 +133,15 @@ private:
 
     auto has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) const -> bool;
 
-    bool                                _allowDiagonal;
-    static pathfinding::heuristic const _heuristic {pathfinding::heuristic::Euclidean};
+    bool                   _allowDiagonal;
+    static heuristic const _heuristic {heuristic::Euclidean};
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API lpastar final {
 public:
-    explicit lpastar(bool allowDiagonal = true, pathfinding::heuristic heuristic = pathfinding::heuristic::Manhattan);
+    explicit lpastar(bool allowDiagonal = true, heuristic heuristic = heuristic::Manhattan);
 
     void initialize(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish);
 
@@ -165,11 +169,11 @@ private:
     void compute_shortest_path(PathGrid auto&& testGrid);
     void rebuild_path();
 
-    size_i                 _gridExtent {};
-    point_i                _start {-1, -1};
-    point_i                _finish {-1, -1};
-    bool                   _allowDiagonal {false};
-    pathfinding::heuristic _heuristic;
+    size_i    _gridExtent {};
+    point_i   _start {-1, -1};
+    point_i   _finish {-1, -1};
+    bool      _allowDiagonal {false};
+    heuristic _heuristic;
 
     grid<u64>     _g {};
     grid<u64>     _rhs {};
@@ -185,7 +189,7 @@ private:
 
 class TCOB_API dstar_lite final {
 public:
-    explicit dstar_lite(bool allowDiagonal = false, pathfinding::heuristic heuristic = pathfinding::heuristic::Manhattan);
+    explicit dstar_lite(bool allowDiagonal = false, heuristic heuristic = heuristic::Manhattan);
 
     void initialize(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish);
 
@@ -217,14 +221,14 @@ private:
     void compute_shortest_path(PathGrid auto&& testGrid);
     void rebuild_path();
 
-    size_i                 _gridExtent {};
-    point_i                _start {-1, -1};
-    point_i                _finish {-1, -1};
-    point_i                _current {-1, -1};
-    point_i                _last {-1, -1};
-    bool                   _allowDiagonal {false};
-    pathfinding::heuristic _heuristic;
-    u64                    _km {0};
+    size_i    _gridExtent {};
+    point_i   _start {-1, -1};
+    point_i   _finish {-1, -1};
+    point_i   _current {-1, -1};
+    point_i   _last {-1, -1};
+    bool      _allowDiagonal {false};
+    heuristic _heuristic;
+    u64       _km {0};
 
     grid<u64>     _g {};
     grid<u64>     _rhs {};
