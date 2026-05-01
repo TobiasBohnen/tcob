@@ -40,12 +40,14 @@ namespace detail {
     TCOB_API auto distance(heuristic h, point_i a, point_i b) -> u64;
 
     class TCOB_API neighbor_list {
-    public:
-        std::array<point_i, 8> Data;
-        i32                    Count {0};
+        using data = std::array<point_i, 8>;
 
-        auto begin() const { return Data.begin(); }
-        auto end() const { return Data.begin() + Count; }
+    public:
+        data Data;
+        i32  Count {0};
+
+        auto begin() const -> data::const_iterator;
+        auto end() const -> data::const_iterator;
     };
 
     TCOB_API auto neighbors(bool allowDiagonal, size_i gridSize, point_i pos) -> neighbor_list;
@@ -67,7 +69,7 @@ private:
         point_i Pos;
         u64     G {};
         u64     F {};
-        auto    operator>(node const& other) const -> bool { return F > other.F; }
+        auto    operator<=>(node const& other) const -> std::strong_ordering;
     };
 
     bool      _allowDiagonal;
@@ -88,7 +90,7 @@ private:
         point_i Pos;
         u64     G {};
         u64     F {};
-        auto    operator>(node const& other) const -> bool { return F > other.F; }
+        auto    operator<=>(node const& other) const -> std::strong_ordering;
     };
 
     auto reconstruct_path(grid<point_i> const& cameFrom, point_i current, point_i sentinel) -> std::vector<point_i>;
@@ -116,10 +118,8 @@ private:
         state State;
         u64   G {};
         u64   F {};
-        auto  operator>(node const& other) const -> bool { return F > other.F; }
+        auto  operator<=>(node const& other) const -> std::strong_ordering;
     };
-
-    static auto dir_to_index(point_i dir) -> i32;
 
     bool      _allowDiagonal;
     heuristic _heuristic;
@@ -139,7 +139,7 @@ private:
         point_i Pos;
         u64     G {};
         u64     F {};
-        auto    operator>(node const& other) const -> bool { return F > other.F; }
+        auto    operator<=>(node const& other) const -> std::strong_ordering;
     };
 
     auto has_line_of_sight(PathGrid auto&& testGrid, size_i gridExtent, point_i a, point_i b) const -> bool;
@@ -172,7 +172,7 @@ private:
     public:
         point_i Pos;
         key     Key;
-        auto    operator<(node const& other) const -> bool;
+        auto    operator<=>(node const& other) const -> std::strong_ordering;
     };
 
     auto calculate_key(point_i p) const -> key;
@@ -224,7 +224,7 @@ private:
     public:
         point_i Pos;
         key     Key;
-        auto    operator<(node const& other) const -> bool;
+        auto    operator<=>(node const& other) const -> std::strong_ordering;
     };
 
     auto calculate_key(point_i p) const -> key;
@@ -249,6 +249,36 @@ private:
 
     std::set<node>       _open;
     std::vector<point_i> _path;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API flow_field final {
+public:
+    static constexpr point_i INVALID_DIR {-2, -2};
+
+    explicit flow_field(bool allowDiagonal = false);
+
+    void build(PathGrid auto&& testGrid, size_i gridExtent, point_i finish);
+
+    auto direction(point_i from) const -> point_i;
+
+    auto path(point_i from) const -> std::vector<point_i>;
+
+private:
+    class TCOB_API node {
+    public:
+        u64     Cost {};
+        point_i Pos;
+        auto    operator<=>(node const& other) const -> std::strong_ordering;
+    };
+
+    bool    _allowDiagonal;
+    size_i  _gridExtent {};
+    point_i _finish {-1, -1};
+
+    grid<u64>     _cost {};
+    grid<point_i> _flow {};
 };
 
 }

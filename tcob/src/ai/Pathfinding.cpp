@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <compare>
 #include <unordered_map>
 #include <vector>
 
@@ -70,6 +71,8 @@ namespace detail {
         std::ranges::reverse(retValue);
         return retValue;
     }
+    auto neighbor_list::begin() const -> data::const_iterator { return Data.begin(); }
+    auto neighbor_list::end() const -> data::const_iterator { return Data.begin() + Count; }
 }
 
 ////////////////////////////////////////////////////////////
@@ -79,6 +82,8 @@ astar::astar(bool allowDiagonal, heuristic heuristic)
     , _heuristic {heuristic}
 {
 }
+
+auto astar::node::operator<=>(node const& other) const -> std::strong_ordering { return F <=> other.F; }
 
 ////////////////////////////////////////////////////////////
 
@@ -99,6 +104,8 @@ auto bidir_astar::reconstruct_path(grid<point_i> const& cameFrom, point_i curren
     return retValue;
 }
 
+auto bidir_astar::node::operator<=>(node const& other) const -> std::strong_ordering { return F <=> other.F; }
+
 ////////////////////////////////////////////////////////////
 
 astar_minturns::astar_minturns(bool allowDiagonal, heuristic heuristic)
@@ -107,12 +114,16 @@ astar_minturns::astar_minturns(bool allowDiagonal, heuristic heuristic)
 {
 }
 
+auto astar_minturns::node::operator<=>(node const& other) const -> std::strong_ordering { return F <=> other.F; }
+
 ////////////////////////////////////////////////////////////
 
 thetastar::thetastar(bool allowDiagonal)
     : _allowDiagonal {allowDiagonal}
 {
 }
+
+auto thetastar::node::operator<=>(node const& other) const -> std::strong_ordering { return F <=> other.F; }
 
 ////////////////////////////////////////////////////////////
 
@@ -156,11 +167,11 @@ void lpastar::rebuild_path()
 
 auto lpastar::path() const -> std::vector<point_i> const& { return _path; }
 
-auto lpastar::node::operator<(node const& other) const -> bool
+auto lpastar::node::operator<=>(node const& other) const -> std::strong_ordering
 {
-    if (Key != other.Key) { return Key < other.Key; }
-    if (Pos.X != other.Pos.X) { return Pos.X < other.Pos.X; }
-    return Pos.Y < other.Pos.Y;
+    if (Key != other.Key) { return Key <=> other.Key; }
+    if (Pos.X != other.Pos.X) { return Pos.X <=> other.Pos.X; }
+    return Pos.Y <=> other.Pos.Y;
 }
 
 ////////////////////////////////////////////////////////////
@@ -211,11 +222,44 @@ void dstar_lite::rebuild_path()
     if (!_path.empty()) { _path.erase(_path.begin()); }
 }
 
-auto dstar_lite::node::operator<(node const& other) const -> bool
+auto dstar_lite::node::operator<=>(node const& other) const -> std::strong_ordering
 {
-    if (Key != other.Key) { return Key < other.Key; }
-    if (Pos.X != other.Pos.X) { return Pos.X < other.Pos.X; }
-    return Pos.Y < other.Pos.Y;
+    if (Key != other.Key) { return Key <=> other.Key; }
+    if (Pos.X != other.Pos.X) { return Pos.X <=> other.Pos.X; }
+    return Pos.Y <=> other.Pos.Y;
+}
+
+////////////////////////////////////////////////////////////
+
+flow_field::flow_field(bool allowDiagonal)
+    : _allowDiagonal {allowDiagonal}
+{
+}
+
+auto flow_field::direction(point_i from) const -> point_i
+{
+    if (_flow[from] == INVALID_DIR) { return INVALID_DIR; }
+    return _flow[from];
+}
+
+auto flow_field::path(point_i from) const -> std::vector<point_i>
+{
+    std::vector<point_i> retValue;
+    point_i              cur {from};
+
+    while (cur != _finish) {
+        point_i const n {cur + direction(cur)};
+        if (n == INVALID_DIR) { return {}; }
+        retValue.push_back(n);
+        cur = n;
+    }
+
+    return retValue;
+}
+
+auto flow_field::node::operator<=>(node const& other) const -> std::strong_ordering
+{
+    return Cost <=> other.Cost;
 }
 
 }

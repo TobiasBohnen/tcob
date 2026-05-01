@@ -549,4 +549,41 @@ inline void dstar_lite::compute_shortest_path(PathGrid auto&& testGrid)
     rebuild_path();
 }
 
+////////////////////////////////////////////////////////////
+
+void flow_field::build(PathGrid auto&& testGrid, size_i gridExtent, point_i finish)
+{
+    if (testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return; }
+
+    _gridExtent = gridExtent;
+    _finish     = finish;
+    _cost       = grid<u64> {gridExtent, IMPASSABLE_COST};
+    _flow       = grid<point_i> {gridExtent, INVALID_DIR};
+
+    std::priority_queue<node, std::vector<node>, std::greater<>> openSet;
+
+    _cost[finish] = 0;
+    openSet.emplace(0, finish);
+
+    while (!openSet.empty()) {
+        auto const [cost, current] {openSet.top()};
+        openSet.pop();
+
+        if (cost > _cost[current]) { continue; }
+
+        for (auto const& neighbor : detail::neighbors(_allowDiagonal, gridExtent, current)) {
+            auto const moveCost {testGrid.get_cost(neighbor, current)};
+            if (moveCost == IMPASSABLE_COST) { continue; }
+            if (_cost[current] > IMPASSABLE_COST - moveCost) { continue; }
+
+            u64 const g {_cost[current] + moveCost};
+            if (g < _cost[neighbor]) {
+                _cost[neighbor] = g;
+                _flow[neighbor] = {current.X - neighbor.X, current.Y - neighbor.Y};
+                openSet.push({.Cost = g, .Pos = neighbor});
+            }
+        }
+    }
+}
+
 }
