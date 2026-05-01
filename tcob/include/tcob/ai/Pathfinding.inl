@@ -301,25 +301,21 @@ auto thetastar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i s
         for (auto const& neighbor : detail::neighbors(_allowDiagonal, gridExtent, current)) {
             if (testGrid.get_cost(current, neighbor) == IMPASSABLE_COST) { continue; }
 
-            auto          it {cameFrom.find(current)};
-            point_i const parent {(it != cameFrom.end()) ? it->second : current};
+            auto const    it {cameFrom.find(current)};
+            point_i const grandparent {(it != cameFrom.end()) ? it->second : current};
 
-            if (has_line_of_sight(testGrid, gridExtent, parent, neighbor)) {
-                u64 const d {detail::distance(_heuristic, parent, neighbor)};
-                if (gScore[parent] > (IMPASSABLE_COST - d)) { continue; }
-                u64 const g {gScore[parent] + d};
+            point_i newParent {current};
+            if (has_line_of_sight(testGrid, gridExtent, grandparent, neighbor)) {
+                newParent = grandparent;
+            }
+
+            u64 const d {detail::distance(_heuristic, newParent, neighbor)};
+
+            u64 parentG {gScore[newParent]};
+            if (parentG <= (IMPASSABLE_COST - d)) {
+                u64 const g {parentG + d};
                 if (g < gScore[neighbor]) {
-                    cameFrom[neighbor] = parent;
-                    gScore[neighbor]   = g;
-                    u64 const h {detail::distance(_heuristic, neighbor, finish)};
-                    openSet.push({.Pos = neighbor, .G = g, .F = g + h});
-                }
-            } else {
-                u64 const d {detail::distance(_heuristic, current, neighbor)};
-                if (gScore[current] > (IMPASSABLE_COST - d)) { continue; }
-                u64 const g {gScore[current] + d};
-                if (g < gScore[neighbor]) {
-                    cameFrom[neighbor] = current;
+                    cameFrom[neighbor] = newParent;
                     gScore[neighbor]   = g;
                     u64 const h {detail::distance(_heuristic, neighbor, finish)};
                     openSet.push({.Pos = neighbor, .G = g, .F = g + h});

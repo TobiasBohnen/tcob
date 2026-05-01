@@ -249,7 +249,7 @@ auto flow_field::path(point_i from) const -> std::vector<point_i>
 
     while (cur != _finish) {
         point_i const n {cur + direction(cur)};
-        if (n == INVALID_DIR) { return {}; }
+        if (n == INVALID_DIR || n.X < 0 || n.Y < 0) { return {}; }
         retValue.push_back(n);
         cur = n;
     }
