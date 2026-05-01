@@ -27,7 +27,7 @@ namespace detail {
         return 0;
     }
 
-    auto neighbors(bool allowDiagonal, size_i gridSize, point_i pos) -> std::vector<point_i>
+    auto neighbors(bool allowDiagonal, size_i gridSize, point_i pos) -> neighbor_list
     {
         static constexpr std::array<point_i, 4> orthogonalDirections {{
             {0, 1},
@@ -42,18 +42,18 @@ namespace detail {
             {-1, 1},
         }};
 
-        std::vector<point_i> retValue;
+        neighbor_list retValue;
         for (auto const& dir : orthogonalDirections) {
             point_i const neighbor {pos.X + dir.X, pos.Y + dir.Y};
             if (neighbor.X >= 0 && neighbor.X < gridSize.Width && neighbor.Y >= 0 && neighbor.Y < gridSize.Height) {
-                retValue.push_back(neighbor);
+                retValue.Data[retValue.Count++] = neighbor;
             }
         }
         if (allowDiagonal) {
             for (auto const& dir : diagonalDirections) {
                 point_i const neighbor {pos.X + dir.X, pos.Y + dir.Y};
                 if (neighbor.X >= 0 && neighbor.X < gridSize.Width && neighbor.Y >= 0 && neighbor.Y < gridSize.Height) {
-                    retValue.push_back(neighbor);
+                    retValue.Data[retValue.Count++] = neighbor;
                 }
             }
         }

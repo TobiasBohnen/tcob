@@ -302,8 +302,7 @@ auto thetastar::find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i s
         }
 
         for (auto const& neighbor : detail::neighbors(_allowDiagonal, gridExtent, current)) {
-            auto const neighborCost {testGrid.get_cost(current, neighbor)};
-            if (neighborCost == IMPASSABLE_COST) { continue; }
+            if (testGrid.get_cost(current, neighbor) == IMPASSABLE_COST) { continue; }
 
             auto          it {cameFrom.find(current)};
             point_i const parent {(it != cameFrom.end()) ? it->second : current};

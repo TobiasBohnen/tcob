@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
 #include <compare>
 #include <limits>
 #include <set>
@@ -37,7 +38,17 @@ enum class heuristic : u8 {
 
 namespace detail {
     TCOB_API auto distance(heuristic h, point_i a, point_i b) -> u64;
-    TCOB_API auto neighbors(bool allowDiagonal, size_i gridSize, point_i pos) -> std::vector<point_i>;
+
+    class TCOB_API neighbor_list {
+    public:
+        std::array<point_i, 8> Data;
+        i32                    Count {0};
+
+        auto begin() const { return Data.begin(); }
+        auto end() const { return Data.begin() + Count; }
+    };
+
+    TCOB_API auto neighbors(bool allowDiagonal, size_i gridSize, point_i pos) -> neighbor_list;
 
     TCOB_API auto reconstruct_path(std::unordered_map<point_i, point_i> const& cameFrom, point_i current) -> std::vector<point_i>;
 }
@@ -90,7 +101,7 @@ private:
 
 class TCOB_API astar_minturns final {
 public:
-    explicit astar_minturns(bool allowDiagonal = false, heuristic heuristic = heuristic::Euclidean);
+    explicit astar_minturns(bool allowDiagonal = false, heuristic heuristic = heuristic::Manhattan);
 
     auto find_path(PathGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
