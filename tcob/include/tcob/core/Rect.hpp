@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
 #include <cstddef>
 #include <format>
 #include <functional>
@@ -30,6 +31,8 @@ public:
 
     template <Arithmetic U>
     explicit constexpr rect(rect<U> const& p);
+
+    auto constexpr to_array [[nodiscard]] () const -> std::array<T, 4>;
 
     auto constexpr left() const -> T;
     auto constexpr top() const -> T;

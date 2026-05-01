@@ -7,6 +7,7 @@
 #include "Rect.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <tuple>
 #include <utility>
@@ -36,6 +37,12 @@ template <Arithmetic U>
 constexpr rect<T>::rect(rect<U> const& p)
     : rect {static_cast<point<T>>(p.Position), static_cast<size<T>>(p.Size)}
 {
+}
+
+template <Arithmetic T>
+auto constexpr rect<T>::to_array [[nodiscard]] () const -> std::array<T, 4>
+{
+    return {Position.X, Position.Y, Size.Width, Size.Height};
 }
 
 template <Arithmetic T>
