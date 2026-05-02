@@ -20,7 +20,6 @@
 #include <tcob/audio/Source.hpp>
 #include <tcob/audio/synth/SoundFont.hpp>
 #include <tcob/audio/synth/SoundGenerator.hpp>
-#include <tcob/audio/synth/SpeechGenerator.hpp>
 
 #include <tcob/core/AngleUnits.hpp>
 #include <tcob/core/Color.hpp>

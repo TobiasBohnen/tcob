@@ -9,7 +9,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Source.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/synth/SoundGenerator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/synth/SoundGenerator_private.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/synth/SpeechGenerator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/audio_codecs/AudioCodec_bsa.cpp
 )
 
@@ -22,7 +21,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/audio/Sound.hpp
     ${TCOB_INC_DIR}/tcob/audio/Source.hpp
     ${TCOB_INC_DIR}/tcob/audio/synth/SoundGenerator.hpp
-    ${TCOB_INC_DIR}/tcob/audio/synth/SpeechGenerator.hpp
 )
 
 if(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)

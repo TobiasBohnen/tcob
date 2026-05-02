@@ -5,6 +5,8 @@
 
 #include "tcob/audio/synth/SoundFont.hpp"
 
+#include <cmath>
+
 #if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
 
     #if defined(_MSC_VER)
@@ -84,7 +86,7 @@ auto sound_font::create_buffer(sound_font_commands const& commands) const -> buf
     // calculate duration
     f64 const d {commands.duration().count() / 1000};
 
-    std::vector<f32> samples(static_cast<usize>(d * _sampleRate * _channels));
+    std::vector<f32> samples(static_cast<usize>(std::ceil(d * _sampleRate) * _channels), 0.0f);
     f32*             ptr {samples.data()};
 
     // call 'apply' on all commands; then render them
