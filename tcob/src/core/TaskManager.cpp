@@ -77,21 +77,7 @@ void task_manager::drop_deferred(uid id)
     helper::erase_first(_deferredQueueBack, [id](auto const& ctx) { return ctx.second == id; });
 }
 
-auto task_manager::thread_count() const -> isize
-{
-    return _threadCount;
-}
-
-void task_manager::add_task(task_func&& func)
-{
-    {
-        std::scoped_lock lock {_taskMutex};
-        _taskQueue.emplace(std::move(func));
-    }
-    _taskCondition.notify_one();
-}
-
-auto task_manager::process_queue(milliseconds deltaTime, bool abort) -> bool
+auto task_manager::process_defer_queue(milliseconds deltaTime, bool abort) -> bool
 {
     assert(std::this_thread::get_id() == _mainThreadID);
     std::scoped_lock lock {_deferredMutex};
@@ -109,6 +95,20 @@ auto task_manager::process_queue(milliseconds deltaTime, bool abort) -> bool
     _deferredQueueBack.clear();
 
     return _deferredQueueFront.empty();
+}
+
+auto task_manager::thread_count() const -> isize
+{
+    return _threadCount;
+}
+
+void task_manager::add_task(task_func&& func)
+{
+    {
+        std::scoped_lock lock {_taskMutex};
+        _taskQueue.emplace(std::move(func));
+    }
+    _taskCondition.notify_one();
 }
 
 void task_manager::worker_thread(std::stop_token const& stopToken)

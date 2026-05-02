@@ -36,7 +36,6 @@ struct def_task {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API task_manager final {
-    friend class game; // loop -> process_queue
     using task_func = std::function<void()>;
 
 public:
@@ -55,6 +54,7 @@ public:
 
     auto run_deferred(def_func const& func) -> uid;
     void drop_deferred(uid id);
+    auto process_defer_queue(milliseconds deltaTime, bool abort) -> bool;
 
     auto thread_count() const -> isize;
 
@@ -62,8 +62,6 @@ public:
 
 private:
     void add_task(task_func&& func);
-
-    auto process_queue(milliseconds deltaTime, bool abort) -> bool;
 
     void worker_thread(std::stop_token const& stopToken);
 

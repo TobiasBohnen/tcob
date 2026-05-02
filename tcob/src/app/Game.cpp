@@ -78,7 +78,7 @@ void game::finish()
 {
     // wait for command queue
     auto& tm {locate_service<task_manager>()};
-    while (!tm.process_queue(milliseconds {9999}, true)) {
+    while (!tm.process_defer_queue(milliseconds {9999}, true)) {
         std::this_thread::yield();
     }
 
@@ -157,7 +157,7 @@ void game::step()
         fixedUpdateLoops++;
     }
 
-    _tm->process_queue(clock::now().time_since_epoch() - _lastUpdate, false);
+    _tm->process_defer_queue(clock::now().time_since_epoch() - _lastUpdate, false);
 
     milliseconds const now {clock::now().time_since_epoch()};
     milliseconds const deltaUpdate {now - _lastUpdate};
