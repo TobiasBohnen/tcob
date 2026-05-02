@@ -267,7 +267,7 @@ auto image::load(io::istream& in, string const& ext) noexcept -> bool
 {
     if (!in) { return false; }
 
-    if (auto decoder {locate_service<image_decoder::factory>().create_from_magic(in, ext)}) {
+    if (auto decoder {create_from_factory<image_decoder>(in, ext)}) {
         if (auto img {decoder->decode(in)}) {
             std::swap(_buffer, img->_buffer);
             std::swap(_info, img->_info);
@@ -286,8 +286,8 @@ auto image::load_async(path const& file) noexcept -> std::future<bool>
 auto image::LoadInfo(path const& file) noexcept -> std::optional<information>
 {
     io::ifstream fs {file};
-    if (auto decoder {locate_service<image_decoder::factory>().create_from_magic(fs, io::get_extension(file))}) {
-        return decoder->decode_info(fs);
+    if (auto dec {create_from_factory<image_decoder>(fs, io::get_extension(file))}) {
+        return dec->decode_info(fs);
     }
 
     return std::nullopt;
@@ -301,7 +301,7 @@ auto image::save(path const& file) const noexcept -> bool
 
 auto image::save(io::ostream& out, string const& ext) const noexcept -> bool
 {
-    if (auto enc {locate_service<image_encoder::factory>().create(ext)}) {
+    if (auto enc {create_from_factory<image_encoder>(ext)}) {
         return enc->encode(*this, out);
     }
 
@@ -375,7 +375,7 @@ auto save_animation [[nodiscard]] (path const& file, std::span<image_frame const
 
 auto save_animation [[nodiscard]] (std::shared_ptr<io::ostream> out, string const& ext, std::span<image_frame const> frames) noexcept -> bool
 {
-    auto enc {locate_service<gfx::animated_image_encoder::factory>().create(ext)};
+    auto enc {create_from_factory<gfx::animated_image_encoder>(ext)};
     enc->start(std::move(out));
     enc->add_frames(frames);
     return enc->finish();

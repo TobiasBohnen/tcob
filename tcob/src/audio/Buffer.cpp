@@ -65,15 +65,15 @@ auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any c
     _buffer.clear();
     if (!in || !(*in)) { return false; }
 
-    auto decoder {locate_service<decoder::factory>().create_from_magic(*in, ext)};
-    if (!decoder) { return false; }
+    auto dec {create_from_factory<decoder>(*in, ext)};
+    if (!dec) { return false; }
 
-    if (auto info {decoder->open(std::move(in), ctx)}) {
+    if (auto info {dec->open(std::move(in), ctx)}) {
         _info = *info;
-        decoder->seek_from_start(0ms);
+        dec->seek_from_start(0ms);
 
         std::vector<f32> buffer(static_cast<usize>(_info.Specs.Channels * _info.FrameCount));
-        auto const       size {decoder->decode(buffer)};
+        auto const       size {dec->decode(buffer)};
         if (size > 0) {
             buffer.resize(size);
             _buffer = std::move(buffer);
@@ -99,7 +99,7 @@ auto buffer::save(io::ostream& out, string const& ext) const noexcept -> bool
 {
     if (_info.FrameCount == 0) { return false; }
 
-    if (auto enc {locate_service<encoder::factory>().create(ext)}) {
+    if (auto enc {create_from_factory<encoder>(ext)}) {
         return enc->encode(_buffer, _info, out);
     }
 

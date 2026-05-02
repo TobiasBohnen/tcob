@@ -62,7 +62,7 @@ auto object::str() const -> string
 auto object::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> bool
 {
     if (!skipBinary) {
-        if (auto binParser {locate_service<binary_reader::factory>().create_from_magic(in, ext)}) {
+        if (auto binParser {create_from_factory<binary_reader>(in, ext)}) {
             if (auto result {binParser->read_as_object(in)}) {
                 swap(*result);
                 return true;
@@ -81,7 +81,7 @@ auto object::on_load(io::istream& in, string const& ext, bool skipBinary) noexce
 auto object::parse(string_view config, string const& ext) noexcept -> bool
 {
     std::optional<object> result;
-    if (auto txtParser {locate_service<text_reader::factory>().create(ext)}) {
+    if (auto txtParser {create_from_factory<text_reader>(ext)}) {
         result = txtParser->read_as_object(config);
     }
 
@@ -215,7 +215,7 @@ auto array::operator[](index_type index) const -> proxy<array const, index_type>
 auto array::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> bool
 {
     if (!skipBinary) {
-        if (auto binParser {locate_service<binary_reader::factory>().create_from_magic(in, ext)}) {
+        if (auto binParser {create_from_factory<binary_reader>(in, ext)}) {
             if (auto result {binParser->read_as_array(in)}) {
                 swap(*result);
                 return true;
@@ -234,7 +234,7 @@ auto array::on_load(io::istream& in, string const& ext, bool skipBinary) noexcep
 auto array::parse(string_view config, string const& ext) -> bool
 {
     std::optional<array> result;
-    if (auto txtParser {locate_service<text_reader::factory>().create(ext)}) {
+    if (auto txtParser {create_from_factory<text_reader>(ext)}) {
         result = txtParser->read_as_array(config);
     }
 

@@ -67,11 +67,11 @@ inline auto base_type<Impl, Container>::save(path const& file) const noexcept ->
 template <typename Impl, typename Container>
 inline auto base_type<Impl, Container>::save(io::ostream& out, string const& ext) const noexcept -> bool
 {
-    if (auto txtWriter {locate_service<text_writer::factory>().create(ext)}) {
+    if (auto txtWriter {create_from_factory<text_writer>(ext)}) {
         return txtWriter->write(out, *static_cast<Impl const*>(this));
     }
 
-    if (auto binWriter {locate_service<binary_writer::factory>().create(ext)}) {
+    if (auto binWriter {create_from_factory<binary_writer>(ext)}) {
         return binWriter->write(out, *static_cast<Impl const*>(this));
     }
 

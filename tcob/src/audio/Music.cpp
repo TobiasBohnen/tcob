@@ -23,7 +23,6 @@
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/core/tweening/Tween.hpp"
 
-
 namespace tcob::audio {
 using namespace std::chrono_literals;
 
@@ -65,7 +64,7 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> bool
 
     stop();
 
-    _decoder = locate_service<decoder::factory>().create_from_magic(*in, ext);
+    _decoder = create_from_factory<decoder>(*in, ext);
     if (!_decoder) { return false; }
 
     auto const info {_decoder->open(std::move(in), DecoderContext)};

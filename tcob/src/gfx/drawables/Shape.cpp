@@ -606,7 +606,7 @@ auto mesh_shape::load(io::istream& in, string const& ext) noexcept -> bool
 {
     if (!in) { return false; }
 
-    if (auto loader {locate_service<mesh_loader::factory>().create(ext)}) {
+    if (auto loader {create_from_factory<mesh_loader>(ext)}) {
         if (auto store {loader->load(in)}) {
             set(store->get_vertices(0), store->get_indices(0));
             return true;

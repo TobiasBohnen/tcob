@@ -54,7 +54,7 @@ void group::load()
         auto const ext {io::get_extension(file)};
 
         if (!_loaderManagers.contains(ext)) {
-            if (auto mgr {locate_service<loader_manager::factory>().create(ext, *this)}) {
+            if (auto mgr {create_from_factory<loader_manager>(ext, *this)}) {
                 _loaderManagers[ext] = std::move(mgr);
             } else {
                 continue;

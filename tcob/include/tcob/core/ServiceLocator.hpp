@@ -66,6 +66,18 @@ void remove_service()
     service_locator::GetInstance().set<T>(nullptr);
 }
 
+template <typename Factory, typename... Args>
+auto create_from_factory(string const& name, Args&&... args)
+{
+    return locate_service<typename Factory::factory>().create(name, std::forward<Args>(args)...);
+}
+
+template <typename Factory, typename... Args>
+auto create_from_factory(io::istream& in, string const& fallback, Args&&... args)
+{
+    return locate_service<typename Factory::factory>().create_from_magic(in, fallback, std::forward<Args>(args)...);
+}
+
 }
 
 #include "ServiceLocator.inl"
