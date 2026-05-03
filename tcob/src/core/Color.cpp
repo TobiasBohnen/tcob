@@ -5,6 +5,7 @@
 
 #include "tcob/core/Color.hpp"
 
+#include <format>
 #include <ios>
 #include <sstream>
 #include <unordered_map>
@@ -189,4 +190,10 @@ auto color::FromString(string_view name) -> color
 
     return {0, 0, 0, 0};
 }
+
+auto color::ToString(color col) -> string
+{
+    return std::format("#{:08x}", col.value()); // RRGGBBAA
+}
+
 }

@@ -50,6 +50,7 @@ public:
     static auto constexpr Lerp(color from, color to, f64 step) -> color;
 
     static auto FromString(string_view name) -> color;
+    static auto ToString(color col) -> string;
 
     u8 R {0};
     u8 G {0};
