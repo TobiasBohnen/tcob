@@ -58,16 +58,13 @@ void tab_container::on_prepare_redraw()
     widget_container::on_prepare_redraw();
 }
 
-void tab_container::remove_tab(widget const& tab)
+void tab_container::remove_tab(isize idx)
 {
-    for (usize i {0}; i < _tabs.size(); ++i) {
-        if (_tabs[i].get() == &tab) {
-            _tabs.erase(_tabs.begin() + i);
-            _tabLabels.erase(_tabLabels.begin() + i);
-            clear_sub_styles();
-            break;
-        }
-    }
+    if (idx < 0 || idx >= std::ssize(_tabs)) { return; }
+
+    _tabs.erase(_tabs.begin() + idx);
+    _tabLabels.erase(_tabLabels.begin() + idx);
+    clear_sub_styles();
 
     if (_tabs.empty()) {
         ActiveTabIndex = INVALID_INDEX;
@@ -81,29 +78,23 @@ void tab_container::remove_tab(widget const& tab)
 void tab_container::clear()
 {
     while (!_tabs.empty()) {
-        remove_tab(*_tabs.front());
+        remove_tab(0);
     }
 }
 
-void tab_container::change_tab_label(widget* tab, utf8_string const& label)
+void tab_container::change_tab_label(isize tabIdx, utf8_string const& label)
 {
-    for (isize i {0}; i < std::ssize(_tabs); ++i) {
-        if (_tabs[i].get() == tab) {
-            _tabLabels[i].Text = label;
-            break;
-        }
-    }
+    if (tabIdx < 0 || tabIdx >= std::ssize(_tabs)) { return; }
+
+    _tabLabels[tabIdx].Text = label;
     queue_redraw();
 }
 
-void tab_container::change_tab_label(widget* tab, item const& label)
+void tab_container::change_tab_label(isize tabIdx, item const& item)
 {
-    for (isize i {0}; i < std::ssize(_tabs); ++i) {
-        if (_tabs[i].get() == tab) {
-            _tabLabels[i] = label;
-            break;
-        }
-    }
+    if (tabIdx < 0 || tabIdx >= std::ssize(_tabs)) { return; }
+
+    _tabLabels[tabIdx] = item;
     queue_redraw();
 }
 
@@ -123,6 +114,15 @@ auto tab_container::find_child_at(point_i pos) -> widget*
     }
     return activeTab.get();
 }
+auto tab_container::get_tab_index(widget const& tab) const -> isize
+{
+    for (isize i {0}; i < std::ssize(_tabs); ++i) {
+        if (_tabs[i].get() == &tab) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 auto tab_container::widgets() const -> std::span<std::unique_ptr<widget> const>
 {
@@ -136,6 +136,8 @@ void tab_container::on_draw(widget_painter& painter)
     // tabs
     _tabRectCache.clear();
 
+    auto const rows {get_rows()};
+
     rect_f tabHeaderRect {rect};
     switch (_style.Bar.Position) {
     case position::Top:
@@ -143,22 +145,22 @@ void tab_container::on_draw(widget_painter& painter)
         break;
     case position::Bottom:
         tabHeaderRect.Size.Height = _style.Bar.Size.calc(tabHeaderRect.height());
-        tabHeaderRect.Position.Y  = rect.bottom() - (tabHeaderRect.height() * _style.Bar.Rows);
+        tabHeaderRect.Position.Y  = rect.bottom() - (tabHeaderRect.height() * rows);
         break;
     case position::Left:
         tabHeaderRect.Size.Width = _style.Bar.Size.calc(tabHeaderRect.width());
         break;
     case position::Right:
         tabHeaderRect.Size.Width = _style.Bar.Size.calc(tabHeaderRect.width());
-        tabHeaderRect.Position.X = rect.right() - (tabHeaderRect.width() * _style.Bar.Rows);
+        tabHeaderRect.Position.X = rect.right() - (tabHeaderRect.width() * rows);
         break;
 
     case position::None: return;
     }
 
-    isize const      columns {(std::ssize(_tabs) + static_cast<isize>(_style.Bar.Rows) - 1) / static_cast<isize>(_style.Bar.Rows)};
+    isize const      columns {rows == 0 ? 1 : (std::ssize(_tabs) + static_cast<isize>(rows) - 1) / static_cast<isize>(rows)};
     std::vector<f32> lineOffsets;
-    lineOffsets.resize(static_cast<usize>(_style.Bar.Rows));
+    lineOffsets.resize(static_cast<usize>(rows));
     isize index {0};
 
     auto const getNextTabRect {[&](item const& item, item_style const& itemStyle) {
@@ -298,18 +300,22 @@ void tab_container::offset_tab_content(rect_f& bounds) const
     switch (_style.Bar.Position) {
     case position::Top:
     case position::Bottom: {
-        f32 const size {_style.Bar.Size.calc(bounds.height()) * _style.Bar.Rows};
+        f32 const size {_style.Bar.Size.calc(bounds.height()) * get_rows()};
         bounds.Size.Height -= size;
         if (_style.Bar.Position == position::Top) { bounds.Position.Y += size; }
     } break;
     case position::Left:
     case position::Right: {
-        f32 const size {_style.Bar.Size.calc(bounds.width()) * _style.Bar.Rows};
+        f32 const size {_style.Bar.Size.calc(bounds.width()) * get_rows()};
         bounds.Size.Width -= size;
         if (_style.Bar.Position == position::Left) { bounds.Position.X += size; }
     } break;
     case position::None: break;
     }
+}
+auto tab_container::get_rows() const -> f32
+{
+    return std::min(static_cast<f32>(_tabs.size()), _style.Bar.Rows);
 }
 
 auto tab_container::attributes() const -> widget_attributes

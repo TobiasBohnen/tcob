@@ -55,13 +55,15 @@ public:
     auto create_tab(utf8_string const& name) -> T&;
     template <DerivedFrom<widget_container> T>
     auto create_tab(utf8_string const& name, item const& label) -> T&;
-    void remove_tab(widget const& tab);
+
+    void remove_tab(isize tabIdx);
     void clear();
 
-    void change_tab_label(widget* tab, utf8_string const& label);
-    void change_tab_label(widget* tab, item const& label);
+    void change_tab_label(isize tabIdx, utf8_string const& label);
+    void change_tab_label(isize tabIdx, item const& item);
 
     auto find_child_at(point_i pos) -> widget* override;
+    auto get_tab_index(widget const& tab) const -> isize;
 
     auto widgets() const -> std::span<std::unique_ptr<widget> const> override;
 
@@ -83,6 +85,8 @@ protected:
 
 private:
     void offset_tab_content(rect_f& bounds) const;
+
+    auto get_rows() const -> f32;
 
     std::vector<std::unique_ptr<widget>> _tabs;
     std::vector<item>                    _tabLabels;
