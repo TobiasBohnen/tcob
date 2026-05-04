@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/widgets/Spinner.hpp"
 
 #include <algorithm>
+#include <format>
 #include <string>
 
 #include "tcob/core/Common.hpp"
@@ -30,17 +31,17 @@ void spinner::style::Transition(style& target, style const& from, style const& t
 
 spinner::spinner(init const& wi)
     : widget {wi}
-    , Min {{[this](i32 val) -> i32 { return std::min(val, *Max); }}}
-    , Max {{[this](i32 val) -> i32 { return std::max(val, *Min); }}}
-    , Value {{[this](i32 val) -> i32 { return std::clamp(val, *Min, *Max); }}}
+    , Min {{[this](f32 val) -> f32 { return std::min(val, *Max); }}}
+    , Max {{[this](f32 val) -> f32 { return std::max(val, *Min); }}}
+    , Value {{[this](f32 val) -> f32 { return std::clamp(val, *Min, *Max); }}}
 {
     Min.Changed.connect([this](auto const& val) {
-        Value = std::min(val, *Value);
+        Value = std::max(val, *Value);
         queue_redraw();
     });
     Min(0);
     Max.Changed.connect([this](auto const& val) {
-        Value = std::max(val, *Value);
+        Value = std::min(val, *Value);
         queue_redraw();
     });
     Max(100);
@@ -48,6 +49,8 @@ spinner::spinner(init const& wi)
     Step(5);
     Value.Changed.connect([this](auto const&) { queue_redraw(); });
     Value(0);
+
+    Precision(2);
 
     Class("spinner");
 }
@@ -74,7 +77,8 @@ void spinner::on_draw(widget_painter& painter)
 
     // text
     if (_style.Text.Font) {
-        painter.draw_text(_style.Text, {rect.left(), rect.top(), rect.width() - _rectCache.first.width(), rect.height()}, std::to_string(*Value));
+        string const text {std::format("{:.{}f}", *Value, *Precision)};
+        painter.draw_text(_style.Text, {rect.left(), rect.top(), rect.width() - _rectCache.first.width(), rect.height()}, text);
     }
 }
 
@@ -187,10 +191,11 @@ auto spinner::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
 
-    retValue["min"]   = *Min;
-    retValue["max"]   = *Max;
-    retValue["value"] = *Value;
-    retValue["step"]  = *Step;
+    retValue["min"]       = *Min;
+    retValue["max"]       = *Max;
+    retValue["value"]     = *Value;
+    retValue["step"]      = *Step;
+    retValue["precision"] = *Precision;
 
     return retValue;
 }

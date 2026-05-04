@@ -54,8 +54,8 @@ public:
 
     min_max<milliseconds> Lifetime;
 
-    min_max<f32> Scale;
-    size_f       Size;
+    min_max<f32> Scale {1, 1};
+    size_f       Size {1, 1};
 
     min_max<degree_f> Spin;
     min_max<degree_f> Rotation;

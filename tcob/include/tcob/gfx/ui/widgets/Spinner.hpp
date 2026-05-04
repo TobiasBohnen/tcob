@@ -33,10 +33,12 @@ public:
 
     explicit spinner(init const& wi);
 
-    prop_chk<i32> Min;
-    prop_chk<i32> Max;
-    prop<i32>     Step;
-    prop_chk<i32> Value;
+    prop_chk<f32> Min;
+    prop_chk<f32> Max;
+    prop<f32>     Step;
+    prop_chk<f32> Value;
+
+    prop<i32> Precision;
 
 protected:
     void on_draw(widget_painter& painter) override;
