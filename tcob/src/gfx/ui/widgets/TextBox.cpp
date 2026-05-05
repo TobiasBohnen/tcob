@@ -5,7 +5,6 @@
 
 #include "tcob/gfx/ui/widgets/TextBox.hpp"
 
-#include <algorithm>
 #include <limits>
 
 #include "tcob/core/Point.hpp"
@@ -53,7 +52,7 @@ text_box::text_box(init const& wi)
     MaxLength(std::numeric_limits<isize>::max());
 
     Selectable.Changed.connect([this](auto const& val) {
-        if (!val) { select_text(INVALID_INDEX, INVALID_INDEX); }
+        if (!val) { _edit.select_text(INVALID_INDEX, INVALID_INDEX); }
         queue_redraw();
     });
     Selectable(false);
@@ -63,25 +62,9 @@ text_box::text_box(init const& wi)
 
 auto text_box::selected_text() const -> utf8_string
 {
-    if (!is_text_selected()) { return ""; }
-    return utf8::substr(*Text, _selectedText.first, _selectedText.second - _selectedText.first + 1);
-}
-
-void text_box::select_text(isize first, isize last)
-{
-    _selectedText.first  = std::min(first, last);
-    _selectedText.second = std::max(first, last);
-    if (Selectable) { queue_redraw(); }
-}
-
-void text_box::deselect_text()
-{
-    select_text(INVALID_INDEX, INVALID_INDEX);
-}
-
-auto text_box::is_text_selected() const -> bool
-{
-    return Selectable && _selectedText.first != INVALID_INDEX && _selectedText.second != INVALID_INDEX;
+    if (!_edit.is_text_selected()) { return ""; }
+    auto const sel {_edit.selected_text_indices()};
+    return utf8::substr(*Text, sel.first, sel.second - sel.first + 1);
 }
 
 void text_box::on_draw(widget_painter& painter)
@@ -89,47 +72,15 @@ void text_box::on_draw(widget_painter& painter)
     rect_f const         rect {draw_base(_style, painter)};
     scoped_scissor const guard {painter, this};
 
-    if (!(*Text).empty() && _style.Text.Font) {
-        if (_needsFormat) {
-            _formatResult = painter.format_text(_style.Text, rect.Size, *Text);
-            _needsFormat  = false;
-        }
-
-        if (_selectedText.first >= _formatResult.QuadCount || _selectedText.second >= _formatResult.QuadCount) {
-            _selectedText = {INVALID_INDEX, INVALID_INDEX};
-        }
-        if (is_text_selected()) {
-            auto& canvas {painter.canvas()};
-            canvas.set_fill_style(_style.Text.SelectColor);
-            canvas.begin_path();
-
-            auto const& first {_formatResult.get_quad(_selectedText.first).Rect};
-
-            size_f size {};
-            size.Width  = _formatResult.get_quad(_selectedText.second).Rect.right() - first.left();
-            size.Height = rect.height() * 0.9f;
-            point_f pos {};
-            pos.X = first.left();
-            pos.Y = (rect.height() - size.Height) / 2;
-
-            canvas.rect({pos + rect.Position, size});
-            canvas.fill();
-        }
-
-        painter.draw_text(_style.Text, rect, _formatResult);
-    } else {
+    if (!_style.Text.Font) {
         _formatResult = {};
+        return;
     }
-
-    if (_edit.caret_visible()) {
-        f32 offset {0.0f};
-        if (!_formatResult.Tokens.empty()) {
-            isize const cp {_edit.caret_pos()};
-            offset = cp == 0 ? _formatResult.get_quad(cp).Rect.left()
-                             : _formatResult.get_quad(cp - 1).Rect.right();
-        }
-        painter.draw_caret(_style.Caret, rect, {offset, 0});
+    if (_needsFormat) {
+        _formatResult = painter.format_text(_style.Text, rect.Size, *Text);
+        _needsFormat  = false;
     }
+    _edit.draw(painter, rect, _formatResult, _style.Text, _style.Caret);
 }
 
 void text_box::on_update(milliseconds deltaTime)
@@ -143,75 +94,21 @@ void text_box::on_update(milliseconds deltaTime)
 void text_box::on_key_down(input::keyboard::event const& ev)
 {
     using namespace tcob::enum_ops;
-    _edit.pause_blinking();
 
     auto const& controls {form().Controls};
-
-    if (ev.KeyCode == controls->NavLeftKey) {
-        if (_edit.caret_pos() > 0) {
-            isize const refPos {_edit.caret_pos() - 1};
-            if (ev.KeyMods.is_down(controls->SelectMod)) {
-                if (!is_text_selected()) {
-                    select_text(refPos, refPos);
-                } else if (_selectedText.first == refPos) {
-                    deselect_text();
-                } else {
-                    bool const b {_selectedText.first < refPos};
-                    select_text(b ? _selectedText.first : refPos,
-                                b ? refPos - 1 : _selectedText.second);
-                }
-                _edit.move_caret_left();
-            } else {
-                if (is_text_selected()) {
-                    while (_edit.caret_pos() > _selectedText.first) { _edit.move_caret_left(); }
-                    deselect_text();
-                } else {
-                    _edit.move_caret_left();
-                }
-            }
-        } else if (is_text_selected() && !ev.KeyMods.is_down(controls->SelectMod)) {
-            deselect_text();
-        }
-    } else if (ev.KeyCode == controls->NavRightKey) {
-        if (_edit.caret_pos() < _edit.text_length()) {
-            isize const refPos {_edit.caret_pos()};
-            if (ev.KeyMods.is_down(controls->SelectMod)) {
-                if (!is_text_selected()) {
-                    select_text(refPos, refPos);
-                } else if (_selectedText.second == refPos) {
-                    deselect_text();
-                } else {
-                    bool const b {_selectedText.second > refPos};
-                    select_text(b ? refPos + 1 : _selectedText.first,
-                                b ? _selectedText.second : refPos);
-                }
-                _edit.move_caret_right();
-            } else {
-                if (is_text_selected()) {
-                    while (_edit.caret_pos() <= _selectedText.second) { _edit.move_caret_right(); }
-                    deselect_text();
-                } else {
-                    _edit.move_caret_right();
-                }
-            }
-        } else if (is_text_selected() && !ev.KeyMods.is_down(controls->SelectMod)) {
-            deselect_text();
-        }
-    } else if (ev.KeyCode == controls->ForwardDeleteKey) {
-        if (!remove_selected_text()) { _edit.delete_forward(); }
-    } else if (ev.KeyCode == controls->BackwardDeleteKey) {
-        if (!remove_selected_text()) { _edit.delete_backward(); }
-    } else if (ev.KeyCode == controls->SubmitKey) {
+    if (ev.KeyCode == controls->SubmitKey) {
         Submit({.Sender = this, .Text = *Text});
     } else if (ev.KeyMods.is_down(controls->CutCopyPasteMod)) {
-        if (is_text_selected()) {
+        if (_edit.is_text_selected()) {
             if (ev.KeyCode == controls->CopyKey) {
                 locate_service<input::system>().clipboard().set_text(selected_text());
             } else if (ev.KeyCode == controls->CutKey) {
                 locate_service<input::system>().clipboard().set_text(selected_text());
-                remove_selected_text();
+                _edit.remove_selected_text();
             }
         }
+    } else {
+        _edit.key_down(ev, controls, Selectable);
     }
 
     ev.Handled = true;
@@ -219,7 +116,7 @@ void text_box::on_key_down(input::keyboard::event const& ev)
 
 void text_box::on_key_up(input::keyboard::event const& ev)
 {
-    _edit.resume_blinking();
+    _edit.key_up(ev, form().Controls);
     ev.Handled = true;
 }
 
@@ -232,18 +129,10 @@ void text_box::on_text_input(input::keyboard::text_input_event const& ev)
 
 void text_box::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    isize const target {calc_caret_pos(screen_to_content(*this, ev.Position))};
-    if (_edit.caret_pos() != target) {
-        if (target < _dragCaretPos) {
-            select_text(_dragCaretPos - 1, target);
-        } else if (target > _dragCaretPos) {
-            select_text(_dragCaretPos, target - 1);
-        } else {
-            deselect_text();
-        }
-
-        while (_edit.caret_pos() < target) { _edit.move_caret_right(); }
-        while (_edit.caret_pos() > target) { _edit.move_caret_left(); }
+    if (Selectable) {
+        isize const target {calc_caret_pos(screen_to_content(*this, ev.Position))};
+        _edit.drag_select(target);
+        queue_redraw();
         ev.Handled = true;
     }
 }
@@ -251,22 +140,18 @@ void text_box::on_mouse_drag(input::mouse::motion_event const& ev)
 void text_box::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (ev.Button != controls().PrimaryMouseButton) { return; }
+
     isize const target {calc_caret_pos(screen_to_content(*this, ev.Position))};
-    if (_edit.caret_pos() != target) {
-        deselect_text();
-        while (_edit.caret_pos() < target) { _edit.move_caret_right(); }
-        while (_edit.caret_pos() > target) { _edit.move_caret_left(); }
-    }
-    _dragCaretPos = target;
-    ev.Handled    = true;
+    _edit.mouse_button_down(target);
+    ev.Handled = true;
 }
 
 void text_box::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (ev.Button != controls().PrimaryMouseButton) { return; }
 
-    _dragCaretPos = -1;
-    ev.Handled    = true;
+    _edit.mouse_button_up();
+    ev.Handled = true;
 }
 
 void text_box::on_focus_gained()
@@ -294,13 +179,13 @@ auto text_box::attributes() const -> widget_attributes
 
 void text_box::insert_text(utf8_string const& newText)
 {
-    remove_selected_text();
+    _edit.remove_selected_text();
 
     text_event ev {.Sender = this, .Text = newText};
     BeforeTextInserted(ev);
     isize const newTextLength {utf8::length(ev.Text)};
     if (newTextLength > 0 && _edit.text_length() + newTextLength <= MaxLength) {
-        _edit.insert_char(ev.Text);
+        _edit.insert_text(ev.Text);
     }
 }
 
@@ -308,19 +193,6 @@ void text_box::on_styles_changed()
 {
     widget::on_styles_changed();
     _needsFormat = true;
-}
-
-auto text_box::remove_selected_text() -> bool
-{
-    if (is_text_selected()) {
-        isize const count {_selectedText.second - _selectedText.first + 1};
-        while (_edit.caret_pos() > _selectedText.first) { _edit.move_caret_left(); }
-        for (isize i {0}; i < count; ++i) { _edit.delete_forward(); }
-        deselect_text();
-        return true;
-    }
-
-    return false;
 }
 
 auto text_box::calc_caret_pos(point_f mp) const -> isize

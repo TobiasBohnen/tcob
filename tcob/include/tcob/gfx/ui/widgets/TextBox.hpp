@@ -6,8 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <utility>
-
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
@@ -65,17 +63,11 @@ protected:
     void on_styles_changed() override;
 
 private:
-    auto remove_selected_text() -> bool;
     void insert_text(utf8_string const& newText);
 
-    void select_text(isize first, isize last);
-    void deselect_text();
-    auto is_text_selected() const -> bool;
     auto calc_caret_pos(point_f mp) const -> isize;
 
-    text_edit               _edit;
-    isize                   _dragCaretPos {INVALID_INDEX};
-    std::pair<isize, isize> _selectedText {INVALID_INDEX, INVALID_INDEX};
+    text_edit _edit;
 
     gfx::text_formatter::result _formatResult;
     bool                        _needsFormat {false};

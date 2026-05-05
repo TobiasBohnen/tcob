@@ -7,9 +7,15 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <utility>
 
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/core/tweening/Tween.hpp"
+#include "tcob/gfx/TextFormatter.hpp"
+#include "tcob/gfx/ui/StyleElements.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
@@ -21,13 +27,32 @@ public:
     signal<> Invalidated;
 
     void update(milliseconds deltaTime);
+    void draw(widget_painter& painter, rect_f const& rect, gfx::text_formatter::result const& formatResult, text_element const& text, caret_element const& caret);
 
     void start_blinking(milliseconds blinkRate);
     void stop_blinking();
+
+    void insert_text(utf8_string const& ch);
+
+    auto get_text() const -> utf8_string const&;
+    void set_text(utf8_string const& t);
+    auto text_length() const -> isize;
+
+    auto selected_text_indices() const -> std::pair<isize, isize>;
+    void select_text(isize first, isize last);
+    auto remove_selected_text() -> bool;
+    auto is_text_selected() const -> bool;
+
+    void key_down(input::keyboard::event const& ev, control_map const& controls, bool selectable);
+    void key_up(input::keyboard::event const& ev, control_map const& controls);
+    void drag_select(isize targetCaretPos);
+    void mouse_button_down(isize targetCaretPos);
+    void mouse_button_up();
+
+private:
     void pause_blinking();
     void resume_blinking();
 
-    void insert_char(utf8_string const& ch);
     void delete_backward();
     void delete_forward();
 
@@ -35,17 +60,16 @@ public:
     void move_caret_right();
     void move_caret_home();
     void move_caret_end();
-    auto caret_pos() const -> isize;
-    auto caret_visible() const -> bool;
 
-    auto get_text() const -> utf8_string const&;
-    void set_text(utf8_string const& t);
-    auto text_length() const -> isize;
+    void deselect_text();
 
-private:
-    utf8_string                              _text;
-    isize                                    _caretPos {0};
-    isize                                    _textLength {0};
+    utf8_string             _text;
+    isize                   _textLength {0};
+    std::pair<isize, isize> _selectedText {INVALID_INDEX, INVALID_INDEX};
+
+    isize _caretPos {0};
+    isize _dragCaretPos {INVALID_INDEX};
+
     bool                                     _caretVisible {false};
     std::unique_ptr<square_wave_tween<bool>> _caretTween;
 };
