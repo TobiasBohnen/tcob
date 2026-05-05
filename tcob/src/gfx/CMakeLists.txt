@@ -55,6 +55,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Chart.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Charting.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Legend.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/TextEdit.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/Scrollbar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/WidgetTweener.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Accordion.cpp
@@ -148,6 +149,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Icon.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Item.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Scrollbar.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/component/TextEdit.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/WidgetTweener.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.inl

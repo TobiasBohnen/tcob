@@ -40,8 +40,8 @@ panel::panel(init const& wi)
     , _vScrollbar {orientation::Vertical}
     , _hScrollbar {orientation::Horizontal}
 {
-    _vScrollbar.ValueChanged.connect([this] { queue_redraw(); });
-    _hScrollbar.ValueChanged.connect([this] { queue_redraw(); });
+    _vScrollbar.Invalidated.connect([this] { queue_redraw(); });
+    _hScrollbar.Invalidated.connect([this] { queue_redraw(); });
 
     _layout->Changed.connect([&] { queue_redraw(); });
 

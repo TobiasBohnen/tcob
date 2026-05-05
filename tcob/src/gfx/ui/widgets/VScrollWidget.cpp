@@ -28,7 +28,7 @@ vscroll_widget::vscroll_widget(init const& wi)
     : widget {wi}
     , _vScrollbar {orientation::Vertical}
 {
-    _vScrollbar.ValueChanged.connect([this] { queue_redraw(); });
+    _vScrollbar.Invalidated.connect([this] { queue_redraw(); });
 }
 
 void vscroll_widget::draw_scrollbar(widget_painter& painter, rect_f& rect)

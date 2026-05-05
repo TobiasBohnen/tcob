@@ -136,6 +136,7 @@
 #include <tcob/gfx/ui/component/Icon.hpp>
 #include <tcob/gfx/ui/component/Item.hpp>
 #include <tcob/gfx/ui/component/Scrollbar.hpp>
+#include <tcob/gfx/ui/component/TextEdit.hpp>
 #include <tcob/gfx/ui/component/WidgetTweener.hpp>
 #include <tcob/gfx/ui/widgets/Accordion.hpp>
 #include <tcob/gfx/ui/widgets/Button.hpp>

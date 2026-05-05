@@ -6,18 +6,17 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <memory>
 #include <utility>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/component/TextEdit.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
@@ -38,9 +37,9 @@ public:
     signal<text_event>       BeforeTextInserted;
     signal<text_event const> Submit;
 
-    prop<utf8_string> Text;
-    prop<isize>       MaxLength;
-    prop<bool>        Selectable;
+    prop_fn<utf8_string> Text;
+    prop<isize>          MaxLength;
+    prop<bool>           Selectable;
 
     auto selected_text() const -> utf8_string;
 
@@ -75,15 +74,12 @@ private:
     void set_caret_pos(isize pos);
     auto calc_caret_pos(point_f mp) const -> isize;
 
-    std::unique_ptr<square_wave_tween<bool>> _caretTween;
-    isize                                    _caretPos {0};
-    isize                                    _dragCaretPos {INVALID_INDEX};
-    bool                                     _caretVisible {false};
+    text_edit               _edit;
+    isize                   _dragCaretPos {INVALID_INDEX};
+    std::pair<isize, isize> _selectedText {INVALID_INDEX, INVALID_INDEX};
 
     gfx::text_formatter::result _formatResult;
-    isize                       _textLength {0};
-    bool                        _textDirty {false};
-    std::pair<isize, isize>     _selectedText {INVALID_INDEX, INVALID_INDEX};
+    bool                        _needsFormat {false};
 
     text_box::style _style;
 };
