@@ -33,6 +33,8 @@ public:
     void stop_blinking();
 
     void insert_text(utf8_string const& ch);
+    void delete_backward();
+    void delete_forward();
 
     auto get_text() const -> utf8_string const&;
     void set_text(utf8_string const& t);
@@ -52,9 +54,6 @@ public:
 private:
     void pause_blinking();
     void resume_blinking();
-
-    void delete_backward();
-    void delete_forward();
 
     void move_caret_left();
     void move_caret_right();
