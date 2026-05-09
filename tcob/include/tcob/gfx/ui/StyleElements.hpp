@@ -14,6 +14,7 @@
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/ui/Length.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 

@@ -87,6 +87,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/WidgetContainer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Form.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Layout.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/Length.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Paint.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Style.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/StyleCollection.cpp
@@ -188,6 +189,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/Form.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/Layout.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Layout.inl
+    ${TCOB_INC_DIR}/tcob/gfx/ui/Length.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/Length.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/Paint.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Style.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/StyleCollection.hpp
@@ -196,7 +199,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/Transition.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Transition.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/UI.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/ui/UI.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/UIEvents.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/WidgetPainter.hpp
 )

@@ -123,6 +123,7 @@
 
 #include <tcob/gfx/ui/Form.hpp>
 #include <tcob/gfx/ui/Layout.hpp>
+#include <tcob/gfx/ui/Length.hpp>
 #include <tcob/gfx/ui/Paint.hpp>
 #include <tcob/gfx/ui/Style.hpp>
 #include <tcob/gfx/ui/StyleCollection.hpp>

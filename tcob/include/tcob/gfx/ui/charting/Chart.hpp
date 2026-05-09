@@ -13,6 +13,7 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ui/Length.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/charting/Charting.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"

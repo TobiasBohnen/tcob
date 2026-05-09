@@ -15,7 +15,7 @@
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/Texture.hpp"
-#include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/Length.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
