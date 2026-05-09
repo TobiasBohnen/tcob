@@ -58,6 +58,7 @@ class glass;
 class panel;
 class modal_dialog;
 class tab_container;
+class toast;
 class tooltip;
 
 // TODO:
@@ -304,6 +305,15 @@ enum class position : u8 {
 
 ////////////////////////////////////////////////////////////
 
+enum class corner : u8 {
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight
+};
+
+////////////////////////////////////////////////////////////
+
 enum class cursor_mode : u8 {
     Default,
 
@@ -405,11 +415,6 @@ struct controller_button_event {
 struct text_event {
     widget*     Sender {nullptr};
     utf8_string Text;
-};
-
-struct tooltip_event {
-    tooltip* Sender {nullptr};
-    widget*  Widget {nullptr};
 };
 
 struct drop_event {

@@ -39,7 +39,8 @@ using namespace std::chrono_literals;
 
 constexpr static i32 overlayLayer {0};
 constexpr static i32 tooltipLayer {1};
-constexpr static i32 modalLayer {2};
+constexpr static i32 toastLayer {2};
+constexpr static i32 modalLayer {3};
 constexpr static i32 firstUILayer {modalLayer + 1};
 
 ////////////////////////////////////////////////////////////
@@ -269,6 +270,11 @@ void form_base::on_update(milliseconds deltaTime)
             tooltip.lock()->prepare_redraw();
         }
 
+        // toasts
+        for (auto const& toast : _toasts) {
+            toast->prepare_redraw();
+        }
+
         // modal
         if (auto* modal {active_modal()}) {
             modal->prepare_redraw();
@@ -284,6 +290,12 @@ void form_base::on_update(milliseconds deltaTime)
     // update widgets
     for (auto const& container : widgets) {
         container->update(deltaTime);
+    }
+
+    // update toasts
+    std::erase_if(_toasts, [](auto const& toast) { return toast->done(); });
+    for (auto const& toast : _toasts) {
+        toast->update(deltaTime);
     }
 
     // update modal
@@ -344,8 +356,18 @@ void form_base::on_draw_to(gfx::render_target& target, transform const& xform)
         _topWidget->Tooltip->set_redraw(true);
         _topWidget->Tooltip->draw(*_painter);
         _canvas.end_frame();
-
         _renderer.queue_layer(tooltipLayer);
+    }
+
+    // toasts
+    if (!_toasts.empty()) {
+        _canvas.begin_frame(size, 1.0f, toastLayer);
+        for (auto const& toast : _toasts) {
+            toast->set_redraw(true);
+            toast->draw(*_painter);
+        }
+        _canvas.end_frame();
+        _renderer.queue_layer(toastLayer);
     }
 
     // modal
@@ -668,6 +690,20 @@ void form_base::on_styles_changed()
         assert(style);
         tooltip->_transition.reset(style);
         tooltip->on_styles_changed();
+    }
+
+    for (auto const& tt : _toasts) {
+        auto& toast {*tt};
+
+        widget_style_selectors const ttNewSelectors {
+            .Class      = toast.Class,
+            .Flags      = toast.flags(),
+            .Attributes = toast.attributes(),
+        };
+        auto* style {dynamic_cast<widget_style*>(Styles->get(ttNewSelectors))};
+        assert(style);
+        toast._transition.reset(style);
+        toast.on_styles_changed();
     }
 }
 

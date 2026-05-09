@@ -6,12 +6,17 @@
 #pragma once
 #include "Form.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <span>
+#include <unordered_set>
 #include <vector>
 
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/widgets/Tooltip.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
@@ -95,6 +100,65 @@ inline auto form_base::create_tooltip(string const& name) -> std::shared_ptr<T>
     auto retValue {std::make_shared<T>(wi)};
     _tooltips.push_back(retValue);
     return retValue;
+}
+
+template <DerivedFrom<toast> T>
+inline auto form_base::queue_toast(string const& name, corner corner) -> T&
+{
+    widget::init const wi {
+        .Form   = this,
+        .Parent = nullptr,
+        .Name   = name,
+    };
+    auto ptr {std::make_unique<T>(wi)};
+    ptr->_corner = corner;
+    auto*      retValue {ptr.get()};
+    auto const fb {bounds()};
+    auto const size {size_f {fb.width() / 5.f, fb.height() / 5.f}};
+
+    i32 const maxRows {static_cast<i32>(fb.height() / size.Height)};
+
+    std::unordered_set<point_i> occupied;
+    for (auto const& t : _toasts) {
+        if (t->_corner == corner) {
+            occupied.insert(t->_slot);
+        }
+    }
+
+    point_i slot {0, 0};
+    while (occupied.contains(slot)) {
+        ++slot.Y;
+        if (slot.Y >= maxRows) {
+            slot.Y = 0;
+            ++slot.X;
+        }
+    }
+
+    point_f pos {};
+
+    switch (corner) {
+    case corner::TopLeft:
+        pos.X = fb.left() + (static_cast<f32>(slot.X) * size.Width);
+        pos.Y = fb.top() + (static_cast<f32>(slot.Y) * size.Height);
+        break;
+    case corner::TopRight:
+        pos.X = fb.right() - size.Width - (static_cast<f32>(slot.X) * size.Width);
+        pos.Y = fb.top() + (static_cast<f32>(slot.Y) * size.Height);
+        break;
+    case corner::BottomLeft:
+        pos.X = fb.left() + (static_cast<f32>(slot.X) * size.Width);
+        pos.Y = fb.bottom() - size.Height - (static_cast<f32>(slot.Y) * size.Height);
+        break;
+    case corner::BottomRight:
+        pos.X = fb.right() - size.Width - (static_cast<f32>(slot.X) * size.Width);
+        pos.Y = fb.bottom() - size.Height - (static_cast<f32>(slot.Y) * size.Height);
+        break;
+    }
+
+    retValue->_slot  = slot;
+    retValue->Bounds = {pos, size};
+    _toasts.push_back(std::move(ptr));
+    return *retValue;
 }
 
 template <DerivedFrom<modal_dialog> T>

@@ -19,6 +19,7 @@
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/ShaderProgram.hpp"
@@ -55,6 +56,9 @@ public:
     auto create_tooltip(string const& name) -> std::shared_ptr<T>;
     template <DerivedFrom<modal_dialog> T = modal_dialog>
     auto create_modal_dialog(string const& name) -> std::shared_ptr<T>;
+
+    template <DerivedFrom<toast> T = toast>
+    auto queue_toast(string const& name, corner corner = corner::BottomRight) -> T&;
 
     auto find_widget_at(point_i pos) const -> widget*;
     auto find_widget_by_name(string const& name) const -> widget*;
@@ -134,6 +138,7 @@ private:
     widget*                             _focusWidget {nullptr};
     detail::input_injector              _injector;
     std::vector<std::weak_ptr<tooltip>> _tooltips;
+    std::vector<std::unique_ptr<toast>> _toasts;
     std::vector<modal_dialog*>          _modals {};
 
     bool _canvasDirty {true};
