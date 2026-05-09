@@ -129,6 +129,7 @@
 #include <tcob/gfx/ui/StyleElements.hpp>
 #include <tcob/gfx/ui/Transition.hpp>
 #include <tcob/gfx/ui/UI.hpp>
+#include <tcob/gfx/ui/UIEvents.hpp>
 #include <tcob/gfx/ui/WidgetPainter.hpp>
 #include <tcob/gfx/ui/charting/Chart.hpp>
 #include <tcob/gfx/ui/charting/Charting.hpp>

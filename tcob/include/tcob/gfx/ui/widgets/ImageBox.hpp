@@ -17,6 +17,7 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/UIEvents.hpp"
 #include "tcob/gfx/ui/component/Icon.hpp"
 #include "tcob/gfx/ui/component/WidgetTweener.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"

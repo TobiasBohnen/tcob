@@ -381,50 +381,6 @@ static constexpr isize INVALID_INDEX {-1};
 
 ////////////////////////////////////////////////////////////
 
-struct widget_event {
-    widget* Sender {nullptr};
-};
-
-struct keyboard_event {
-    widget*                       Sender {nullptr};
-    input::keyboard::event const& Event;
-};
-
-struct mouse_button_event {
-    widget*                           Sender {nullptr};
-    point_i                           RelativePosition {point_i::Zero};
-    input::mouse::button_event const& Event;
-};
-
-struct mouse_motion_event {
-    widget*                           Sender {nullptr};
-    point_i                           RelativePosition {point_i::Zero};
-    input::mouse::motion_event const& Event;
-};
-
-struct mouse_wheel_event {
-    widget*                          Sender {nullptr};
-    input::mouse::wheel_event const& Event;
-};
-
-struct controller_button_event {
-    widget*                                Sender {nullptr};
-    input::controller::button_event const& Event;
-};
-
-struct text_event {
-    widget*     Sender {nullptr};
-    utf8_string Text;
-};
-
-struct drop_event {
-    widget* Sender {nullptr};
-    widget* Target {nullptr};
-    point_i Position {point_i::Zero};
-};
-
-////////////////////////////////////////////////////////////
-
 TCOB_API auto screen_to_content(widget const& widget, point_i p) -> point_f;
 TCOB_API auto screen_to_local(widget const& widget, point_i p) -> point_f;
 TCOB_API auto local_to_screen(widget const& widget, point_f p) -> point_f;

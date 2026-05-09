@@ -197,6 +197,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/Transition.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/UI.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/UI.inl
+    ${TCOB_INC_DIR}/tcob/gfx/ui/UIEvents.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/WidgetPainter.hpp
 )
 
