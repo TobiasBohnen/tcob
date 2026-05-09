@@ -99,6 +99,7 @@ void text_edit::draw(widget_painter& painter, rect_f const& rect, gfx::text_form
 
 void text_edit::insert_text(utf8_string const& ch)
 {
+    remove_selected_text();
     _text = utf8::insert(_text, ch, _caretPos);
     _textLength += utf8::length(ch);
     _caretPos += utf8::length(ch);

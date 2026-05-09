@@ -68,33 +68,17 @@ spinner::spinner(init const& wi)
     Class("spinner");
 }
 
-void spinner::enter_edit_mode()
+void spinner::sync_edit()
 {
-    _editing = true;
-    _edit.set_text({});
-
-    _edit.start_blinking(_style.Caret.BlinkRate);
+    _edit.set_text(std::format("{:.{}f}", *Value, *Precision));
+    if (_edit.text_length() > 0) { _edit.select_text(0, _edit.text_length() - 1); }
     _needsFormat = true;
-    queue_redraw();
 }
 
 void spinner::commit_edit()
 {
     auto const parsed {helper::to_number<f32>(_edit.get_text())};
-
-    if (parsed) {
-        Value = *parsed;
-    }
-
-    cancel_edit();
-}
-
-void spinner::cancel_edit()
-{
-    _editing = false;
-    _edit.stop_blinking();
-    _needsFormat = true;
-    queue_redraw();
+    if (parsed) { Value = *parsed; }
 }
 
 void spinner::on_draw(widget_painter& painter)
@@ -102,18 +86,6 @@ void spinner::on_draw(widget_painter& painter)
     rect_f const         rect {draw_base(_style, painter)};
     scoped_scissor const guard {painter, this};
 
-    if (_editing) {
-        if (_style.Text.Font) {
-            if (_needsFormat) {
-                _formatResult = painter.format_text(_style.Text, rect.Size, _edit.get_text());
-                _needsFormat  = false;
-            }
-            _edit.draw(painter, rect, _formatResult, _style.Text, _style.Caret);
-        }
-        return;
-    }
-
-    // normal mode — arrows + value text
     auto const&      fls {flags()};
     nav_arrows_style incArrowStyle {};
     prepare_sub_style(incArrowStyle, 0, _style.NavArrowClass,
@@ -131,16 +103,23 @@ void spinner::on_draw(widget_painter& painter)
     decRect.Position.Y += decRect.height();
     _rectCache.second = painter.draw_nav_arrow(decArrowStyle.NavArrow, decRect, direction::Down, gfx::horizontal_alignment::Right);
 
-    // text
     if (_style.Text.Font) {
-        string const text {std::format("{:.{}f}", *Value, *Precision)};
-        painter.draw_text(_style.Text, {rect.left(), rect.top(), rect.width() - _rectCache.first.width(), rect.height()}, text);
+        rect_f const textRect {rect.left(), rect.top(), rect.width() - _rectCache.first.width(), rect.height()};
+        if (_editing) {
+            if (_needsFormat) {
+                _formatResult = painter.format_text(_style.Text, textRect.Size, _edit.get_text());
+                _needsFormat  = false;
+            }
+            _edit.draw(painter, textRect, _formatResult, _style.Text, _style.Caret);
+        } else {
+            string const text {std::format("{:.{}f}", *Value, *Precision)};
+            painter.draw_text(_style.Text, textRect, text);
+        }
     }
 }
 
 void spinner::on_mouse_leave()
 {
-    if (_editing) { return; }
     _mouseDown  = false;
     _holdCount  = 1;
     _hoverArrow = arrow::None;
@@ -148,7 +127,6 @@ void spinner::on_mouse_leave()
 
 void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    if (_editing) { return; }
     auto const mp {screen_to_local(*this, ev.Position)};
     if (_rectCache.first.contains(mp)) {
         if (_hoverArrow != arrow::Increase) {
@@ -170,15 +148,29 @@ void spinner::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (ev.Button != controls().PrimaryMouseButton) { return; }
 
-    if (_editing) { return; }
-    if (_hoverArrow == arrow::None) { return; }
-
     if (_hoverArrow == arrow::Increase) {
         Value += *Step;
-    } else if (_hoverArrow == arrow::Decrease) {
+        sync_edit();
+        ev.Handled = true;
+        _mouseDown = true;
+        _holdTime.restart();
+        return;
+    }
+    if (_hoverArrow == arrow::Decrease) {
         Value -= *Step;
+        sync_edit();
+        ev.Handled = true;
+        _mouseDown = true;
+        _holdTime.restart();
+        return;
     }
 
+    // text area click — enter edit mode
+    if (!_editing) {
+        _editing = true;
+        sync_edit();
+        _edit.start_blinking(_style.Caret.BlinkRate);
+    }
     ev.Handled = true;
     _mouseDown = true;
     _holdTime.restart();
@@ -213,11 +205,15 @@ void spinner::on_key_down(input::keyboard::event const& ev)
     if (_editing) {
         if (ev.KeyCode == controls->SubmitKey) {
             commit_edit();
+            _editing = false;
+            _edit.stop_blinking();
             ev.Handled = true;
             return;
         }
         if (ev.ScanCode == input::scan_code::ESCAPE) {
-            cancel_edit();
+            sync_edit();
+            _editing = false;
+            _edit.stop_blinking();
             ev.Handled = true;
             return;
         }
@@ -226,21 +222,16 @@ void spinner::on_key_down(input::keyboard::event const& ev)
         return;
     }
 
-    // enter edit mode on backspace
-    if (ev.KeyCode == controls->BackwardDeleteKey) {
-        enter_edit_mode();
-        _edit.delete_backward();
-        ev.Handled = true;
-        return;
-    }
-
     if (ev.Keyboard->is_key_down(controls->ActivateKey)) {
         if (ev.KeyCode == controls->NavDownKey) {
             Value -= *Step;
             ev.Handled = true;
-        } else if (ev.KeyCode == controls->NavUpKey) {
+            return;
+        }
+        if (ev.KeyCode == controls->NavUpKey) {
             Value += *Step;
             ev.Handled = true;
+            return;
         }
     }
 }
@@ -255,14 +246,11 @@ void spinner::on_key_up(input::keyboard::event const& ev)
 
 void spinner::on_text_input(input::keyboard::text_input_event const& ev)
 {
-    if (!_editing) { enter_edit_mode(); } // clear, user is typing fresh
-
+    if (!_editing) { return; }
     bool const valid {std::ranges::all_of(ev.Text, [](char c) {
         return std::isdigit(c) || c == '-' || c == '.';
     })};
-    if (valid) {
-        _edit.insert_text(ev.Text);
-    }
+    if (valid) { _edit.insert_text(ev.Text); }
     ev.Handled = true;
 }
 
@@ -282,10 +270,15 @@ void spinner::on_controller_button_down(input::controller::button_event const& e
 
 void spinner::on_update(milliseconds deltaTime)
 {
-    if (_editing) {
-        _edit.update(deltaTime);
-        return;
+    if (form().top_widget() == this) {
+        if (_hoverArrow == arrow::None) {
+            form().change_cursor_mode(cursor_mode::Text);
+        } else {
+            form().change_cursor_mode(cursor_mode::Default);
+        }
     }
+
+    if (_editing) { _edit.update(deltaTime); }
     if (_mouseDown && _holdTime.elapsed_milliseconds() > (250.0f / _holdCount)) {
         if (_hoverArrow == arrow::Increase) {
             Value += *Step;
@@ -299,7 +292,11 @@ void spinner::on_update(milliseconds deltaTime)
 
 void spinner::on_focus_lost()
 {
-    if (_editing) { commit_edit(); }
+    if (_editing) {
+        commit_edit();
+        _editing = false;
+        _edit.stop_blinking();
+    }
 }
 
 auto spinner::attributes() const -> widget_attributes

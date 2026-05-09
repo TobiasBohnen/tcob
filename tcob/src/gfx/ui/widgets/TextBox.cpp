@@ -179,8 +179,6 @@ auto text_box::attributes() const -> widget_attributes
 
 void text_box::insert_text(utf8_string const& newText)
 {
-    _edit.remove_selected_text();
-
     text_event ev {.Sender = this, .Text = newText};
     BeforeTextInserted(ev);
     isize const newTextLength {utf8::length(ev.Text)};
