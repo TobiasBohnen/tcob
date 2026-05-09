@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <optional>
 #include <variant>
 #include <vector>
 
@@ -52,7 +53,7 @@ public:
     size_f                    UsedSize {size_f::Zero};
     font*                     Font {nullptr};
 
-    auto get_quad(isize idx) const -> quad_definition;
+    auto get_quad(isize idx) const -> std::optional<quad_definition>;
 };
 
 ////////////////////////////////////////////////////////////

@@ -8,6 +8,7 @@
 
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
 
 #include "tcob/core/Point.hpp"
@@ -141,16 +142,21 @@ struct control_map {
     input::mouse::button SecondaryMouseButton {input::mouse::button::Right};
 
     input::key_code ActivateKey {input::key_code::SPACE};
-    input::key_code SubmitKey {input::key_code::RETURN};
-    input::key_code NavLeftKey {input::key_code::LEFT};
-    input::key_code NavRightKey {input::key_code::RIGHT};
-    input::key_code NavUpKey {input::key_code::UP};
-    input::key_code NavDownKey {input::key_code::DOWN};
+
+    std::unordered_set<input::key_code> SubmitKeys {input::key_code::RETURN, input::key_code::KP_ENTER};
+    std::unordered_set<input::key_code> NavLeftKeys {input::key_code::LEFT};
+    std::unordered_set<input::key_code> NavRightKeys {input::key_code::RIGHT};
+    std::unordered_set<input::key_code> NavUpKeys {input::key_code::UP};
+    std::unordered_set<input::key_code> NavDownKeys {input::key_code::DOWN};
+
     input::key_code ForwardDeleteKey {input::key_code::DEL};
     input::key_code BackwardDeleteKey {input::key_code::BACKSPACE};
-    input::key_mod  SelectMod {input::key_mod::LeftShift};
+
+    input::key_mod SelectMod {input::key_mod::LeftShift};
+
     input::key_code TabKey {input::key_code::TAB};
     input::key_mod  TabMod {input::key_mod::LeftShift};
+
     input::key_code CutKey {input::key_code::x};
     input::key_code CopyKey {input::key_code::c};
     input::key_code PasteKey {input::key_code::v};

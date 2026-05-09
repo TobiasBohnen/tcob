@@ -96,7 +96,7 @@ void text_box::on_key_down(input::keyboard::event const& ev)
     using namespace tcob::enum_ops;
 
     auto const& controls {form().Controls};
-    if (ev.KeyCode == controls->SubmitKey) {
+    if (controls->SubmitKeys.contains(ev.KeyCode)) {
         Submit({.Sender = this, .Text = *Text});
     } else if (ev.KeyMods.is_down(controls->CutCopyPasteMod)) {
         if (_edit.is_text_selected()) {
@@ -198,15 +198,15 @@ auto text_box::calc_caret_pos(point_f mp) const -> isize
     if (_formatResult.QuadCount == 0) { return 0; }
 
     // before first
-    auto const& firstRect {_formatResult.get_quad(0).Rect};
+    auto const& firstRect {_formatResult.get_quad(0)->Rect};
     if (mp.X <= firstRect.center().X) { return 0; }
     // after last
-    auto const& lastRect {_formatResult.get_quad(_formatResult.QuadCount - 1).Rect};
+    auto const& lastRect {_formatResult.get_quad(_formatResult.QuadCount - 1)->Rect};
     if (mp.X >= lastRect.center().X) { return _edit.text_length(); }
 
     // center check
     for (isize i {0}; i < _formatResult.QuadCount; ++i) {
-        auto const rect {_formatResult.get_quad(i).Rect};
+        auto const rect {_formatResult.get_quad(i)->Rect};
         if (mp.X < rect.center().X) { return i; }
     }
     return _edit.text_length();

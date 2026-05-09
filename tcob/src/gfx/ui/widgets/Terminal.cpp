@@ -376,7 +376,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
     auto const& controls {form().Controls};
     auto const [x, y] {get_xy()};
 
-    if (ev.KeyCode == controls->NavLeftKey) {
+    if (controls->NavLeftKeys.contains(ev.KeyCode)) {
         if (x > 0) {
             move({x - 1, y});
             ev.Handled = true;
@@ -384,7 +384,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
             move({Size->Width - 1, y - 1});
             ev.Handled = true;
         }
-    } else if (ev.KeyCode == controls->NavRightKey) {
+    } else if (controls->NavRightKeys.contains(ev.KeyCode)) {
         if (x < Size->Width - 1) {
             move({x + 1, y});
             ev.Handled = true;
@@ -392,12 +392,12 @@ void terminal::on_key_down(input::keyboard::event const& ev)
             cursor_line_break();
             ev.Handled = true;
         }
-    } else if (ev.KeyCode == controls->NavUpKey) {
+    } else if (controls->NavUpKeys.contains(ev.KeyCode)) {
         if (y > 0) {
             move({x, y - 1});
             ev.Handled = true;
         }
-    } else if (ev.KeyCode == controls->NavDownKey) {
+    } else if (controls->NavDownKeys.contains(ev.KeyCode)) {
         if (y < Size->Height - 1) {
             move({x, y + 1});
             ev.Handled = true;
@@ -432,7 +432,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
                 redraw();
                 ev.Handled = true;
             }
-        } else if (ev.KeyCode == controls->SubmitKey) {
+        } else if (controls->SubmitKeys.contains(ev.KeyCode)) {
             if (_echoKeys == echo_mode::InsertEcho) {
                 ins_str("\n");
             } else {
@@ -442,7 +442,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
         }
     }
 
-    if (ev.KeyCode == controls->SubmitKey) {
+    if (controls->SubmitKeys.contains(ev.KeyCode)) {
         Submit({this});
         ev.Handled = true;
     }

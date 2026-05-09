@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <optional>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -326,7 +327,7 @@ auto measure(utf8_string_view text, font& font, f32 availableHeight, bool kernin
 
 ////////////////////////////////////////////////////////////
 
-auto result::get_quad(isize idx) const -> quad_definition
+auto result::get_quad(isize idx) const -> std::optional<quad_definition>
 {
     for (auto const& token : Tokens) {
         for (auto const& quad : token.Quads) {
@@ -335,7 +336,7 @@ auto result::get_quad(isize idx) const -> quad_definition
         }
     }
 
-    return {};
+    return std::nullopt;
 }
 
 ////////////////////////////////////////////////////////////

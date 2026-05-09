@@ -144,8 +144,8 @@ void widget_painter::draw_text(text_element const& element, rect_f const& rect, 
         f32 const strokeWidth {deco.Size.calc(rect.height())};
 
         // FIXME: multiline
-        rect_f const first {text.get_quad(0).Rect};
-        rect_f const last {text.get_quad(text.QuadCount - 1).Rect};
+        rect_f const first {text.get_quad(0).value_or({}).Rect};
+        rect_f const last {text.get_quad(text.QuadCount - 1).value_or({}).Rect};
 
         auto const drawLine {[&](point_f p0, point_f p1, point_f offset) {
             switch (deco.Style) {

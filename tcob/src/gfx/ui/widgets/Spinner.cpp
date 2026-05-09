@@ -187,7 +187,6 @@ void spinner::on_mouse_button_up(input::mouse::button_event const& ev)
 void spinner::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (_editing) { return; }
-    if (!is_focused()) { return; }
 
     if (ev.Scroll.Y > 0) {
         Value += *Step;
@@ -203,7 +202,7 @@ void spinner::on_key_down(input::keyboard::event const& ev)
     auto const& controls {form().Controls};
 
     if (_editing) {
-        if (ev.KeyCode == controls->SubmitKey) {
+        if (controls->SubmitKeys.contains(ev.KeyCode)) {
             commit_edit();
             _editing = false;
             _edit.stop_blinking();
@@ -223,12 +222,12 @@ void spinner::on_key_down(input::keyboard::event const& ev)
     }
 
     if (ev.Keyboard->is_key_down(controls->ActivateKey)) {
-        if (ev.KeyCode == controls->NavDownKey) {
+        if (controls->NavDownKeys.contains(ev.KeyCode)) {
             Value -= *Step;
             ev.Handled = true;
             return;
         }
-        if (ev.KeyCode == controls->NavUpKey) {
+        if (controls->NavUpKeys.contains(ev.KeyCode)) {
             Value += *Step;
             ev.Handled = true;
             return;

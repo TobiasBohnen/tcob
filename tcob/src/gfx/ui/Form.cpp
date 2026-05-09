@@ -611,13 +611,13 @@ void form_base::handle_tab(input::keyboard::event const& ev)
 
 void form_base::handle_nav(input::keyboard::event const& ev)
 {
-    if (ev.KeyCode == Controls->NavLeftKey) {
+    if (Controls->NavLeftKeys.contains(ev.KeyCode)) {
         ev.Handled = focus_nav_target(_focusWidget->name(), direction::Left);
-    } else if (ev.KeyCode == Controls->NavRightKey) {
+    } else if (Controls->NavRightKeys.contains(ev.KeyCode)) {
         ev.Handled = focus_nav_target(_focusWidget->name(), direction::Right);
-    } else if (ev.KeyCode == Controls->NavDownKey) {
+    } else if (Controls->NavDownKeys.contains(ev.KeyCode)) {
         ev.Handled = focus_nav_target(_focusWidget->name(), direction::Down);
-    } else if (ev.KeyCode == Controls->NavUpKey) {
+    } else if (Controls->NavUpKeys.contains(ev.KeyCode)) {
         ev.Handled = focus_nav_target(_focusWidget->name(), direction::Up);
     }
 }

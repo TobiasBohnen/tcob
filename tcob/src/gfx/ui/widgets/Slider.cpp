@@ -172,13 +172,13 @@ void slider::on_key_down(input::keyboard::event const& ev)
 {
     auto const& controls {form().Controls};
     if (ev.Keyboard->is_key_down(controls->ActivateKey)) {
-        if (ev.KeyCode == controls->NavLeftKey) {
+        if (controls->NavLeftKeys.contains(ev.KeyCode)) {
             ev.Handled = handle_dir_input(direction::Left);
-        } else if (ev.KeyCode == controls->NavRightKey) {
+        } else if (controls->NavRightKeys.contains(ev.KeyCode)) {
             ev.Handled = handle_dir_input(direction::Right);
-        } else if (ev.KeyCode == controls->NavDownKey) {
+        } else if (controls->NavDownKeys.contains(ev.KeyCode)) {
             ev.Handled = handle_dir_input(direction::Down);
-        } else if (ev.KeyCode == controls->NavUpKey) {
+        } else if (controls->NavUpKeys.contains(ev.KeyCode)) {
             ev.Handled = handle_dir_input(direction::Up);
         }
     }
