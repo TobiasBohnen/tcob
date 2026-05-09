@@ -70,10 +70,10 @@ void text_edit::draw(widget_painter& painter, rect_f const& rect, gfx::text_form
             canvas.set_fill_style(text.SelectColor);
             canvas.begin_path();
 
-            auto const first {formatResult.get_quad(selText.first).value_or({})};
+            auto const first {formatResult.get_quad(selText.first).value_or(gfx::text_formatter::quad_definition {})};
 
             size_f size {};
-            size.Width  = formatResult.get_quad(selText.second).value_or({}).Rect.right() - first.Rect.left();
+            size.Width  = formatResult.get_quad(selText.second).value_or(gfx::text_formatter::quad_definition {}).Rect.right() - first.Rect.left();
             size.Height = rect.height() * 0.9f;
             point_f pos {};
             pos.X = first.Rect.left();
@@ -90,8 +90,8 @@ void text_edit::draw(widget_painter& painter, rect_f const& rect, gfx::text_form
         f32 offset {0.0f};
         if (!formatResult.Tokens.empty()) {
             isize const cp {_caretPos};
-            offset = cp == 0 ? formatResult.get_quad(cp).value_or({}).Rect.left()
-                             : formatResult.get_quad(cp - 1).value_or({}).Rect.right();
+            offset = cp == 0 ? formatResult.get_quad(cp).value_or(gfx::text_formatter::quad_definition {}).Rect.left()
+                             : formatResult.get_quad(cp - 1).value_or(gfx::text_formatter::quad_definition {}).Rect.right();
         }
         painter.draw_caret(caret, rect, {offset, 0});
     }
