@@ -100,7 +100,7 @@ auto widget::is_visible() const -> bool
 
 void widget::focus()
 {
-    _form->focus_widget(this);
+    _form->focus_widget(*this);
 }
 
 auto widget::is_focused() const -> bool

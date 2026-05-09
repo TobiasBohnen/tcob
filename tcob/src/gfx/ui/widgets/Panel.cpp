@@ -432,37 +432,4 @@ auto glass::is_inert() const -> bool
     return true;
 }
 
-////////////////////////////////////////////////////////////
-
-modal_dialog::modal_dialog(init const& wi)
-    : panel {wi}
-{
-    Class("modal_dialog");
-}
-
-void modal_dialog::open()
-{
-    form().push_modal(this); // always push to top
-    if (!_open) {
-        _open = true;
-        on_open();
-    }
-    queue_redraw();
-}
-
-void modal_dialog::close()
-{
-    if (_open) {
-        form().pop_modal(this);
-        _open = false;
-        on_close();
-        queue_redraw();
-    }
-}
-
-auto modal_dialog::is_open() const -> bool
-{
-    return _open;
-}
-
 }

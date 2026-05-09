@@ -40,7 +40,7 @@ inline auto form<Layout>::containers() const -> std::span<std::unique_ptr<widget
 }
 
 template <DerivedFrom<layout> Layout>
-inline void form<Layout>::remove_container(widget* widget)
+inline void form<Layout>::remove_container(widget const& widget)
 {
     _layout.remove(widget);
 }

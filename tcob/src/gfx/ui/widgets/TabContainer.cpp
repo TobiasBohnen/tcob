@@ -58,12 +58,12 @@ void tab_container::on_prepare_redraw()
     widget_container::on_prepare_redraw();
 }
 
-void tab_container::remove_tab(isize idx)
+void tab_container::remove_tab(isize tabIdx)
 {
-    if (idx < 0 || idx >= std::ssize(_tabs)) { return; }
+    if (tabIdx < 0 || tabIdx >= std::ssize(_tabs)) { return; }
 
-    _tabs.erase(_tabs.begin() + idx);
-    _tabLabels.erase(_tabLabels.begin() + idx);
+    _tabs.erase(_tabs.begin() + tabIdx);
+    _tabLabels.erase(_tabLabels.begin() + tabIdx);
     clear_sub_styles();
 
     if (_tabs.empty()) {
@@ -114,6 +114,7 @@ auto tab_container::find_child_at(point_i pos) -> widget*
     }
     return activeTab.get();
 }
+
 auto tab_container::get_tab_index(widget const& tab) const -> isize
 {
     for (isize i {0}; i < std::ssize(_tabs); ++i) {

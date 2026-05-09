@@ -62,7 +62,6 @@ class tooltip;
 
 // TODO:
 // class html_control;
-// class video_control;
 // class menu;
 // class context_menu;
 // class radial_menu;

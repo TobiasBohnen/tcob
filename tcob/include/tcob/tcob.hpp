@@ -149,6 +149,7 @@
 #include <tcob/gfx/ui/widgets/ImageBox.hpp>
 #include <tcob/gfx/ui/widgets/Label.hpp>
 #include <tcob/gfx/ui/widgets/ListBox.hpp>
+#include <tcob/gfx/ui/widgets/ModalDialog.hpp>
 #include <tcob/gfx/ui/widgets/NodeGraphView.hpp>
 #include <tcob/gfx/ui/widgets/Panel.hpp>
 #include <tcob/gfx/ui/widgets/Progressbar.hpp>

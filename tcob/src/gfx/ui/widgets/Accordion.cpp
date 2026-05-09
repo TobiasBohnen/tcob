@@ -74,16 +74,13 @@ void accordion::on_prepare_redraw()
     widget_container::on_prepare_redraw();
 }
 
-void accordion::remove_section(widget const& sec)
+void accordion::remove_section(isize secIdx)
 {
-    for (usize i {0}; i < _sections.size(); ++i) {
-        if (_sections[i].get() == &sec) {
-            _sections.erase(_sections.begin() + i);
-            _sectionLabels.erase(_sectionLabels.begin() + i);
-            clear_sub_styles();
-            break;
-        }
-    }
+    if (secIdx < 0 || secIdx >= std::ssize(_sections)) { return; }
+
+    _sections.erase(_sections.begin() + secIdx);
+    _sectionLabels.erase(_sectionLabels.begin() + secIdx);
+    clear_sub_styles();
 
     if (_sections.empty()) {
         ActiveSectionIndex = INVALID_INDEX;
@@ -97,29 +94,23 @@ void accordion::remove_section(widget const& sec)
 void accordion::clear()
 {
     while (!_sections.empty()) {
-        remove_section(*_sections.front());
+        remove_section(0);
     }
 }
 
-void accordion::change_section_label(widget* sec, utf8_string const& label)
+void accordion::change_section_label(isize secIdx, utf8_string const& label)
 {
-    for (usize i {0}; i < _sections.size(); ++i) {
-        if (_sections[i].get() == sec) {
-            _sectionLabels[i].Text = label;
-            break;
-        }
-    }
+    if (secIdx < 0 || secIdx >= std::ssize(_sections)) { return; }
+
+    _sectionLabels[secIdx].Text = label;
     queue_redraw();
 }
 
-void accordion::change_section_label(widget* sec, item const& label)
+void accordion::change_section_label(isize secIdx, item const& label)
 {
-    for (usize i {0}; i < _sections.size(); ++i) {
-        if (_sections[i].get() == sec) {
-            _sectionLabels[i] = label;
-            break;
-        }
-    }
+    if (secIdx < 0 || secIdx >= std::ssize(_sections)) { return; }
+
+    _sectionLabels[secIdx] = label;
     queue_redraw();
 }
 
@@ -138,6 +129,16 @@ auto accordion::find_child_at(point_i pos) -> widget*
         }
     }
     return activeSection.get();
+}
+
+auto accordion::get_section_index(widget const& sec) const -> isize
+{
+    for (isize i {0}; i < std::ssize(_sections); ++i) {
+        if (_sections[i].get() == &sec) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 auto accordion::widgets() const -> std::span<std::unique_ptr<widget> const>

@@ -62,10 +62,11 @@ public:
     auto all_widgets() const -> std::vector<widget*>;
 
     auto focused_widget() const -> widget*;
-    void focus_widget(widget* newFocus);
+    void focus_widget(widget& newFocus);
+    void clear_focus();
 
     virtual auto containers() const -> std::span<std::unique_ptr<widget> const> = 0;
-    virtual void remove_container(widget* widget)                               = 0;
+    virtual void remove_container(widget const& widget)                         = 0;
     virtual void clear_containers()                                             = 0;
 
     void queue_redraw();
@@ -77,8 +78,8 @@ public:
     virtual auto allows_move() const -> bool   = 0;
     virtual auto allows_resize() const -> bool = 0;
 
-    void push_modal(modal_dialog* dlg);
-    void pop_modal(modal_dialog* dlg);
+    void push_modal(modal_dialog& dlg);
+    void pop_modal(modal_dialog const& dlg);
     auto active_modal() const -> modal_dialog*;
 
     void change_cursor_mode(cursor_mode mode);
@@ -171,7 +172,7 @@ public:
 
     auto containers() const -> std::span<std::unique_ptr<widget> const> override;
 
-    void remove_container(widget* widget) override;
+    void remove_container(widget const& widget) override;
 
     void clear_containers() override;
 

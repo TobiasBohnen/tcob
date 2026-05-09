@@ -28,6 +28,7 @@
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/widgets/ModalDialog.hpp"
 #include "tcob/gfx/ui/widgets/Tooltip.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
@@ -146,22 +147,24 @@ void form_base::invalidate_layout()
     _layoutDirty = true;
 }
 
-void form_base::push_modal(modal_dialog* dlg)
+void form_base::push_modal(modal_dialog& dlg)
 {
-    auto it {std::ranges::find(_modals, dlg)};
+    auto it {std::ranges::find(_modals, &dlg)};
     if (it != _modals.end()) { _modals.erase(it); }
 
-    _modals.push_back(dlg);
+    _modals.push_back(&dlg);
     focus_widget(dlg);
     _topWidget = nullptr; // TODO: mouse left
 }
 
-void form_base::pop_modal(modal_dialog* dlg)
+void form_base::pop_modal(modal_dialog const& dlg)
 {
-    auto it {std::ranges::find(_modals, dlg)};
+    auto it {std::ranges::find(_modals, &dlg)};
     if (it != _modals.end()) {
         _modals.erase(it);
-        focus_widget(active_modal());
+        if (auto* m {active_modal()}) {
+            focus_widget(*m);
+        }
         _topWidget = nullptr; // TODO: mouse left
     }
 }
@@ -361,19 +364,16 @@ void form_base::on_draw_to(gfx::render_target& target, transform const& xform)
     _renderer.render_to_target(target, xform);
 }
 
-auto form_base::focused_widget() const -> widget*
-{
-    return _focusWidget;
-}
+auto form_base::focused_widget() const -> widget* { return _focusWidget; }
 
-void form_base::focus_widget(widget* newFocus)
+void form_base::focus_widget(widget& newFocus)
 {
-    if (newFocus == _focusWidget) { return; }
+    if (&newFocus == _focusWidget) { return; }
 
     _currentTabIndex = -1;
     _injector.on_focus_lost(_focusWidget);
 
-    _focusWidget = newFocus;
+    _focusWidget = &newFocus;
 
     if (_focusWidget) {
         if (_focusWidget->is_inert()) {
@@ -383,13 +383,15 @@ void form_base::focus_widget(widget* newFocus)
 
         auto* layout {get_layout()};
         if (layout->allows_move()) {
-            layout->bring_to_front(_focusWidget->top_level_widget());
+            layout->bring_to_front(*_focusWidget->top_level_widget());
         }
 
         _currentTabIndex = _focusWidget->TabStop->Index;
         _injector.on_focus_gained(_focusWidget);
     }
 }
+
+void form_base::clear_focus() { _focusWidget = nullptr; }
 
 void form_base::on_key_down(input::keyboard::event const& ev)
 {
@@ -456,7 +458,8 @@ void form_base::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     hide_tooltip();
 
-    focus_widget(_topWidget);
+    if (_topWidget) { focus_widget(*_topWidget); }
+
     if (!_focusWidget) { return; }
     _injector.on_mouse_button_down(_focusWidget, ev);
 
@@ -547,7 +550,7 @@ void form_base::on_visibility_changed()
     _isRButtonDown = false;
 
     if (!is_visible()) {
-        focus_widget(nullptr);
+        clear_focus();
         if (_topWidget) {
             _injector.on_mouse_leave(_topWidget);
             _topWidget = nullptr;
@@ -597,7 +600,7 @@ void form_base::handle_tab(input::keyboard::event const& ev)
             _currentTabIndex = std::numeric_limits<i32>::max();
             nextWidget       = find_prev_tab_widget(vec, _currentTabIndex);
         }
-        focus_widget(nextWidget);
+        if (nextWidget) { focus_widget(*nextWidget); }
     } else {
         // tab
         widget* nextWidget {find_next_tab_widget(vec, _currentTabIndex)};
@@ -605,7 +608,7 @@ void form_base::handle_tab(input::keyboard::event const& ev)
             _currentTabIndex = -1;
             nextWidget       = find_next_tab_widget(vec, _currentTabIndex);
         }
-        focus_widget(nextWidget);
+        if (nextWidget) { focus_widget(*nextWidget); }
     }
 }
 
@@ -637,7 +640,7 @@ auto form_base::focus_nav_target(string const& widget, direction dir) -> bool
 
     if (!navTarget.empty()) {
         if (auto* target {find_widget_by_name(navTarget)}) {
-            focus_widget(target);
+            focus_widget(*target);
             return true;
         }
     }

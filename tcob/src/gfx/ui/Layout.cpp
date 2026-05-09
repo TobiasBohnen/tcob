@@ -38,10 +38,10 @@ void layout::apply(size_f size)
     do_layout(size);
 }
 
-void layout::remove(widget* target)
+void layout::remove(widget const& target)
 {
     for (usize i {0}; i < _widgets.size(); ++i) {
-        if (_widgets[i].get() == target) {
+        if (_widgets[i].get() == &target) {
             _widgets.erase(_widgets.begin() + i);
             Changed();
             return;
@@ -60,17 +60,17 @@ auto layout::widgets() const -> std::span<std::unique_ptr<widget> const>
     return _widgets;
 }
 
-void layout::bring_to_front(widget* target)
+void layout::bring_to_front(widget& target)
 {
-    if (!target || _widgets.empty()) { return; }
-    target->ZOrder = _widgets.size() + 1;
+    if (_widgets.empty()) { return; }
+    target.ZOrder = _widgets.size() + 1;
     normalize_zorder();
 }
 
-void layout::send_to_back(widget* target)
+void layout::send_to_back(widget& target)
 {
-    if (!target || _widgets.empty()) { return; }
-    target->ZOrder = 0;
+    if (_widgets.empty()) { return; }
+    target.ZOrder = 0;
     normalize_zorder();
 }
 

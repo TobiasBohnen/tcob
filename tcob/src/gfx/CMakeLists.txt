@@ -69,6 +69,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/ImageBox.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Label.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/ListBox.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/ModalDialog.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/NodeGraphView.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Panel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Progressbar.cpp
@@ -163,6 +164,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/ImageBox.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Label.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/ListBox.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/ModalDialog.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/NodeGraphView.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Panel.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Panel.inl

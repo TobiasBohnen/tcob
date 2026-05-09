@@ -47,13 +47,15 @@ public:
     auto create_section(utf8_string const& name) -> T&;
     template <DerivedFrom<widget_container> T>
     auto create_section(utf8_string const& name, item const& label) -> T&;
-    void remove_section(widget const& sec);
+
+    void remove_section(isize secIdx);
     void clear();
 
-    void change_section_label(widget* sec, utf8_string const& label);
-    void change_section_label(widget* sec, item const& label);
+    void change_section_label(isize secIdx, utf8_string const& label);
+    void change_section_label(isize secIdx, item const& label);
 
     auto find_child_at(point_i pos) -> widget* override;
+    auto get_section_index(widget const& sec) const -> isize;
 
     auto widgets() const -> std::span<std::unique_ptr<widget> const> override;
 

@@ -48,13 +48,13 @@ public:
 
     void apply(size_f size);
 
-    void remove(widget* target);
+    void remove(widget const& target);
     void clear();
 
     auto widgets() const -> std::span<std::unique_ptr<widget> const>;
 
-    void bring_to_front(widget* target);
-    void send_to_back(widget* target);
+    void bring_to_front(widget& target);
+    void send_to_back(widget& target);
 
     virtual auto allows_move() const -> bool;
     virtual auto allows_resize() const -> bool;
