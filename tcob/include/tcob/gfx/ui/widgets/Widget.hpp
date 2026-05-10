@@ -16,6 +16,7 @@
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ui/Length.hpp"
 #include "tcob/gfx/ui/StyleCollection.hpp"
 #include "tcob/gfx/ui/Transition.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -82,6 +83,7 @@ public:
     auto form() const -> form_base&;
     auto is_top_level() const -> bool;
     auto top_level_widget() -> widget*;
+    auto is_ancestor_of(widget const* w) const -> bool;
 
     auto name() const -> string const&;
 

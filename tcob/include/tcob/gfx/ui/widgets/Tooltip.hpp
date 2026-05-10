@@ -56,7 +56,7 @@ public:
     milliseconds Duration {250};
     milliseconds FadeOut {250};
 
-    auto done() const -> bool;
+    void close();
 
 protected:
     void on_update(milliseconds deltaTime) override;

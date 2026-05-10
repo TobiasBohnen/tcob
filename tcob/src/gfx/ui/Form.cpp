@@ -79,8 +79,17 @@ auto form_base::top_widget() const -> widget*
 
 auto form_base::find_widget_at(point_i pos) const -> widget*
 {
-    auto* modal {active_modal()};
+    // check toasts
+    for (auto const& toast : _toasts) {
+        if (!toast->hit_test(pos)) { continue; }
+        if (auto* retValue {toast->find_child_at(pos)}) {
+            return retValue;
+        }
+        return toast.get();
+    }
 
+    // check widgets
+    auto*      modal {active_modal()};
     auto const widgets {modal ? modal->widgets() : get_layout()->widgets()};
     for (auto const& widget : widgets) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }
@@ -293,7 +302,12 @@ void form_base::on_update(milliseconds deltaTime)
     }
 
     // update toasts
-    std::erase_if(_toasts, [](auto const& toast) { return toast->done(); });
+    std::erase_if(_toasts, [this](auto const& toast) {
+        if (!toast->_done) { return false; }
+        if (toast->is_ancestor_of(_topWidget)) { _topWidget = nullptr; }
+        if (toast->is_ancestor_of(_focusWidget)) { _focusWidget = nullptr; }
+        return true;
+    });
     for (auto const& toast : _toasts) {
         toast->update(deltaTime);
     }
@@ -742,5 +756,4 @@ void form_base::hide_tooltip()
     _mouseOverTime    = 0ms;
     _isTooltipVisible = false;
 }
-
 }

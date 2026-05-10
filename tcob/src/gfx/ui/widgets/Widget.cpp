@@ -308,6 +308,17 @@ auto widget::top_level_widget() -> widget*
     return _parent->top_level_widget();
 }
 
+auto widget::is_ancestor_of(widget const* w) const -> bool
+{
+    if (!w) { return false; }
+    widget const* current {w->parent()};
+    while (current) {
+        if (current == this) { return true; }
+        current = current->parent();
+    }
+    return false;
+}
+
 auto widget::name() const -> string const&
 {
     return _name;

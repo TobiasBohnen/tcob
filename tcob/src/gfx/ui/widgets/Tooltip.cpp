@@ -47,11 +47,11 @@ toast::toast(init const& wi, corner corner)
     Class("toast");
 }
 
-auto toast::done() const -> bool { return _done; }
+void toast::close() { _done = true; }
 
 void toast::on_update(milliseconds deltaTime)
 {
-    if (done()) { return; }
+    if (_done) { return; }
     if (!_fadeTween) { on_toast(); }
 
     _fadeTween->update(deltaTime);
@@ -86,9 +86,7 @@ void toast::on_toast()
             Bounds = {restPos, size};
         }
     });
-    _fadeTween->Finished.connect([this] {
-        _done = true;
-    });
+    _fadeTween->Finished.connect([this] { _done = true; });
     _fadeTween->start();
 }
 
