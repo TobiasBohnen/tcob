@@ -105,17 +105,21 @@ inline auto form_base::create_tooltip(string const& name) -> std::shared_ptr<T>
 template <DerivedFrom<toast> T>
 inline auto form_base::queue_toast(string const& name, corner corner, size_i size) -> T&
 {
+    constexpr size_i TOAST_GRID_SIZE {10, 10};
+    constexpr usize  MAX_TOASTS {10};
+
     widget::init const wi {
         .Form   = this,
         .Parent = nullptr,
         .Name   = name,
     };
-    auto             ptr {std::make_unique<T>(wi, corner)};
-    auto*            retValue {ptr.get()};
-    constexpr size_i ToastGridSize {10, 10};
+    auto  ptr {std::make_unique<T>(wi, corner)};
+    auto* retValue {ptr.get()};
+
+    if (_toasts.size() >= MAX_TOASTS) { _toasts.erase(_toasts.begin()); }
 
     auto const fb {bounds()};
-    auto const slotSize {size_f {fb.width() / static_cast<f32>(ToastGridSize.Width), fb.height() / static_cast<f32>(ToastGridSize.Height)}};
+    auto const slotSize {size_f {fb.width() / static_cast<f32>(TOAST_GRID_SIZE.Width), fb.height() / static_cast<f32>(TOAST_GRID_SIZE.Height)}};
     auto const toastSize {size_f {slotSize.Width * size.Width, slotSize.Height * size.Height}};
 
     std::unordered_set<point_i> occupied;
@@ -138,38 +142,38 @@ inline auto form_base::queue_toast(string const& name, corner corner, size_i siz
         slot = {0, 0};
         while (!fits(slot)) {
             ++slot.Y;
-            if (slot.Y + size.Height > ToastGridSize.Height) {
+            if (slot.Y + size.Height > TOAST_GRID_SIZE.Height) {
                 slot.Y = 0;
                 ++slot.X;
             }
         }
         break;
     case corner::TopRight:
-        slot = {ToastGridSize.Width - size.Width, 0};
+        slot = {TOAST_GRID_SIZE.Width - size.Width, 0};
         while (!fits(slot)) {
             ++slot.Y;
-            if (slot.Y + size.Height > ToastGridSize.Height) {
+            if (slot.Y + size.Height > TOAST_GRID_SIZE.Height) {
                 slot.Y = 0;
                 --slot.X;
             }
         }
         break;
     case corner::BottomLeft:
-        slot = {0, ToastGridSize.Height - size.Height};
+        slot = {0, TOAST_GRID_SIZE.Height - size.Height};
         while (!fits(slot)) {
             --slot.Y;
             if (slot.Y < 0) {
-                slot.Y = ToastGridSize.Height - size.Height;
+                slot.Y = TOAST_GRID_SIZE.Height - size.Height;
                 ++slot.X;
             }
         }
         break;
     case corner::BottomRight:
-        slot = {ToastGridSize.Width - size.Width, ToastGridSize.Height - size.Height};
+        slot = {TOAST_GRID_SIZE.Width - size.Width, TOAST_GRID_SIZE.Height - size.Height};
         while (!fits(slot)) {
             --slot.Y;
             if (slot.Y < 0) {
-                slot.Y = ToastGridSize.Height - size.Height;
+                slot.Y = TOAST_GRID_SIZE.Height - size.Height;
                 --slot.X;
             }
         }

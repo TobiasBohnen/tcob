@@ -13,7 +13,7 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API render_statistics {
-    static constexpr i32 FRAME_VALUES = 100;
+    static constexpr i32 FRAME_VALUES {100};
 
 public:
     render_statistics() = default;

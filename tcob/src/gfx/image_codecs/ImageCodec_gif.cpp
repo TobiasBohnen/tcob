@@ -21,6 +21,8 @@
 
 namespace tcob::gfx::detail {
 
+static constexpr i32 MAX_STACK_SIZE {4096};
+
 auto gif::read_color_table(i32 ncolors, io::istream& reader) -> std::vector<color>
 {
     std::vector<u8> c(ncolors * 3);
@@ -191,10 +193,9 @@ auto gif_decoder::read_contents(io::istream& reader) -> animated_image_decoder::
 
 auto gif_decoder::decode_frame_data(io::istream& reader, u16 iw, u16 ih) -> std::vector<u8>
 {
-    static constexpr i32             MaxStackSize {4096};
-    std::array<u8, MaxStackSize + 1> pixelStack {};
-    std::array<i16, MaxStackSize>    prefix {};
-    std::array<u8, MaxStackSize>     suffix {};
+    std::array<u8, MAX_STACK_SIZE + 1> pixelStack {};
+    std::array<i16, MAX_STACK_SIZE>    prefix {};
+    std::array<u8, MAX_STACK_SIZE>     suffix {};
 
     //  Initialize GIF data stream decoder.
     i32 const dataSize {reader.read<u8>()};
@@ -270,12 +271,12 @@ auto gif_decoder::decode_frame_data(io::istream& reader, u16 iw, u16 ih) -> std:
             first = static_cast<i32>(suffix[code]) & 0xff;
 
             //  Add a new string to the string table,
-            if (available >= MaxStackSize) { break; }
+            if (available >= MAX_STACK_SIZE) { break; }
             pixelStack[top++] = static_cast<u8>(first);
             prefix[available] = static_cast<i16>(oldCode);
             suffix[available] = static_cast<u8>(first);
             available++;
-            if (((available & codeMask) == 0) && (available < MaxStackSize)) {
+            if (((available & codeMask) == 0) && (available < MAX_STACK_SIZE)) {
                 codeSize++;
                 codeMask += available;
             }
@@ -607,7 +608,7 @@ public:
         i32 currentCodeSize {_colorDepth + 1};
 
         std::unordered_map<u32, i32> codeTable;
-        codeTable.reserve(MaxStackSize);
+        codeTable.reserve(MAX_STACK_SIZE);
 
         bit_encoder bitEncoder {currentCodeSize};
         out.write<u8>(_colorDepth);
@@ -628,7 +629,7 @@ public:
             } else {
                 bitEncoder.add(prefix);
 
-                if (availableCode < MaxStackSize) {
+                if (availableCode < MAX_STACK_SIZE) {
                     codeTable[key] = availableCode++;
                 }
 
@@ -637,7 +638,7 @@ public:
                     bitEncoder.InBit = currentCodeSize;
                 }
 
-                if (availableCode >= MaxStackSize) {
+                if (availableCode >= MAX_STACK_SIZE) {
                     bitEncoder.add(clearCode);
                     codeTable.clear();
                     currentCodeSize  = _colorDepth + 1;
@@ -673,7 +674,6 @@ private:
         }
     }
 
-    static constexpr i32 MaxStackSize {4096};
     u8                   _colorDepth;
     std::span<u32 const> _indexedPixel;
 };
