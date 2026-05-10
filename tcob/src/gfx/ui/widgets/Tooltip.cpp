@@ -40,8 +40,9 @@ void tooltip::on_tooltip(widget* top)
 
 ////////////////////////////////////////////////////////////
 
-toast::toast(init const& wi)
+toast::toast(init const& wi, corner corner)
     : panel {wi}
+    , _corner {corner}
 {
     Class("toast");
 }
@@ -70,11 +71,6 @@ void toast::on_toast()
     } else {
         offset.Y = -size.Height;
     }
-    if (_corner == corner::TopRight || _corner == corner::BottomRight) {
-        offset.X = size.Width;
-    } else {
-        offset.X = -size.Width;
-    }
 
     _fadeTween = make_unique_tween<linear_tween<f32>>(total, 0.0f, 1.0f);
     _fadeTween->Value.Changed.connect([total, restPos, offset, size, this](auto val) {
@@ -94,6 +90,11 @@ void toast::on_toast()
         _done = true;
     });
     _fadeTween->start();
+}
+
+auto toast::is_inert() const -> bool
+{
+    return true;
 }
 
 }

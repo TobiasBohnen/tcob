@@ -15,6 +15,7 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -58,7 +59,7 @@ public:
     auto create_modal_dialog(string const& name) -> std::shared_ptr<T>;
 
     template <DerivedFrom<toast> T = toast>
-    auto queue_toast(string const& name, corner corner = corner::BottomRight) -> T&;
+    auto queue_toast(string const& name, corner corner = corner::BottomRight, size_i size = size_i::One) -> T&;
 
     auto find_widget_at(point_i pos) const -> widget*;
     auto find_widget_by_name(string const& name) const -> widget*;

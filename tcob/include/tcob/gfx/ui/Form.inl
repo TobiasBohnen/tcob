@@ -103,60 +103,90 @@ inline auto form_base::create_tooltip(string const& name) -> std::shared_ptr<T>
 }
 
 template <DerivedFrom<toast> T>
-inline auto form_base::queue_toast(string const& name, corner corner) -> T&
+inline auto form_base::queue_toast(string const& name, corner corner, size_i size) -> T&
 {
     widget::init const wi {
         .Form   = this,
         .Parent = nullptr,
         .Name   = name,
     };
-    auto ptr {std::make_unique<T>(wi)};
-    ptr->_corner = corner;
-    auto*      retValue {ptr.get()};
-    auto const fb {bounds()};
-    auto const size {size_f {fb.width() / 5.f, fb.height() / 5.f}};
+    auto             ptr {std::make_unique<T>(wi, corner)};
+    auto*            retValue {ptr.get()};
+    constexpr size_i ToastGridSize {10, 10};
 
-    i32 const maxRows {static_cast<i32>(fb.height() / size.Height)};
+    auto const fb {bounds()};
+    auto const slotSize {size_f {fb.width() / static_cast<f32>(ToastGridSize.Width), fb.height() / static_cast<f32>(ToastGridSize.Height)}};
+    auto const toastSize {size_f {slotSize.Width * size.Width, slotSize.Height * size.Height}};
 
     std::unordered_set<point_i> occupied;
     for (auto const& t : _toasts) {
-        if (t->_corner == corner) {
-            occupied.insert(t->_slot);
-        }
+        occupied.insert(t->_slots.begin(), t->_slots.end());
     }
 
-    point_i slot {0, 0};
-    while (occupied.contains(slot)) {
-        ++slot.Y;
-        if (slot.Y >= maxRows) {
-            slot.Y = 0;
-            ++slot.X;
+    auto const fits {[&](point_i slot) {
+        for (i32 col {0}; col < size.Width; ++col) {
+            for (i32 row {0}; row < size.Height; ++row) {
+                if (occupied.contains({slot.X + col, slot.Y + row})) { return false; }
+            }
         }
-    }
+        return true;
+    }};
 
-    point_f pos {};
-
+    point_i slot {};
     switch (corner) {
     case corner::TopLeft:
-        pos.X = fb.left() + (static_cast<f32>(slot.X) * size.Width);
-        pos.Y = fb.top() + (static_cast<f32>(slot.Y) * size.Height);
+        slot = {0, 0};
+        while (!fits(slot)) {
+            ++slot.Y;
+            if (slot.Y + size.Height > ToastGridSize.Height) {
+                slot.Y = 0;
+                ++slot.X;
+            }
+        }
         break;
     case corner::TopRight:
-        pos.X = fb.right() - size.Width - (static_cast<f32>(slot.X) * size.Width);
-        pos.Y = fb.top() + (static_cast<f32>(slot.Y) * size.Height);
+        slot = {ToastGridSize.Width - size.Width, 0};
+        while (!fits(slot)) {
+            ++slot.Y;
+            if (slot.Y + size.Height > ToastGridSize.Height) {
+                slot.Y = 0;
+                --slot.X;
+            }
+        }
         break;
     case corner::BottomLeft:
-        pos.X = fb.left() + (static_cast<f32>(slot.X) * size.Width);
-        pos.Y = fb.bottom() - size.Height - (static_cast<f32>(slot.Y) * size.Height);
+        slot = {0, ToastGridSize.Height - size.Height};
+        while (!fits(slot)) {
+            --slot.Y;
+            if (slot.Y < 0) {
+                slot.Y = ToastGridSize.Height - size.Height;
+                ++slot.X;
+            }
+        }
         break;
     case corner::BottomRight:
-        pos.X = fb.right() - size.Width - (static_cast<f32>(slot.X) * size.Width);
-        pos.Y = fb.bottom() - size.Height - (static_cast<f32>(slot.Y) * size.Height);
+        slot = {ToastGridSize.Width - size.Width, ToastGridSize.Height - size.Height};
+        while (!fits(slot)) {
+            --slot.Y;
+            if (slot.Y < 0) {
+                slot.Y = ToastGridSize.Height - size.Height;
+                --slot.X;
+            }
+        }
         break;
     }
 
-    retValue->_slot  = slot;
-    retValue->Bounds = {pos, size};
+    for (i32 col {0}; col < size.Width; ++col) {
+        for (i32 row {0}; row < size.Height; ++row) {
+            retValue->_slots.insert({slot.X + col, slot.Y + row});
+        }
+    }
+
+    point_f const pos {
+        fb.left() + (static_cast<f32>(slot.X) * slotSize.Width),
+        fb.top() + (static_cast<f32>(slot.Y) * slotSize.Height)};
+
+    retValue->Bounds = {pos, toastSize};
     _toasts.push_back(std::move(ptr));
     return *retValue;
 }

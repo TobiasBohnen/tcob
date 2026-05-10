@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <unordered_set>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Signal.hpp"
@@ -49,7 +50,7 @@ class TCOB_API toast : public panel {
     friend class form_base;
 
 public:
-    explicit toast(init const& wi);
+    toast(init const& wi, corner corner);
 
     milliseconds FadeIn {250};
     milliseconds Duration {250};
@@ -62,9 +63,11 @@ protected:
 
     virtual void on_toast();
 
+    auto is_inert() const -> bool override;
+
 private:
     std::unique_ptr<linear_tween<f32>> _fadeTween;
-    point_i                            _slot {};
+    std::unordered_set<point_i>        _slots {};
     corner                             _corner {corner::BottomRight};
     bool                               _done {false};
 };
