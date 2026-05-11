@@ -14,6 +14,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/ui/Length.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
