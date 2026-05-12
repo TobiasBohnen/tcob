@@ -18,6 +18,7 @@
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/UIEvents.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
@@ -62,9 +63,7 @@ text_box::text_box(init const& wi)
 
 auto text_box::selected_text() const -> utf8_string
 {
-    if (!_edit.is_text_selected()) { return ""; }
-    auto const sel {_edit.selected_text_indices()};
-    return utf8::substr(*Text, sel.first, sel.second - sel.first + 1);
+    return _edit.selected_text();
 }
 
 void text_box::on_draw(widget_painter& painter)
@@ -99,16 +98,14 @@ void text_box::on_key_down(input::keyboard::event const& ev)
     if (controls->SubmitKeys.contains(ev.KeyCode)) {
         Submit({.Sender = this, .Text = *Text});
     } else if (ev.KeyMods.is_down(controls->CutCopyPasteMod)) {
-        if (_edit.is_text_selected()) {
-            if (ev.KeyCode == controls->CopyKey) {
-                locate_service<input::system>().clipboard().set_text(selected_text());
-            } else if (ev.KeyCode == controls->CutKey) {
-                locate_service<input::system>().clipboard().set_text(selected_text());
-                _edit.remove_selected_text();
-            }
+        if (ev.KeyCode == controls->CopyKey) {
+            locate_service<input::system>().clipboard().set_text(selected_text());
+        } else if (ev.KeyCode == controls->CutKey) {
+            locate_service<input::system>().clipboard().set_text(selected_text());
+            _edit.remove_selected_text();
         }
     } else {
-        _edit.key_down(ev, controls, Selectable);
+        _edit.key_down(*this, ev.KeyMods, ev.KeyCode, Selectable);
     }
 
     ev.Handled = true;
@@ -116,7 +113,7 @@ void text_box::on_key_down(input::keyboard::event const& ev)
 
 void text_box::on_key_up(input::keyboard::event const& ev)
 {
-    _edit.key_up(ev, form().Controls);
+    _edit.key_up();
     ev.Handled = true;
 }
 

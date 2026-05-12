@@ -14,11 +14,14 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/core/input/Input_Codes.hpp"
 #include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
+#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
 
@@ -59,8 +62,7 @@ void text_edit::update(milliseconds deltaTime)
 
 void text_edit::draw(widget_painter& painter, rect_f const& rect, gfx::text_formatter::result const& formatResult, text_element const& text, caret_element const& caret)
 {
-    auto const selText {selected_text_indices()};
-    if (selText.first >= formatResult.QuadCount || selText.second >= formatResult.QuadCount) {
+    if (_selectedText.first >= formatResult.QuadCount || _selectedText.second >= formatResult.QuadCount) {
         deselect_text();
     }
 
@@ -70,10 +72,10 @@ void text_edit::draw(widget_painter& painter, rect_f const& rect, gfx::text_form
             canvas.set_fill_style(text.SelectColor);
             canvas.begin_path();
 
-            auto const first {formatResult.get_quad(selText.first).value_or(gfx::text_formatter::quad_definition {})};
+            auto const first {formatResult.get_quad(_selectedText.first).value_or(gfx::text_formatter::quad_definition {})};
 
             size_f size {};
-            size.Width  = formatResult.get_quad(selText.second).value_or(gfx::text_formatter::quad_definition {}).Rect.right() - first.Rect.left();
+            size.Width  = formatResult.get_quad(_selectedText.second).value_or(gfx::text_formatter::quad_definition {}).Rect.right() - first.Rect.left();
             size.Height = rect.height() * 0.9f;
             point_f pos {};
             pos.X = first.Rect.left();
@@ -169,11 +171,6 @@ void text_edit::set_text(utf8_string const& t)
     Invalidated();
 }
 
-auto text_edit::selected_text_indices() const -> std::pair<isize, isize>
-{
-    return _selectedText;
-}
-
 void text_edit::select_text(isize first, isize last)
 {
     _selectedText.first  = std::min(first, last);
@@ -190,14 +187,22 @@ auto text_edit::is_text_selected() const -> bool
     return _selectedText.first != INVALID_INDEX && _selectedText.second != INVALID_INDEX;
 }
 
-void text_edit::key_down(input::keyboard::event const& ev, control_map const& controls, bool selectable)
+auto text_edit::selected_text() const -> utf8_string
+{
+    if (!is_text_selected()) { return ""; }
+    return utf8::substr(_text, _selectedText.first, _selectedText.second - _selectedText.first + 1);
+}
+
+void text_edit::key_down(widget const& widget, input::key_mods keyMods, input::key_code keyCode, bool selectable)
 {
     pause_blinking();
 
-    if (controls.NavLeftKeys.contains(ev.KeyCode)) {
+    auto const& controls {*widget.form().Controls};
+
+    if (controls.NavLeftKeys.contains(keyCode)) {
         if (_caretPos > 0) {
             isize const refPos {_caretPos - 1};
-            if (ev.KeyMods.is_down(controls.SelectMod) && selectable) {
+            if (keyMods.is_down(controls.SelectMod) && selectable) {
                 if (!is_text_selected()) {
                     select_text(refPos, refPos);
                 } else if (_selectedText.first == refPos) {
@@ -216,13 +221,13 @@ void text_edit::key_down(input::keyboard::event const& ev, control_map const& co
                     move_caret_left();
                 }
             }
-        } else if (is_text_selected() && !ev.KeyMods.is_down(controls.SelectMod)) {
+        } else if (is_text_selected() && !keyMods.is_down(controls.SelectMod)) {
             deselect_text();
         }
-    } else if (controls.NavRightKeys.contains(ev.KeyCode)) {
+    } else if (controls.NavRightKeys.contains(keyCode)) {
         if (_caretPos < text_length()) {
             isize const refPos {_caretPos};
-            if (ev.KeyMods.is_down(controls.SelectMod) && selectable) {
+            if (keyMods.is_down(controls.SelectMod) && selectable) {
                 if (!is_text_selected()) {
                     select_text(refPos, refPos);
                 } else if (_selectedText.second == refPos) {
@@ -241,17 +246,17 @@ void text_edit::key_down(input::keyboard::event const& ev, control_map const& co
                     move_caret_right();
                 }
             }
-        } else if (is_text_selected() && !ev.KeyMods.is_down(controls.SelectMod)) {
+        } else if (is_text_selected() && !keyMods.is_down(controls.SelectMod)) {
             deselect_text();
         }
-    } else if (ev.KeyCode == controls.ForwardDeleteKey) {
+    } else if (keyCode == controls.ForwardDeleteKey) {
         if (!remove_selected_text()) { delete_forward(); }
-    } else if (ev.KeyCode == controls.BackwardDeleteKey) {
+    } else if (keyCode == controls.BackwardDeleteKey) {
         if (!remove_selected_text()) { delete_backward(); }
     }
 }
 
-void text_edit::key_up(input::keyboard::event const& /* ev */, control_map const& /* controls */)
+void text_edit::key_up()
 {
     resume_blinking();
 }

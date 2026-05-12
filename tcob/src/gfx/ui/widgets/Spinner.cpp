@@ -216,7 +216,7 @@ void spinner::on_key_down(input::keyboard::event const& ev)
             ev.Handled = true;
             return;
         }
-        _edit.key_down(ev, controls, false);
+        _edit.key_down(*this, ev.KeyMods, ev.KeyCode, false);
         ev.Handled = true;
         return;
     }
@@ -238,7 +238,7 @@ void spinner::on_key_down(input::keyboard::event const& ev)
 void spinner::on_key_up(input::keyboard::event const& ev)
 {
     if (_editing) {
-        _edit.key_up(ev, form().Controls);
+        _edit.key_up();
         ev.Handled = true;
     }
 }

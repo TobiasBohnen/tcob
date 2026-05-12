@@ -12,6 +12,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/core/input/Input_Codes.hpp"
 #include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -40,18 +41,21 @@ public:
     void set_text(utf8_string const& t);
     auto text_length() const -> isize;
 
-    auto selected_text_indices() const -> std::pair<isize, isize>;
+    auto selected_text() const -> utf8_string;
     void select_text(isize first, isize last);
     auto remove_selected_text() -> bool;
-    auto is_text_selected() const -> bool;
 
-    void key_down(input::keyboard::event const& ev, control_map const& controls, bool selectable);
-    void key_up(input::keyboard::event const& ev, control_map const& controls);
     void drag_select(isize targetCaretPos);
+
+    void key_down(widget const& widget, input::key_mods keyMods, input::key_code keyCode, bool selectable);
+    void key_up();
     void mouse_button_down(isize targetCaretPos);
     void mouse_button_up();
 
 private:
+    void deselect_text();
+    auto is_text_selected() const -> bool;
+
     void pause_blinking();
     void resume_blinking();
 
@@ -59,8 +63,6 @@ private:
     void move_caret_right();
     void move_caret_home();
     void move_caret_end();
-
-    void deselect_text();
 
     utf8_string             _text;
     isize                   _textLength {0};
