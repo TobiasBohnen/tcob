@@ -40,8 +40,9 @@ struct quad_definition {
 };
 
 struct format_token {
-    command_definition           Command {}; // shape
-    std::vector<quad_definition> Quads {};   // format
+    command_definition           Command {};
+    std::vector<quad_definition> Quads {};
+    usize                        LineIndex {0};
 };
 
 ////////////////////////////////////////////////////////////

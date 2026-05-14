@@ -29,16 +29,17 @@ enum class token_type : u8 {
 };
 
 struct token {
-    token_type         Type {token_type::None}; // shape
-    string             Text {};                 // shape
-    command_definition Command {};              // shape
-    f32                Width {0};               // shape
-    std::vector<glyph> Glyphs {};               // shape
+    token_type         Type {token_type::None};
+    string             Text {};
+    command_definition Command {};
+    f32                Width {0};
+    std::vector<glyph> Glyphs {};
 };
 
 struct line_definition {
     std::vector<token const*> Tokens {};
     f32                       RemainingWidth {0};
+    usize                     LineIndex {0};
 };
 
 static auto HandleCommands(token& token) -> bool
@@ -199,20 +200,22 @@ static auto Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> 
     currentLine.RemainingWidth = lineWidth < 0 ? std::numeric_limits<f32>::max() : lineWidth;
     currentLine.Tokens.reserve(tokens.size());
 
+    usize lineIndex {0};
+
     for (auto const& currentToken : tokens) {
         if (currentToken.Type == token_type::Command) {
             currentLine.Tokens.push_back(&currentToken);
             continue;
         }
 
-        f32 const testWidth {currentLine.RemainingWidth};
-        if (std::floor(currentToken.Width * scale) > testWidth || currentToken.Type == token_type::Newline) {
+        if (std::floor(currentToken.Width * scale) > currentLine.RemainingWidth || currentToken.Type == token_type::Newline) {
             if (!currentLine.Tokens.empty()) {
                 if (currentLine.Tokens.back()->Type == token_type::Whitespace) { // remove whitespace if last word of line
                     currentLine.RemainingWidth += currentLine.Tokens.back()->Width * scale;
                     currentLine.Tokens.pop_back();
                 }
             }
+            currentLine.LineIndex = lineIndex++;
             retValue.push_back(currentLine);
 
             // reset currentLine
@@ -234,6 +237,7 @@ static auto Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> 
         }
     }
     if (!currentLine.Tokens.empty()) {
+        currentLine.LineIndex = lineIndex;
         retValue.push_back(currentLine);
     }
 
@@ -264,7 +268,8 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
 
         for (auto const* shapeToken : line.Tokens) {
             auto& formatToken {retValue.Tokens.emplace_back()};
-            formatToken.Command = shapeToken->Command;
+            formatToken.Command   = shapeToken->Command;
+            formatToken.LineIndex = line.LineIndex;
 
             for (auto const& glyph : shapeToken->Glyphs) {
                 auto&     quadDef {formatToken.Quads.emplace_back()};
