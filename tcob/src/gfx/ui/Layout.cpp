@@ -10,6 +10,7 @@
 #include <iterator>
 #include <memory>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -20,6 +21,7 @@
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/Length.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
@@ -241,6 +243,68 @@ void grid_layout::do_layout(size_f size)
 
         widget->Bounds = bounds;
     }
+}
+
+////////////////////////////////////////////////////////////
+
+variable_row_layout::variable_row_layout(parent parent, std::vector<i32> rowSizes)
+    : layout {parent}
+    , _rowSizes {std::move(rowSizes)}
+{
+}
+
+void variable_row_layout::do_layout(size_f size)
+{
+    auto const& w {widgets()};
+    f32 const   height {size.Height / static_cast<f32>(_rowSizes.size())};
+
+    usize idx {0};
+    for (i32 row {0}; row < std::ssize(_rowSizes) && idx < w.size(); ++row) {
+        i32 const colCount {_rowSizes[row]};
+        f32 const width {size.Width / static_cast<f32>(colCount)};
+
+        for (i32 col {0}; col < colCount && idx < w.size(); ++col, ++idx) {
+            auto const& widget {w[idx]};
+            widget->Bounds = {
+                static_cast<f32>(col) * width,
+                static_cast<f32>(row) * height,
+                widget->Flex->Width.calc(width),
+                widget->Flex->Height.calc(height)};
+        }
+    }
+
+    for (; idx < w.size(); ++idx) { w[idx]->Bounds = rect_f::Zero; }
+}
+
+////////////////////////////////////////////////////////////
+
+variable_column_layout::variable_column_layout(parent parent, std::vector<i32> colSizes)
+    : layout {parent}
+    , _colSizes {std::move(colSizes)}
+{
+}
+
+void variable_column_layout::do_layout(size_f size)
+{
+    auto const& w {widgets()};
+    f32 const   width {size.Width / static_cast<f32>(_colSizes.size())};
+
+    usize idx {0};
+    for (i32 col {0}; col < std::ssize(_colSizes) && idx < w.size(); ++col) {
+        i32 const rowCount {_colSizes[col]};
+        f32 const height {size.Height / static_cast<f32>(rowCount)};
+
+        for (i32 row {0}; row < rowCount && idx < w.size(); ++row, ++idx) {
+            auto const& widget {w[idx]};
+            widget->Bounds = {
+                static_cast<f32>(col) * width,
+                static_cast<f32>(row) * height,
+                widget->Flex->Width.calc(width),
+                widget->Flex->Height.calc(height)};
+        }
+    }
+
+    for (; idx < w.size(); ++idx) { w[idx]->Bounds = rect_f::Zero; }
 }
 
 ////////////////////////////////////////////////////////////
