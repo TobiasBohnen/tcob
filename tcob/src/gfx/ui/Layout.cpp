@@ -159,8 +159,8 @@ void flex_size_layout::do_layout(size_f size)
 
     for (auto const& widget : w) {
         auto bounds {*widget->Bounds};
-        bounds.Size.Width  = widget->RelativeSize->Width.calc(size.Width);
-        bounds.Size.Height = widget->RelativeSize->Height.calc(size.Height);
+        bounds.Size.Width  = widget->RelativeSize->Width * size.Width;
+        bounds.Size.Height = widget->RelativeSize->Height * size.Height;
         widget->Bounds     = bounds;
     }
 }
@@ -183,8 +183,8 @@ void dock_layout::do_layout(size_f size)
             continue;
         }
 
-        f32 const width {std::min(layoutRect.width(), widget->RelativeSize->Width.calc(size.Width))};
-        f32 const height {std::min(layoutRect.height(), widget->RelativeSize->Height.calc(size.Height))};
+        f32 const width {std::min(layoutRect.width(), widget->RelativeSize->Width * size.Width)};
+        f32 const height {std::min(layoutRect.height(), widget->RelativeSize->Height * size.Height)};
 
         rect_f widgetBounds {layoutRect};
 
@@ -238,9 +238,9 @@ void grid_layout::do_layout(size_f size)
     for (auto const& widget : w) {
         rect_f bounds {_widgetBounds[widget.get()]};
         bounds.Position.X *= horiSize;
-        bounds.Size.Width = widget->RelativeSize->Width.calc(bounds.Size.Width * horiSize);
+        bounds.Size.Width = widget->RelativeSize->Width * (bounds.Size.Width * horiSize);
         bounds.Position.Y *= vertSize;
-        bounds.Size.Height = widget->RelativeSize->Height.calc(bounds.Size.Height * vertSize);
+        bounds.Size.Height = widget->RelativeSize->Height * (bounds.Size.Height * vertSize);
 
         widget->Bounds = bounds;
     }
@@ -293,8 +293,8 @@ void horizontal_layout::do_layout(size_f size)
 
         for (i32 col {0}; col < std::ssize(weights) && idx < w.size(); ++col, ++idx) {
             f32 const cellWidth {size.Width * (weights[col] / totalWeight)};
-            f32 const widgetWidth {w[idx]->RelativeSize->Width.calc(cellWidth)};
-            f32 const widgetHeight {w[idx]->RelativeSize->Height.calc(rowHeight)};
+            f32 const widgetWidth {w[idx]->RelativeSize->Width * cellWidth};
+            f32 const widgetHeight {w[idx]->RelativeSize->Height * rowHeight};
 
             f32 y {row * rowHeight};
             switch (_alignment) {
@@ -350,8 +350,8 @@ void vertical_layout::do_layout(size_f size)
 
         for (i32 row {0}; row < std::ssize(weights) && idx < w.size(); ++row, ++idx) {
             f32 const cellHeight {size.Height * (weights[row] / totalWeight)};
-            f32 const widgetWidth {w[idx]->RelativeSize->Width.calc(colWidth)};
-            f32 const widgetHeight {w[idx]->RelativeSize->Height.calc(cellHeight)};
+            f32 const widgetWidth {w[idx]->RelativeSize->Width * colWidth};
+            f32 const widgetHeight {w[idx]->RelativeSize->Height * cellHeight};
 
             f32 x {col * colWidth};
             switch (_alignment) {
@@ -386,8 +386,8 @@ void tile_layout::do_layout(size_f size)
         if (i < _box.Width * _box.Height) {
             f32 const cellX {static_cast<f32>(i % _box.Width) * horiSize};
             f32 const cellY {static_cast<f32>(i / _box.Width) * vertSize};
-            f32 const widgetWidth {widget->RelativeSize->Width.calc(horiSize)};
-            f32 const widgetHeight {widget->RelativeSize->Height.calc(vertSize)};
+            f32 const widgetWidth {widget->RelativeSize->Width * horiSize};
+            f32 const widgetHeight {widget->RelativeSize->Height * vertSize};
 
             widget->Bounds = {cellX + ((horiSize - widgetWidth) / 2.0f),
                               cellY + ((vertSize - widgetHeight) / 2.0f),
@@ -416,8 +416,8 @@ void flow_layout::do_layout(size_f size)
     f32       rowHeight {0.0f};
 
     for (auto const& widget : w) {
-        f32 const widgetWidth {widget->RelativeSize->Width.calc(availableWidth)};
-        f32 const widgetHeight {widget->RelativeSize->Height.calc(size.Height)};
+        f32 const widgetWidth {widget->RelativeSize->Width * availableWidth};
+        f32 const widgetHeight {widget->RelativeSize->Height * size.Height};
 
         if (x + widgetWidth > availableWidth) {
             x = 0.0f;
@@ -451,8 +451,8 @@ void masonry_layout::do_layout(size_f size)
     std::vector<f32> trackFill(_tracks, 0.f);
 
     for (auto const& widget : w) {
-        f32 const widgetWidth {widget->RelativeSize->Width.calc(isVertical ? trackSize : size.Width)};
-        f32 const widgetHeight {widget->RelativeSize->Height.calc(isVertical ? size.Height : trackSize)};
+        f32 const widgetWidth {widget->RelativeSize->Width * (isVertical ? trackSize : size.Width)};
+        f32 const widgetHeight {widget->RelativeSize->Height * (isVertical ? size.Height : trackSize)};
         f32 const widgetMain {isVertical ? widgetHeight : widgetWidth};
         f32 const mainSize {isVertical ? size.Height : size.Width};
 
@@ -501,8 +501,8 @@ void tree_layout::do_layout(size_f size)
 
     f32 y {0.0f};
     for (auto const& widget : w) {
-        f32 const widgetWidth {widget->RelativeSize->Width.calc(horiSize)};
-        f32 const widgetHeight {widget->RelativeSize->Height.calc(vertSize)};
+        f32 const widgetWidth {widget->RelativeSize->Width * horiSize};
+        f32 const widgetHeight {widget->RelativeSize->Height * vertSize};
 
         i32 const level {_levels[widget.get()]};
         f32 const x {level * horiSize};
@@ -531,7 +531,7 @@ void stack_layout::do_layout(size_f size)
 
     for (auto const& widget : w) {
         if (widget.get() == _active) {
-            rect_f const bounds {point_f::Zero, {widget->RelativeSize->Width.calc(horiSize), widget->RelativeSize->Height.calc(vertSize)}};
+            rect_f const bounds {point_f::Zero, {widget->RelativeSize->Width * (horiSize), widget->RelativeSize->Height * (vertSize)}};
             if (widget->Bounds != bounds) {
                 widget->Bounds = bounds;
             }
@@ -564,8 +564,8 @@ void circle_layout::do_layout(size_f size)
         auto const pos {center + (point_f::FromDirection(radian_f {angle}) * radius)};
 
         auto const& widget {w[i]};
-        f32 const   widgetWidth {widget->RelativeSize->Width.calc(horiSize)};
-        f32 const   widgetHeight {widget->RelativeSize->Height.calc(vertSize)};
+        f32 const   widgetWidth {widget->RelativeSize->Width * horiSize};
+        f32 const   widgetHeight {widget->RelativeSize->Height * vertSize};
 
         widget->Bounds = {{pos.X - (widgetWidth / 2.0f), pos.Y - (widgetHeight / 2.0f)}, {widgetWidth, widgetHeight}};
     }

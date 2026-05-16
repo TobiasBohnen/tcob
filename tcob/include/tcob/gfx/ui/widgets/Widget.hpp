@@ -16,7 +16,6 @@
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/ui/Length.hpp"
 #include "tcob/gfx/ui/StyleCollection.hpp"
 #include "tcob/gfx/ui/Transition.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -62,7 +61,7 @@ public:
     prop_chk<rect_f> Bounds;
     prop_chk<size_f> MinSize;
     prop_chk<size_f> MaxSize;
-    prop<dimensions> RelativeSize;
+    prop<size_f>     RelativeSize {size_f::One};
 
     cursor_mode Cursor {cursor_mode::Default};
 
