@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <iterator>
 #include <memory>
+#include <numeric>
 #include <span>
 #include <utility>
 #include <vector>
@@ -247,29 +248,42 @@ void grid_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
-variable_row_layout::variable_row_layout(parent parent, std::vector<i32> rowSizes)
+static auto expand_to_weights(std::vector<i32> const& sizes) -> std::vector<std::vector<f32>>
+{
+    std::vector<std::vector<f32>> weights;
+    weights.reserve(sizes.size());
+    for (i32 n : sizes) { weights.push_back(std::vector<f32>(n, 1.f)); }
+    return weights;
+}
+
+variable_row_layout::variable_row_layout(parent parent, std::vector<std::vector<f32>> rowWeights)
     : layout {parent}
-    , _rowSizes {std::move(rowSizes)}
+    , _rowWeights {std::move(rowWeights)}
+{
+}
+
+variable_row_layout::variable_row_layout(parent parent, std::vector<i32> const& rowSizes)
+    : variable_row_layout {parent, expand_to_weights(rowSizes)}
 {
 }
 
 void variable_row_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
-    f32 const   height {size.Height / static_cast<f32>(_rowSizes.size())};
+    f32 const   rowHeight {size.Height / static_cast<f32>(_rowWeights.size())};
 
     usize idx {0};
-    for (i32 row {0}; row < std::ssize(_rowSizes) && idx < w.size(); ++row) {
-        i32 const colCount {_rowSizes[row]};
-        f32 const width {size.Width / static_cast<f32>(colCount)};
+    for (i32 row {0}; row < std::ssize(_rowWeights) && idx < w.size(); ++row) {
+        auto const& weights {_rowWeights[row]};
+        f32 const   totalWeight {std::accumulate(weights.begin(), weights.end(), 0.f)};
+        f32         x {0.f};
 
-        for (i32 col {0}; col < colCount && idx < w.size(); ++col, ++idx) {
-            auto const& widget {w[idx]};
-            widget->Bounds = {
-                static_cast<f32>(col) * width,
-                static_cast<f32>(row) * height,
-                widget->Flex->Width.calc(width),
-                widget->Flex->Height.calc(height)};
+        for (i32 col {0}; col < std::ssize(weights) && idx < w.size(); ++col, ++idx) {
+            f32 const cellWidth {size.Width * (weights[col] / totalWeight)};
+            w[idx]->Bounds = {x, static_cast<f32>(row) * rowHeight,
+                              w[idx]->Flex->Width.calc(cellWidth),
+                              w[idx]->Flex->Height.calc(rowHeight)};
+            x += cellWidth;
         }
     }
 
@@ -278,29 +292,34 @@ void variable_row_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
-variable_column_layout::variable_column_layout(parent parent, std::vector<i32> colSizes)
+variable_column_layout::variable_column_layout(parent parent, std::vector<std::vector<f32>> colWeights)
     : layout {parent}
-    , _colSizes {std::move(colSizes)}
+    , _colWeights {std::move(colWeights)}
+{
+}
+
+variable_column_layout::variable_column_layout(parent parent, std::vector<i32> const& colSizes)
+    : variable_column_layout {parent, expand_to_weights(colSizes)}
 {
 }
 
 void variable_column_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
-    f32 const   width {size.Width / static_cast<f32>(_colSizes.size())};
+    f32 const   colWidth {size.Width / static_cast<f32>(_colWeights.size())};
 
     usize idx {0};
-    for (i32 col {0}; col < std::ssize(_colSizes) && idx < w.size(); ++col) {
-        i32 const rowCount {_colSizes[col]};
-        f32 const height {size.Height / static_cast<f32>(rowCount)};
+    for (i32 col {0}; col < std::ssize(_colWeights) && idx < w.size(); ++col) {
+        auto const& weights {_colWeights[col]};
+        f32 const   totalWeight {std::accumulate(weights.begin(), weights.end(), 0.f)};
+        f32         y {0.f};
 
-        for (i32 row {0}; row < rowCount && idx < w.size(); ++row, ++idx) {
-            auto const& widget {w[idx]};
-            widget->Bounds = {
-                static_cast<f32>(col) * width,
-                static_cast<f32>(row) * height,
-                widget->Flex->Width.calc(width),
-                widget->Flex->Height.calc(height)};
+        for (i32 row {0}; row < std::ssize(weights) && idx < w.size(); ++row, ++idx) {
+            f32 const cellHeight {size.Height * (weights[row] / totalWeight)};
+            w[idx]->Bounds = {static_cast<f32>(col) * colWidth, y,
+                              w[idx]->Flex->Width.calc(colWidth),
+                              w[idx]->Flex->Height.calc(cellHeight)};
+            y += cellHeight;
         }
     }
 

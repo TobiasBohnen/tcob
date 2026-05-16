@@ -150,13 +150,14 @@ private:
 // variable_row_layout: Arranges widgets into rows with a variable number of columns per row.
 class TCOB_API variable_row_layout : public layout, public detail::default_creator<variable_row_layout> {
 public:
-    variable_row_layout(parent parent, std::vector<i32> rowSizes);
+    variable_row_layout(parent parent, std::vector<std::vector<f32>> rowWeights);
+    variable_row_layout(parent parent, std::vector<i32> const& rowSizes);
 
 protected:
     void do_layout(size_f size) override;
 
 private:
-    std::vector<i32> _rowSizes;
+    std::vector<std::vector<f32>> _rowWeights;
 };
 
 ////////////////////////////////////////////////////////////
@@ -164,13 +165,14 @@ private:
 // variable_column_layout: Arranges widgets into columns with a variable number of rows per column.
 class TCOB_API variable_column_layout : public layout, public detail::default_creator<variable_column_layout> {
 public:
-    variable_column_layout(parent parent, std::vector<i32> colSizes);
+    variable_column_layout(parent parent, std::vector<std::vector<f32>> colWeights);
+    variable_column_layout(parent parent, std::vector<i32> const& colSizes);
 
 protected:
     void do_layout(size_f size) override;
 
 private:
-    std::vector<i32> _colSizes;
+    std::vector<std::vector<f32>> _colWeights;
 };
 
 ////////////////////////////////////////////////////////////
