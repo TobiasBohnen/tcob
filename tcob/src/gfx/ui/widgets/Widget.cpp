@@ -47,7 +47,7 @@ widget::widget(init const& wi)
     assert(_form);
 
     Class.Changed.connect([this](auto const&) { queue_redraw(); });
-    Flex.Changed.connect([this](auto const&) { queue_redraw(); });
+    RelativeSize.Changed.connect([this](auto const&) { queue_redraw(); });
     ZOrder.Changed.connect([this](auto const&) { queue_redraw(); });
 
     static i32 tabIndex {0};

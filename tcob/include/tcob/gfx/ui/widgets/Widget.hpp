@@ -62,7 +62,7 @@ public:
     prop_chk<rect_f> Bounds;
     prop_chk<size_f> MinSize;
     prop_chk<size_f> MaxSize;
-    prop<dimensions> Flex;
+    prop<dimensions> RelativeSize;
 
     cursor_mode Cursor {cursor_mode::Default};
 

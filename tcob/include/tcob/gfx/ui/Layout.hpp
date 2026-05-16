@@ -147,33 +147,40 @@ private:
 };
 
 ////////////////////////////////////////////////////////////
+using weights_t = std::vector<std::vector<f32>>;
 
-// variable_row_layout: Arranges widgets into rows with a variable number of columns per row.
-class TCOB_API variable_row_layout : public layout, public detail::default_creator<variable_row_layout> {
+// horizontal_layout: Arranges widgets into rows with a variable number of weighted columns per row.
+class TCOB_API horizontal_layout : public layout, public detail::default_creator<horizontal_layout> {
 public:
-    variable_row_layout(parent parent, std::vector<std::vector<f32>> rowWeights);
-    variable_row_layout(parent parent, std::vector<i32> const& rowSizes);
+    horizontal_layout(parent parent, weights_t columnWeights, gfx::vertical_alignment alignment = gfx::vertical_alignment::Top);
+    horizontal_layout(parent parent, std::span<i32 const> columns, gfx::vertical_alignment alignment = gfx::vertical_alignment::Top);
+    horizontal_layout(parent parent, gfx::vertical_alignment alignment = gfx::vertical_alignment::Top);
 
 protected:
     void do_layout(size_f size) override;
 
 private:
-    std::vector<std::vector<f32>> _rowWeights;
+    weights_t               _weights;
+    gfx::vertical_alignment _alignment;
+    bool                    _autoWeights {false};
 };
 
 ////////////////////////////////////////////////////////////
 
-// variable_column_layout: Arranges widgets into columns with a variable number of rows per column.
-class TCOB_API variable_column_layout : public layout, public detail::default_creator<variable_column_layout> {
+// vertical_layout: Arranges widgets into columns with a variable number of rows per column.
+class TCOB_API vertical_layout : public layout, public detail::default_creator<vertical_layout> {
 public:
-    variable_column_layout(parent parent, std::vector<std::vector<f32>> colWeights);
-    variable_column_layout(parent parent, std::vector<i32> const& colSizes);
+    vertical_layout(parent parent, weights_t rowHeights, gfx::horizontal_alignment alignment = gfx::horizontal_alignment::Left);
+    vertical_layout(parent parent, std::span<i32 const> rows, gfx::horizontal_alignment alignment = gfx::horizontal_alignment::Left);
+    vertical_layout(parent parent, gfx::horizontal_alignment alignment = gfx::horizontal_alignment::Left);
 
 protected:
     void do_layout(size_f size) override;
 
 private:
-    std::vector<std::vector<f32>> _colWeights;
+    weights_t                 _weights;
+    gfx::horizontal_alignment _alignment;
+    bool                      _autoWeights {false};
 };
 
 ////////////////////////////////////////////////////////////
@@ -188,34 +195,6 @@ protected:
 
 private:
     size_i _box {size_i::Zero};
-};
-
-////////////////////////////////////////////////////////////
-
-// horizontal_layout: Evenly distributes widgets horizontally across the container.
-class TCOB_API horizontal_layout final : public layout, public detail::default_creator<horizontal_layout> {
-public:
-    explicit horizontal_layout(parent parent, gfx::vertical_alignment alignment = gfx::vertical_alignment::Top);
-
-protected:
-    void do_layout(size_f size) override;
-
-private:
-    gfx::vertical_alignment _alignment;
-};
-
-////////////////////////////////////////////////////////////
-
-// vertical_layout: Evenly distributes widgets vertically down the container.
-class TCOB_API vertical_layout final : public layout, public detail::default_creator<vertical_layout> {
-public:
-    explicit vertical_layout(parent parent, gfx::horizontal_alignment alignment = gfx::horizontal_alignment::Left);
-
-protected:
-    void do_layout(size_f size) override;
-
-private:
-    gfx::horizontal_alignment _alignment;
 };
 
 ////////////////////////////////////////////////////////////

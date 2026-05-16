@@ -159,8 +159,8 @@ void flex_size_layout::do_layout(size_f size)
 
     for (auto const& widget : w) {
         auto bounds {*widget->Bounds};
-        bounds.Size.Width  = widget->Flex->Width.calc(size.Width);
-        bounds.Size.Height = widget->Flex->Height.calc(size.Height);
+        bounds.Size.Width  = widget->RelativeSize->Width.calc(size.Width);
+        bounds.Size.Height = widget->RelativeSize->Height.calc(size.Height);
         widget->Bounds     = bounds;
     }
 }
@@ -183,8 +183,8 @@ void dock_layout::do_layout(size_f size)
             continue;
         }
 
-        f32 const width {std::min(layoutRect.width(), widget->Flex->Width.calc(size.Width))};
-        f32 const height {std::min(layoutRect.height(), widget->Flex->Height.calc(size.Height))};
+        f32 const width {std::min(layoutRect.width(), widget->RelativeSize->Width.calc(size.Width))};
+        f32 const height {std::min(layoutRect.height(), widget->RelativeSize->Height.calc(size.Height))};
 
         rect_f widgetBounds {layoutRect};
 
@@ -238,9 +238,9 @@ void grid_layout::do_layout(size_f size)
     for (auto const& widget : w) {
         rect_f bounds {_widgetBounds[widget.get()]};
         bounds.Position.X *= horiSize;
-        bounds.Size.Width = widget->Flex->Width.calc(bounds.Size.Width * horiSize);
+        bounds.Size.Width = widget->RelativeSize->Width.calc(bounds.Size.Width * horiSize);
         bounds.Position.Y *= vertSize;
-        bounds.Size.Height = widget->Flex->Height.calc(bounds.Size.Height * vertSize);
+        bounds.Size.Height = widget->RelativeSize->Height.calc(bounds.Size.Height * vertSize);
 
         widget->Bounds = bounds;
     }
@@ -248,41 +248,62 @@ void grid_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
-static auto expand_to_weights(std::vector<i32> const& sizes) -> std::vector<std::vector<f32>>
+static auto expand_to_weights(std::span<i32 const> sizes) -> weights_t
 {
-    std::vector<std::vector<f32>> weights;
+    weights_t weights;
     weights.reserve(sizes.size());
-    for (i32 n : sizes) { weights.push_back(std::vector<f32>(n, 1.f)); }
+    for (i32 n : sizes) { weights.emplace_back(n, 1.f); }
     return weights;
 }
 
-variable_row_layout::variable_row_layout(parent parent, std::vector<std::vector<f32>> rowWeights)
+horizontal_layout::horizontal_layout(parent parent, weights_t columnWeights, gfx::vertical_alignment alignment)
     : layout {parent}
-    , _rowWeights {std::move(rowWeights)}
+    , _weights {std::move(columnWeights)}
+    , _alignment {alignment}
 {
 }
 
-variable_row_layout::variable_row_layout(parent parent, std::vector<i32> const& rowSizes)
-    : variable_row_layout {parent, expand_to_weights(rowSizes)}
+horizontal_layout::horizontal_layout(parent parent, std::span<i32 const> columns, gfx::vertical_alignment alignment)
+    : horizontal_layout {parent, expand_to_weights(columns), alignment}
 {
 }
 
-void variable_row_layout::do_layout(size_f size)
+horizontal_layout::horizontal_layout(parent parent, gfx::vertical_alignment alignment)
+    : layout {parent}
+    , _alignment {alignment}
+    , _autoWeights {true}
+{
+}
+
+void horizontal_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
-    f32 const   rowHeight {size.Height / static_cast<f32>(_rowWeights.size())};
+    if (w.empty()) { return; }
+    if (_autoWeights) {
+        _weights = {{std::vector<f32>(w.size(), 1.f)}};
+    }
+
+    f32 const rowHeight {size.Height / static_cast<f32>(_weights.size())};
 
     usize idx {0};
-    for (i32 row {0}; row < std::ssize(_rowWeights) && idx < w.size(); ++row) {
-        auto const& weights {_rowWeights[row]};
+    for (i32 row {0}; row < std::ssize(_weights) && idx < w.size(); ++row) {
+        auto const& weights {_weights[row]};
         f32 const   totalWeight {std::accumulate(weights.begin(), weights.end(), 0.f)};
         f32         x {0.f};
 
         for (i32 col {0}; col < std::ssize(weights) && idx < w.size(); ++col, ++idx) {
             f32 const cellWidth {size.Width * (weights[col] / totalWeight)};
-            w[idx]->Bounds = {x, static_cast<f32>(row) * rowHeight,
-                              w[idx]->Flex->Width.calc(cellWidth),
-                              w[idx]->Flex->Height.calc(rowHeight)};
+            f32 const widgetWidth {w[idx]->RelativeSize->Width.calc(cellWidth)};
+            f32 const widgetHeight {w[idx]->RelativeSize->Height.calc(rowHeight)};
+
+            f32 y {row * rowHeight};
+            switch (_alignment) {
+            case gfx::vertical_alignment::Top:    break;
+            case gfx::vertical_alignment::Bottom: y += rowHeight - widgetHeight; break;
+            case gfx::vertical_alignment::Middle: y += (rowHeight - widgetHeight) / 2.f; break;
+            }
+
+            w[idx]->Bounds = {x, y, widgetWidth, widgetHeight};
             x += cellWidth;
         }
     }
@@ -292,33 +313,54 @@ void variable_row_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
-variable_column_layout::variable_column_layout(parent parent, std::vector<std::vector<f32>> colWeights)
+vertical_layout::vertical_layout(parent parent, weights_t rowHeights, gfx::horizontal_alignment alignment)
     : layout {parent}
-    , _colWeights {std::move(colWeights)}
+    , _weights {std::move(rowHeights)}
+    , _alignment {alignment}
 {
 }
 
-variable_column_layout::variable_column_layout(parent parent, std::vector<i32> const& colSizes)
-    : variable_column_layout {parent, expand_to_weights(colSizes)}
+vertical_layout::vertical_layout(parent parent, std::span<i32 const> rows, gfx::horizontal_alignment alignment)
+    : vertical_layout {parent, expand_to_weights(rows), alignment}
 {
 }
 
-void variable_column_layout::do_layout(size_f size)
+vertical_layout::vertical_layout(parent parent, gfx::horizontal_alignment alignment)
+    : layout {parent}
+    , _alignment {alignment}
+    , _autoWeights {true}
+{
+}
+
+void vertical_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
-    f32 const   colWidth {size.Width / static_cast<f32>(_colWeights.size())};
+    if (w.empty()) { return; }
+    if (_autoWeights) {
+        _weights = {{std::vector<f32>(w.size(), 1.f)}};
+    }
+
+    f32 const colWidth {size.Width / static_cast<f32>(_weights.size())};
 
     usize idx {0};
-    for (i32 col {0}; col < std::ssize(_colWeights) && idx < w.size(); ++col) {
-        auto const& weights {_colWeights[col]};
+    for (i32 col {0}; col < std::ssize(_weights) && idx < w.size(); ++col) {
+        auto const& weights {_weights[col]};
         f32 const   totalWeight {std::accumulate(weights.begin(), weights.end(), 0.f)};
         f32         y {0.f};
 
         for (i32 row {0}; row < std::ssize(weights) && idx < w.size(); ++row, ++idx) {
             f32 const cellHeight {size.Height * (weights[row] / totalWeight)};
-            w[idx]->Bounds = {static_cast<f32>(col) * colWidth, y,
-                              w[idx]->Flex->Width.calc(colWidth),
-                              w[idx]->Flex->Height.calc(cellHeight)};
+            f32 const widgetWidth {w[idx]->RelativeSize->Width.calc(colWidth)};
+            f32 const widgetHeight {w[idx]->RelativeSize->Height.calc(cellHeight)};
+
+            f32 x {col * colWidth};
+            switch (_alignment) {
+            case gfx::horizontal_alignment::Left:     break;
+            case gfx::horizontal_alignment::Right:    x += colWidth - widgetWidth; break;
+            case gfx::horizontal_alignment::Centered: x += (colWidth - widgetWidth) / 2.f; break;
+            }
+
+            w[idx]->Bounds = {x, y, widgetWidth, widgetHeight};
             y += cellHeight;
         }
     }
@@ -344,8 +386,8 @@ void tile_layout::do_layout(size_f size)
         if (i < _box.Width * _box.Height) {
             f32 const cellX {static_cast<f32>(i % _box.Width) * horiSize};
             f32 const cellY {static_cast<f32>(i / _box.Width) * vertSize};
-            f32 const widgetWidth {widget->Flex->Width.calc(horiSize)};
-            f32 const widgetHeight {widget->Flex->Height.calc(vertSize)};
+            f32 const widgetWidth {widget->RelativeSize->Width.calc(horiSize)};
+            f32 const widgetHeight {widget->RelativeSize->Height.calc(vertSize)};
 
             widget->Bounds = {cellX + ((horiSize - widgetWidth) / 2.0f),
                               cellY + ((vertSize - widgetHeight) / 2.0f),
@@ -354,93 +396,6 @@ void tile_layout::do_layout(size_f size)
         } else {
             widget->Bounds = rect_f::Zero;
         }
-    }
-}
-
-////////////////////////////////////////////////////////////
-
-horizontal_layout::horizontal_layout(parent parent, gfx::vertical_alignment alignment)
-    : layout {parent}
-    , _alignment {alignment}
-{
-}
-
-void horizontal_layout::do_layout(size_f size)
-{
-    auto const& w {widgets()};
-
-    std::vector<f32> widths;
-    widths.reserve(w.size());
-
-    f32 totalDesiredWidth {0.f};
-    for (auto const& widget : w) {
-        f32 const width {widget->Flex->Width.calc(size.Width)};
-        widths.push_back(width);
-        totalDesiredWidth += width;
-    }
-
-    f32 const scale {(totalDesiredWidth > size.Width) ? (size.Width / totalDesiredWidth) : 1.f};
-    f32 const remaining {size.Width - (totalDesiredWidth * scale)};
-    f32 const offsetX {remaining / (w.size() + 1)};
-
-    f32 x {offsetX};
-    for (usize i {0}; i < w.size(); ++i) {
-        f32 const width {widths[i] * scale};
-        f32 const height {w[i]->Flex->Height.calc(size.Height)};
-
-        f32 y {0.f};
-        switch (_alignment) {
-        case gfx::vertical_alignment::Top:    y = 0.f; break;
-        case gfx::vertical_alignment::Bottom: y = size.Height - height; break;
-        case gfx::vertical_alignment::Middle: y = (size.Height - height) / 2.f; break;
-        }
-
-        w[i]->Bounds = {x, y, width, height};
-        x += width + offsetX;
-    }
-}
-
-////////////////////////////////////////////////////////////
-
-vertical_layout::vertical_layout(parent parent, gfx::horizontal_alignment alignment)
-    : layout {parent}
-    , _alignment {alignment}
-{
-}
-
-void vertical_layout::do_layout(size_f size)
-{
-    auto const& w {widgets()};
-
-    std::vector<f32> heights;
-    heights.reserve(w.size());
-
-    f32 totalDesiredHeight {0.f};
-    for (auto const& widget : w) {
-        f32 const height {widget->Flex->Height.calc(size.Height)};
-        heights.push_back(height);
-        totalDesiredHeight += height;
-    }
-
-    f32 const scale {(totalDesiredHeight > size.Height) ? (size.Height / totalDesiredHeight) : 1.f};
-    f32 const remaining {size.Height - (totalDesiredHeight * scale)};
-    f32 const offsetY {remaining / (w.size() + 1)};
-
-    f32 y {offsetY};
-    for (usize i {0}; i < w.size(); ++i) {
-        auto const& widget {w[i]};
-        f32 const   height {heights[i] * scale};
-        f32 const   width {widget->Flex->Width.calc(size.Width)};
-
-        f32 x {0.f};
-        switch (_alignment) {
-        case gfx::horizontal_alignment::Left:     x = 0.f; break;
-        case gfx::horizontal_alignment::Right:    x = size.Width - width; break;
-        case gfx::horizontal_alignment::Centered: x = (size.Width - width) / 2.f; break;
-        }
-
-        widget->Bounds = {x, y, width, height};
-        y += height + offsetY;
     }
 }
 
@@ -461,8 +416,8 @@ void flow_layout::do_layout(size_f size)
     f32       rowHeight {0.0f};
 
     for (auto const& widget : w) {
-        f32 const widgetWidth {widget->Flex->Width.calc(availableWidth)};
-        f32 const widgetHeight {widget->Flex->Height.calc(size.Height)};
+        f32 const widgetWidth {widget->RelativeSize->Width.calc(availableWidth)};
+        f32 const widgetHeight {widget->RelativeSize->Height.calc(size.Height)};
 
         if (x + widgetWidth > availableWidth) {
             x = 0.0f;
@@ -496,8 +451,8 @@ void masonry_layout::do_layout(size_f size)
     std::vector<f32> trackFill(_tracks, 0.f);
 
     for (auto const& widget : w) {
-        f32 const widgetWidth {widget->Flex->Width.calc(isVertical ? trackSize : size.Width)};
-        f32 const widgetHeight {widget->Flex->Height.calc(isVertical ? size.Height : trackSize)};
+        f32 const widgetWidth {widget->RelativeSize->Width.calc(isVertical ? trackSize : size.Width)};
+        f32 const widgetHeight {widget->RelativeSize->Height.calc(isVertical ? size.Height : trackSize)};
         f32 const widgetMain {isVertical ? widgetHeight : widgetWidth};
         f32 const mainSize {isVertical ? size.Height : size.Width};
 
@@ -546,8 +501,8 @@ void tree_layout::do_layout(size_f size)
 
     f32 y {0.0f};
     for (auto const& widget : w) {
-        f32 const widgetWidth {widget->Flex->Width.calc(horiSize)};
-        f32 const widgetHeight {widget->Flex->Height.calc(vertSize)};
+        f32 const widgetWidth {widget->RelativeSize->Width.calc(horiSize)};
+        f32 const widgetHeight {widget->RelativeSize->Height.calc(vertSize)};
 
         i32 const level {_levels[widget.get()]};
         f32 const x {level * horiSize};
@@ -576,7 +531,7 @@ void stack_layout::do_layout(size_f size)
 
     for (auto const& widget : w) {
         if (widget.get() == _active) {
-            rect_f const bounds {point_f::Zero, {widget->Flex->Width.calc(horiSize), widget->Flex->Height.calc(vertSize)}};
+            rect_f const bounds {point_f::Zero, {widget->RelativeSize->Width.calc(horiSize), widget->RelativeSize->Height.calc(vertSize)}};
             if (widget->Bounds != bounds) {
                 widget->Bounds = bounds;
             }
@@ -609,8 +564,8 @@ void circle_layout::do_layout(size_f size)
         auto const pos {center + (point_f::FromDirection(radian_f {angle}) * radius)};
 
         auto const& widget {w[i]};
-        f32 const   widgetWidth {widget->Flex->Width.calc(horiSize)};
-        f32 const   widgetHeight {widget->Flex->Height.calc(vertSize)};
+        f32 const   widgetWidth {widget->RelativeSize->Width.calc(horiSize)};
+        f32 const   widgetHeight {widget->RelativeSize->Height.calc(vertSize)};
 
         widget->Bounds = {{pos.X - (widgetWidth / 2.0f), pos.Y - (widgetHeight / 2.0f)}, {widgetWidth, widgetHeight}};
     }
