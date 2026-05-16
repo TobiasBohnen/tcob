@@ -12,6 +12,7 @@
 #include <variant>
 #include <vector>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -177,10 +178,10 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-// box_layout: Arranges widgets in a fixed grid defined by box dimensions, positioning each widget in its cell.
-class TCOB_API box_layout final : public layout, public detail::default_creator<box_layout> {
+// tile_layout: Arranges widgets in a fixed grid defined by box dimensions, positioning each widget in its cell.
+class TCOB_API tile_layout final : public layout, public detail::default_creator<tile_layout> {
 public:
-    box_layout(parent parent, size_i boxSize);
+    tile_layout(parent parent, size_i boxSize);
 
 protected:
     void do_layout(size_f size) override;
@@ -233,13 +234,14 @@ protected:
 // masonry_layout: distributes widgets across a fixed number of columns
 class TCOB_API masonry_layout final : public layout, public detail::default_creator<masonry_layout> {
 public:
-    masonry_layout(parent parent, i32 columns);
+    masonry_layout(parent parent, i32 tracks, direction dir = direction::Down);
 
 protected:
     void do_layout(size_f size) override;
 
 private:
-    i32 _columns;
+    i32       _tracks;
+    direction _dir;
 };
 
 ////////////////////////////////////////////////////////////

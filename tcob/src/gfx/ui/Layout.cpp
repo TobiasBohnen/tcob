@@ -328,13 +328,13 @@ void variable_column_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
-box_layout::box_layout(parent parent, size_i boxSize)
+tile_layout::tile_layout(parent parent, size_i boxSize)
     : layout {parent}
     , _box {boxSize}
 {
 }
 
-void box_layout::do_layout(size_f size)
+void tile_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
     f32 const   horiSize {size.Width / _box.Width};
@@ -479,41 +479,55 @@ void flow_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
-masonry_layout::masonry_layout(parent parent, i32 columns)
+masonry_layout::masonry_layout(parent parent, i32 tracks, direction dir)
     : layout {parent}
-    , _columns {columns}
+    , _tracks {tracks}
+    , _dir {dir}
 {
 }
 
 void masonry_layout::do_layout(size_f size)
 {
-    auto const&      w {widgets()};
-    f32 const        horiSize {size.Width / _columns};
-    std::vector<f32> colHeights(_columns, 0.0f);
+    auto const& w {widgets()};
+
+    bool const isVertical {_dir == direction::Down || _dir == direction::Up};
+
+    f32 const        trackSize {isVertical ? size.Width / static_cast<f32>(_tracks) : size.Height / static_cast<f32>(_tracks)};
+    std::vector<f32> trackFill(_tracks, 0.f);
 
     for (auto const& widget : w) {
-        f32 const widgetWidth {widget->Flex->Width.calc(horiSize)};
-        f32 const widgetHeight {widget->Flex->Height.calc(size.Height)};
+        f32 const widgetWidth {widget->Flex->Width.calc(isVertical ? trackSize : size.Width)};
+        f32 const widgetHeight {widget->Flex->Height.calc(isVertical ? size.Height : trackSize)};
+        f32 const widgetMain {isVertical ? widgetHeight : widgetWidth};
+        f32 const mainSize {isVertical ? size.Height : size.Width};
 
-        // Find the shortest column that can fit the widget
-        i32 colIndex {-1};
-        for (i32 i {0}; i < _columns; ++i) {
-            if (colHeights[i] + widgetHeight <= size.Height && (colIndex == -1 || colHeights[i] < colHeights[colIndex])) {
-                colIndex = i;
+        // find shortest track that fits
+        i32 trackIndex {-1};
+        for (i32 i {0}; i < _tracks; ++i) {
+            if (trackFill[i] + widgetMain <= mainSize && (trackIndex == -1 || trackFill[i] < trackFill[trackIndex])) {
+                trackIndex = i;
             }
         }
 
-        // If no column can fit the widget, skip it
-        if (colIndex == -1) {
+        // If no track can fit the widget, skip it
+        if (trackIndex == -1) {
             widget->Bounds = rect_f::Zero;
             continue;
         }
 
-        // Place the widget in the selected column
-        f32 const x {colIndex * horiSize};
-        f32 const y {colHeights[colIndex]};
-        widget->Bounds = {x, y, widgetWidth, widgetHeight};
-        colHeights[colIndex] += widgetHeight;
+        // Place the widget in the selected track
+        f32 const cross {trackIndex * trackSize};
+        f32 const main {trackFill[trackIndex]};
+
+        switch (_dir) {
+        case direction::Down:  widget->Bounds = {cross, main, widgetWidth, widgetHeight}; break;
+        case direction::Up:    widget->Bounds = {cross, mainSize - main - widgetHeight, widgetWidth, widgetHeight}; break;
+        case direction::Right: widget->Bounds = {main, cross, widgetWidth, widgetHeight}; break;
+        case direction::Left:  widget->Bounds = {mainSize - main - widgetWidth, cross, widgetWidth, widgetHeight}; break;
+        case direction::None:  widget->Bounds = rect_f::Zero; break;
+        }
+
+        trackFill[trackIndex] += widgetMain;
     }
 }
 
