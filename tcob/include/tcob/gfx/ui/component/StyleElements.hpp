@@ -142,7 +142,7 @@ public:
     line      Line {};
     line_type Style {line_type::Solid};
     color     Color {colors::Transparent};
-    length    Size {};
+    length    StrokeWidth {};
 
     void lerp(deco_element const& from, deco_element const& to, f64 step);
 

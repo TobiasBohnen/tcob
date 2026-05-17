@@ -177,10 +177,10 @@ void shadow_element::lerp(shadow_element const& from, shadow_element const& to, 
 
 void deco_element::lerp(deco_element const& from, deco_element const& to, f64 step)
 {
-    Line  = helper::lerp(from.Line, to.Line, step);
-    Style = helper::lerp(from.Style, to.Style, step);
-    Color = helper::lerp(from.Color, to.Color, step);
-    Size  = helper::lerp(from.Size, to.Size, step);
+    Line        = helper::lerp(from.Line, to.Line, step);
+    Style       = helper::lerp(from.Style, to.Style, step);
+    Color       = helper::lerp(from.Color, to.Color, step);
+    StrokeWidth = helper::lerp(from.StrokeWidth, to.StrokeWidth, step);
 }
 
 void tick_element::lerp(tick_element const& from, tick_element const& to, f64 step)

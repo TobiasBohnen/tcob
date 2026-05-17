@@ -141,7 +141,7 @@ void widget_painter::draw_text(text_element const& element, rect_f const& rect, 
     // deco
     auto const& deco {element.Decoration};
     if (deco.Style != line_type::Hidden && (deco.Line.LineThrough || deco.Line.Overline || deco.Line.Underline) && deco.Color.A > 0 && text.QuadCount > 0) {
-        f32 const strokeWidth {deco.Size.calc(rect.height())};
+        f32 const strokeWidth {deco.StrokeWidth.calc(rect.height())};
 
         // FIXME: multiline
         rect_f const first {text.get_quad(0).value_or(gfx::text_formatter::quad_definition {}).Rect};
