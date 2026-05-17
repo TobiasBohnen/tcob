@@ -8,8 +8,8 @@
 
 #include "tcob/gfx/ui/Length.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
-#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/component/StyleElements.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////

@@ -22,10 +22,10 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Length.hpp"
 #include "tcob/gfx/ui/Style.hpp"
-#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/UIEvents.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/component/StyleElements.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {

@@ -15,8 +15,8 @@
 #include "tcob/core/input/Input_Codes.hpp"
 #include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
-#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/component/StyleElements.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////

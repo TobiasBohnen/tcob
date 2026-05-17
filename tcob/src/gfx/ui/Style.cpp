@@ -8,8 +8,8 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/tweening/TweenFunc.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
-#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/component/StyleElements.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////

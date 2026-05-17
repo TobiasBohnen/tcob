@@ -14,9 +14,9 @@
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
-#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/component/StyleElements.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {

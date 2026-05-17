@@ -57,6 +57,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Legend.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/TextEdit.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/Scrollbar.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/StyleElements.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/WidgetTweener.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Accordion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Button.cpp
@@ -91,7 +92,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Paint.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Style.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/StyleCollection.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/StyleElements.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/UI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/WidgetPainter.cpp
 )
@@ -151,6 +151,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Icon.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Item.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Scrollbar.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/component/StyleElements.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/TextEdit.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/WidgetTweener.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.hpp
@@ -195,7 +196,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/Style.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/StyleCollection.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/StyleCollection.inl
-    ${TCOB_INC_DIR}/tcob/gfx/ui/StyleElements.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Transition.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Transition.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/UI.hpp

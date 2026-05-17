@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/ui/StyleElements.hpp"
+#include "tcob/gfx/ui/component/StyleElements.hpp"
 
 #include <algorithm>
 #include <cmath>

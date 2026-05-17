@@ -21,7 +21,6 @@
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-
 namespace tcob::ui {
 
 using namespace gfx;

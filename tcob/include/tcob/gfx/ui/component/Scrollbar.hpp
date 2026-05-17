@@ -9,9 +9,9 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/component/StyleElements.hpp"
 #include "tcob/gfx/ui/component/WidgetTweener.hpp"
 
 namespace tcob::ui {

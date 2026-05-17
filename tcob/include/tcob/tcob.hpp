@@ -127,7 +127,6 @@
 #include <tcob/gfx/ui/Paint.hpp>
 #include <tcob/gfx/ui/Style.hpp>
 #include <tcob/gfx/ui/StyleCollection.hpp>
-#include <tcob/gfx/ui/StyleElements.hpp>
 #include <tcob/gfx/ui/Transition.hpp>
 #include <tcob/gfx/ui/UI.hpp>
 #include <tcob/gfx/ui/UIEvents.hpp>
@@ -138,6 +137,7 @@
 #include <tcob/gfx/ui/component/Icon.hpp>
 #include <tcob/gfx/ui/component/Item.hpp>
 #include <tcob/gfx/ui/component/Scrollbar.hpp>
+#include <tcob/gfx/ui/component/StyleElements.hpp>
 #include <tcob/gfx/ui/component/TextEdit.hpp>
 #include <tcob/gfx/ui/component/WidgetTweener.hpp>
 #include <tcob/gfx/ui/widgets/Accordion.hpp>

@@ -19,9 +19,9 @@
 #include "tcob/gfx/ui/Layout.hpp"
 #include "tcob/gfx/ui/Length.hpp"
 #include "tcob/gfx/ui/Style.hpp"
-#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/component/StyleElements.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
