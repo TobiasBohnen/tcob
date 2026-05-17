@@ -292,6 +292,183 @@ void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 
                             _states->get().XForm);
 }
 
+void canvas::border_rect(rect_f const& outer,
+                         f32 top, f32 right, f32 bottom, f32 left,
+                         f32 radTL, f32 radTR, f32 radBR, f32 radBL)
+{
+    if (top <= 0 && right <= 0 && bottom <= 0 && left <= 0) { return; }
+
+    auto const [ox, oy] {outer.Position};
+    auto const [ow, oh] {outer.Size};
+
+    bool const hasTop {top > 0};
+    bool const hasRight {right > 0};
+    bool const hasBottom {bottom > 0};
+    bool const hasLeft {left > 0};
+
+    auto static const clamp_rad {[](f32 const r, f32 const limit) -> f32 {
+        return std::max(0.f, std::min(r, limit));
+    }};
+
+    // full border
+    if (hasTop && hasRight && hasBottom && hasLeft) {
+        f32 const iTL {std::max(0.f, radTL - std::max(top, left))};    // NOLINT(readability-suspicious-call-argument)
+        f32 const iTR {std::max(0.f, radTR - std::max(top, right))};
+        f32 const iBR {std::max(0.f, radBR - std::max(bottom, right))};
+        f32 const iBL {std::max(0.f, radBL - std::max(bottom, left))}; // NOLINT(readability-suspicious-call-argument)
+
+        rect_f const inner {outer.left() + left, outer.top() + top,
+                            outer.width() - left - right, outer.height() - top - bottom};
+
+        auto const [ix, iy] {inner.Position};
+        auto const [iw, ih] {inner.Size};
+
+        f32 const halfw {std::abs(iw) * 0.5f};
+        f32 const halfh {std::abs(ih) * 0.5f};
+
+        f32 const rxoTL {clamp_rad(radTL, std::abs(ow) * 0.5f)};
+        f32 const ryoTL {clamp_rad(radTL, std::abs(oh) * 0.5f)};
+
+        f32 const rxoTR {clamp_rad(radTR, std::abs(ow) * 0.5f)};
+        f32 const ryoTR {clamp_rad(radTR, std::abs(oh) * 0.5f)};
+
+        f32 const rxoBR {clamp_rad(radBR, std::abs(ow) * 0.5f)};
+        f32 const ryoBR {clamp_rad(radBR, std::abs(oh) * 0.5f)};
+
+        f32 const rxoBL {clamp_rad(radBL, std::abs(ow) * 0.5f)};
+        f32 const ryoBL {clamp_rad(radBL, std::abs(oh) * 0.5f)};
+
+        f32 const rxiTL {clamp_rad(iTL, halfw)};
+        f32 const ryiTL {clamp_rad(iTL, halfh)};
+
+        f32 const rxiTR {clamp_rad(iTR, halfw)};
+        f32 const ryiTR {clamp_rad(iTR, halfh)};
+
+        f32 const rxiBR {clamp_rad(iBR, halfw)};
+        f32 const ryiBR {clamp_rad(iBR, halfh)};
+
+        f32 const rxiBL {clamp_rad(iBL, halfw)};
+        f32 const ryiBL {clamp_rad(iBL, halfh)};
+
+        _cache->append_commands(
+            std::vector<f32> {
+                MoveTo, ox, oy + ryoTL,
+                Winding, static_cast<f32>(winding::CCW),
+                LineTo, ox, oy + oh - ryoBL,
+                BezierTo, ox, oy + oh - (ryoBL * (1 - KAPPA90)), ox + (rxoBL * (1 - KAPPA90)), oy + oh, ox + rxoBL, oy + oh,
+                LineTo, ox + ow - rxoBR, oy + oh,
+                BezierTo, ox + ow - (rxoBR * (1 - KAPPA90)), oy + oh, ox + ow, oy + oh - (ryoBR * (1 - KAPPA90)), ox + ow, oy + oh - ryoBR,
+                LineTo, ox + ow, oy + ryoTR,
+                BezierTo, ox + ow, oy + (ryoTR * (1 - KAPPA90)), ox + ow - (rxoTR * (1 - KAPPA90)), oy, ox + ow - rxoTR, oy,
+                LineTo, ox + rxoTL, oy,
+                BezierTo, ox + (rxoTL * (1 - KAPPA90)), oy, ox, oy + (ryoTL * (1 - KAPPA90)), ox, oy + ryoTL,
+                Close,
+
+                MoveTo, ix + rxiTL, iy,
+                Winding, static_cast<f32>(winding::CW),
+                LineTo, ix + iw - rxiTR, iy,
+                BezierTo, ix + iw - (rxiTR * (1 - KAPPA90)), iy, ix + iw, iy + (ryiTR * (1 - KAPPA90)), ix + iw, iy + ryiTR,
+                LineTo, ix + iw, iy + ih - ryiBR,
+                BezierTo, ix + iw, iy + ih - (ryiBR * (1 - KAPPA90)), ix + iw - (rxiBR * (1 - KAPPA90)), iy + ih, ix + iw - rxiBR, iy + ih,
+                LineTo, ix + rxiBL, iy + ih,
+                BezierTo, ix + (rxiBL * (1 - KAPPA90)), iy + ih, ix, iy + ih - (ryiBL * (1 - KAPPA90)), ix, iy + ih - ryiBL,
+                LineTo, ix, iy + ryiTL,
+                BezierTo, ix, iy + (ryiTL * (1 - KAPPA90)), ix + (rxiTL * (1 - KAPPA90)), iy, ix + rxiTL, iy,
+                Close},
+            _states->get().XForm);
+
+        return;
+    }
+
+    // partial border
+    std::vector<f32> cmds;
+    cmds.reserve(128);
+
+    if (hasTop) {
+        f32 const rTL {clamp_rad(radTL, top)};
+        f32 const rTR {clamp_rad(radTR, top)};
+
+        cmds.insert(cmds.end(),
+                    {MoveTo, ox + rTL, oy,
+
+                     LineTo, ox + ow - rTR, oy,
+
+                     BezierTo, ox + ow - (rTR * (1 - KAPPA90)), oy, ox + ow, oy + (rTR * (1 - KAPPA90)), ox + ow, oy + rTR,
+
+                     LineTo, ox + ow, oy + top,
+
+                     LineTo, ox, oy + top,
+
+                     LineTo, ox, oy + rTL,
+
+                     BezierTo, ox, oy + (rTL * (1 - KAPPA90)), ox + (rTL * (1 - KAPPA90)), oy, ox + rTL, oy,
+
+                     Close});
+    }
+
+    if (hasRight) {
+        f32 const rTR {clamp_rad(radTR, right)};
+        f32 const rBR {clamp_rad(radBR, right)};
+
+        cmds.insert(cmds.end(),
+                    {MoveTo, ox + ow, oy + rTR,
+
+                     BezierTo, ox + ow, oy + (rTR * (1 - KAPPA90)), ox + ow - (rTR * (1 - KAPPA90)), oy, ox + ow - rTR, oy,
+
+                     LineTo, ox + ow - right, oy,
+
+                     LineTo, ox + ow - right, oy + oh,
+
+                     LineTo, ox + ow - rBR, oy + oh,
+
+                     BezierTo, ox + ow - (rBR * (1 - KAPPA90)), oy + oh, ox + ow, oy + oh - (rBR * (1 - KAPPA90)), ox + ow, oy + oh - rBR,
+
+                     Close});
+    }
+
+    if (hasBottom) {
+        f32 const rBL {clamp_rad(radBL, bottom)};
+        f32 const rBR {clamp_rad(radBR, bottom)};
+
+        cmds.insert(cmds.end(),
+                    {MoveTo, ox + ow - rBR, oy + oh,
+
+                     BezierTo, ox + ow - (rBR * (1 - KAPPA90)), oy + oh, ox + ow, oy + oh - (rBR * (1 - KAPPA90)), ox + ow, oy + oh - rBR,
+
+                     LineTo, ox + ow, oy + oh - bottom,
+
+                     LineTo, ox, oy + oh - bottom,
+
+                     LineTo, ox, oy + oh - rBL,
+
+                     BezierTo, ox, oy + oh - (rBL * (1 - KAPPA90)), ox + (rBL * (1 - KAPPA90)), oy + oh, ox + rBL, oy + oh,
+
+                     Close});
+    }
+
+    if (hasLeft) {
+        f32 const rTL {clamp_rad(radTL, left)};
+        f32 const rBL {clamp_rad(radBL, left)};
+
+        cmds.insert(cmds.end(),
+                    {MoveTo, ox, oy + rTL,
+
+                     BezierTo, ox, oy + (rTL * (1 - KAPPA90)), ox + (rTL * (1 - KAPPA90)), oy, ox + rTL, oy,
+
+                     LineTo, ox + left, oy,
+
+                     LineTo, ox + left, oy + oh,
+
+                     LineTo, ox + rBL, oy + oh,
+
+                     BezierTo, ox + (rBL * (1 - KAPPA90)), oy + oh, ox, oy + oh - (rBL * (1 - KAPPA90)), ox, oy + oh - rBL,
+
+                     Close});
+    }
+
+    _cache->append_commands(cmds, _states->get().XForm);
+}
+
 ////////////////////////////////////////////////////////////
 
 void canvas::ellipse(point_f c, f32 rx, f32 ry)

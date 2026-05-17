@@ -175,6 +175,7 @@ public:
     void rect(rect_f const& rect);
     void rounded_rect(rect_f const& rect, f32 r);
     void rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL);
+    void border_rect(rect_f const& outer, f32 top, f32 right, f32 bottom, f32 left, f32 radTL, f32 radTR, f32 radBR, f32 radBL);
     void ellipse(point_f c, f32 rx, f32 ry);
     void circle(point_f c, f32 r);
 
