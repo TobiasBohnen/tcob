@@ -307,7 +307,7 @@ void canvas::border_rect(rect_f const& outer,
     bool const hasLeft {left > 0};
 
     auto static const clamp_rad {[](f32 const r, f32 const limit) -> f32 {
-        return std::max(0.f, std::min(r, limit));
+        return std::clamp(r, 0.f, limit);
     }};
 
     // full border
