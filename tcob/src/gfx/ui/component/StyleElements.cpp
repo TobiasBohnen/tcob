@@ -163,9 +163,8 @@ void text_element::lerp(text_element const& from, text_element const& to, f64 st
 
 void caret_element::lerp(caret_element const& from, caret_element const& to, f64 step)
 {
-    Color  = helper::lerp(from.Color, to.Color, step);
-    Height = helper::lerp(from.Height, to.Height, step);
-    Width  = helper::lerp(from.Width, to.Width, step);
+    Color = helper::lerp(from.Color, to.Color, step);
+    Size  = helper::lerp(from.Size, to.Size, step);
     // BlinkRate = helper::lerp(from.BlinkRate, to.BlinkRate, step);
 }
 

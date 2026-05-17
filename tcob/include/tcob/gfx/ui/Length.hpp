@@ -10,6 +10,7 @@
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Serialization.hpp"
+#include "tcob/core/Size.hpp"
 
 namespace tcob::ui {
 
@@ -87,6 +88,8 @@ class TCOB_API dimensions final {
 public:
     length Width {1, length::type::Relative};
     length Height {1, length::type::Relative};
+
+    auto calc(size_f refSize) const -> size_f;
 
     auto operator==(dimensions const& other) const -> bool = default;
 

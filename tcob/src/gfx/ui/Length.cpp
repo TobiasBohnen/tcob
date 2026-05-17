@@ -9,6 +9,7 @@
 #include <cassert>
 
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Size.hpp"
 
 namespace tcob::ui {
 
@@ -85,6 +86,11 @@ auto thickness::Lerp(thickness const& from, thickness const& to, f64 step) -> th
     retValue.Left   = length::Lerp(from.Left, to.Left, step);
     retValue.Right  = length::Lerp(from.Right, to.Right, step);
     return retValue;
+}
+
+auto dimensions::calc(size_f refSize) const -> size_f
+{
+    return {Width.calc(refSize.Width), Height.calc(refSize.Height)};
 }
 
 auto dimensions::Lerp(dimensions const& from, dimensions const& to, f64 step) -> dimensions

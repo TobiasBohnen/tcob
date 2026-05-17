@@ -358,9 +358,8 @@ void widget_painter::draw_caret(caret_element const& element, rect_f const& rect
 {
     rect_f r {rect};
     r.Position += offset;
-    r.Size.Height = element.Height.calc(rect.Size.Height);
+    r.Size = element.Size.calc(rect.Size);
     r.Position.Y += (rect.Size.Height - r.Size.Height) / 2;
-    r.Size.Width = element.Width.calc(rect.Size.Width);
     do_bordered_rect(r, element.Color, {});
 }
 
