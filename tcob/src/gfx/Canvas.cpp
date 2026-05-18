@@ -310,46 +310,40 @@ void canvas::border_rect(rect_f const& outer,
         return std::clamp(r, 0.f, limit);
     }};
 
+    f32 const iTL {std::max(0.f, radTL - std::max(top, left))};    // NOLINT(readability-suspicious-call-argument)
+    f32 const iTR {std::max(0.f, radTR - std::max(top, right))};
+    f32 const iBR {std::max(0.f, radBR - std::max(bottom, right))};
+    f32 const iBL {std::max(0.f, radBL - std::max(bottom, left))}; // NOLINT(readability-suspicious-call-argument)
+
+    rect_f const inner {outer.left() + left, outer.top() + top,
+                        outer.width() - left - right, outer.height() - top - bottom};
+
+    auto const [ix, iy] {inner.Position};
+    auto const [iw, ih] {inner.Size};
+
+    f32 const halfw {std::abs(iw) * 0.5f};
+    f32 const halfh {std::abs(ih) * 0.5f};
+
+    f32 const rxoTL {clamp_rad(radTL, std::abs(ow) * 0.5f)};
+    f32 const ryoTL {clamp_rad(radTL, std::abs(oh) * 0.5f)};
+    f32 const rxoTR {clamp_rad(radTR, std::abs(ow) * 0.5f)};
+    f32 const ryoTR {clamp_rad(radTR, std::abs(oh) * 0.5f)};
+    f32 const rxoBR {clamp_rad(radBR, std::abs(ow) * 0.5f)};
+    f32 const ryoBR {clamp_rad(radBR, std::abs(oh) * 0.5f)};
+    f32 const rxoBL {clamp_rad(radBL, std::abs(ow) * 0.5f)};
+    f32 const ryoBL {clamp_rad(radBL, std::abs(oh) * 0.5f)};
+
+    f32 const rxiTL {clamp_rad(iTL, halfw)};
+    f32 const ryiTL {clamp_rad(iTL, halfh)};
+    f32 const rxiTR {clamp_rad(iTR, halfw)};
+    f32 const ryiTR {clamp_rad(iTR, halfh)};
+    f32 const rxiBR {clamp_rad(iBR, halfw)};
+    f32 const ryiBR {clamp_rad(iBR, halfh)};
+    f32 const rxiBL {clamp_rad(iBL, halfw)};
+    f32 const ryiBL {clamp_rad(iBL, halfh)};
+
     // full border
     if (hasTop && hasRight && hasBottom && hasLeft) {
-        f32 const iTL {std::max(0.f, radTL - std::max(top, left))};    // NOLINT(readability-suspicious-call-argument)
-        f32 const iTR {std::max(0.f, radTR - std::max(top, right))};
-        f32 const iBR {std::max(0.f, radBR - std::max(bottom, right))};
-        f32 const iBL {std::max(0.f, radBL - std::max(bottom, left))}; // NOLINT(readability-suspicious-call-argument)
-
-        rect_f const inner {outer.left() + left, outer.top() + top,
-                            outer.width() - left - right, outer.height() - top - bottom};
-
-        auto const [ix, iy] {inner.Position};
-        auto const [iw, ih] {inner.Size};
-
-        f32 const halfw {std::abs(iw) * 0.5f};
-        f32 const halfh {std::abs(ih) * 0.5f};
-
-        f32 const rxoTL {clamp_rad(radTL, std::abs(ow) * 0.5f)};
-        f32 const ryoTL {clamp_rad(radTL, std::abs(oh) * 0.5f)};
-
-        f32 const rxoTR {clamp_rad(radTR, std::abs(ow) * 0.5f)};
-        f32 const ryoTR {clamp_rad(radTR, std::abs(oh) * 0.5f)};
-
-        f32 const rxoBR {clamp_rad(radBR, std::abs(ow) * 0.5f)};
-        f32 const ryoBR {clamp_rad(radBR, std::abs(oh) * 0.5f)};
-
-        f32 const rxoBL {clamp_rad(radBL, std::abs(ow) * 0.5f)};
-        f32 const ryoBL {clamp_rad(radBL, std::abs(oh) * 0.5f)};
-
-        f32 const rxiTL {clamp_rad(iTL, halfw)};
-        f32 const ryiTL {clamp_rad(iTL, halfh)};
-
-        f32 const rxiTR {clamp_rad(iTR, halfw)};
-        f32 const ryiTR {clamp_rad(iTR, halfh)};
-
-        f32 const rxiBR {clamp_rad(iBR, halfw)};
-        f32 const ryiBR {clamp_rad(iBR, halfh)};
-
-        f32 const rxiBL {clamp_rad(iBL, halfw)};
-        f32 const ryiBL {clamp_rad(iBL, halfh)};
-
         _cache->append_commands(
             std::vector<f32> {
                 MoveTo, ox, oy + ryoTL,
@@ -384,86 +378,130 @@ void canvas::border_rect(rect_f const& outer,
     std::vector<f32> cmds;
     cmds.reserve(128);
 
-    if (hasTop) {
-        f32 const rTL {clamp_rad(radTL, top)};
-        f32 const rTR {clamp_rad(radTR, top)};
+    std::array<i32, 4>  ccwOrder {3, 2, 1, 0}; // Left, Bottom, Right, Top
+    std::array<bool, 4> has {hasTop, hasRight, hasBottom, hasLeft};
 
-        cmds.insert(cmds.end(),
-                    {MoveTo, ox + rTL, oy,
+    std::array<i32, 4> chainStarts {};
+    i32                numChains {0};
 
-                     LineTo, ox + ow - rTR, oy,
-
-                     BezierTo, ox + ow - (rTR * (1 - KAPPA90)), oy, ox + ow, oy + (rTR * (1 - KAPPA90)), ox + ow, oy + rTR,
-
-                     LineTo, ox + ow, oy + top,
-
-                     LineTo, ox, oy + top,
-
-                     LineTo, ox, oy + rTL,
-
-                     BezierTo, ox, oy + (rTL * (1 - KAPPA90)), ox + (rTL * (1 - KAPPA90)), oy, ox + rTL, oy,
-
-                     Close});
+    for (i32 i {0}; i < 4; ++i) {
+        i32 const curr {ccwOrder[i]};
+        i32 const prev {ccwOrder[(i + 3) % 4]};
+        if (has[curr] && !has[prev]) {
+            chainStarts[numChains++] = i;
+        }
     }
 
-    if (hasRight) {
-        f32 const rTR {clamp_rad(radTR, right)};
-        f32 const rBR {clamp_rad(radBR, right)};
+    auto const draw_out_corner {[&](i32 c) {
+        switch (c) {
+        case 3: cmds.insert(cmds.end(), {BezierTo, ox + (rxoTL * (1 - KAPPA90)), oy, ox, oy + (ryoTL * (1 - KAPPA90)), ox, oy + ryoTL}); break;
+        case 2: cmds.insert(cmds.end(), {BezierTo, ox, oy + oh - (ryoBL * (1 - KAPPA90)), ox + (rxoBL * (1 - KAPPA90)), oy + oh, ox + rxoBL, oy + oh}); break;
+        case 1: cmds.insert(cmds.end(), {BezierTo, ox + ow - (rxoBR * (1 - KAPPA90)), oy + oh, ox + ow, oy + oh - (ryoBR * (1 - KAPPA90)), ox + ow, oy + oh - ryoBR}); break;
+        case 0: cmds.insert(cmds.end(), {BezierTo, ox + ow, oy + (ryoTR * (1 - KAPPA90)), ox + ow - (rxoTR * (1 - KAPPA90)), oy, ox + ow - rxoTR, oy}); break;
+        }
+    }};
 
-        cmds.insert(cmds.end(),
-                    {MoveTo, ox + ow, oy + rTR,
+    auto const draw_out_side {[&](i32 s) {
+        switch (s) {
+        case 3: cmds.insert(cmds.end(), {LineTo, ox, oy + oh - ryoBL}); break;
+        case 2: cmds.insert(cmds.end(), {LineTo, ox + ow - rxoBR, oy + oh}); break;
+        case 1: cmds.insert(cmds.end(), {LineTo, ox + ow, oy + ryoTR}); break;
+        case 0: cmds.insert(cmds.end(), {LineTo, ox + rxoTL, oy}); break;
+        }
+    }};
 
-                     BezierTo, ox + ow, oy + (rTR * (1 - KAPPA90)), ox + ow - (rTR * (1 - KAPPA90)), oy, ox + ow - rTR, oy,
+    auto const draw_in_side {[&](i32 s) {
+        switch (s) {
+        case 0: cmds.insert(cmds.end(), {LineTo, ix + iw - rxiTR, iy}); break;
+        case 1: cmds.insert(cmds.end(), {LineTo, ix + iw, iy + ih - ryiBR}); break;
+        case 2: cmds.insert(cmds.end(), {LineTo, ix + rxiBL, iy + ih}); break;
+        case 3: cmds.insert(cmds.end(), {LineTo, ix, iy + ryiTL}); break;
+        }
+    }};
 
-                     LineTo, ox + ow - right, oy,
+    auto const draw_in_corner {[&](i32 c) {
+        switch (c) {
+        case 0: cmds.insert(cmds.end(), {BezierTo, ix + iw - (rxiTR * (1 - KAPPA90)), iy, ix + iw, iy + (ryiTR * (1 - KAPPA90)), ix + iw, iy + ryiTR}); break;
+        case 1: cmds.insert(cmds.end(), {BezierTo, ix + iw, iy + ih - (ryiBR * (1 - KAPPA90)), ix + iw - (rxiBR * (1 - KAPPA90)), iy + ih, ix + iw - rxiBR, iy + ih}); break;
+        case 2: cmds.insert(cmds.end(), {BezierTo, ix + (rxiBL * (1 - KAPPA90)), iy + ih, ix, iy + ih - (ryiBL * (1 - KAPPA90)), ix, iy + ih - ryiBL}); break;
+        case 3: cmds.insert(cmds.end(), {BezierTo, ix, iy + (ryiTL * (1 - KAPPA90)), ix + (rxiTL * (1 - KAPPA90)), iy, ix + rxiTL, iy}); break;
+        }
+    }};
 
-                     LineTo, ox + ow - right, oy + oh,
+    for (i32 c {0}; c < numChains; ++c) {
+        i32 const          startIdx {chainStarts[c]};
+        std::array<i32, 4> ccwChain {};
+        i32                chainLen {0};
 
-                     LineTo, ox + ow - rBR, oy + oh,
+        for (i32 k {0}; k < 4; ++k) {
+            i32 side {ccwOrder[(startIdx + k) % 4]};
+            if (!has[side]) { break; }
+            ccwChain[chainLen++] = side;
+        }
 
-                     BezierTo, ox + ow - (rBR * (1 - KAPPA90)), oy + oh, ox + ow, oy + oh - (rBR * (1 - KAPPA90)), ox + ow, oy + oh - rBR,
+        // Outer Path
+        i32 const firstOutCorner {ccwChain[0]};
+        f32       sx {0}, sy {0};
+        switch (firstOutCorner) {
+        case 3:
+            sx = ox + rxoTL;
+            sy = oy;
+            break;
+        case 2:
+            sx = ox;
+            sy = oy + oh - ryoBL;
+            break;
+        case 1:
+            sx = ox + ow - rxoBR;
+            sy = oy + oh;
+            break;
+        case 0:
+            sx = ox + ow;
+            sy = oy + ryoTR;
+            break;
+        }
+        cmds.insert(cmds.end(), {MoveTo, sx, sy});
+        draw_out_corner(firstOutCorner);
 
-                     Close});
-    }
+        for (i32 i {0}; i < chainLen; ++i) {
+            i32 side {ccwChain[i]};
+            draw_out_side(side);
+            draw_out_corner((side + 3) % 4);
+        }
 
-    if (hasBottom) {
-        f32 const rBL {clamp_rad(radBL, bottom)};
-        f32 const rBR {clamp_rad(radBR, bottom)};
+        // Inner Path (Cap directly to inner starting point and trace backward)
+        i32 const lastSide {ccwChain[chainLen - 1]};
+        i32 const lastCorner {(lastSide + 3) % 4};
+        f32       capX {0}, capY {0};
+        switch (lastCorner) {
+        case 0:
+            capX = ix + iw - rxiTR;
+            capY = iy;
+            break;
+        case 1:
+            capX = ix + iw;
+            capY = iy + ih - ryiBR;
+            break;
+        case 2:
+            capX = ix + rxiBL;
+            capY = iy + ih;
+            break;
+        case 3:
+            capX = ix;
+            capY = iy + ryiTL;
+            break;
+        }
+        cmds.insert(cmds.end(), {LineTo, capX, capY});
 
-        cmds.insert(cmds.end(),
-                    {MoveTo, ox + ow - rBR, oy + oh,
-
-                     BezierTo, ox + ow - (rBR * (1 - KAPPA90)), oy + oh, ox + ow, oy + oh - (rBR * (1 - KAPPA90)), ox + ow, oy + oh - rBR,
-
-                     LineTo, ox + ow, oy + oh - bottom,
-
-                     LineTo, ox, oy + oh - bottom,
-
-                     LineTo, ox, oy + oh - rBL,
-
-                     BezierTo, ox, oy + oh - (rBL * (1 - KAPPA90)), ox + (rBL * (1 - KAPPA90)), oy + oh, ox + rBL, oy + oh,
-
-                     Close});
-    }
-
-    if (hasLeft) {
-        f32 const rTL {clamp_rad(radTL, left)};
-        f32 const rBL {clamp_rad(radBL, left)};
-
-        cmds.insert(cmds.end(),
-                    {MoveTo, ox, oy + rTL,
-
-                     BezierTo, ox, oy + (rTL * (1 - KAPPA90)), ox + (rTL * (1 - KAPPA90)), oy, ox + rTL, oy,
-
-                     LineTo, ox + left, oy,
-
-                     LineTo, ox + left, oy + oh,
-
-                     LineTo, ox + rBL, oy + oh,
-
-                     BezierTo, ox + (rBL * (1 - KAPPA90)), oy + oh, ox, oy + oh - (rBL * (1 - KAPPA90)), ox, oy + oh - rBL,
-
-                     Close});
+        for (i32 i {chainLen - 1}; i >= 0; --i) {
+            i32 const s {ccwChain[i]};
+            if (i == chainLen - 1) {
+                draw_in_corner((s + 3) % 4);
+            }
+            draw_in_side(s);
+            draw_in_corner(s);
+        }
+        cmds.push_back(Close);
     }
 
     _cache->append_commands(cmds, _states->get().XForm);
