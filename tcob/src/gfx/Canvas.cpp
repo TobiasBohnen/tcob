@@ -378,15 +378,15 @@ void canvas::border_rect(rect_f const& outer,
     std::vector<f32> cmds;
     cmds.reserve(128);
 
-    std::array<i32, 4>  ccwOrder {3, 2, 1, 0}; // Left, Bottom, Right, Top
-    std::array<bool, 4> has {hasTop, hasRight, hasBottom, hasLeft};
+    static std::array<i32, 4> const CCW_ORDER {3, 2, 1, 0}; // Left, Bottom, Right, Top
+    std::array<bool, 4> const       has {hasTop, hasRight, hasBottom, hasLeft};
 
     std::array<i32, 4> chainStarts {};
     i32                numChains {0};
 
     for (i32 i {0}; i < 4; ++i) {
-        i32 const curr {ccwOrder[i]};
-        i32 const prev {ccwOrder[(i + 3) % 4]};
+        i32 const curr {CCW_ORDER[i]};
+        i32 const prev {CCW_ORDER[(i + 3) % 4]};
         if (has[curr] && !has[prev]) {
             chainStarts[numChains++] = i;
         }
@@ -434,7 +434,7 @@ void canvas::border_rect(rect_f const& outer,
         i32                chainLen {0};
 
         for (i32 k {0}; k < 4; ++k) {
-            i32 side {ccwOrder[(startIdx + k) % 4]};
+            i32 side {CCW_ORDER[(startIdx + k) % 4]};
             if (!has[side]) { break; }
             ccwChain[chainLen++] = side;
         }
