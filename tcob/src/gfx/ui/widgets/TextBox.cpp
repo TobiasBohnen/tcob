@@ -169,7 +169,7 @@ auto text_box::attributes() const -> widget_attributes
     retValue["text"]          = *Text;
     retValue["selected_text"] = selected_text();
     retValue["max_length"]    = *MaxLength;
-    retValue["selectedable"]  = *Selectable;
+    retValue["selectable"]    = *Selectable;
 
     return retValue;
 }
