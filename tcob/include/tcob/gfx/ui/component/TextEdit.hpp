@@ -24,8 +24,6 @@ namespace tcob::ui {
 
 class TCOB_API text_edit {
 public:
-    signal<> TextChanged;
-    signal<> Submitted;
     signal<> Invalidated;
 
     void update(milliseconds deltaTime);

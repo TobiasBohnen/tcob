@@ -38,9 +38,6 @@ text_box::text_box(init const& wi)
                          [](text_box& w, string const& value) { w._edit.set_text(value); }>(this)}
 {
     _edit.Invalidated.connect([this] { queue_redraw(); });
-    _edit.TextChanged.connect([this] {
-        queue_redraw();
-    });
 
     MaxLength.Changed.connect([this](auto const& val) {
         if (_edit.text_length() > val) {
@@ -109,7 +106,6 @@ void text_box::on_key_up(input::keyboard::event const& ev)
 
 void text_box::on_text_input(input::keyboard::text_input_event const& ev)
 {
-    // TODO: active text input on focus
     insert_text(ev.Text);
     ev.Handled = true;
 }

@@ -334,7 +334,6 @@ auto text_edit::calc_caret_pos(point_f mp) const -> isize
 
 void text_edit::mark_dirty()
 {
-    TextChanged();
     Invalidated();
     _needsFormat = true;
 }

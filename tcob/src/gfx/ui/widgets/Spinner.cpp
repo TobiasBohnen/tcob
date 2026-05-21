@@ -40,9 +40,6 @@ spinner::spinner(init const& wi)
     , Value {{[this](f32 val) -> f32 { return std::clamp(val, *Min, *Max); }}}
 {
     _edit.Invalidated.connect([this] { queue_redraw(); });
-    _edit.TextChanged.connect([this] {
-        queue_redraw();
-    });
 
     Min.Changed.connect([this](f32 val) {
         Value = std::max(val, *Value);
