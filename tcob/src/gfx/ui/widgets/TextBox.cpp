@@ -11,7 +11,6 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
-#include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
@@ -40,7 +39,6 @@ text_box::text_box(init const& wi)
 {
     _edit.Invalidated.connect([this] { queue_redraw(); });
     _edit.TextChanged.connect([this] {
-        _needsFormat = true;
         queue_redraw();
     });
 
@@ -71,15 +69,7 @@ void text_box::on_draw(widget_painter& painter)
     rect_f const         rect {draw_base(_style, painter)};
     scoped_scissor const guard {painter, this};
 
-    if (!_style.Text.Font) {
-        _formatResult = {};
-        return;
-    }
-    if (_needsFormat) {
-        _formatResult = painter.format_text(_style.Text, rect.Size, *Text);
-        _needsFormat  = false;
-    }
-    _edit.draw(painter, rect, _formatResult, _style.Text, _style.Caret);
+    _edit.draw(painter, rect, _style.Text, _style.Caret);
 }
 
 void text_box::on_update(milliseconds deltaTime)
@@ -127,8 +117,7 @@ void text_box::on_text_input(input::keyboard::text_input_event const& ev)
 void text_box::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     if (Selectable) {
-        isize const target {calc_caret_pos(screen_to_content(*this, ev.Position))};
-        _edit.drag_select(target);
+        _edit.mouse_drag(screen_to_content(*this, ev.Position));
         queue_redraw();
         ev.Handled = true;
     }
@@ -138,8 +127,7 @@ void text_box::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (ev.Button != controls().PrimaryMouseButton) { return; }
 
-    isize const target {calc_caret_pos(screen_to_content(*this, ev.Position))};
-    _edit.mouse_button_down(target);
+    _edit.mouse_button_down(screen_to_content(*this, ev.Position));
     ev.Handled = true;
 }
 
@@ -182,31 +170,6 @@ void text_box::insert_text(utf8_string const& newText)
     if (newTextLength > 0 && _edit.text_length() + newTextLength <= MaxLength) {
         _edit.insert_text(ev.Text);
     }
-}
-
-void text_box::on_styles_changed()
-{
-    widget::on_styles_changed();
-    _needsFormat = true;
-}
-
-auto text_box::calc_caret_pos(point_f mp) const -> isize
-{
-    if (_formatResult.QuadCount == 0) { return 0; }
-
-    // before first
-    auto const& firstRect {_formatResult.get_quad(0)->Rect};
-    if (mp.X <= firstRect.center().X) { return 0; }
-    // after last
-    auto const& lastRect {_formatResult.get_quad(_formatResult.QuadCount - 1)->Rect};
-    if (mp.X >= lastRect.center().X) { return _edit.text_length(); }
-
-    // center check
-    for (isize i {0}; i < _formatResult.QuadCount; ++i) {
-        auto const rect {_formatResult.get_quad(i)->Rect};
-        if (mp.X < rect.center().X) { return i; }
-    }
-    return _edit.text_length();
 }
 
 }

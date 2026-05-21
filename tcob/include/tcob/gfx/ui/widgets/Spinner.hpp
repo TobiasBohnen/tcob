@@ -12,7 +12,6 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Stopwatch.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/component/StyleElements.hpp"
@@ -73,10 +72,8 @@ private:
         Decrease
     };
 
-    text_edit                   _edit;
-    gfx::text_formatter::result _formatResult;
-    bool                        _needsFormat {false};
-    bool                        _editing {false};
+    text_edit _edit;
+    bool      _editing {false};
 
     arrow                     _hoverArrow {arrow::None};
     bool                      _mouseDown {false};

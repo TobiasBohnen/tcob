@@ -60,9 +60,19 @@ void text_edit::update(milliseconds deltaTime)
     if (_caretTween) { _caretTween->update(deltaTime); }
 }
 
-void text_edit::draw(widget_painter& painter, rect_f const& rect, gfx::text_formatter::result const& formatResult, text_element const& text, caret_element const& caret)
+void text_edit::draw(widget_painter& painter, rect_f const& rect, text_element const& text, caret_element const& caret)
 {
-    if (_selectedText.first >= formatResult.QuadCount || _selectedText.second >= formatResult.QuadCount) {
+    if (!text.Font) {
+        _formatResult = {};
+        return;
+    }
+
+    if (_needsFormat) {
+        _formatResult = painter.format_text(text, rect.Size, _text);
+        _needsFormat  = false;
+    }
+
+    if (_selectedText.first >= _formatResult.QuadCount || _selectedText.second >= _formatResult.QuadCount) {
         deselect_text();
     }
 
@@ -72,10 +82,10 @@ void text_edit::draw(widget_painter& painter, rect_f const& rect, gfx::text_form
             canvas.set_fill_style(text.SelectColor);
             canvas.begin_path();
 
-            auto const first {formatResult.get_quad(_selectedText.first).value_or(gfx::text_formatter::quad_definition {})};
+            auto const first {_formatResult.get_quad(_selectedText.first).value_or(gfx::text_formatter::quad_definition {})};
 
             size_f size {};
-            size.Width  = formatResult.get_quad(_selectedText.second).value_or(gfx::text_formatter::quad_definition {}).Rect.right() - first.Rect.left();
+            size.Width  = _formatResult.get_quad(_selectedText.second).value_or(gfx::text_formatter::quad_definition {}).Rect.right() - first.Rect.left();
             size.Height = rect.height() * 0.9f;
             point_f pos {};
             pos.X = first.Rect.left();
@@ -85,15 +95,15 @@ void text_edit::draw(widget_painter& painter, rect_f const& rect, gfx::text_form
             canvas.fill();
         }
 
-        painter.draw_text(text, rect, formatResult);
+        painter.draw_text(text, rect, _formatResult);
     }
 
     if (_caretVisible) {
         f32 offset {0.0f};
-        if (!formatResult.Tokens.empty()) {
+        if (!_formatResult.Tokens.empty()) {
             isize const cp {_caretPos};
-            offset = cp == 0 ? formatResult.get_quad(cp).value_or(gfx::text_formatter::quad_definition {}).Rect.left()
-                             : formatResult.get_quad(cp - 1).value_or(gfx::text_formatter::quad_definition {}).Rect.right();
+            offset = cp == 0 ? _formatResult.get_quad(cp).value_or(gfx::text_formatter::quad_definition {}).Rect.left()
+                             : _formatResult.get_quad(cp - 1).value_or(gfx::text_formatter::quad_definition {}).Rect.right();
         }
         painter.draw_caret(caret, rect, {offset, 0});
     }
@@ -105,8 +115,7 @@ void text_edit::insert_text(utf8_string const& ch)
     _text = utf8::insert(_text, ch, _caretPos);
     _textLength += utf8::length(ch);
     _caretPos += utf8::length(ch);
-    TextChanged();
-    Invalidated();
+    mark_dirty();
 }
 
 void text_edit::delete_backward()
@@ -115,8 +124,7 @@ void text_edit::delete_backward()
         --_caretPos;
         _text = utf8::remove(_text, _caretPos);
         --_textLength;
-        TextChanged();
-        Invalidated();
+        mark_dirty();
     }
 }
 
@@ -125,8 +133,7 @@ void text_edit::delete_forward()
     if (_textLength > 0 && _caretPos < _textLength) {
         _text = utf8::remove(_text, _caretPos);
         --_textLength;
-        TextChanged();
-        Invalidated();
+        mark_dirty();
     }
 }
 
@@ -167,8 +174,7 @@ void text_edit::set_text(utf8_string const& t)
     _text       = t;
     _textLength = utf8::length(t);
     _caretPos   = std::min(_caretPos, _textLength);
-    TextChanged();
-    Invalidated();
+    mark_dirty();
 }
 
 void text_edit::select_text(isize first, isize last)
@@ -225,7 +231,7 @@ void text_edit::key_down(widget const& widget, input::key_mods keyMods, input::k
             deselect_text();
         }
     } else if (controls.NavRightKeys.contains(keyCode)) {
-        if (_caretPos < text_length()) {
+        if (_caretPos < _textLength) {
             isize const refPos {_caretPos};
             if (keyMods.is_down(controls.SelectMod) && selectable) {
                 if (!is_text_selected()) {
@@ -261,8 +267,9 @@ void text_edit::key_up()
     resume_blinking();
 }
 
-void text_edit::drag_select(isize targetCaretPos)
+void text_edit::mouse_drag(point_f mp)
 {
+    auto const targetCaretPos {calc_caret_pos(mp)};
     if (_caretPos != targetCaretPos) {
         if (targetCaretPos < _dragCaretPos) {
             select_text(_dragCaretPos - 1, targetCaretPos);
@@ -277,8 +284,9 @@ void text_edit::drag_select(isize targetCaretPos)
     }
 }
 
-void text_edit::mouse_button_down(isize targetCaretPos)
+void text_edit::mouse_button_down(point_f mp)
 {
+    auto const targetCaretPos {calc_caret_pos(mp)};
     if (_caretPos != targetCaretPos) {
         deselect_text();
         while (_caretPos < targetCaretPos) { move_caret_right(); }
@@ -303,6 +311,32 @@ auto text_edit::remove_selected_text() -> bool
     }
 
     return false;
+}
+
+auto text_edit::calc_caret_pos(point_f mp) const -> isize
+{
+    if (_formatResult.QuadCount == 0) { return 0; }
+
+    // before first
+    auto const& firstRect {_formatResult.get_quad(0)->Rect};
+    if (mp.X <= firstRect.center().X) { return 0; }
+    // after last
+    auto const& lastRect {_formatResult.get_quad(_formatResult.QuadCount - 1)->Rect};
+    if (mp.X >= lastRect.center().X) { return _textLength; }
+
+    // center check
+    for (isize i {0}; i < _formatResult.QuadCount; ++i) {
+        auto const rect {_formatResult.get_quad(i)->Rect};
+        if (mp.X < rect.center().X) { return i; }
+    }
+    return _textLength;
+}
+
+void text_edit::mark_dirty()
+{
+    TextChanged();
+    Invalidated();
+    _needsFormat = true;
 }
 
 }

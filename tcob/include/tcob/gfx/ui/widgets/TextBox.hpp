@@ -6,11 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/UIEvents.hpp"
@@ -61,17 +59,10 @@ protected:
 
     auto attributes() const -> widget_attributes override;
 
-    void on_styles_changed() override;
-
 private:
     void insert_text(utf8_string const& newText);
 
-    auto calc_caret_pos(point_f mp) const -> isize;
-
     text_edit _edit;
-
-    gfx::text_formatter::result _formatResult;
-    bool                        _needsFormat {false};
 
     text_box::style _style;
 };

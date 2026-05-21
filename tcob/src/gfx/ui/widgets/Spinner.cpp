@@ -41,7 +41,6 @@ spinner::spinner(init const& wi)
 {
     _edit.Invalidated.connect([this] { queue_redraw(); });
     _edit.TextChanged.connect([this] {
-        _needsFormat = true;
         queue_redraw();
     });
 
@@ -72,7 +71,6 @@ void spinner::sync_edit()
 {
     _edit.set_text(std::format("{:.{}f}", *Value, *Precision));
     if (_edit.text_length() > 0) { _edit.select_text(0, _edit.text_length() - 1); }
-    _needsFormat = true;
 }
 
 void spinner::commit_edit()
@@ -106,11 +104,7 @@ void spinner::on_draw(widget_painter& painter)
     if (_style.Text.Font) {
         rect_f const textRect {rect.left(), rect.top(), rect.width() - _rectCache.first.width(), rect.height()};
         if (_editing) {
-            if (_needsFormat) {
-                _formatResult = painter.format_text(_style.Text, textRect.Size, _edit.get_text());
-                _needsFormat  = false;
-            }
-            _edit.draw(painter, textRect, _formatResult, _style.Text, _style.Caret);
+            _edit.draw(painter, textRect, _style.Text, _style.Caret);
         } else {
             string const text {std::format("{:.{}f}", *Value, *Precision)};
             painter.draw_text(_style.Text, textRect, text);
