@@ -147,6 +147,8 @@ private:
     std::vector<std::byte> _uniforms;
     usize                  _nuniforms {0};
 
-    gl_texture _gradientTexture;
+    gl_texture           _gradientTexture;
+    std::vector<GLint>   _scratchFirsts;
+    std::vector<GLsizei> _scratchCounts;
 };
 }
