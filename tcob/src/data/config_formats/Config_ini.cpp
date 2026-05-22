@@ -202,7 +202,7 @@ auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, 
     auto const keyStr {helper::trim(line.substr(0, separatorPos))};
     auto const valueStr {helper::trim(line.substr(separatorPos + 1))};
 
-    if (keyStr.empty() || valueStr.empty()) { return false; }                                      //  ERROR: empty key or value
+    if (keyStr.empty()) { return false; }                                                          //  ERROR: empty key or value
     auto const keyStrSize {keyStr.size()};
     if (keyStr[0] == _settings.Path || keyStr[keyStrSize - 1] == _settings.Path) { return false; } //  ERROR: dot at start or end of key
 
@@ -231,7 +231,7 @@ auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, 
     }
 
     // read value string
-    if (valueStr[0] == _settings.Reference && valueStr.size() > 1) {
+    if (valueStr.size() > 1 && valueStr[0] == _settings.Reference) {
         if (!read_ref(currentEntry, valueStr.substr(1))) {
             return false; // invalid ref
         }
@@ -247,7 +247,12 @@ auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, 
 
 auto ini_reader::read_entry(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (line.empty()) { return false; }
+    // null
+    if (line.empty()) {
+        currentEntry.set_value(std::monostate {});
+        return true;
+    }
+
     return read_inline_array(currentEntry, line)
         || read_inline_section(currentEntry, line)
         || read_scalar(currentEntry, line);
@@ -482,8 +487,6 @@ auto ini_writer::write_section(io::ostream& stream, object const& obj, utf8_stri
 
     std::unordered_map<utf8_string, object> objects;
     for (auto const& [k, v] : obj) {
-        if (v.is<std::monostate>()) { continue; }
-
         auto const& comment {v.get_comment()};
         for (auto const& c : helper::split(comment.Text, '\n')) {
             stream << ";" << c << "\n";
@@ -531,8 +534,6 @@ auto ini_writer::write_inline_section(io::ostream& stream, object const& obj, us
     stream << "{ ";
     bool first {true};
     for (auto const& [k, v] : obj) {
-        if (v.is<std::monostate>()) { continue; }
-
         if (!first) { stream << ", "; }
         first = false;
 
