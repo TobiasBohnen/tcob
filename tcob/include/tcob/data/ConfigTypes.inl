@@ -561,7 +561,7 @@ inline auto operator==(object const& left, object const& right) -> bool
         return false;
     }
 
-    return std::all_of(left.begin(), left.end(), [&right](auto const& entry) {
+    return std::ranges::all_of(left, [&right](auto const& entry) {
         auto const* val {right.get_entry(entry.first)};
         return val && *val == entry.second;
     });

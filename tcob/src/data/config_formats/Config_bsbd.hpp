@@ -36,6 +36,7 @@ namespace bsbd {
         BoolFalse    = 0x0F,
         ShortString  = 0x10,
         LongString   = 0x11,
+        Null         = 0x12,
         LitInt       = 0x14
     };
 }

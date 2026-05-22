@@ -14,6 +14,7 @@
 #include <limits>
 #include <map>
 #include <optional>
+#include <variant>
 
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigConversions.hpp"
@@ -33,7 +34,7 @@ auto bsbd_reader::read_as_object(io::istream& stream) -> std::optional<object>
     stream.read_to<u8>(buf);
     if (MAGIC != buf) { return std::nullopt; }
 
-    read_string_pool(stream);
+    if (!read_string_pool(stream)) { return std::nullopt; }
 
     auto const type {stream.read<bsbd::marker_type>()};
     if (type != bsbd::marker_type::SectionStart) { return std::nullopt; }
@@ -50,7 +51,7 @@ auto bsbd_reader::read_as_array(io::istream& stream) -> std::optional<array>
     stream.read_to<u8>(buf);
     if (MAGIC != buf) { return std::nullopt; }
 
-    read_string_pool(stream);
+    if (!read_string_pool(stream)) { return std::nullopt; }
 
     auto const type {stream.read<bsbd::marker_type>()};
     if (type != bsbd::marker_type::ArrayStart) { return std::nullopt; }
@@ -107,6 +108,7 @@ auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type
     case bsbd::marker_type::Float64:      entry = stream.read<f64, std::endian::little>(); break;
     case bsbd::marker_type::BoolTrue:     entry = true; break;
     case bsbd::marker_type::BoolFalse:    entry = false; break;
+    case bsbd::marker_type::Null:         entry = std::monostate {}; break;
 
     case bsbd::marker_type::LongString:   entry = stream.read_string(stream.read<long_string_size_t, std::endian::little>()); break;
     case bsbd::marker_type::ShortString:  entry = stream.read_string(stream.read<short_string_size_t, std::endian::little>()); break;
@@ -170,6 +172,7 @@ auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, 
     case bsbd::marker_type::Float64:      entry = stream.read<f64, std::endian::little>(); break;
     case bsbd::marker_type::BoolTrue:     entry = true; break;
     case bsbd::marker_type::BoolFalse:    entry = false; break;
+    case bsbd::marker_type::Null:         entry = std::monostate {}; break;
 
     case bsbd::marker_type::LongString:   entry = stream.read_string(stream.read<long_string_size_t, std::endian::little>()); break;
     case bsbd::marker_type::ShortString:  entry = stream.read_string(stream.read<short_string_size_t, std::endian::little>()); break;
@@ -294,6 +297,8 @@ void bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
 {
     if (ent.is<bool>()) {
         write_key(stream, ent.as<bool>() ? bsbd::marker_type::BoolTrue : bsbd::marker_type::BoolFalse, name);
+    } else if (ent.is<std::monostate>()) {
+        write_key(stream, bsbd::marker_type::Null, name);
     } else if (ent.is<i64>()) {
         i64 const  val {ent.as<i64>()};
         auto const type {FitInt(val)};
