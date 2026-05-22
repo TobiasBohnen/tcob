@@ -54,7 +54,7 @@ inline auto manual_layout::create_widget(rect_f const& rect, string const& name)
 ////////////////////////////////////////////////////////////
 
 template <DerivedFrom<widget> T>
-inline auto flex_size_layout::create_widget(point_f pos, string const& name) -> T&
+inline auto auto_size_layout::create_widget(point_f pos, string const& name) -> T&
 {
     auto& retValue {add_widget<T>(name)};
     retValue.Bounds = {pos, size_f::Zero};

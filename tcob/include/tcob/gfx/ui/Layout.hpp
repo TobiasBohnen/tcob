@@ -96,10 +96,10 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-// flex_size_layout: Dynamically adjusts each widget's size using its flex values.
-class TCOB_API flex_size_layout : public layout {
+// auto_size_layout: Dynamically adjusts each widget's size using its relative size values.
+class TCOB_API auto_size_layout : public layout {
 public:
-    explicit flex_size_layout(parent parent);
+    explicit auto_size_layout(parent parent);
 
     template <DerivedFrom<widget> T>
     auto create_widget(point_f pos, string const& name) -> T&;

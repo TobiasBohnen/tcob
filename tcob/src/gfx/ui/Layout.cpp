@@ -143,17 +143,17 @@ void manual_layout::do_layout(size_f /* size */)
 
 ////////////////////////////////////////////////////////////
 
-flex_size_layout::flex_size_layout(parent parent)
+auto_size_layout::auto_size_layout(parent parent)
     : layout {parent}
 {
 }
 
-auto flex_size_layout::allows_move() const -> bool
+auto auto_size_layout::allows_move() const -> bool
 {
     return true;
 }
 
-void flex_size_layout::do_layout(size_f size)
+void auto_size_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
 
