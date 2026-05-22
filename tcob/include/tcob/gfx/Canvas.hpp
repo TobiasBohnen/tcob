@@ -84,6 +84,7 @@ enum class composite_operation : u8 {
 };
 
 ////////////////////////////////////////////////////////////
+
 using paint_gradient = std::pair<f32, i32>;
 using paint_color    = std::variant<color, paint_gradient>;
 
@@ -114,7 +115,7 @@ public:
     };
 
     struct path {
-        i32     First {0};
+        usize   First {0};
         usize   Count {0};
         usize   BevelCount {0};
         vertex* Fill {nullptr};

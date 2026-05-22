@@ -60,11 +60,6 @@ void states::reset()
 
 ////////////////////////////////////////////////////////////
 
-static auto Hypot(f32 x, f32 y) -> f32
-{
-    return std::sqrt((x * x) + (y * y));
-}
-
 static void SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v)
 {
     vtx->Position.X = x;
@@ -319,32 +314,34 @@ static auto DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 tot
     return true;
 }
 
-static auto DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std::span<f32 const> dashPattern, f32 dashOffset) -> std::vector<std::vector<canvas_point>>
+struct dash_segment {
+    usize Offset;
+    usize Count;
+};
+
+static auto DashPolyline(
+    std::span<canvas_point const> pts,
+    std::span<f32 const>          accumLengths,
+    f32                           totalLength,
+    std::span<f32 const>          dashPattern,
+    f32                           dashOffset,
+    std::vector<canvas_point>&    outPoints,
+    std::vector<dash_segment>&    outSegments) -> void
 {
-    // Precompute cumulative distances along the polyline.
-    std::vector<f32> accumLengths {};
-    accumLengths.reserve(pts.size());
-    accumLengths.push_back(0.0f);
+    f32 const period {std::accumulate(dashPattern.begin(), dashPattern.end(), 0.0f)};
 
-    for (usize i {1}; i < pts.size(); ++i) {
-        f32 const segLen {Hypot(pts[i].X - pts[i - 1].X, pts[i].Y - pts[i - 1].Y)};
-        accumLengths.push_back(accumLengths.back() + segLen);
-    }
+    f32 effectiveOffset {std::fmod(dashOffset, period)};
+    if (effectiveOffset < 0.0f) { effectiveOffset += period; }
 
-    usize      left {0};
-    auto const func {[&](f32 d) -> canvas_point {
+    auto const interpolate {[&](f32 d) -> canvas_point {
         if (d <= accumLengths.front()) { return pts.front(); }
         if (d >= accumLengths.back()) { return pts.back(); }
 
-        if (accumLengths.size() == 2) {
-            f32 const d0 {accumLengths[0]};
-            f32 const d1 {accumLengths[1]};
-            f32 const ratio {(d - d0) / (d1 - d0)};
-            return {.X = pts[0].X + (ratio * (pts[1].X - pts[0].X)),
-                    .Y = pts[0].Y + (ratio * (pts[1].Y - pts[0].Y))};
-        }
-
-        while (left + 1 < accumLengths.size() && accumLengths[left + 1] <= d) { ++left; }
+        auto it {std::ranges::lower_bound(accumLengths, d)};
+        if (it == accumLengths.end()) { --it; }
+        // step back if we overshot so [left, right] straddles d
+        if (*it > d && it != accumLengths.begin()) { --it; }
+        usize const left {static_cast<usize>(std::distance(accumLengths.begin(), it))};
         usize const right {left + 1};
 
         f32 const d0 {accumLengths[left]};
@@ -354,22 +351,10 @@ static auto DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
                 .Y = pts[left].Y + (ratio * (pts[right].Y - pts[left].Y))};
     }};
 
-    // Compute total dash pattern period.
-    f32 const period {std::accumulate(dashPattern.begin(), dashPattern.end(), 0.0f)};
-
-    // Compute effective dash offset.
-    f32 effectiveOffset {std::fmod(dashOffset, period)};
-    if (effectiveOffset < 0.0f) { effectiveOffset += period; }
-
-    // Start at a negative distance so that our first segment starts at the effective offset.
     f32   currentDistance {-effectiveOffset};
     bool  drawing {true};
     usize dashIndex {0};
 
-    std::vector<std::vector<canvas_point>> dashedPaths {};
-    dashedPaths.reserve(16);
-
-    usize polyIdx {1};
     while (currentDistance < totalLength) {
         f32 const segDash {dashPattern[dashIndex++ % dashPattern.size()]};
         f32 const nextDistance {std::min(totalLength, currentDistance + segDash)};
@@ -380,41 +365,30 @@ static auto DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
             f32 const drawEnd {nextDistance};
 
             if (drawEnd > drawStart) {
-                std::vector<canvas_point>& dashSegment {dashedPaths.emplace_back()};
-                dashSegment.reserve(16);
-
+                usize const segOffset {outPoints.size()};
                 // Insert the starting point.
-                dashSegment.push_back(func(drawStart));
+                outPoints.push_back(interpolate(drawStart));
 
-                // Advance polyIdx: skip any points before the segment.
-                while (polyIdx < accumLengths.size() && accumLengths[polyIdx] < drawStart) {
-                    ++polyIdx;
+                // lower_bound to find the first accumulated length >= drawStart
+                auto it {std::ranges::lower_bound(accumLengths, drawStart)};
+                while (it != accumLengths.end() && *it < drawEnd) {
+                    usize const idx {static_cast<usize>(std::distance(accumLengths.begin(), it))};
+                    outPoints.push_back(pts[idx]);
+                    ++it;
                 }
 
-                // Insert all intermediate polyline points in [drawStart, drawEnd).
-                usize tempIdx {polyIdx};
-                while (tempIdx < accumLengths.size() && accumLengths[tempIdx] < drawEnd) {
-                    dashSegment.push_back(pts[tempIdx++]);
-                }
-                polyIdx = tempIdx;
+                outPoints.push_back(interpolate(drawEnd));
 
-                // Insert the endpoint.
-                dashSegment.push_back(func(drawEnd));
-                dashSegment.front().Flags = Corner;
-                dashSegment.back().Flags  = Corner;
-            }
-        } else {
-            // Even in non-drawing segments, move polyIdx forward.
-            while (polyIdx < accumLengths.size() && accumLengths[polyIdx] < nextDistance) {
-                ++polyIdx;
+                outPoints.front().Flags = Corner;
+                outPoints.back().Flags  = Corner;
+
+                outSegments.push_back({.Offset = segOffset, .Count = outPoints.size() - segOffset});
             }
         }
 
         currentDistance = nextDistance;
         drawing         = !drawing;
     }
-
-    return dashedPaths;
 }
 
 static auto PolyArea(std::span<canvas_point> pts)
@@ -427,23 +401,14 @@ static auto PolyArea(std::span<canvas_point> pts)
         return (acx * aby) - (abx * acy);
     }};
 
-    f32 area {0};
+    f32                area {0};
+    canvas_point const a {pts[0]};
     for (usize i {2}; i < pts.size(); ++i) {
-        canvas_point const a {pts[0]};
         canvas_point const b {pts[i - 1]};
         canvas_point const c {pts[i]};
         area += TriArea2(a.X, a.Y, b.X, b.Y, c.X, c.Y);
     }
     return area * 0.5f;
-}
-
-static auto PolylineLength(std::span<canvas_point const> pts) -> f32
-{
-    f32 length {0.0f};
-    for (usize i {1}; i < pts.size(); ++i) {
-        length += Hypot(pts[i].X - pts[i - 1].X, pts[i].Y - pts[i - 1].Y);
-    }
-    return length;
 }
 
 ////////////////////////////////////////////////////////////
@@ -508,11 +473,7 @@ void path_cache::fill(state const& s, bool enforceWinding, bool edgeAntiAlias, f
 
     flatten_paths(enforceWinding, {}, 0);
 
-    if (edgeAntiAlias && s.ShapeAntiAlias) {
-        expand_fill(fringeWidth, line_join::Miter, 2.4f, fringeWidth);
-    } else {
-        expand_fill(0.0f, line_join::Miter, 2.4f, fringeWidth);
-    }
+    expand_fill(edgeAntiAlias && s.ShapeAntiAlias ? fringeWidth : 0.0f, line_join::Miter, 2.4f, fringeWidth);
 }
 
 void path_cache::stroke(state const& s, bool enforceWinding, bool edgeAntiAlias, f32 strokeWidth, f32 fringeWidth)
@@ -526,11 +487,7 @@ void path_cache::stroke(state const& s, bool enforceWinding, bool edgeAntiAlias,
         flatten_paths(enforceWinding, s.Dash, s.DashOffset);
     }
 
-    if (edgeAntiAlias && s.ShapeAntiAlias) {
-        expand_stroke(strokeWidth * 0.5f, s.LineCap, s.LineJoin, s.MiterLimit, fringeWidth);
-    } else {
-        expand_stroke(strokeWidth * 0.5f, s.LineCap, s.LineJoin, s.MiterLimit, 0.0f);
-    }
+    expand_stroke(strokeWidth * 0.5f, s.LineCap, s.LineJoin, s.MiterLimit, edgeAntiAlias && s.ShapeAntiAlias ? fringeWidth : 0.0f);
 }
 
 void path_cache::clip(bool enforceWinding, f32 fringeWidth)
@@ -599,7 +556,7 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
         } break;
         case Close: {
             auto& path {get_last_path()};
-            if (path.First < std::ssize(_points)) {
+            if (path.First < _points.size()) {
                 auto const& pt {_points[path.First]};
                 add_point(pt.X, pt.Y, Corner); // loop
                 path.Closed = true;
@@ -620,21 +577,46 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
 
     // --- Apply dash conversion to each flattened path ---
     if (!dash.empty()) {
+        std::vector<canvas_point> flatPoints;
+        std::vector<dash_segment> flatSegments;
+        std::vector<f32>          accumLengths;
+
         std::vector<canvas_point> newPoints;
         std::vector<canvas::path> newPaths;
+
+        usize totalPts {0};
+        for (auto const& p : _paths) { totalPts += p.Count; }
+        newPoints.reserve(totalPts * 2);
+
         for (auto const& p : _paths) {
             // Get the original polyline for this path.
-            std::span<canvas_point const> polyline {&_points[p.First], p.Count};
-            f32 const                     totalLen {PolylineLength(polyline)};
-            std::vector<f32>              dashPattern;
+            std::span<canvas_point const> polyline {&_points[p.First], static_cast<usize>(p.Count)};
+
+            accumLengths.clear();
+            accumLengths.reserve(polyline.size());
+            accumLengths.push_back(0.0f);
+            for (usize i {1}; i < polyline.size(); ++i) {
+                f32 const segLen {std::hypot(polyline[i].X - polyline[i - 1].X,
+                                             polyline[i].Y - polyline[i - 1].Y)};
+                accumLengths.push_back(accumLengths.back() + segLen);
+            }
+            f32 const totalLen {accumLengths.back()};
+
+            std::vector<f32> dashPattern;
             if (!DashPattern(dashPattern, dash, totalLen)) { continue; }
 
-            auto const dashedPaths {DashPolyline(polyline, totalLen, dashPattern, dashOffset)};
-            for (auto const& dp : dashedPaths) {
+            flatPoints.clear();
+            flatSegments.clear();
+            DashPolyline(polyline, accumLengths, totalLen, dashPattern, dashOffset,
+                         flatPoints, flatSegments);
+
+            for (auto const& seg : flatSegments) {
                 canvas::path dashedPath {};
                 dashedPath.First = static_cast<i32>(newPoints.size());
-                dashedPath.Count = dp.size();
-                newPoints.insert(newPoints.end(), dp.begin(), dp.end());
+                dashedPath.Count = seg.Count;
+                newPoints.insert(newPoints.end(),
+                                 flatPoints.begin() + seg.Offset,
+                                 flatPoints.begin() + seg.Offset + seg.Count);
                 newPaths.push_back(dashedPath);
             }
         }
@@ -647,7 +629,7 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
     for (auto& path : _paths) {
         if (path.Count == 0) { continue; }
 
-        auto start {_points.begin() + path.First};
+        auto const start {_points.begin() + path.First};
 
         // If the first and last points coincide, remove the duplicate.
         auto p0It {start + path.Count - 1};
@@ -963,7 +945,7 @@ auto path_cache::is_degenerate_arc(point_f pos1, point_f pos2, f32 radius) const
 void path_cache::add_path()
 {
     canvas::path path;
-    path.First = static_cast<i32>(_points.size());
+    path.First = _points.size();
     _paths.push_back(path);
 }
 
@@ -1037,10 +1019,10 @@ void path_cache::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
 
     // Calculate which joins needs extra vertices to append, and gather vertex count.
     for (auto& path : _paths) {
-        auto  start {_points.begin() + path.First};
-        auto  p0It {start + path.Count - 1};
-        auto  p1It {start};
-        usize nleft {0};
+        auto const start {_points.begin() + path.First};
+        auto       p0It {start + path.Count - 1};
+        auto       p1It {start};
+        usize      nleft {0};
 
         path.BevelCount = 0;
 
