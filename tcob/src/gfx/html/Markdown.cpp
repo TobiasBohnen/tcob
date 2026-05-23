@@ -11,6 +11,7 @@
 #include <span>
 #include <vector>
 
+#include "tcob/core/Color.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/SpanStream.hpp"
 
@@ -167,10 +168,15 @@ namespace detail {
                 if (closeBrace != utf8_string::npos && closeBrace + 1 < to && s[closeBrace + 1] == '(') {
                     usize const closeParen {s.find(')', closeBrace + 2)};
                     if (closeParen != utf8_string::npos) {
-                        utf8_string const color {s.substr(i + 1, closeBrace - i - 1)};
-                        utf8_string const text {ParseInline(s, closeBrace + 2, closeParen)};
+                        utf8_string const col {s.substr(i + 1, closeBrace - i - 1)};
+                        if (color::FromString(col) == colors::Transparent) {
+                            out += s.substr(i, closeParen - i + 1);
+                            i = closeParen + 1;
+                            continue;
+                        }
 
-                        out += std::format(R"(<span style="color:{}">{}</span>)", color, text);
+                        utf8_string const text {ParseInline(s, closeBrace + 2, closeParen)};
+                        out += std::format(R"(<span style="color:{}">{}</span>)", col, text);
                         i = closeParen + 1;
                         continue;
                     }

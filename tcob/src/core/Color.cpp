@@ -14,7 +14,7 @@
 
 namespace tcob {
 
-auto color::FromString(string_view name) -> color
+auto color::FromString(string_view name) -> color // FIXME: should be optional
 {
     static std::unordered_map<string, color> const colorMap {
         {"transparent", colors::Transparent},
