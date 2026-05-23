@@ -8,309 +8,307 @@
 #include <algorithm>
 #include <cctype>
 #include <format>
-#include <span>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/StringUtils.hpp"
-#include "tcob/core/io/SpanStream.hpp"
 
 namespace tcob::gfx::html {
 
-namespace detail {
-
-    static void EscapeChar(utf8_string& out, char c)
-    {
-        switch (c) {
-        case '&': out += "&amp;"; return;
-        case '<': out += "&lt;"; return;
-        case '>': out += "&gt;"; return;
-        case '"': out += "&quot;"; return;
-        default:  out += c;
-        }
+static void EscapeChar(utf8_string& out, char c)
+{
+    switch (c) {
+    case '&': out += "&amp;"; return;
+    case '<': out += "&lt;"; return;
+    case '>': out += "&gt;"; return;
+    case '"': out += "&quot;"; return;
+    default:  out += c;
     }
+}
 
-    static void EscapeRange(utf8_string& out, utf8_string const& s, usize from, usize to)
-    {
-        for (usize i {from}; i < to; ++i) { EscapeChar(out, s[i]); }
-    }
+static void EscapeRange(utf8_string& out, utf8_string_view s, usize const from, usize const to)
+{
+    for (usize i {from}; i < to; ++i) { EscapeChar(out, s[i]); }
+}
 
-    static auto IsSpace(char c) -> bool { return c == ' ' || c == '\t'; }
+static auto IsSpace(char const c) -> bool { return c == ' ' || c == '\t'; }
 
-    static auto ParseInline(utf8_string const& s, usize from, usize to) -> utf8_string
-    {
-        utf8_string out;
-        for (usize i {from}; i < to;) {
-            char c {s[i]};
+static auto ParseInline(utf8_string_view s, usize const from, usize const to) -> utf8_string
+{
+    utf8_string retValue;
+    for (usize i {from}; i < to;) {
+        char const c {s[i]};
 
-            // inline html
-            if (c == '<' && i + 1 < to) {
-                char const next = {s[i + 1]};
-                if (std::isalpha(next) || next == '/' || next == '!' || next == '?') {
-                    usize const closePos {s.find('>', i + 1)};
-                    if (closePos != utf8_string::npos) {
-                        // Include the tag in output without escaping
-                        out += s.substr(i, closePos - i + 1);
-                        i = closePos + 1;
-                        continue;
-                    }
-                }
-            }
-
-            // backslash escape
-            if (c == '\\' && i + 1 < to) {
-                EscapeChar(out, s[i + 1]);
-                i += 2;
-                continue;
-            }
-
-            // inline code  `...`  or  ``...``
-            if (c == '`') {
-                usize runLen {0};
-                while (i + runLen < to && s[i + runLen] == '`') { ++runLen; }
-                usize const closePos {s.find(utf8_string(runLen, '`'), i + runLen)};
-                if (closePos != utf8_string::npos && closePos + runLen <= to) {
-                    utf8_string escaped;
-                    EscapeRange(escaped, s, i + runLen, closePos);
-                    out += std::format("<code>{}</code>", escaped);
-                    i = closePos + runLen;
-                    continue;
-                }
-                EscapeChar(out, c);
-                ++i;
-                continue;
-            }
-
-            // bold  **...**  or  __...__  (checked before italic)
-            if ((c == '*' || c == '_') && i + 1 < to && s[i + 1] == c) {
-                // for __, require whitespace before opener
-                if (c == '_' && i > from && !IsSpace(s[i - 1])) {
-                    EscapeChar(out, c);
-                    ++i;
-                    continue;
-                }
-                usize closePos {utf8_string::npos};
-                for (usize j {i + 2}; j + 1 < to; ++j) {
-                    if (s[j] == c && s[j + 1] == c) {
-                        // count full run
-                        usize runEnd {j + 2};
-                        while (runEnd < to && s[runEnd] == c) { ++runEnd; }
-                        usize const runLen {runEnd - j};
-                        // for __, require whitespace after closer
-                        if (c == '_' && runEnd < to && !IsSpace(s[runEnd])) {
-                            j = runEnd - 1;
-                            continue;
-                        }
-                        // use last two chars of run as the close
-                        closePos = j + (runLen - 2);
-                        break;
-                    }
-                }
-                if (closePos != utf8_string::npos && closePos + 2 <= to) {
-                    out += std::format("<strong>{}</strong>", ParseInline(s, i + 2, closePos));
-                    i = closePos + 2;
-                    continue;
-                }
-            }
-
-            // italic  *...*  or  _..._
-            if (c == '*' || c == '_') {
-                // for _, require whitespace before opener
-                if (c == '_' && i > from && !IsSpace(s[i - 1])) {
-                    EscapeChar(out, c);
-                    ++i;
-                    continue;
-                }
-                // find closing single delimiter not part of a ** run
-                usize closePos {utf8_string::npos};
-                for (usize j {i + 1}; j < to; ++j) {
-                    if (s[j] == c) {
-                        bool const prevSame {j > 0 && s[j - 1] == c};
-                        bool const nextSame {j + 1 < to && s[j + 1] == c};
-                        if (prevSame || nextSame) { continue; }
-                        // for _, require whitespace after closer
-                        if (c == '_' && j + 1 < to && !IsSpace(s[j + 1])) { continue; }
-                        closePos = j;
-                        break;
-                    }
-                }
-                if (closePos != utf8_string::npos && closePos < to) {
-                    out += std::format("<em>{}</em>", ParseInline(s, i + 1, closePos));
+        // inline html
+        if (c == '<' && i + 1 < to) {
+            char const next {s[i + 1]};
+            if (std::isalpha(next) || next == '/' || next == '!' || next == '?') {
+                usize const closePos {s.find('>', i + 1)};
+                if (closePos != utf8_string_view::npos && closePos < to) {
+                    retValue += s.substr(i, closePos - i + 1);
                     i = closePos + 1;
                     continue;
                 }
-                EscapeChar(out, c);
+            }
+        }
+
+        // backslash escape
+        if (c == '\\' && i + 1 < to) {
+            EscapeChar(retValue, s[i + 1]);
+            i += 2;
+            continue;
+        }
+
+        // inline code  `...`  or  ``...``
+        if (c == '`') {
+            usize runLen {0};
+            while (i + runLen < to && s[i + runLen] == '`') { ++runLen; }
+
+            utf8_string_view openFence {s.substr(i, runLen)};
+            usize const      closePos {s.find(openFence, i + runLen)};
+            if (closePos != utf8_string_view::npos && closePos + runLen <= to) {
+                utf8_string escaped;
+                EscapeRange(escaped, s, i + runLen, closePos);
+                retValue += std::format("<code>{}</code>", escaped);
+                i = closePos + runLen;
+                continue;
+            }
+            EscapeChar(retValue, c);
+            ++i;
+            continue;
+        }
+
+        // bold  **...**  or  __...__
+        if ((c == '*' || c == '_') && i + 1 < to && s[i + 1] == c) {
+            if (c == '_' && i > from && !IsSpace(s[i - 1])) {
+                EscapeChar(retValue, c);
                 ++i;
                 continue;
             }
+            usize closePos {utf8_string_view::npos};
+            for (usize j {i + 2}; j + 1 < to; ++j) {
+                if (s[j] == c && s[j + 1] == c) {
+                    usize runEnd {j + 2};
+                    while (runEnd < to && s[runEnd] == c) { ++runEnd; }
+                    usize const runLen {runEnd - j};
 
-            // strikethrough  ~...~  or  ~~...~~
-            if (c == '~') {
-                usize runLen {0};
-                while (i + runLen < to && s[i + runLen] == '~') { ++runLen; }
-
-                // Only support 1 or 2 tildes
-                if (runLen == 1 || runLen == 2) {
-                    string const closeRun(runLen, '~');
-                    usize const  closePos {s.find(closeRun, i + runLen)};
-
-                    if (closePos != string::npos) {
-                        out += std::format("<del>{}</del>", ParseInline(s, i + runLen, closePos));
-                        i = closePos + runLen;
+                    if (c == '_' && runEnd < to && !IsSpace(s[runEnd])) {
+                        j = runEnd - 1;
                         continue;
                     }
+                    closePos = j + (runLen - 2);
+                    break;
                 }
             }
+            if (closePos != utf8_string_view::npos && closePos + 2 <= to) {
+                retValue += std::format("<strong>{}</strong>", ParseInline(s, i + 2, closePos));
+                i = closePos + 2;
+                continue;
+            }
+        }
 
-            // inline color {color}(text)
-            if (c == '{') {
-                usize const closeBrace {s.find('}', i + 1)};
-                if (closeBrace != utf8_string::npos && closeBrace + 1 < to && s[closeBrace + 1] == '(') {
-                    usize const closeParen {s.find(')', closeBrace + 2)};
-                    if (closeParen != utf8_string::npos) {
-                        utf8_string const col {s.substr(i + 1, closeBrace - i - 1)};
-                        if (color::FromString(col) == colors::Transparent) {
-                            out += s.substr(i, closeParen - i + 1);
-                            i = closeParen + 1;
-                            continue;
-                        }
+        // italic  *...*  or  _..._
+        if (c == '*' || c == '_') {
+            if (c == '_' && i > from && !IsSpace(s[i - 1])) {
+                EscapeChar(retValue, c);
+                ++i;
+                continue;
+            }
+            usize closePos {utf8_string_view::npos};
+            for (usize j {i + 1}; j < to; ++j) {
+                if (s[j] == c) {
+                    bool const prevSame {j > from && s[j - 1] == c};
+                    bool const nextSame {j + 1 < to && s[j + 1] == c};
+                    if (prevSame || nextSame) { continue; }
+                    if (c == '_' && j + 1 < to && !IsSpace(s[j + 1])) { continue; }
+                    closePos = j;
+                    break;
+                }
+            }
+            if (closePos != utf8_string_view::npos && closePos < to) {
+                retValue += std::format("<em>{}</em>", ParseInline(s, i + 1, closePos));
+                i = closePos + 1;
+                continue;
+            }
+            EscapeChar(retValue, c);
+            ++i;
+            continue;
+        }
 
-                        utf8_string const text {ParseInline(s, closeBrace + 2, closeParen)};
-                        out += std::format(R"(<span style="color:{}">{}</span>)", col, text);
+        // strikethrough  ~...~  or  ~~...~~
+        if (c == '~') {
+            usize runLen {0};
+            while (i + runLen < to && s[i + runLen] == '~') { ++runLen; }
+
+            if (runLen == 1 || runLen == 2) {
+                utf8_string_view closeRun {s.substr(i, runLen)};
+                usize const      closePos {s.find(closeRun, i + runLen)};
+
+                if (closePos != utf8_string_view::npos && closePos + runLen <= to) {
+                    retValue += std::format("<del>{}</del>", ParseInline(s, i + runLen, closePos));
+                    i = closePos + runLen;
+                    continue;
+                }
+            }
+        }
+
+        // inline color {color}(text)
+        if (c == '{') {
+            usize const closeBrace {s.find('}', i + 1)};
+            if (closeBrace != utf8_string_view::npos && closeBrace + 1 < to && s[closeBrace + 1] == '(') {
+                usize const closeParen {s.find(')', closeBrace + 2)};
+                if (closeParen != utf8_string_view::npos && closeParen < to) {
+                    utf8_string_view col {s.substr(i + 1, closeBrace - i - 1)};
+                    if (color::FromString(col) == colors::Transparent) {
+                        retValue += s.substr(i, closeParen - i + 1);
                         i = closeParen + 1;
                         continue;
                     }
+
+                    utf8_string const text {ParseInline(s, closeBrace + 2, closeParen)};
+                    retValue += std::format(R"(<span style="color:{}">{}</span>)", col, text);
+                    i = closeParen + 1;
+                    continue;
                 }
             }
+        }
 
-            // image  ![alt](url)
-            if (c == '!' && i + 1 < to && s[i + 1] == '[') {
-                usize const altEnd {s.find(']', i + 2)};
-                if (altEnd != utf8_string::npos && altEnd + 1 < to && s[altEnd + 1] == '(') {
-                    usize const urlEnd {s.find(')', altEnd + 2)};
-                    if (urlEnd != utf8_string::npos && urlEnd <= to) {
-                        utf8_string url, alt;
-                        EscapeRange(url, s, altEnd + 2, urlEnd);
-                        EscapeRange(alt, s, i + 2, altEnd);
-                        out += std::format(R"(<img src="{}" alt="{}">)", url, alt);
-                        i = urlEnd + 1;
-                        continue;
-                    }
+        // image  ![alt](url)
+        if (c == '!' && i + 1 < to && s[i + 1] == '[') {
+            usize const altEnd {s.find(']', i + 2)};
+            if (altEnd != utf8_string_view::npos && altEnd + 1 < to && s[altEnd + 1] == '(') {
+                usize const urlEnd {s.find(')', altEnd + 2)};
+                if (urlEnd != utf8_string_view::npos && urlEnd < to) {
+                    utf8_string url;
+                    utf8_string alt;
+                    EscapeRange(url, s, altEnd + 2, urlEnd);
+                    EscapeRange(alt, s, i + 2, altEnd);
+                    retValue += std::format(R"(<img src="{}" alt="{}">)", url, alt);
+                    i = urlEnd + 1;
+                    continue;
                 }
             }
+        }
 
-            // link  [text](url)
-            if (c == '[') {
-                usize const textEnd {s.find(']', i + 1)};
-                if (textEnd != utf8_string::npos && textEnd + 1 < to && s[textEnd + 1] == '(') {
-                    usize const urlEnd {s.find(')', textEnd + 2)};
-                    if (urlEnd != utf8_string::npos && urlEnd <= to) {
-                        utf8_string url;
-                        EscapeRange(url, s, textEnd + 2, urlEnd);
-                        out += std::format(R"(<a href="{}">{}</a>)", url, ParseInline(s, i + 1, textEnd));
-                        i = urlEnd + 1;
-                        continue;
-                    }
+        // link  [text](url)
+        if (c == '[') {
+            usize const textEnd {s.find(']', i + 1)};
+            if (textEnd != utf8_string_view::npos && textEnd + 1 < to && s[textEnd + 1] == '(') {
+                usize const urlEnd {s.find(')', textEnd + 2)};
+                if (urlEnd != utf8_string_view::npos && urlEnd < to) {
+                    utf8_string url;
+                    EscapeRange(url, s, textEnd + 2, urlEnd);
+                    retValue += std::format(R"(<a href="{}">{}</a>)", url, ParseInline(s, i + 1, textEnd));
+                    i = urlEnd + 1;
+                    continue;
                 }
             }
-
-            EscapeChar(out, c);
-            ++i;
         }
-        return out;
-    }
 
-    static auto LeadingSpaces(utf8_string const& s) -> usize
-    {
-        usize n {0};
-        while (n < s.size() && s[n] == ' ') { ++n; }
-        return n;
+        EscapeChar(retValue, c);
+        ++i;
     }
+    return retValue;
+}
 
-    // first non-space character, or 0 if line is blank
-    static auto FirstChar(utf8_string const& s) -> char
-    {
-        usize const pos {LeadingSpaces(s)};
-        return pos < s.size() ? s[pos] : 0;
-    }
+static auto ParseInline(utf8_string_view s) -> utf8_string
+{
+    return ParseInline(s, 0, s.size());
+}
 
-    // returns 1-6 for ATX headings, 0 otherwise
-    static auto HeadingLevel(utf8_string const& s) -> i32
-    {
-        usize const start {LeadingSpaces(s)};
-        usize       hashes {0};
-        while (start + hashes < s.size() && s[start + hashes] == '#') { ++hashes; }
-        if (!hashes || hashes > 6 || start + hashes >= s.size() || s[start + hashes] != ' ') { return 0; }
-        return static_cast<i32>(hashes);
-    }
+static auto LeadingSpaces(utf8_string_view s) -> usize
+{
+    usize n {0};
+    while (n < s.size() && s[n] == ' ') { ++n; }
+    return n;
+}
 
-    static auto IsThematicBreak(utf8_string const& s) -> bool
-    {
-        char const c {FirstChar(s)};
-        if (c != '-' && c != '*' && c != '_') { return false; }
-        i32 count {0};
-        for (char x : s) {
-            if (x == c) {
-                ++count;
-            } else if (x != ' ') {
-                return false;
-            }
+static auto FirstChar(utf8_string_view s) -> char
+{
+    usize const pos {LeadingSpaces(s)};
+    return pos < s.size() ? s[pos] : 0;
+}
+
+static auto HeadingLevel(utf8_string_view s) -> i32
+{
+    usize const start {LeadingSpaces(s)};
+    usize       hashes {0};
+    while (start + hashes < s.size() && s[start + hashes] == '#') { ++hashes; }
+    if (!hashes || hashes > 6 || start + hashes >= s.size() || s[start + hashes] != ' ') { return 0; }
+    return static_cast<i32>(hashes);
+}
+
+static auto IsThematicBreak(utf8_string_view s) -> bool
+{
+    char const c {FirstChar(s)};
+    if (c != '-' && c != '*' && c != '_') { return false; }
+    i32 count {0};
+    for (char const x : s) {
+        if (x == c) {
+            ++count;
+        } else if (x != ' ') {
+            return false;
         }
-        return count >= 3;
     }
+    return count >= 3;
+}
 
-    static auto IsFencedCodeOpen(utf8_string const& s) -> bool
+static auto IsFencedCodeOpen(utf8_string_view s) -> bool
+{
+    usize const pos {LeadingSpaces(s)};
+    return pos + 2 < s.size()
+        && ((s[pos] == '`' && s[pos + 1] == '`' && s[pos + 2] == '`')
+            || (s[pos] == '~' && s[pos + 1] == '~' && s[pos + 2] == '~'));
+}
+
+static auto IsBulletListItem(utf8_string_view s) -> bool
+{
+    usize const pos {LeadingSpaces(s)};
+    char const  c {FirstChar(s)};
+    return (c == '-' || c == '*' || c == '+') && pos + 1 < s.size() && s[pos + 1] == ' ';
+}
+
+static auto IsOrderedListItem(utf8_string_view s, i32& startNum) -> bool
+{
+    usize i {LeadingSpaces(s)};
+    i32   num {0};
+    bool  hasDigit {false};
+    while (i < s.size() && s[i] >= '0' && s[i] <= '9') {
+        num      = (num * 10) + (s[i++] - '0');
+        hasDigit = true;
+    }
+    if (!hasDigit || i >= s.size() || (s[i] != '.' && s[i] != ')')
+        || i + 1 >= s.size() || s[i + 1] != ' ') { return false; }
+    startNum = num;
+    return true;
+}
+
+static auto IsBlockquoteLine(utf8_string_view s) -> bool { return FirstChar(s) == '>'; }
+
+static auto IsTable(utf8_string_view s) -> bool { return FirstChar(s) == '|'; }
+
+static auto AllSameChar(utf8_string_view s, char const c) -> bool
+{
+    return !s.empty() && std::ranges::all_of(s, [c](char const x) { return x == c; });
+}
+
+struct md_parser {
+    std::vector<utf8_string_view> Lines {};
+    usize                         CurrentPos {0};
+
+    auto is_eof() const -> bool { return CurrentPos >= Lines.size(); }
+
+    auto parse() -> utf8_string
     {
-        usize const pos {LeadingSpaces(s)};
-        return pos + 2 < s.size()
-            && ((s[pos] == '`' && s[pos + 1] == '`' && s[pos + 2] == '`')
-                || (s[pos] == '~' && s[pos + 1] == '~' && s[pos + 2] == '~'));
+        utf8_string retValue;
+        while (!is_eof()) { retValue += block(); }
+        return retValue;
     }
 
-    static auto IsBulletListItem(utf8_string const& s) -> bool
-    {
-        usize const pos {LeadingSpaces(s)};
-        char const  c {FirstChar(s)};
-        return (c == '-' || c == '*' || c == '+') && pos + 1 < s.size() && s[pos + 1] == ' ';
-    }
-
-    static auto IsOrderedListItem(utf8_string const& s, i32& startNum) -> bool
-    {
-        usize i {LeadingSpaces(s)};
-        i32   num {0};
-        bool  hasDigit {false};
-        while (i < s.size() && s[i] >= '0' && s[i] <= '9') {
-            num      = (num * 10) + (s[i++] - '0');
-            hasDigit = true;
-        }
-        if (!hasDigit || i >= s.size() || (s[i] != '.' && s[i] != ')')
-            || i + 1 >= s.size() || s[i + 1] != ' ') { return false; }
-        startNum = num;
-        return true;
-    }
-
-    static auto IsBlockquoteLine(utf8_string const& s) -> bool { return FirstChar(s) == '>'; }
-
-    static auto IsTable(utf8_string const& s) -> bool { return FirstChar(s) == '|'; }
-
-    static auto AllSameChar(utf8_string const& s, char c) -> bool
-    {
-        return !s.empty() && std::ranges::all_of(s, [c](char x) { return x == c; });
-    }
-
-    auto md::is_eof() const -> bool { return CurrentPos >= Lines.size(); }
-
-    auto md::parse() -> utf8_string
-    {
-        utf8_string out;
-        while (!is_eof()) { out += block(); }
-        return out;
-    }
-
-    auto md::block() -> utf8_string
+    auto block() -> utf8_string
     {
         if (is_eof()) { return {}; }
-        utf8_string const& line {Lines[CurrentPos]};
+        utf8_string_view line {Lines[CurrentPos]};
         if (line.empty() || LeadingSpaces(line) == line.size()) {
             ++CurrentPos;
             return {};
@@ -321,7 +319,7 @@ namespace detail {
             ++CurrentPos;
             return "<hr>";
         }
-        if (i32 level {HeadingLevel(line)}) { return atx_heading(level); }
+        if (i32 const level {HeadingLevel(line)}) { return atx_heading(level); }
         if (IsBlockquoteLine(line)) { return blockquote(); }
         if (IsBulletListItem(line)) { return list(false); }
         i32 num {0};
@@ -330,96 +328,98 @@ namespace detail {
         return paragraph();
     }
 
-    auto md::fenced_code() -> utf8_string
+    auto fenced_code() -> utf8_string
     {
-        usize const openPos {LeadingSpaces(Lines[CurrentPos])};
-        char const  fenceChar {Lines[CurrentPos][openPos]};
-        usize       fenceLen {0};
-        while (openPos + fenceLen < Lines[CurrentPos].size() && Lines[CurrentPos][openPos + fenceLen] == fenceChar) { ++fenceLen; }
+        utf8_string_view openLine {Lines[CurrentPos]};
+        usize const      openPos {LeadingSpaces(openLine)};
+        char const       fenceChar {openLine[openPos]};
+        usize            fenceLen {0};
+        while (openPos + fenceLen < openLine.size() && openLine[openPos + fenceLen] == fenceChar) { ++fenceLen; }
 
-        utf8_string lang {Lines[CurrentPos].substr(openPos + fenceLen)};
-        while (!lang.empty() && lang.back() == ' ') { lang.pop_back(); }
+        utf8_string_view lang {openLine.substr(openPos + fenceLen)};
+        while (!lang.empty() && lang.back() == ' ') { lang.remove_suffix(1); }
         ++CurrentPos;
 
-        utf8_string out {lang.empty()
-                             ? utf8_string {"<pre><code>"}
-                             : std::format(R"(<pre><code class="language-{}">)", lang)};
+        utf8_string retValue {lang.empty()
+                                  ? utf8_string {"<pre><code>"}
+                                  : std::format(R"(<pre><code class="language-{}">)", lang)};
 
         while (!is_eof()) {
-            utf8_string const& line {Lines[CurrentPos]};
-            usize const        linePos {LeadingSpaces(line)};
-            usize              runLen {0};
+            utf8_string_view line {Lines[CurrentPos]};
+            usize const      linePos {LeadingSpaces(line)};
+            usize            runLen {0};
             while (linePos + runLen < line.size() && line[linePos + runLen] == fenceChar) { ++runLen; }
+
             bool const isClosingFence {
                 runLen >= fenceLen
-                && std::ranges::all_of(line.begin() + static_cast<isize>(linePos + runLen),
-                                       line.end(), [](char x) { return x == ' '; })};
+                && std::ranges::all_of(line.substr(linePos + runLen), [](char const x) { return x == ' '; })};
             if (isClosingFence) {
                 ++CurrentPos;
                 break;
             }
-            EscapeRange(out, line, 0, line.size());
-            out += '\n';
+            EscapeRange(retValue, line, 0, line.size());
+            retValue += '\n';
             ++CurrentPos;
         }
-        return out + "</code></pre>";
+        return retValue + "</code></pre>";
     }
 
-    auto md::indented_code() -> utf8_string
+    auto indented_code() -> utf8_string
     {
-        utf8_string out {"<pre><code>"};
+        utf8_string retValue {"<pre><code>"};
         while (!is_eof()) {
-            utf8_string const& line {Lines[CurrentPos]};
+            utf8_string_view line {Lines[CurrentPos]};
             if (line.empty()) {
-                out += '\n';
+                retValue += '\n';
                 ++CurrentPos;
                 continue;
             }
             if (LeadingSpaces(line) < 4) { break; }
-            EscapeRange(out, line, 4, line.size());
-            out += '\n';
+            EscapeRange(retValue, line, 4, line.size());
+            retValue += '\n';
             ++CurrentPos;
         }
-        return out + "</code></pre>";
+        return retValue + "</code></pre>";
     }
 
-    auto md::atx_heading(i32 level) -> utf8_string
+    auto atx_heading(i32 const level) -> utf8_string
     {
-        utf8_string const& line {Lines[CurrentPos++]};
-        usize const        start {LeadingSpaces(line) + static_cast<usize>(level) + 1};
-        usize              end {line.size()};
+        utf8_string_view line {Lines[CurrentPos++]};
+        usize const      start {LeadingSpaces(line) + static_cast<usize>(level) + 1};
+        usize            end {line.size()};
         while (end > start && line[end - 1] == '#') { --end; }
         while (end > start && line[end - 1] == ' ') { --end; }
         return std::format("<h{0}>{1}</h{0}>", level, ParseInline(line, start, end));
     }
 
-    auto md::blockquote() -> utf8_string
+    auto blockquote() -> utf8_string
     {
-        std::vector<utf8_string> inner;
+        std::vector<utf8_string_view> inner {};
         while (!is_eof() && IsBlockquoteLine(Lines[CurrentPos])) {
-            usize contentStart {LeadingSpaces(Lines[CurrentPos]) + 1};
-            if (contentStart < Lines[CurrentPos].size() && Lines[CurrentPos][contentStart] == ' ') { ++contentStart; }
-            inner.push_back(Lines[CurrentPos].substr(contentStart));
+            utf8_string_view line {Lines[CurrentPos]};
+            usize            contentStart {LeadingSpaces(line) + 1};
+            if (contentStart < line.size() && line[contentStart] == ' ') { ++contentStart; }
+            inner.push_back(line.substr(contentStart));
             ++CurrentPos;
         }
-        md sub;
+        md_parser sub {};
         sub.Lines = inner;
         return std::format("<blockquote>{}</blockquote>", sub.parse());
     }
 
-    auto md::list(bool ordered) -> utf8_string
+    auto list(bool const ordered) -> utf8_string
     {
         i32 startNum {1};
         if (ordered) { IsOrderedListItem(Lines[CurrentPos], startNum); }
-        utf8_string out {ordered
-                             ? (startNum != 1 ? std::format(R"(<ol start="{}">)", startNum) : utf8_string {"<ol>"})
-                             : utf8_string {"<ul>"}};
+        utf8_string retValue {ordered
+                                  ? (startNum != 1 ? std::format(R"(<ol start="{}">)", startNum) : utf8_string {"<ol>"})
+                                  : utf8_string {"<ul>"}};
 
         while (!is_eof()) {
-            utf8_string const& line {Lines[CurrentPos]};
+            utf8_string_view line {Lines[CurrentPos]};
             if (line.empty()) { break; }
-            i32  num {0};
-            bool isItem {ordered ? IsOrderedListItem(line, num) : IsBulletListItem(line)};
+            i32        num {0};
+            bool const isItem {ordered ? IsOrderedListItem(line, num) : IsBulletListItem(line)};
             if (!isItem) { break; }
 
             usize const itemIndent {LeadingSpaces(line)};
@@ -430,12 +430,12 @@ namespace detail {
             } else {
                 textStart += 2;
             }
-            utf8_string const itemText {line.substr(textStart)};
+            utf8_string_view itemText {line.substr(textStart)};
             ++CurrentPos;
 
-            std::vector<utf8_string> continuation;
+            std::vector<utf8_string_view> continuation {};
             while (!is_eof()) {
-                utf8_string const& next {Lines[CurrentPos]};
+                utf8_string_view next {Lines[CurrentPos]};
                 if (next.empty() || LeadingSpaces(next) <= itemIndent) { break; }
                 usize const stripLen {itemIndent + 2 <= next.size() ? itemIndent + 2 : 0};
                 continuation.push_back(next.substr(stripLen));
@@ -443,64 +443,79 @@ namespace detail {
             }
 
             if (!continuation.empty()) {
-                md sub;
+                md_parser sub {};
                 sub.Lines = continuation;
-                out += std::format("<li>{}{}</li>", ParseInline(itemText, 0, itemText.size()), sub.parse());
+                retValue += std::format("<li>{}{}</li>", ParseInline(itemText), sub.parse());
             } else {
-                out += std::format("<li>{}</li>", ParseInline(itemText, 0, itemText.size()));
+                retValue += std::format("<li>{}</li>", ParseInline(itemText));
             }
         }
-        return std::format("{}{}", out, ordered ? "</ol>" : "</ul>");
+        return std::format("{}{}", retValue, ordered ? "</ol>" : "</ul>");
     }
 
-    auto md::table() -> utf8_string
+    auto table() -> utf8_string
     {
-        std::vector<utf8_string> rows;
+        std::vector<utf8_string_view> rows {};
         while (!is_eof() && Lines[CurrentPos].contains('|')) {
             rows.push_back(Lines[CurrentPos++]);
         }
 
-        if (rows.size() < 2) { return ""; } // Tables need at least header + delimiter
-        if (rows[0].size() < 2) { return ""; }
+        if (rows.size() < 2) { return {}; }
 
-        utf8_string out {"<table><thead><tr>"};
+        auto const parse_row {[](utf8_string_view row) {
+            usize const start {row.find('|') + 1};
+            usize const end {row.rfind('|')};
+            if (start >= end) { return std::vector<utf8_string_view> {}; }
 
-        // Process Header
-        auto const trimHeader {rows[0].substr(1, rows[0].size() - 1)};
-        auto const headers {helper::split(trimHeader, '|')};
-        for (auto const& h : headers) {
-            utf8_string const trimmed {helper::trim(h)};
-            if (!trimmed.empty()) { out += std::format("<th>{}</th>", ParseInline(trimmed, 0, trimmed.size())); }
-        }
-        out += "</tr></thead><tbody>";
+            utf8_string_view center {row.substr(start, end - start)};
+            auto const       rawCells {helper::split(center, '|')};
 
-        // Process Body (skip index 1, which is the --- delimiter row)
-        for (usize i {2}; i < rows.size(); ++i) {
-            if (rows[i].size() < 2) { return ""; }
-            out += "<tr>";
-            auto const trimRow {rows[i].substr(1, rows[i].size() - 1)};
-            auto const cells {helper::split(trimRow, '|')};
-            for (auto const& c : cells) {
-                utf8_string const trimmed {helper::trim(c)};
-                out += std::format("<td>{}</td>", ParseInline(trimmed, 0, trimmed.size()));
+            std::vector<utf8_string_view> cleanCells {};
+            cleanCells.reserve(rawCells.size());
+            for (auto const& cell : rawCells) {
+                cleanCells.push_back(helper::trim(cell));
             }
-            out += "</tr>";
+            return cleanCells;
+        }};
+
+        auto const header_cells {parse_row(rows[0])};
+        if (header_cells.empty()) { return {}; }
+
+        utf8_string retValue {"<table><thead><tr>"};
+        for (auto const& h : header_cells) {
+            retValue += std::format("<th>{}</th>", ParseInline(h));
+        }
+        retValue += "</tr></thead><tbody>";
+
+        for (usize i {2}; i < rows.size(); ++i) {
+            auto const cells {parse_row(rows[i])};
+            if (cells.empty()) { continue; }
+
+            retValue += "<tr>";
+            for (usize c {0}; c < header_cells.size(); ++c) {
+                retValue += "<td>";
+                if (c < cells.size()) {
+                    retValue += ParseInline(cells[c]);
+                }
+                retValue += "</td>";
+            }
+            retValue += "</tr>";
         }
 
-        return std::format("{}</tbody></table>", out);
+        return retValue + "</tbody></table>";
     }
 
-    auto md::paragraph() -> utf8_string
+    auto paragraph() -> utf8_string
     {
         utf8_string text;
         while (!is_eof()) {
-            utf8_string const& line {Lines[CurrentPos]};
+            utf8_string_view line {Lines[CurrentPos]};
             if (line.empty() || LeadingSpaces(line) == line.size()) { break; }
             if (IsFencedCodeOpen(line) || IsThematicBreak(line) || HeadingLevel(line) || IsBlockquoteLine(line)) { break; }
             i32 num {0};
             if (IsBulletListItem(line) || IsOrderedListItem(line, num)) { break; }
-            // peek ahead: stop before consuming a setext underline
-            utf8_string const& nextLine {(CurrentPos + 1 < Lines.size()) ? Lines[CurrentPos + 1] : utf8_string {}};
+
+            utf8_string_view nextLine {(CurrentPos + 1 < Lines.size()) ? Lines[CurrentPos + 1] : utf8_string_view {}};
             if (AllSameChar(nextLine, '=') || AllSameChar(nextLine, '-')) {
                 if (!text.empty()) { text += ' '; }
                 text += line;
@@ -512,32 +527,39 @@ namespace detail {
             ++CurrentPos;
         }
 
-        // setext heading check
         if (!is_eof()) {
-            utf8_string const& underline {Lines[CurrentPos]};
+            utf8_string_view underline {Lines[CurrentPos]};
             if (AllSameChar(underline, '=')) {
                 ++CurrentPos;
-                return std::format("<h1>{}</h1>", ParseInline(text, 0, text.size()));
+                return std::format("<h1>{}</h1>", ParseInline(text));
             }
             if (AllSameChar(underline, '-')) {
                 ++CurrentPos;
-                return std::format("<h2>{}</h2>", ParseInline(text, 0, text.size()));
+                return std::format("<h2>{}</h2>", ParseInline(text));
             }
         }
-        return std::format("<p>{}</p>", ParseInline(text, 0, text.size()));
+        return std::format("<p>{}</p>", ParseInline(text));
     }
-
-}
+};
 
 auto md_to_html(utf8_string_view md) -> utf8_string
 {
-    detail::md   p;
-    io::isstream ss {std::as_bytes(std::span {md})};
+    md_parser p {};
 
-    while (!ss.is_eof()) {
-        utf8_string line {ss.read_string_until('\n')};
-        if (!line.empty() && line.back() == '\r') { line.pop_back(); }
+    usize pos {0};
+    while (pos < md.size()) {
+        usize next {md.find('\n', pos)};
+        if (next == utf8_string_view::npos) {
+            next = md.size();
+        }
+
+        utf8_string_view line {md.substr(pos, next - pos)};
+        if (!line.empty() && line.back() == '\r') {
+            line.remove_suffix(1);
+        }
+
         p.Lines.push_back(line);
+        pos = next + 1;
     }
 
     return p.parse();
