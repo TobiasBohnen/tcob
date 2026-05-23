@@ -34,6 +34,8 @@ namespace detail {
 
         auto list(bool ordered) -> utf8_string;
 
+        auto table() -> utf8_string;
+
         auto paragraph() -> utf8_string;
     };
 

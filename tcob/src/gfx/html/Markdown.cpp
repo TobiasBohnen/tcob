@@ -11,6 +11,7 @@
 #include <span>
 #include <vector>
 
+#include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/SpanStream.hpp"
 
 namespace tcob::gfx::html {
@@ -64,14 +65,14 @@ namespace detail {
 
             // inline code  `...`  or  ``...``
             if (c == '`') {
-                usize tickCount {0};
-                while (i + tickCount < to && s[i + tickCount] == '`') { ++tickCount; }
-                usize const closePos {s.find(utf8_string(tickCount, '`'), i + tickCount)};
-                if (closePos != utf8_string::npos && closePos + tickCount <= to) {
+                usize runLen {0};
+                while (i + runLen < to && s[i + runLen] == '`') { ++runLen; }
+                usize const closePos {s.find(utf8_string(runLen, '`'), i + runLen)};
+                if (closePos != utf8_string::npos && closePos + runLen <= to) {
                     utf8_string escaped;
-                    EscapeRange(escaped, s, i + tickCount, closePos);
+                    EscapeRange(escaped, s, i + runLen, closePos);
                     out += std::format("<code>{}</code>", escaped);
-                    i = closePos + tickCount;
+                    i = closePos + runLen;
                     continue;
                 }
                 EscapeChar(out, c);
@@ -142,24 +143,32 @@ namespace detail {
                 continue;
             }
 
-            // strikethrough  ~~...~~
-            if (c == '~' && i + 1 < to && s[i + 1] == '~') {
-                usize const closePos {s.find("~~", i + 2)};
-                if (closePos != utf8_string::npos && closePos + 2 <= to) {
-                    out += std::format("<del>{}</del>", ParseInline(s, i + 2, closePos));
-                    i = closePos + 2;
-                    continue;
+            // strikethrough  ~...~  or  ~~...~~
+            if (c == '~') {
+                usize runLen {0};
+                while (i + runLen < to && s[i + runLen] == '~') { ++runLen; }
+
+                // Only support 1 or 2 tildes
+                if (runLen == 1 || runLen == 2) {
+                    string const closeRun(runLen, '~');
+                    usize const  closePos {s.find(closeRun, i + runLen)};
+
+                    if (closePos != string::npos) {
+                        out += std::format("<del>{}</del>", ParseInline(s, i + runLen, closePos));
+                        i = closePos + runLen;
+                        continue;
+                    }
                 }
             }
 
             // inline color {color}(text)
             if (c == '{') {
                 usize const closeBrace {s.find('}', i + 1)};
-                if (closeBrace != string::npos && closeBrace + 1 < to && s[closeBrace + 1] == '(') {
+                if (closeBrace != utf8_string::npos && closeBrace + 1 < to && s[closeBrace + 1] == '(') {
                     usize const closeParen {s.find(')', closeBrace + 2)};
-                    if (closeParen != string::npos) {
-                        string const color {s.substr(i + 1, closeBrace - i - 1)};
-                        string const text {ParseInline(s, closeBrace + 2, closeParen)};
+                    if (closeParen != utf8_string::npos) {
+                        utf8_string const color {s.substr(i + 1, closeBrace - i - 1)};
+                        utf8_string const text {ParseInline(s, closeBrace + 2, closeParen)};
 
                         out += std::format(R"(<span style="color:{}">{}</span>)", color, text);
                         i = closeParen + 1;
@@ -276,6 +285,8 @@ namespace detail {
 
     static auto IsBlockquoteLine(utf8_string const& s) -> bool { return FirstChar(s) == '>'; }
 
+    static auto IsTable(utf8_string const& s) -> bool { return FirstChar(s) == '|'; }
+
     static auto AllSameChar(utf8_string const& s, char c) -> bool
     {
         return !s.empty() && std::ranges::all_of(s, [c](char x) { return x == c; });
@@ -309,6 +320,7 @@ namespace detail {
         if (IsBulletListItem(line)) { return list(false); }
         i32 num {0};
         if (IsOrderedListItem(line, num)) { return list(true); }
+        if (IsTable(line)) { return table(); }
         return paragraph();
     }
 
@@ -433,6 +445,43 @@ namespace detail {
             }
         }
         return std::format("{}{}", out, ordered ? "</ol>" : "</ul>");
+    }
+
+    auto md::table() -> utf8_string
+    {
+        std::vector<utf8_string> rows;
+        while (!is_eof() && Lines[CurrentPos].contains('|')) {
+            rows.push_back(Lines[CurrentPos++]);
+        }
+
+        if (rows.size() < 2) { return ""; } // Tables need at least header + delimiter
+        if (rows[0].size() < 2) { return ""; }
+
+        utf8_string out {"<table><thead><tr>"};
+
+        // Process Header
+        auto const trimHeader {rows[0].substr(1, rows[0].size() - 1)};
+        auto const headers {helper::split(trimHeader, '|')};
+        for (auto const& h : headers) {
+            utf8_string const trimmed {helper::trim(h)};
+            if (!trimmed.empty()) { out += std::format("<th>{}</th>", ParseInline(trimmed, 0, trimmed.size())); }
+        }
+        out += "</tr></thead><tbody>";
+
+        // Process Body (skip index 1, which is the --- delimiter row)
+        for (usize i {2}; i < rows.size(); ++i) {
+            if (rows[i].size() < 2) { return ""; }
+            out += "<tr>";
+            auto const trimRow {rows[i].substr(1, rows[i].size() - 1)};
+            auto const cells {helper::split(trimRow, '|')};
+            for (auto const& c : cells) {
+                utf8_string const trimmed {helper::trim(c)};
+                out += std::format("<td>{}</td>", ParseInline(trimmed, 0, trimmed.size()));
+            }
+            out += "</tr>";
+        }
+
+        return std::format("{}</tbody></table>", out);
     }
 
     auto md::paragraph() -> utf8_string
