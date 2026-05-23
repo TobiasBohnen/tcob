@@ -450,7 +450,7 @@ struct md_parser {
             while (!is_eof()) {
                 utf8_string_view next {Lines[CurrentPos]};
                 if (next.empty() || LeadingSpaces(next) <= itemIndent) { break; }
-                usize const stripLen {itemIndent + 2 <= next.size() ? itemIndent + 2 : 0};
+                usize const stripLen {textStart <= next.size() ? textStart : 0};
                 continuation.push_back(next.substr(stripLen));
                 ++CurrentPos;
             }
