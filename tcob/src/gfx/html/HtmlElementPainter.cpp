@@ -3,18 +3,16 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/html/HtmlElementPainter.hpp"
+#include "HtmlElementPainter.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
+#include <algorithm>
 
-    #include <algorithm>
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Canvas.hpp"
 
-    #include "tcob/core/AngleUnits.hpp"
-    #include "tcob/core/Point.hpp"
-    #include "tcob/core/Size.hpp"
-    #include "tcob/gfx/Canvas.hpp"
-
-namespace tcob::gfx::html {
+namespace tcob::gfx::html::detail {
 
 element_painter::element_painter(canvas& c)
     : _canvas {c}
@@ -95,18 +93,10 @@ void element_painter::draw_gradient(gradient_draw_context const& ctx)
 void element_painter::draw_borders(borders const& brds)
 {
     _canvas.save();
-    if (brds.Left.Width > 0) {
-        draw_left_border(brds);
-    }
-    if (brds.Top.Width > 0) {
-        draw_top_border(brds);
-    }
-    if (brds.Right.Width > 0) {
-        draw_right_border(brds);
-    }
-    if (brds.Bottom.Width > 0) {
-        draw_bottom_border(brds);
-    }
+    if (brds.Left.Width > 0) { draw_left_border(brds); }
+    if (brds.Top.Width > 0) { draw_top_border(brds); }
+    if (brds.Right.Width > 0) { draw_right_border(brds); }
+    if (brds.Bottom.Width > 0) { draw_bottom_border(brds); }
     _canvas.restore();
 }
 
@@ -256,5 +246,3 @@ auto margins::height() const -> i32
 }
 
 }
-
-#endif

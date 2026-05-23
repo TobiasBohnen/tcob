@@ -37,6 +37,10 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Shape.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Text.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/TileMap.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/html/Markdown.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/html/HtmlDocument.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/html/HtmlContainer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/html/HtmlElementPainter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_bmp.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_bsi.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_gif.cpp
@@ -141,6 +145,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Shape.inl
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Text.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/TileMap.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/html/HtmlDocument.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/html/Markdown.hpp
     ${TCOB_INC_DIR}/tcob/gfx/procgen/LSystem.hpp
     ${TCOB_INC_DIR}/tcob/gfx/procgen/Metaball.hpp
     ${TCOB_INC_DIR}/tcob/gfx/procgen/Noise.hpp
@@ -202,19 +208,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/UIEvents.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/WidgetPainter.hpp
 )
-
-# litehtml
-if(TCOB_ENABLE_ADDON_GFX_LITEHTML)
-    list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/html/HtmlDocument.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/html/HtmlContainer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/html/HtmlElementPainter.cpp
-    )
-    list(APPEND HDR
-        ${TCOB_INC_DIR}/tcob/gfx/html/HtmlDocument.hpp
-        ${TCOB_INC_DIR}/tcob/gfx/html/HtmlElementPainter.hpp
-    )
-endif()
 
 if(TCOB_ENABLE_FILETYPES_GFX_THEORA)
     list(APPEND SRC

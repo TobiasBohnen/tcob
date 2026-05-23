@@ -6,16 +6,14 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/Texture.hpp"
 
-    #include "tcob/core/Color.hpp"
-    #include "tcob/core/Interfaces.hpp"
-    #include "tcob/core/Rect.hpp"
-    #include "tcob/gfx/Canvas.hpp"
-    #include "tcob/gfx/Font.hpp"
-    #include "tcob/gfx/Texture.hpp"
-
-namespace tcob::gfx::html {
+namespace tcob::gfx::html::detail {
 
 ////////////////////////////////////////////////////////////
 
@@ -155,5 +153,3 @@ private:
 
 ////////////////////////////////////////////////////////////
 }
-
-#endif

@@ -6,29 +6,26 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
+#include <memory>
 
-    #include <memory>
-
-    #include "tcob/core/Point.hpp"
-    #include "tcob/core/Property.hpp"
-    #include "tcob/core/Rect.hpp"
-    #include "tcob/core/Signal.hpp"
-    #include "tcob/core/Transform.hpp"
-    #include "tcob/core/assets/Asset.hpp"
-    #include "tcob/core/assets/Assets.hpp"
-    #include "tcob/core/input/Input.hpp"
-    #include "tcob/gfx/Canvas.hpp"
-    #include "tcob/gfx/FontFamily.hpp"
-    #include "tcob/gfx/Geometry.hpp"
-    #include "tcob/gfx/Gfx.hpp"
-    #include "tcob/gfx/Material.hpp"
-    #include "tcob/gfx/RenderTarget.hpp"
-    #include "tcob/gfx/Renderer.hpp"
-    #include "tcob/gfx/Transformable.hpp"
-    #include "tcob/gfx/Window.hpp"
-    #include "tcob/gfx/drawables/Drawable.hpp"
-    #include "tcob/gfx/html/HtmlElementPainter.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Signal.hpp"
+#include "tcob/core/Transform.hpp"
+#include "tcob/core/assets/Asset.hpp"
+#include "tcob/core/assets/Assets.hpp"
+#include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/FontFamily.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Renderer.hpp"
+#include "tcob/gfx/Transformable.hpp"
+#include "tcob/gfx/Window.hpp"
+#include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace litehtml {
 class document;
@@ -39,6 +36,7 @@ namespace tcob::gfx::html {
 
 namespace detail {
     class container;
+    class element_painter;
 }
 
 ////////////////////////////////////////////////////////////
@@ -70,8 +68,6 @@ public:
     void from_string(string const& html, string const& css);
     auto load(path const& file) noexcept -> bool;
 
-    void change_language(string const& language, string const& culture);
-
     void force_redraw();
 
 protected:
@@ -93,7 +89,6 @@ private:
     canvas _canvas;
     config _config;
 
-    std::unique_ptr<element_painter>    _painter;
     std::shared_ptr<detail::container>  _container;
     std::shared_ptr<litehtml::document> _lhdoc;
 
@@ -109,5 +104,3 @@ private:
     asset_owner_ptr<material> _material {};
 };
 }
-
-#endif

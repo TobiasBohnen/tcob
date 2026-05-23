@@ -6,39 +6,38 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
+#include <functional>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-    #include <functional>
-    #include <memory>
-    #include <string>
-    #include <unordered_map>
-    #include <vector>
+#include <litehtml.h>
+#include <litehtml/background.h>
+#include <litehtml/borders.h>
+#include <litehtml/css_length.h>
+#include <litehtml/document.h>
+#include <litehtml/document_container.h>
+#include <litehtml/el_space.h>
+#include <litehtml/el_text.h>
+#include <litehtml/font_description.h>
+#include <litehtml/html.h>
+#include <litehtml/os_types.h>
+#include <litehtml/render_item.h>
+#include <litehtml/string_id.h>
+#include <litehtml/types.h>
+#include <litehtml/web_color.h>
 
-    #include <litehtml.h>
-    #include <litehtml/background.h>
-    #include <litehtml/borders.h>
-    #include <litehtml/css_length.h>
-    #include <litehtml/document.h>
-    #include <litehtml/document_container.h>
-    #include <litehtml/el_space.h>
-    #include <litehtml/el_text.h>
-    #include <litehtml/font_description.h>
-    #include <litehtml/html.h>
-    #include <litehtml/os_types.h>
-    #include <litehtml/render_item.h>
-    #include <litehtml/string_id.h>
-    #include <litehtml/types.h>
-    #include <litehtml/web_color.h>
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/Texture.hpp"
+#include "tcob/gfx/html/HtmlDocument.hpp"
 
-    #include "tcob/core/Color.hpp"
-    #include "tcob/core/Point.hpp"
-    #include "tcob/core/Rect.hpp"
-    #include "tcob/core/Size.hpp"
-    #include "tcob/gfx/Canvas.hpp"
-    #include "tcob/gfx/Font.hpp"
-    #include "tcob/gfx/Texture.hpp"
-    #include "tcob/gfx/html/HtmlDocument.hpp"
-    #include "tcob/gfx/html/HtmlElementPainter.hpp"
+#include "HtmlElementPainter.hpp"
 
 namespace tcob::gfx::html::detail {
 
@@ -52,9 +51,8 @@ auto to_color(litehtml::web_color const& col) -> color;
 
 class container : public litehtml::document_container {
 public:
-    container(document& doc, document::config& config, canvas& canvas, element_painter& painter);
+    container(document& doc, document::config& config, canvas& canvas);
 
-    auto get_document() -> document&;
     void set_size(size_i size);
 
     auto create_font(litehtml::font_description const& descr, litehtml::document const* doc, litehtml::font_metrics* fm) -> litehtml::uint_ptr override;
@@ -79,7 +77,7 @@ public:
     auto create_element(char const* tag_name, litehtml::string_map const& attributes, std::shared_ptr<litehtml::document> const& doc) -> std::shared_ptr<litehtml::element> override;
     void get_media_features(litehtml::media_features& media) const override;
     void get_language(string& language, string& culture) const override;
-    void change_language(string const& language, string const& culture);
+    auto resolve_color(litehtml::string const& color) const -> litehtml::string override;
 
     void draw_list_marker(litehtml::uint_ptr hdc, litehtml::list_marker const& marker) override;
     void draw_image(litehtml::uint_ptr hdc, litehtml::background_layer const& layer, std::string const& url, std::string const& base_url) override;
@@ -94,11 +92,11 @@ private:
     void init_background(base_draw_context& ctx, litehtml::background_layer const& layer);
     void init_borders(borders& brds, litehtml::borders const& b, litehtml::position const& draw_pos);
 
-    document&         _document;
-    document::config& _config;
-    canvas&           _canvas;
-    element_painter&  _painter;
-    size_i            _windowSize;
+    document&               _document;
+    document::config&       _config;
+    detail::element_painter _painter;
+    canvas&                 _canvas;
+    size_i                  _windowSize;
 
     string                               _baseUrl;
     string                               _caption;
@@ -111,5 +109,3 @@ private:
 };
 
 }
-
-#endif

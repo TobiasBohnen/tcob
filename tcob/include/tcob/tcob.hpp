@@ -117,6 +117,7 @@
 #include <tcob/gfx/drawables/Text.hpp>
 #include <tcob/gfx/drawables/TileMap.hpp>
 #include <tcob/gfx/html/HtmlDocument.hpp>
+#include <tcob/gfx/html/Markdown.hpp>
 #include <tcob/gfx/procgen/LSystem.hpp>
 #include <tcob/gfx/procgen/Metaball.hpp>
 #include <tcob/gfx/procgen/Noise.hpp>

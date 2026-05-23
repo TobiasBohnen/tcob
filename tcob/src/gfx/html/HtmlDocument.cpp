@@ -5,31 +5,28 @@
 
 #include "tcob/gfx/html/HtmlDocument.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
+#include <memory>
+#include <types.h>
+#include <utility>
 
-    #include <memory>
-    #include <types.h>
-    #include <utility>
+#include <litehtml.h>
+#include <litehtml/el_space.h>
+#include <litehtml/el_text.h>
+#include <litehtml/master_css.h>
 
-    #include <litehtml.h>
-    #include <litehtml/el_space.h>
-    #include <litehtml/el_text.h>
-    #include <litehtml/master_css.h>
+#include "HtmlContainer.hpp"
 
-    #include "HtmlContainer.hpp"
-
-    #include "tcob/core/Point.hpp"
-    #include "tcob/core/Rect.hpp"
-    #include "tcob/core/Size.hpp"
-    #include "tcob/core/Transform.hpp"
-    #include "tcob/core/input/Input.hpp"
-    #include "tcob/core/io/FileStream.hpp"
-    #include "tcob/core/io/FileSystem.hpp"
-    #include "tcob/gfx/Geometry.hpp"
-    #include "tcob/gfx/Gfx.hpp"
-    #include "tcob/gfx/RenderTarget.hpp"
-    #include "tcob/gfx/RenderTexture.hpp"
-    #include "tcob/gfx/html/HtmlElementPainter.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/core/Transform.hpp"
+#include "tcob/core/input/Input.hpp"
+#include "tcob/core/io/FileStream.hpp"
+#include "tcob/core/io/FileSystem.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/RenderTexture.hpp"
 
 namespace tcob::gfx::html {
 
@@ -37,8 +34,7 @@ namespace tcob::gfx::html {
 
 document::document(config c)
     : _config {std::move(c)}
-    , _painter {std::make_unique<element_painter>(_canvas)}
-    , _container {std::make_shared<detail::container>(*this, _config, _canvas, *_painter)}
+    , _container {std::make_shared<detail::container>(*this, _config, _canvas)}
 {
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
@@ -87,14 +83,6 @@ auto document::load(path const& file) noexcept -> bool
     if (!fs) { return false; }
     from_string(io::read_as_string(file));
     return true;
-}
-
-void document::change_language(string const& language, string const& culture)
-{
-    if (!_lhdoc) { return; }
-
-    _container->change_language(language, culture);
-    _lhdoc->lang_changed();
 }
 
 void document::force_redraw()
@@ -234,5 +222,3 @@ auto document::convert_screen_to_world(point_i pos) const -> point_i
     return point_i {_config.Window->camera().convert_screen_to_world(pos)};
 }
 }
-
-#endif

@@ -5,40 +5,39 @@
 
 #include "HtmlContainer.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
+#include <memory>
+#include <string>
+#include <vector>
 
-    #include <memory>
-    #include <string>
-    #include <vector>
+#include <litehtml/background.h>
+#include <litehtml/borders.h>
+#include <litehtml/css_length.h>
+#include <litehtml/document.h>
+#include <litehtml/document_container.h>
+#include <litehtml/el_space.h>
+#include <litehtml/el_text.h>
+#include <litehtml/font_description.h>
+#include <litehtml/html.h>
+#include <litehtml/render_item.h>
+#include <litehtml/string_id.h>
+#include <litehtml/types.h>
+#include <litehtml/web_color.h>
 
-    #include <litehtml/background.h>
-    #include <litehtml/borders.h>
-    #include <litehtml/css_length.h>
-    #include <litehtml/document.h>
-    #include <litehtml/document_container.h>
-    #include <litehtml/el_space.h>
-    #include <litehtml/el_text.h>
-    #include <litehtml/font_description.h>
-    #include <litehtml/html.h>
-    #include <litehtml/render_item.h>
-    #include <litehtml/string_id.h>
-    #include <litehtml/types.h>
-    #include <litehtml/web_color.h>
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/core/StringUtils.hpp"
+#include "tcob/core/assets/AssetGroup.hpp"
+#include "tcob/core/io/FileSystem.hpp"
+#include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/TextFormatter.hpp"
+#include "tcob/gfx/Texture.hpp"
+#include "tcob/gfx/html/HtmlDocument.hpp"
 
-    #include "tcob/core/Color.hpp"
-    #include "tcob/core/Point.hpp"
-    #include "tcob/core/Rect.hpp"
-    #include "tcob/core/Size.hpp"
-    #include "tcob/core/StringUtils.hpp"
-    #include "tcob/core/assets/AssetGroup.hpp"
-    #include "tcob/core/io/FileSystem.hpp"
-    #include "tcob/gfx/Canvas.hpp"
-    #include "tcob/gfx/ColorGradient.hpp"
-    #include "tcob/gfx/Font.hpp"
-    #include "tcob/gfx/TextFormatter.hpp"
-    #include "tcob/gfx/Texture.hpp"
-    #include "tcob/gfx/html/HtmlDocument.hpp"
-    #include "tcob/gfx/html/HtmlElementPainter.hpp"
+#include "HtmlElementPainter.hpp"
 
 namespace tcob::gfx::html::detail {
 
@@ -73,17 +72,12 @@ static auto ToBorderStyle(litehtml::border_style style) -> border_style
 
 ////////////////////////////////////////////////////////////
 
-container::container(document& doc, document::config& config, canvas& canvas, element_painter& painter)
+container::container(document& doc, document::config& config, canvas& canvas)
     : _document {doc}
     , _config {config}
+    , _painter {canvas}
     , _canvas {canvas}
-    , _painter {painter}
 {
-}
-
-auto container::get_document() -> document&
-{
-    return _document;
 }
 
 void container::set_size(size_i size)
@@ -271,11 +265,7 @@ void container::get_language(string& language, string& culture) const
     culture  = _culture;
 }
 
-void container::change_language(string const& language, string const& culture)
-{
-    _language = language;
-    _culture  = culture;
-}
+auto container::resolve_color(litehtml::string const& color) const -> litehtml::string { return color::ToString(color::FromString(color)); }
 
 void container::init_borders(borders& brds, litehtml::borders const& b, litehtml::position const& draw_pos)
 {
@@ -454,5 +444,3 @@ void container::draw_conic_gradient(litehtml::uint_ptr hdc, litehtml::background
     // not supported
 }
 }
-
-#endif
