@@ -5,8 +5,6 @@
 
 #include "HtmlElementPainter.hpp"
 
-#include <algorithm>
-
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
@@ -110,17 +108,17 @@ void element_painter::draw_text(text_draw_context const& ctx)
     _canvas.set_font(ctx.Font);
     _canvas.draw_text(ctx.TextBox, ctx.Text);
 
-    if (ctx.FontDecorations != font_decorations::None) {
-        _canvas.set_stroke_style(ctx.TextColor);
-        _canvas.set_stroke_width(std::max(ctx.TextBox.height() / 10, 3.0f));
+    if (ctx.FontDecorationLine != font_decoration_line::None) {
+        _canvas.set_stroke_style(ctx.FontDecorationColor);
+        _canvas.set_stroke_width(ctx.FontDecorationThickness);
 
-        if ((ctx.FontDecorations & font_decorations::Linethrough) == font_decorations::Linethrough) {
+        if ((ctx.FontDecorationLine & font_decoration_line::Linethrough) == font_decoration_line::Linethrough) {
             _canvas.stroke_line({ctx.TextBox.left(), ctx.TextBox.top() + (ctx.TextBox.height() / 2)}, {ctx.TextBox.right(), ctx.TextBox.top() + (ctx.TextBox.height() / 2)});
         }
-        if ((ctx.FontDecorations & font_decorations::Overline) == font_decorations::Overline) {
+        if ((ctx.FontDecorationLine & font_decoration_line::Overline) == font_decoration_line::Overline) {
             _canvas.stroke_line({ctx.TextBox.left(), ctx.TextBox.top()}, {ctx.TextBox.right(), ctx.TextBox.top()});
         }
-        if ((ctx.FontDecorations & font_decorations::Underline) == font_decorations::Underline) {
+        if ((ctx.FontDecorationLine & font_decoration_line::Underline) == font_decoration_line::Underline) {
             _canvas.stroke_line({ctx.TextBox.left(), ctx.TextBox.bottom()}, {ctx.TextBox.right(), ctx.TextBox.bottom()});
         }
     }

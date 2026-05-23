@@ -35,7 +35,7 @@ enum class list_marker_type : u8 {
 
 ////////////////////////////////////////////////////////////
 
-enum class font_decorations : u8 {
+enum class font_decoration_line : u8 {
     None        = 0x00,
     Underline   = 0x01,
     Linethrough = 0x02,
@@ -114,11 +114,14 @@ struct gradient_draw_context : public base_draw_context {
 };
 
 struct text_draw_context {
-    string           Text;
-    rect_f           TextBox {};
-    font*            Font {nullptr};
-    color            TextColor {};
-    font_decorations FontDecorations {};
+    string Text;
+    rect_f TextBox {};
+    font*  Font {nullptr};
+    color  TextColor {};
+
+    font_decoration_line FontDecorationLine {};
+    color                FontDecorationColor {};
+    f32                  FontDecorationThickness {};
 };
 
 struct list_marker_draw_context {

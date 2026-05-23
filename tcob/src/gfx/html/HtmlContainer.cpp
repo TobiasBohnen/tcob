@@ -103,7 +103,8 @@ auto container::create_font(litehtml::font_description const& descr, litehtml::d
     fm->draw_spaces = true;
     _fonts.push_back(font.ptr());
     usize const retValue {_fonts.size() - 1};
-    _fontDecorations[retValue] = descr.decoration_line;
+    _fontDecoration[retValue] = font_deco {.Line = descr.decoration_line, .Color = descr.decoration_color, .Thickness = descr.decoration_thickness};
+
     return retValue + 1;
 }
 
@@ -295,21 +296,28 @@ void container::draw_text(litehtml::uint_ptr hdc, char const* text, litehtml::ui
     static_cast<void>(hdc);
     using namespace tcob::enum_ops;
 
-    font_decorations deco {font_decorations::None};
-    auto const       decos {_fontDecorations[hFont - 1]};
-    if (decos != 0) {
-        if (decos & litehtml::text_decoration_line::text_decoration_line_line_through) {
-            deco = deco | font_decorations::Linethrough;
+    auto const&          deco {_fontDecoration[hFont - 1]};
+    font_decoration_line lineStyle {font_decoration_line::None};
+    auto const           lineStyles {deco.Line};
+    if (lineStyles != 0) {
+        if (lineStyles & litehtml::text_decoration_line::text_decoration_line_line_through) {
+            lineStyle = lineStyle | font_decoration_line::Linethrough;
         }
-        if (decos & litehtml::text_decoration_line::text_decoration_line_overline) {
-            deco = deco | font_decorations::Overline;
+        if (lineStyles & litehtml::text_decoration_line::text_decoration_line_overline) {
+            lineStyle = lineStyle | font_decoration_line::Overline;
         }
-        if (decos & litehtml::text_decoration_line::text_decoration_line_underline) {
-            deco = deco | font_decorations::Underline;
+        if (lineStyles & litehtml::text_decoration_line::text_decoration_line_underline) {
+            lineStyle = lineStyle | font_decoration_line::Underline;
         }
     }
 
-    _painter.draw_text({.Text = text, .TextBox = to_rect(pos), .Font = _fonts[hFont - 1], .TextColor = to_color(col), .FontDecorations = deco});
+    _painter.draw_text({.Text                    = text,
+                        .TextBox                 = to_rect(pos),
+                        .Font                    = _fonts[hFont - 1],
+                        .TextColor               = to_color(col),
+                        .FontDecorationLine      = lineStyle,
+                        .FontDecorationColor     = to_color(deco.Color),
+                        .FontDecorationThickness = deco.Thickness.val()});
 }
 
 void container::init_background(base_draw_context& ctx, litehtml::background_layer const& layer)

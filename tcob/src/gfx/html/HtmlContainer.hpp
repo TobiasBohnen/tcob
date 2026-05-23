@@ -102,10 +102,17 @@ private:
     string                               _caption;
     std::unordered_map<string, texture*> _images {};
     std::vector<font*>                   _fonts;
-    std::unordered_map<usize, i32>       _fontDecorations {};
-    std::vector<std::function<void()>>   _overlayFunctions;
-    string                               _language {"en"};
-    string                               _culture;
+
+    struct font_deco { // TODO: style
+        i32                  Line {0};
+        litehtml::web_color  Color;
+        litehtml::css_length Thickness;
+    };
+    std::unordered_map<usize, font_deco> _fontDecoration {};
+
+    std::vector<std::function<void()>> _overlayFunctions;
+    string                             _language {"en"};
+    string                             _culture;
 };
 
 }
