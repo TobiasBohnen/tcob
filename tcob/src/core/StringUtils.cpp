@@ -51,6 +51,8 @@ auto to_string(char const* s) -> string
     return s == nullptr ? string {} : s;
 }
 
+auto is_ascii_alpha(char c) -> bool { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
+
 auto split(string_view str, char delim) -> std::vector<string_view>
 {
     return split(str, {&delim, 1});

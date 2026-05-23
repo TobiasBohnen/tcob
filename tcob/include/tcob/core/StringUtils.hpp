@@ -24,6 +24,8 @@ template <typename T>
 auto          to_string(T&& value) -> string;
 TCOB_API auto to_string(char const* s) -> string;
 
+TCOB_API auto is_ascii_alpha(char c) -> bool;
+
 template <Arithmetic T>
 auto to_number(string_view str) -> std::optional<T>;
 

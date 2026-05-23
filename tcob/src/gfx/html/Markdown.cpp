@@ -6,7 +6,6 @@
 #include "tcob/gfx/html/Markdown.hpp"
 
 #include <algorithm>
-#include <cctype>
 #include <format>
 #include <vector>
 
@@ -42,7 +41,7 @@ static auto ParseInline(utf8_string_view s, usize const from, usize const to) ->
         // inline html
         if (c == '<' && i + 1 < to) {
             char const next {s[i + 1]};
-            if (std::isalpha(next) || next == '/' || next == '!' || next == '?') {
+            if (helper::is_ascii_alpha(next) || next == '/' || next == '!' || next == '?') {
                 usize const closePos {s.find('>', i + 1)};
                 if (closePos != utf8_string_view::npos && closePos < to) {
                     retValue += s.substr(i, closePos - i + 1);
@@ -285,7 +284,19 @@ static auto IsOrderedListItem(utf8_string_view s, i32& startNum) -> bool
 
 static auto IsBlockquoteLine(utf8_string_view s) -> bool { return FirstChar(s) == '>'; }
 
-static auto IsTable(utf8_string_view s) -> bool { return FirstChar(s) == '|'; }
+static auto IsTable(utf8_string_view current, utf8_string_view next) -> bool
+{
+    current = helper::trim(current);
+    next    = helper::trim(next);
+
+    auto const hasOuterPipes {[](utf8_string_view s) {
+        return s.size() >= 2
+            && s.front() == '|'
+            && s.back() == '|';
+    }};
+
+    return hasOuterPipes(current) && hasOuterPipes(next) && next.contains('-');
+}
 
 static auto AllSameChar(utf8_string_view s, char const c) -> bool
 {
@@ -324,7 +335,9 @@ struct md_parser {
         if (IsBulletListItem(line)) { return list(false); }
         i32 num {0};
         if (IsOrderedListItem(line, num)) { return list(true); }
-        if (IsTable(line)) { return table(); }
+        if (CurrentPos + 1 < Lines.size() && IsTable(line, Lines[CurrentPos + 1])) {
+            return table();
+        }
         return paragraph();
     }
 
@@ -511,9 +524,12 @@ struct md_parser {
         while (!is_eof()) {
             utf8_string_view line {Lines[CurrentPos]};
             if (line.empty() || LeadingSpaces(line) == line.size()) { break; }
-            if (IsFencedCodeOpen(line) || IsThematicBreak(line) || HeadingLevel(line) || IsBlockquoteLine(line)) { break; }
+            if (IsFencedCodeOpen(line) || IsThematicBreak(line) || HeadingLevel(line) || IsBlockquoteLine(line) || IsBulletListItem(line)) { break; }
             i32 num {0};
-            if (IsBulletListItem(line) || IsOrderedListItem(line, num)) { break; }
+            if (IsOrderedListItem(line, num)) { break; }
+            if (CurrentPos + 1 < Lines.size() && IsTable(line, Lines[CurrentPos + 1])) {
+                break;
+            }
 
             utf8_string_view nextLine {(CurrentPos + 1 < Lines.size()) ? Lines[CurrentPos + 1] : utf8_string_view {}};
             if (AllSameChar(nextLine, '=') || AllSameChar(nextLine, '-')) {
