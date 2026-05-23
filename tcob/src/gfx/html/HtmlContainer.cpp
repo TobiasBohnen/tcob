@@ -447,8 +447,18 @@ void container::draw_radial_gradient(litehtml::uint_ptr hdc, litehtml::backgroun
 void container::draw_conic_gradient(litehtml::uint_ptr hdc, litehtml::background_layer const& layer, litehtml::background_layer::conic_gradient const& gradient)
 {
     static_cast<void>(hdc);
-    static_cast<void>(layer);
-    static_cast<void>(gradient);
-    // not supported
+
+    gradient_draw_context ctx;
+    init_background(ctx, layer);
+
+    std::vector<color_stop> colors;
+    colors.reserve(gradient.color_points.size());
+    for (auto const& cp : gradient.color_points) {
+        colors.emplace_back(cp.offset, to_color(cp.color));
+    }
+    // TODO: angle, radius
+    ctx.Gradient = _canvas.create_conic_gradient(to_point(gradient.position), color_gradient {colors});
+
+    _painter.draw_gradient(ctx);
 }
 }

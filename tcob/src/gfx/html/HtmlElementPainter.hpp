@@ -99,6 +99,7 @@ struct base_draw_context {
     rect_f            OriginBox {};
     background_repeat Repeat {};
     border_radii      BorderRadii {};
+    // TODO: Attachment?
 };
 
 struct image_draw_context : public base_draw_context {
@@ -122,6 +123,7 @@ struct text_draw_context {
     font_decoration_line FontDecorationLine {};
     color                FontDecorationColor {};
     f32                  FontDecorationThickness {};
+    // TODO: FontDecorationStyle
 };
 
 struct list_marker_draw_context {

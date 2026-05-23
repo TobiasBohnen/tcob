@@ -103,7 +103,7 @@ private:
     std::unordered_map<string, texture*> _images {};
     std::vector<font*>                   _fonts;
 
-    struct font_deco { // TODO: style
+    struct font_deco {
         i32                  Line {0};
         litehtml::web_color  Color;
         litehtml::css_length Thickness;
