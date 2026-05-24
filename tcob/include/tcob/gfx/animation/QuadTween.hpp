@@ -24,7 +24,6 @@
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
-
 ////////////////////////////////////////////////////////////
 
 template <typename T>

@@ -15,7 +15,6 @@
 #include "tcob/core/Property.hpp"
 
 namespace tcob {
-
 ////////////////////////////////////////////////////////////
 
 struct no_default_t { };

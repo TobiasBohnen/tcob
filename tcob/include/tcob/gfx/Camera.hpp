@@ -17,11 +17,9 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/random/Random.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
-
-class render_target;
-
 ////////////////////////////////////////////////////////////
 
 struct camera_state {

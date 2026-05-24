@@ -26,7 +26,6 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API dot_matrix_display : public widget {

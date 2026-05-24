@@ -13,100 +13,97 @@
 #include "tcob/core/random/Distribution.hpp"
 #include "tcob/core/random/Engine.hpp"
 
-namespace tcob {
+namespace tcob::random {
+////////////////////////////////////////////////////////////
 
-namespace random {
+template <RandomEngine E, typename D>
+class prng final {
+public:
+    using random_engine_type = E;
+    using state_type         = typename E::state_type;
+    using seed_type          = typename E::seed_type;
+    using result_type        = typename E::result_type;
+    using distribution_type  = D;
 
-    ////////////////////////////////////////////////////////////
+    explicit prng(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()), auto&&... distArgs);
+    explicit prng(state_type state, auto&&... distArgs);
 
-    template <RandomEngine E, typename D>
-    class prng final {
-    public:
-        using random_engine_type = E;
-        using state_type         = typename E::state_type;
-        using seed_type          = typename E::seed_type;
-        using result_type        = typename E::result_type;
-        using distribution_type  = D;
+    auto operator()(auto&&... distArgs);
 
-        explicit prng(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()), auto&&... distArgs);
-        explicit prng(state_type state, auto&&... distArgs);
+    auto next() -> result_type;
+    auto state() const -> state_type const&;
 
-        auto operator()(auto&&... distArgs);
+private:
+    random_engine_type _engine;
+    state_type         _state;
+    distribution_type  _distribution;
+};
 
-        auto next() -> result_type;
-        auto state() const -> state_type const&;
+////////////////////////////////////////////////////////////
 
-    private:
-        random_engine_type _engine;
-        state_type         _state;
-        distribution_type  _distribution;
-    };
+using prng_split_mix_32            = prng<split_mix_32, core_uniform_distribution>;
+using prng_split_mix_64            = prng<split_mix_64, core_uniform_distribution>;
+using prng_game_rand               = prng<game_rand, core_uniform_distribution>;
+using prng_xorshift_64             = prng<xorshift_64, core_uniform_distribution>;
+using prng_xorshift_64_star        = prng<xorshift_64_star, core_uniform_distribution>;
+using prng_xoroshiro_128_plus      = prng<xoroshiro_128_plus, core_uniform_distribution>;
+using prng_xoroshiro_128_plus_plus = prng<xoroshiro_128_plus_plus, core_uniform_distribution>;
+using prng_xoroshiro_128_star_star = prng<xoroshiro_128_star_star, core_uniform_distribution>;
+using prng_xoshiro_256_plus        = prng<xoshiro_256_plus, core_uniform_distribution>;
+using prng_xoshiro_256_plus_plus   = prng<xoshiro_256_plus_plus, core_uniform_distribution>;
+using prng_xoshiro_256_star_star   = prng<xoshiro_256_star_star, core_uniform_distribution>;
+using prng_well_512_a              = prng<well_512_a, core_uniform_distribution>;
+using prng_pcg_32                  = prng<pcg_32, core_uniform_distribution>;
+using prng_sfc_64                  = prng<sfc_64, core_uniform_distribution>;
 
-    ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
-    using prng_split_mix_32            = prng<split_mix_32, core_uniform_distribution>;
-    using prng_split_mix_64            = prng<split_mix_64, core_uniform_distribution>;
-    using prng_game_rand               = prng<game_rand, core_uniform_distribution>;
-    using prng_xorshift_64             = prng<xorshift_64, core_uniform_distribution>;
-    using prng_xorshift_64_star        = prng<xorshift_64_star, core_uniform_distribution>;
-    using prng_xoroshiro_128_plus      = prng<xoroshiro_128_plus, core_uniform_distribution>;
-    using prng_xoroshiro_128_plus_plus = prng<xoroshiro_128_plus_plus, core_uniform_distribution>;
-    using prng_xoroshiro_128_star_star = prng<xoroshiro_128_star_star, core_uniform_distribution>;
-    using prng_xoshiro_256_plus        = prng<xoshiro_256_plus, core_uniform_distribution>;
-    using prng_xoshiro_256_plus_plus   = prng<xoshiro_256_plus_plus, core_uniform_distribution>;
-    using prng_xoshiro_256_star_star   = prng<xoshiro_256_star_star, core_uniform_distribution>;
-    using prng_well_512_a              = prng<well_512_a, core_uniform_distribution>;
-    using prng_pcg_32                  = prng<pcg_32, core_uniform_distribution>;
-    using prng_sfc_64                  = prng<sfc_64, core_uniform_distribution>;
+template <i32 N, RandomEngine E = xoroshiro_128_plus_plus>
+class dice final {
+    static_assert(N > 0, "N must be greater than 0");
+    using state_type = typename E::state_type;
+    using seed_type  = typename E::seed_type;
 
-    ////////////////////////////////////////////////////////////
+public:
+    explicit dice(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
+    explicit dice(state_type state);
 
-    template <i32 N, RandomEngine E = xoroshiro_128_plus_plus>
-    class dice final {
-        static_assert(N > 0, "N must be greater than 0");
-        using state_type = typename E::state_type;
-        using seed_type  = typename E::seed_type;
+    auto state() const -> state_type const&;
 
-    public:
-        explicit dice(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
-        explicit dice(state_type state);
+    auto roll() -> i32;
 
-        auto state() const -> state_type const&;
+    auto roll_n(usize n) -> std::vector<i32>;
+    auto roll_n_sum(usize n) -> i32;
 
-        auto roll() -> i32;
+private:
+    prng<E, core_uniform_distribution> _random;
+};
 
-        auto roll_n(usize n) -> std::vector<i32>;
-        auto roll_n_sum(usize n) -> i32;
+////////////////////////////////////////////////////////////
 
-    private:
-        prng<E, core_uniform_distribution> _random;
-    };
+template <RandomEngine E = xoroshiro_128_plus_plus>
+class shuffle final {
+public:
+    using state_type = typename E::state_type;
+    using seed_type  = typename E::seed_type;
 
-    ////////////////////////////////////////////////////////////
+    explicit shuffle(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
+    explicit shuffle(state_type state);
 
-    template <RandomEngine E = xoroshiro_128_plus_plus>
-    class shuffle final {
-    public:
-        using state_type = typename E::state_type;
-        using seed_type  = typename E::seed_type;
+    auto state() const -> state_type const&;
 
-        explicit shuffle(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
-        explicit shuffle(state_type state);
+    void operator()(auto&& span);
 
-        auto state() const -> state_type const&;
-
-        void operator()(auto&& span);
-
-    private:
-        prng<E, core_uniform_distribution> _random {};
-    };
+private:
+    prng<E, core_uniform_distribution> _random {};
+};
 
 }
 
+namespace tcob {
 using rng = random::prng_xoroshiro_128_plus_plus;
 
 TCOB_API auto get_random_ID() -> uid;
-
 }
 
 #include "Random.inl"

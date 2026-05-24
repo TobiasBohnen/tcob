@@ -11,7 +11,7 @@
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////

@@ -18,7 +18,6 @@
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::ui {
-
 ////////////////////////////////////////////////////////////
 // forward declarations
 

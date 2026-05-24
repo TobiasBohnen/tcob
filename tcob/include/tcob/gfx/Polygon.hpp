@@ -15,7 +15,6 @@
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
-
 ////////////////////////////////////////////////////////////
 
 enum class clip_mode : u8 {

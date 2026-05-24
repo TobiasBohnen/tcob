@@ -17,7 +17,6 @@
 #include "tcob/core/Interfaces.hpp"
 
 namespace tcob::io {
-
 ////////////////////////////////////////////////////////////
 
 enum class seek_dir : u8 {

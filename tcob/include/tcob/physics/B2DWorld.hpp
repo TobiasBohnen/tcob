@@ -21,7 +21,6 @@
 #include "tcob/physics/Physics.hpp"
 
 namespace tcob::physics {
-
 ////////////////////////////////////////////////////////////
 
 struct body_move_event {

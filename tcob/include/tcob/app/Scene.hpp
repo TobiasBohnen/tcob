@@ -24,10 +24,6 @@
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-class game;
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API scene_node : public gfx::drawable, public gfx::transformable, public hybrid_updatable {
     friend class scene;
 
@@ -71,6 +67,7 @@ private:
 };
 
 ////////////////////////////////////////////////////////////
+class game;
 
 class TCOB_API scene : public hybrid_updatable, public input::receiver {
 public:

@@ -10,7 +10,6 @@
 #include <vector>
 
 namespace tcob::io::magic {
-
 ////////////////////////////////////////////////////////////
 
 struct signature {

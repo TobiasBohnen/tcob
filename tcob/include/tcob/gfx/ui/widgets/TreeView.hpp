@@ -20,7 +20,6 @@
 #include "tcob/gfx/ui/widgets/VScrollWidget.hpp"
 
 namespace tcob::ui {
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API tree_view : public vscroll_widget {

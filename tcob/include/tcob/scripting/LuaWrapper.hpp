@@ -24,7 +24,6 @@
 #include "tcob/scripting/Scripting.hpp"
 
 namespace tcob::scripting {
-
 ////////////////////////////////////////////////////////////
 
 template <typename T>

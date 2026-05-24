@@ -14,7 +14,6 @@
 #include "tcob/core/Interfaces.hpp"
 
 namespace tcob {
-
 ////////////////////////////////////////////////////////////
 
 struct event_base {

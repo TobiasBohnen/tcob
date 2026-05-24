@@ -15,7 +15,6 @@
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
-#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/Stats.hpp"
 #include "tcob/gfx/VertexArray.hpp"

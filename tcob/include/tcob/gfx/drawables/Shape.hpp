@@ -27,7 +27,6 @@
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Ray.hpp"
-#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/Transformable.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"

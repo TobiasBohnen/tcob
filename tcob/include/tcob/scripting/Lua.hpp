@@ -24,10 +24,7 @@ using lua_Hook         = void (*)(lua_State*, lua_Debug*);
 using lua_Writer       = int (*)(lua_State*, void const* p, size_t sz, void* ud);
 using lua_Alloc        = void* (*)(void* ud, void* ptr, size_t osize, size_t nsize);
 
-////////////////////////////////////////////////////////////
-
 namespace tcob::scripting {
-
 ///////////////////////////////////////////////////////////
 
 template <typename T>

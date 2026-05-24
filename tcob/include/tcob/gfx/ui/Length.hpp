@@ -13,7 +13,6 @@
 #include "tcob/core/Size.hpp"
 
 namespace tcob::ui {
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API length final {

@@ -30,6 +30,7 @@
 #include "tcob/core/random/Random.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 
 namespace tcob::gfx {

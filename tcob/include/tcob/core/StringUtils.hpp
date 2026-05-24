@@ -17,6 +17,7 @@
 #include "tcob/core/Concepts.hpp"
 
 namespace tcob::helper {
+////////////////////////////////////////////////////////////
 
 TCOB_API auto get_levenshtein_distance(string_view lhs, string_view rhs) -> u32;
 
@@ -52,6 +53,7 @@ TCOB_API auto random_string(usize length) -> string;
 }
 
 namespace tcob::utf8 {
+////////////////////////////////////////////////////////////
 
 TCOB_API auto length(utf8_string_view str) -> isize;
 TCOB_API auto insert(utf8_string_view str, utf8_string_view what, usize pos) -> utf8_string;

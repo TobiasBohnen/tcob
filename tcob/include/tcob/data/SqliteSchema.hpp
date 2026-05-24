@@ -14,7 +14,6 @@
 #include "tcob/data/SqliteTable.hpp"
 
 namespace tcob::db {
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API schema final {

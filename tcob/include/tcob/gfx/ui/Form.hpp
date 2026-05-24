@@ -21,7 +21,6 @@
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Gfx.hpp"
-#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/drawables/Cursor.hpp"

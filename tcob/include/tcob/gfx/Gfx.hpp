@@ -247,16 +247,11 @@ struct display {
 
 namespace tcob {
 namespace gfx {
-    class background;
     class canvas;
     class font;
-    class particle_emitter;
-    class particle_system;
-    class parallax_background;
     class render_system;
     class render_target;
     struct render_properties;
-    class tilemap_base;
     class window;
 
     class material;

@@ -17,7 +17,6 @@
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx::text_formatter {
-
 ////////////////////////////////////////////////////////////
 
 enum class command_type : u8 {
