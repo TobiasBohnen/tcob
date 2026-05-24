@@ -13,6 +13,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/random/Random.hpp"
 #include "tcob/core/spatial/KDTree.hpp"
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/procgen/Noise.hpp"
@@ -59,10 +60,10 @@ private:
 
 class TCOB_API neuquant final {
 public:
-    auto static GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
+    auto static GetPalette(image const& img, i32 maxColors, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count())) -> std::vector<color>;
 
 private:
-    explicit neuquant(i32 maxColors);
+    explicit neuquant(i32 maxColors, u64 seed);
 
     struct neuron {
         f64 R {0};
@@ -71,11 +72,13 @@ private:
     };
 
     void train(image const& img);
-    auto find_bmu(color c) const -> i32;
-    void alter_neighbor(i32 index, color c, f64 alpha);
+    void adapt(i32 index, color c, f64 alpha);
 
+    i32                 _maxColors;
     std::vector<neuron> _network;
-    i32                 _maxColors {};
+    std::vector<f64>    _bias;
+    std::vector<f64>    _freq;
+    random::shuffle<>   _rngShuffle;
 };
 
 ////////////////////////////////////////////////////////////
@@ -179,5 +182,4 @@ public:
 
     auto to_indexed(image const& img) const -> std::vector<u32> override;
 };
-
 };

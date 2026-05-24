@@ -8,7 +8,9 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <memory>
+#include <numeric>
 #include <utility>
 #include <vector>
 
@@ -162,19 +164,21 @@ void octree_quant::merge_leaf_nodes(node* n, i32 level)
 
 ////////////////////////////////////////////////////////////
 
-neuquant::neuquant(i32 maxColors)
+static constexpr f64 BETA {1.0 / 1024.0};
+static constexpr f64 GAMMA {1024.0};
+
+neuquant::neuquant(i32 maxColors, u64 seed)
     : _maxColors {maxColors}
+    , _bias(maxColors, 0.0)
+    , _freq(maxColors, 1.0 / maxColors)
+    , _rngShuffle {seed}
 {
-    _network.resize(_maxColors);
-    for (i32 i {0}; i < _maxColors; ++i) {
-        f64 const val {(i * 255.0) / std::max(1, _maxColors - 1)};
-        _network[i] = {.R = val, .G = val, .B = val};
-    }
+    _network.resize(maxColors);
 }
 
-auto neuquant::GetPalette(image const& img, i32 maxColors) -> std::vector<color>
+auto neuquant::GetPalette(image const& img, i32 maxColors, u64 seed) -> std::vector<color>
 {
-    neuquant quant {maxColors};
+    neuquant quant {maxColors, seed};
     quant.train(img);
     std::vector<color> palette;
     palette.reserve(maxColors);
@@ -192,61 +196,49 @@ auto neuquant::GetPalette(image const& img, i32 maxColors) -> std::vector<color>
 
 void neuquant::train(image const& img)
 {
-    auto const& info {img.info()};
-    i32 const   lengthCount {info.Size.area()};
+    i32 const total {img.info().Size.area()};
+    i32 const sampleFac {std::max(1, total / 100000)};
+    i32 const numSamples {total / sampleFac};
+    if (numSamples <= 0) { return; }
 
-    i32 const cycleCount {100};
-    i32 const step {std::clamp(lengthCount / (_maxColors * 30), 1, 30)};
-    u32 const primeStep {499};
+    std::vector<i32> indices(total);
+    std::ranges::iota(indices, 0);
+    _rngShuffle(indices);
 
+    for (i32 i {0}; i < std::min(total, _maxColors); ++i) {
+        color const c {img.get_pixel(static_cast<usize>(indices[i]))};
+        _network[i] = {.R = static_cast<f64>(c.R), .G = static_cast<f64>(c.G), .B = static_cast<f64>(c.B)};
+    }
+
+    indices.resize(numSamples);
+
+    f64 const alphaFactor {std::pow(0.01, 1.0 / numSamples)};
     f64       alpha {1.0};
-    f64       radius {std::max(static_cast<f64>(_maxColors >> 3), 2.0)};
-    f64 const radDecay {radius / cycleCount};
 
-    usize pixelPos {0};
-
-    for (i32 i {0}; i < cycleCount; ++i) {
-        if (alpha < 0.001) { break; }
-
-        for (i32 j {0}; j < lengthCount; j += step) {
-            color const c {img.get_pixel((pixelPos % lengthCount))};
-            i32 const   bmu {find_bmu(c)};
-            alter_neighbor(bmu, c, alpha);
-
-            for (i32 k {1}; k <= static_cast<i32>(radius); ++k) {
-                f64 const distAlpha {alpha * ((radius - k) / radius)};
-                if (bmu + k < _maxColors) { alter_neighbor(bmu + k, c, distAlpha); }
-                if (bmu - k >= 0) { alter_neighbor(bmu - k, c, distAlpha); }
+    for (i32 i {0}; i < numSamples; ++i) {
+        color const c {img.get_pixel(static_cast<usize>(indices[i]))};
+        i32         best {0};
+        f64         minBias {1e30};
+        for (i32 j {0}; j < _maxColors; ++j) {
+            f64 const dr {_network[j].R - c.R};
+            f64 const dg {_network[j].G - c.G};
+            f64 const db {_network[j].B - c.B};
+            if (f64 const b {(dr * dr) + (dg * dg) + (db * db) - (_bias[j] * GAMMA)}; b < minBias) {
+                minBias = b;
+                best    = j;
             }
-
-            pixelPos += primeStep;
+            f64 const betafreq {BETA * _freq[j]};
+            _freq[j] -= betafreq;
+            _bias[j] += betafreq * GAMMA;
         }
-
-        alpha -= (1.0 / cycleCount);
-        radius -= radDecay;
+        _freq[best] += BETA;
+        _bias[best] -= 1.0;
+        adapt(best, c, alpha);
+        alpha *= alphaFactor;
     }
 }
 
-auto neuquant::find_bmu(color c) const -> i32
-{
-    i32 bestIdx {0};
-    f64 minDist {1e30};
-
-    for (i32 i {0}; i < _maxColors; ++i) {
-        f64 const dr {_network[i].R - c.R};
-        f64 const dg {_network[i].G - c.G};
-        f64 const db {_network[i].B - c.B};
-        f64 const dist {(dr * dr) + (dg * dg) + (db * db)};
-
-        if (dist < minDist) {
-            minDist = dist;
-            bestIdx = i;
-        }
-    }
-    return bestIdx;
-}
-
-void neuquant::alter_neighbor(i32 index, color c, f64 alpha)
+void neuquant::adapt(i32 index, color c, f64 alpha)
 {
     neuron& n {_network[index]};
 
