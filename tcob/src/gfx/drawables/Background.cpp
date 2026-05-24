@@ -72,7 +72,7 @@ auto parallax_background::can_draw() const -> bool
 
 void parallax_background::on_draw_to(render_target& target, transform const& xform)
 {
-    auto const cameraPos {target.camera().Position};
+    auto const& cameraPos {*target.camera().Position};
     target.camera().push_state();
 
     _quads.resize(_layers.size());
