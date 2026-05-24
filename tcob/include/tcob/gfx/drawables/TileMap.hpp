@@ -44,6 +44,8 @@ using tileset = std::unordered_map<tile_index_t, T>;
 
 ////////////////////////////////////////////////////////////
 
+class tilemap_base;
+
 class TCOB_API tilemap_layer final : public non_copyable {
     friend class tilemap_base;
 
