@@ -72,10 +72,8 @@ auto bmp_decoder::decode(io::istream& in) -> std::optional<image>
 
         auto const palette {get_palette(in)};
 
-        size_i const size {
-            _infoHeader.Width < 0 ? -_infoHeader.Width : _infoHeader.Width,
-            _infoHeader.Height < 0 ? -_infoHeader.Height : _infoHeader.Height};
-        u16 const bitCount {_infoHeader.BitCount};
+        size_i const size {std::abs(_infoHeader.Width), std::abs(_infoHeader.Height)};
+        u16 const    bitCount {_infoHeader.BitCount};
 
         in.seek(offset + _header.BitsOffset, io::seek_dir::Begin);
 
@@ -105,7 +103,7 @@ auto bmp_decoder::decode_info(io::istream& in) -> std::optional<image::informati
     _header.read(in);
     if (_header.Signature == SIGNATURE) {
         _infoHeader.read(in);
-        _info = image::information {.Size = {_infoHeader.Width, _infoHeader.Height}, .Format = image::format::RGBA};
+        _info = image::information {.Size = {std::abs(_infoHeader.Width), std::abs(_infoHeader.Height)}, .Format = image::format::RGBA};
         return _info;
     }
     return std::nullopt;
