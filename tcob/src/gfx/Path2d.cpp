@@ -336,10 +336,11 @@ auto path2d::polygonize() -> std::vector<polygon>
             idx += 3;
         } break;
         case BezierTo: {
-            tween_func::quad_bezier_curve func;
-            func.StartPoint   = {Commands[idx + 1], Commands[idx + 2]};
-            func.ControlPoint = {Commands[idx + 3], Commands[idx + 4]};
-            func.EndPoint     = {Commands[idx + 5], Commands[idx + 6]};
+            tween_func::cubic_bezier_curve func;
+            func.StartPoint    = curPos;
+            func.ControlPoint0 = {Commands[idx + 1], Commands[idx + 2]};
+            func.ControlPoint1 = {Commands[idx + 3], Commands[idx + 4]};
+            func.EndPoint      = {Commands[idx + 5], Commands[idx + 6]};
             for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
             curPos = func.EndPoint;
             idx += 7;
