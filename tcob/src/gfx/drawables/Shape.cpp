@@ -294,6 +294,8 @@ void rect_shape::on_update(milliseconds deltaTime)
 
 void rect_shape::update_geometry()
 {
+    if (!Material) { return; }
+
     mark_clean();
 
     _quads.clear();
@@ -352,6 +354,8 @@ void circle_shape::on_update(milliseconds /* deltaTime */)
 
 void circle_shape::update_geometry()
 {
+    if (!Material) { return; }
+
     mark_clean();
 
     _store.clear();
@@ -501,6 +505,8 @@ auto poly_shape::center() const -> point_f
 
 void poly_shape::update_geometry()
 {
+    if (!Material) { return; }
+
     mark_clean();
 
     auto const info {polygons::info(*Polygons)};
