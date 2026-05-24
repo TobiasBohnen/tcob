@@ -31,7 +31,7 @@ namespace detail {
     class default_creator {
     public:
         template <DerivedFrom<widget> T>
-        auto create_widget(string const& name) -> T&;
+        auto create_widget(string const& name, auto&&... args) -> T&;
     };
 }
 
@@ -65,7 +65,7 @@ protected:
     explicit layout(parent parent);
 
     template <DerivedFrom<widget> T>
-    auto add_widget(string const& name) -> T&;
+    auto add_widget(string const& name, auto&&... args) -> T&;
 
     virtual void do_layout(size_f size) = 0;
 
@@ -85,7 +85,7 @@ public:
     explicit manual_layout(parent parent);
 
     template <DerivedFrom<widget> T>
-    auto create_widget(rect_f const& rect, string const& name) -> T&;
+    auto create_widget(rect_f const& rect, string const& name, auto&&... args) -> T&;
 
     auto allows_move() const -> bool override;
     auto allows_resize() const -> bool override;
@@ -102,7 +102,7 @@ public:
     explicit auto_size_layout(parent parent);
 
     template <DerivedFrom<widget> T>
-    auto create_widget(point_f pos, string const& name) -> T&;
+    auto create_widget(point_f pos, string const& name, auto&&... args) -> T&;
 
     auto allows_move() const -> bool override;
 
@@ -118,7 +118,7 @@ public:
     explicit dock_layout(parent parent);
 
     template <DerivedFrom<widget> T>
-    auto create_widget(dock_style dock, string const& name) -> T&;
+    auto create_widget(dock_style dock, string const& name, auto&&... args) -> T&;
 
 protected:
     void do_layout(size_f size) override;
@@ -135,7 +135,7 @@ public:
     grid_layout(parent parent, size_i initSize, bool autoGrow = false);
 
     template <DerivedFrom<widget> T>
-    auto create_widget(rect_i const& bounds, string const& name) -> T&;
+    auto create_widget(rect_i const& bounds, string const& name, auto&&... args) -> T&;
 
 protected:
     void do_layout(size_f size) override;
@@ -231,7 +231,7 @@ public:
     tree_layout(parent parent);
 
     template <DerivedFrom<widget> T>
-    auto create_widget(i32 level, string const& name) -> T&;
+    auto create_widget(i32 level, string const& name, auto&&... args) -> T&;
 
 protected:
     void do_layout(size_f size) override;
@@ -279,7 +279,7 @@ public:
     explicit magnetic_snap_layout(parent parent, f32 distance, bool snapEdges = true, bool snapSiblings = true);
 
     template <DerivedFrom<widget> T>
-    auto create_widget(rect_f const& rect, string const& name) -> T&;
+    auto create_widget(rect_f const& rect, string const& name, auto&&... args) -> T&;
 
     auto allows_move() const -> bool override;
     // FIXME: auto allows_resize() const -> bool override;

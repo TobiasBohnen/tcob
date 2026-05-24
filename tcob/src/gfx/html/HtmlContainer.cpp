@@ -72,17 +72,15 @@ static auto ToBorderStyle(litehtml::border_style style) -> border_style
 
 ////////////////////////////////////////////////////////////
 
-container::container(document& doc, document::config& config, canvas& canvas)
-    : _document {doc}
-    , _config {config}
-    , _painter {canvas}
-    , _canvas {canvas}
+container::container(document::config& config)
+    : _config {config}
+    , _painter {*_config.Canvas}
 {
 }
 
 void container::set_size(size_i size)
 {
-    _windowSize = size;
+    _size = size;
 }
 
 auto container::create_font(litehtml::font_description const& descr, litehtml::document const* /* doc */, litehtml::font_metrics* fm) -> litehtml::uint_ptr
@@ -93,7 +91,7 @@ auto container::create_font(litehtml::font_description const& descr, litehtml::d
     }
     style.Weight = static_cast<font::weight>(descr.weight);
 
-    auto const font {_config.Fonts->get_font(style, static_cast<u32>(descr.size))};
+    auto const font {_config.Fonts[_config.Fonts.contains(descr.family) ? descr.family : _config.DefaultFont]->get_font(style, static_cast<u32>(descr.size))};
 
     auto const& fontInfo {font->info()};
     fm->ascent      = fontInfo.Ascender;
@@ -135,7 +133,7 @@ auto container::get_default_font_size() const -> litehtml::pixel_t
 
 auto container::get_default_font_name() const -> char const*
 {
-    return _config.Fonts->name().c_str();
+    return _config.DefaultFont.c_str();
 }
 
 void container::load_image(char const* src, char const* baseurl, bool redraw_on_ready)
@@ -147,7 +145,7 @@ void container::load_image(char const* src, char const* baseurl, bool redraw_on_
             _images[src] = tex.ptr();
 
             if (redraw_on_ready) {
-                _document.force_redraw();
+                ForceRedraw();
             }
         }
     }
@@ -185,7 +183,7 @@ void container::link(std::shared_ptr<litehtml::document> const& doc, litehtml::e
 void container::on_anchor_click(char const* url, litehtml::element::ptr const& el)
 {
     el->set_pseudo_class(litehtml::_id("visited"), true);
-    _document.AnchorClick(url);
+    AnchorClick(url);
 }
 
 void container::on_mouse_event(litehtml::element::ptr const& el, litehtml::mouse_event event)
@@ -222,24 +220,23 @@ void container::import_css(string& text, string const& url, string& baseurl)
 void container::set_clip(litehtml::position const& pos, litehtml::border_radiuses const& bdr_radius)
 {
     static_cast<void>(bdr_radius);
-    auto& canvas {_canvas};
-    canvas.set_scissor(rect_f {static_cast<f32>(pos.x),
-                               static_cast<f32>(pos.y),
-                               static_cast<f32>(_windowSize.Width) - pos.x,
-                               static_cast<f32>(_windowSize.Height) - pos.y});
+    _config.Canvas->set_scissor(rect_f {static_cast<f32>(pos.x),
+                                        static_cast<f32>(pos.y),
+                                        static_cast<f32>(_size.Width) - pos.x,
+                                        static_cast<f32>(_size.Height) - pos.y});
 }
 
 void container::del_clip()
 {
-    _canvas.reset_scissor();
+    _config.Canvas->reset_scissor();
 }
 
 void container::get_viewport(litehtml::position& viewport) const
 {
     viewport.x      = 0;
     viewport.y      = 0;
-    viewport.width  = static_cast<f32>(_windowSize.Width);
-    viewport.height = static_cast<f32>(_windowSize.Height);
+    viewport.width  = static_cast<f32>(_size.Width);
+    viewport.height = static_cast<f32>(_size.Height);
 }
 
 auto container::create_element(char const*, litehtml::string_map const&, std::shared_ptr<litehtml::document> const&) -> std::shared_ptr<litehtml::element>
@@ -250,8 +247,8 @@ auto container::create_element(char const*, litehtml::string_map const&, std::sh
 void container::get_media_features(litehtml::media_features& media) const
 {
     media.type          = litehtml::media_type_screen;
-    media.width         = static_cast<litehtml::pixel_t>(_windowSize.Width);
-    media.height        = static_cast<litehtml::pixel_t>(_windowSize.Height);
+    media.width         = static_cast<litehtml::pixel_t>(_size.Width);
+    media.height        = static_cast<litehtml::pixel_t>(_size.Height);
     media.device_width  = static_cast<litehtml::pixel_t>((*_config.Window->Size).Width);
     media.device_height = static_cast<litehtml::pixel_t>((*_config.Window->Size).Height);
     media.color         = 8;
@@ -422,7 +419,7 @@ void container::draw_linear_gradient(litehtml::uint_ptr hdc, litehtml::backgroun
     for (auto const& cp : gradient.color_points) {
         colors.emplace_back(cp.offset, to_color(cp.color));
     }
-    ctx.Gradient = _canvas.create_linear_gradient(to_point(gradient.start), to_point(gradient.end), color_gradient {colors});
+    ctx.Gradient = _config.Canvas->create_linear_gradient(to_point(gradient.start), to_point(gradient.end), color_gradient {colors});
 
     _painter.draw_gradient(ctx);
 }
@@ -439,7 +436,7 @@ void container::draw_radial_gradient(litehtml::uint_ptr hdc, litehtml::backgroun
     for (auto const& cp : gradient.color_points) {
         colors.emplace_back(cp.offset, to_color(cp.color));
     }
-    ctx.Gradient = _canvas.create_radial_gradient(to_point(gradient.position), 0, gradient.radius.x, color_gradient {colors});
+    ctx.Gradient = _config.Canvas->create_radial_gradient(to_point(gradient.position), 0, gradient.radius.x, color_gradient {colors});
 
     _painter.draw_gradient(ctx);
 }
@@ -457,7 +454,7 @@ void container::draw_conic_gradient(litehtml::uint_ptr hdc, litehtml::background
         colors.emplace_back(cp.offset, to_color(cp.color));
     }
     // TODO: angle, radius
-    ctx.Gradient = _canvas.create_conic_gradient(to_point(gradient.position), color_gradient {colors});
+    ctx.Gradient = _config.Canvas->create_conic_gradient(to_point(gradient.position), color_gradient {colors});
 
     _painter.draw_gradient(ctx);
 }

@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <unordered_map>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
@@ -44,11 +45,13 @@ class TCOB_API document final : public entity, public transformable {
 public:
     ////////////////////////////////////////////////////////////
     struct config {
-        assets::group*         AssetGroup {nullptr};
-        asset_ptr<font_family> Fonts;
-        i32                    DefaultFontSize {0};
-        window*                Window {nullptr};
-        string                 MasterCSSPath;
+        assets::group*                                     AssetGroup {nullptr};
+        std::unordered_map<string, asset_ptr<font_family>> Fonts;
+        string                                             DefaultFont;
+        i32                                                DefaultFontSize {0};
+        window*                                            Window {nullptr};
+        canvas*                                            Canvas {nullptr};
+        string                                             MasterCSSPath;
     };
 
     ////////////////////////////////////////////////////////////
@@ -86,7 +89,6 @@ protected:
     auto convert_screen_to_world(point_i pos) const -> point_i;
 
 private:
-    canvas _canvas;
     config _config;
 
     std::shared_ptr<detail::container>  _container;

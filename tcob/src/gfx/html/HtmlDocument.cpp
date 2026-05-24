@@ -34,13 +34,16 @@ namespace tcob::gfx::html {
 
 document::document(config c)
     : _config {std::move(c)}
-    , _container {std::make_shared<detail::container>(*this, _config, _canvas)}
+    , _container {std::make_shared<detail::container>(_config)}
 {
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
     geometry::set_color(_quad, colors::White);
     geometry::set_texcoords(_quad, {.UVRect = render_texture::UVRect(), .Level = 0});
-    _material->first_pass().Texture = _canvas.get_texture();
+    _material->first_pass().Texture = _config.Canvas->get_texture();
+
+    _container->ForceRedraw.connect([&] { force_redraw(); });
+    _container->AnchorClick.connect([&](auto const& val) { AnchorClick(val); });
 }
 
 document::~document() = default;
@@ -115,11 +118,11 @@ void document::on_draw_to(render_target& target, transform const& xform)
         size_f const size {Bounds->Size};
 
         _container->set_size(size_i {size});
-        _canvas.begin_frame(size_i {size}, 1.0f);
+        _config.Canvas->begin_frame(size_i {size}, 1.0f);
         _lhdoc->render(size.Width);
         litehtml::position const pos {0, 0, size.Width, size.Height};
         _lhdoc->draw(0, 0, 0, &pos);
-        _canvas.end_frame();
+        _config.Canvas->end_frame();
 
         _needsRedraw = false;
     }

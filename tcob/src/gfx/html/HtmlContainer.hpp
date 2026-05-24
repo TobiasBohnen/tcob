@@ -31,8 +31,8 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
-#include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Texture.hpp"
 #include "tcob/gfx/html/HtmlDocument.hpp"
@@ -51,7 +51,10 @@ auto to_color(litehtml::web_color const& col) -> color;
 
 class container : public litehtml::document_container {
 public:
-    container(document& doc, document::config& config, canvas& canvas);
+    explicit container(document::config& config);
+
+    signal<string const> AnchorClick;
+    signal<>             ForceRedraw;
 
     void set_size(size_i size);
 
@@ -92,11 +95,9 @@ private:
     void init_background(base_draw_context& ctx, litehtml::background_layer const& layer);
     void init_borders(borders& brds, litehtml::borders const& b, litehtml::position const& draw_pos);
 
-    document&               _document;
     document::config&       _config;
     detail::element_painter _painter;
-    canvas&                 _canvas;
-    size_i                  _windowSize;
+    size_i                  _size;
 
     string                               _baseUrl;
     string                               _caption;
