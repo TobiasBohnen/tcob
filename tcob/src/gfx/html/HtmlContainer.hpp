@@ -28,9 +28,6 @@
 #include <litehtml/types.h>
 #include <litehtml/web_color.h>
 
-#include "tcob/core/Color.hpp"
-#include "tcob/core/Point.hpp"
-#include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Font.hpp"
@@ -40,20 +37,14 @@
 #include "HtmlElementPainter.hpp"
 
 namespace tcob::gfx::html::detail {
-
-////////////////////////////////////////////////////////////
-
-auto to_rect(litehtml::position const& pos) -> rect_f;
-auto to_point(litehtml::pointF const& pos) -> point_f;
-auto to_color(litehtml::web_color const& col) -> color;
-
 ////////////////////////////////////////////////////////////
 
 class container : public litehtml::document_container {
 public:
-    explicit container(document::config& config);
+    explicit container(config& config);
 
     signal<string const> AnchorClick;
+    signal<string const> CursorChanged;
     signal<>             ForceRedraw;
 
     void set_size(size_i size);
@@ -95,7 +86,7 @@ private:
     void init_background(base_draw_context& ctx, litehtml::background_layer const& layer);
     void init_borders(borders& brds, litehtml::borders const& b, litehtml::position const& draw_pos);
 
-    document::config&       _config;
+    config&                 _config;
     detail::element_painter _painter;
     size_i                  _size;
 

@@ -21,8 +21,6 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/core/io/FileStream.hpp"
-#include "tcob/core/io/FileSystem.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
@@ -32,8 +30,9 @@ namespace tcob::gfx::html {
 
 ////////////////////////////////////////////////////////////
 
-document::document(config c)
+document::document(config c, window& window)
     : _config {std::move(c)}
+    , _window {window}
     , _container {std::make_shared<detail::container>(_config)}
 {
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
@@ -42,50 +41,25 @@ document::document(config c)
     geometry::set_texcoords(_quad, {.UVRect = render_texture::UVRect(), .Level = 0});
     _material->first_pass().Texture = _config.Canvas->get_texture();
 
-    _container->ForceRedraw.connect([&] { force_redraw(); });
     _container->AnchorClick.connect([&](auto const& val) { AnchorClick(val); });
+    _container->CursorChanged.connect([&](auto const& val) {
+        auto winCursor {*_window.Cursor};
+        if (winCursor.is_ready()) { winCursor->ActiveMode = val; }
+    });
+    _container->ForceRedraw.connect([&] { force_redraw(); });
 }
 
 document::~document() = default;
-
-auto document::mouse_position() const -> point_i
-{
-    return _mousePosition;
-}
-
-auto document::is_button_down() const -> bool
-{
-    return _buttonDown;
-}
 
 auto document::bounds() const -> rect_f
 {
     return Bounds;
 }
 
-void document::from_string(string const& html)
-{
-    string css;
-    if (io::is_file(_config.MasterCSSPath)) {
-        io::ifstream stream {_config.MasterCSSPath};
-        css = stream.read_string(stream.size_in_bytes());
-    }
-
-    from_string(html, css);
-}
-
-void document::from_string(string const& html, string const& css)
+void document::create_from_string(string const& html, string const& css)
 {
     _lhdoc = litehtml::document::createFromString(html, _container.get(), litehtml::master_css, css);
     force_redraw();
-}
-
-auto document::load(path const& file) noexcept -> bool
-{
-    io::ifstream fs {file};
-    if (!fs) { return false; }
-    from_string(io::read_as_string(file));
-    return true;
 }
 
 void document::force_redraw()
@@ -151,7 +125,6 @@ void document::on_mouse_motion(input::mouse::motion_event const& ev)
     point_i const mp {convert_screen_to_world(ev.Position)};
 
     if (bound.contains(mp)) {
-        _mousePosition = mp - bound.Position;
         if (_lhdoc->on_mouse_over(
                 static_cast<litehtml::pixel_t>(mp.X - bound.left()),
                 static_cast<litehtml::pixel_t>(mp.Y - bound.top()),
@@ -163,7 +136,6 @@ void document::on_mouse_motion(input::mouse::motion_event const& ev)
 
         _isMouseOver = true;
     } else {
-        _mousePosition = {-1, -1};
         if (_isMouseOver) {
             if (_lhdoc->on_mouse_leave(redraw)) {
                 force_redraw();
@@ -222,6 +194,6 @@ void document::on_mouse_button_up(input::mouse::button_event const& ev)
 
 auto document::convert_screen_to_world(point_i pos) const -> point_i
 {
-    return point_i {_config.Window->camera().convert_screen_to_world(pos)};
+    return point_i {_window.camera().convert_screen_to_world(pos)};
 }
 }

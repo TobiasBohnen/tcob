@@ -33,6 +33,7 @@
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/Texture.hpp"
 #include "tcob/gfx/html/HtmlDocument.hpp"
@@ -43,18 +44,18 @@ namespace tcob::gfx::html::detail {
 
 ////////////////////////////////////////////////////////////
 
-auto to_rect(litehtml::position const& pos) -> rect_f
+static auto ToRect(litehtml::position const& pos) -> rect_f
 {
     return {static_cast<f32>(pos.x), static_cast<f32>(pos.y),
             static_cast<f32>(pos.width), static_cast<f32>(pos.height)};
 }
 
-auto to_point(litehtml::pointF const& pos) -> point_f
+static auto ToPoint(litehtml::pointF const& pos) -> point_f
 {
     return {static_cast<f32>(pos.x), static_cast<f32>(pos.y)};
 }
 
-auto to_color(litehtml::web_color const& col) -> color
+static auto ToColor(litehtml::web_color const& col) -> color
 {
     return {col.red, col.green, col.blue, col.alpha};
 }
@@ -72,7 +73,7 @@ static auto ToBorderStyle(litehtml::border_style style) -> border_style
 
 ////////////////////////////////////////////////////////////
 
-container::container(document::config& config)
+container::container(config& config)
     : _config {config}
     , _painter {*_config.Canvas}
 {
@@ -91,7 +92,13 @@ auto container::create_font(litehtml::font_description const& descr, litehtml::d
     }
     style.Weight = static_cast<font::weight>(descr.weight);
 
-    auto const font {_config.Fonts[_config.Fonts.contains(descr.family) ? descr.family : _config.DefaultFont]->get_font(style, static_cast<u32>(descr.size))};
+    string const fontName {_config.Fonts.contains(descr.family) ? descr.family : _config.DefaultFont};
+    if (!_config.AssetGroup->has<font_family>(fontName)) {
+        // TODO: log error
+        return 0;
+    }
+
+    auto const font {_config.AssetGroup->get<font_family>(fontName)->get_font(style, static_cast<u32>(descr.size))};
 
     auto const& fontInfo {font->info()};
     fm->ascent      = fontInfo.Ascender;
@@ -194,10 +201,7 @@ void container::on_mouse_event(litehtml::element::ptr const& el, litehtml::mouse
 
 void container::set_cursor(char const* cursor)
 {
-    auto winCursor {*_config.Window->Cursor};
-    if (winCursor.is_ready()) {
-        winCursor->ActiveMode = cursor;
-    }
+    CursorChanged(helper::to_string(cursor));
 }
 
 void container::transform_text(string& text, litehtml::text_transform tt)
@@ -249,8 +253,8 @@ void container::get_media_features(litehtml::media_features& media) const
     media.type          = litehtml::media_type_screen;
     media.width         = static_cast<litehtml::pixel_t>(_size.Width);
     media.height        = static_cast<litehtml::pixel_t>(_size.Height);
-    media.device_width  = static_cast<litehtml::pixel_t>((*_config.Window->Size).Width);
-    media.device_height = static_cast<litehtml::pixel_t>((*_config.Window->Size).Height);
+    media.device_width  = static_cast<litehtml::pixel_t>(_size.Width);  // TODO: separate this again
+    media.device_height = static_cast<litehtml::pixel_t>(_size.Height); // TODO: separate this again
     media.color         = 8;
     media.monochrome    = 0;
     media.color_index   = 0;
@@ -267,15 +271,15 @@ auto container::resolve_color(litehtml::string const& color) const -> litehtml::
 
 void container::init_borders(borders& brds, litehtml::borders const& b, litehtml::position const& draw_pos)
 {
-    rect_f const rect {to_rect(draw_pos)};
+    rect_f const rect {ToRect(draw_pos)};
     brds.BorderRadii.BottomLeft  = static_cast<f32>(b.radius.bottom_left_x);
     brds.BorderRadii.BottomRight = static_cast<f32>(b.radius.bottom_right_x);
     brds.BorderRadii.TopLeft     = static_cast<f32>(b.radius.top_left_x);
     brds.BorderRadii.TopRight    = static_cast<f32>(b.radius.top_right_x);
-    brds.Bottom.Color            = to_color(b.bottom.color);
-    brds.Left.Color              = to_color(b.left.color);
-    brds.Right.Color             = to_color(b.right.color);
-    brds.Top.Color               = to_color(b.top.color);
+    brds.Bottom.Color            = ToColor(b.bottom.color);
+    brds.Left.Color              = ToColor(b.left.color);
+    brds.Right.Color             = ToColor(b.right.color);
+    brds.Top.Color               = ToColor(b.top.color);
     brds.Bottom.Style            = ToBorderStyle(b.bottom.style);
     brds.Left.Style              = ToBorderStyle(b.left.style);
     brds.Right.Style             = ToBorderStyle(b.right.style);
@@ -309,11 +313,11 @@ void container::draw_text(litehtml::uint_ptr hdc, char const* text, litehtml::ui
     }
 
     _painter.draw_text({.Text                    = text,
-                        .TextBox                 = to_rect(pos),
+                        .TextBox                 = ToRect(pos),
                         .Font                    = _fonts[hFont - 1],
-                        .TextColor               = to_color(col),
+                        .TextColor               = ToColor(col),
                         .FontDecorationLine      = lineStyle,
-                        .FontDecorationColor     = to_color(deco.Color),
+                        .FontDecorationColor     = ToColor(deco.Color),
                         .FontDecorationThickness = deco.Thickness.val()});
 }
 
@@ -323,9 +327,9 @@ void container::init_background(base_draw_context& ctx, litehtml::background_lay
     ctx.BorderRadii.TopLeft     = static_cast<f32>(layer.border_radius.top_left_x);
     ctx.BorderRadii.BottomRight = static_cast<f32>(layer.border_radius.bottom_right_x);
     ctx.BorderRadii.TopRight    = static_cast<f32>(layer.border_radius.top_right_x);
-    ctx.ClipBox                 = to_rect(layer.clip_box);
+    ctx.ClipBox                 = ToRect(layer.clip_box);
 
-    ctx.OriginBox = to_rect(layer.origin_box);
+    ctx.OriginBox = ToRect(layer.origin_box);
     switch (layer.repeat) {
     case litehtml::background_repeat_repeat:
         ctx.Repeat = background_repeat::Repeat;
@@ -358,8 +362,8 @@ void container::draw_list_marker(litehtml::uint_ptr hdc, litehtml::list_marker c
     static_cast<void>(hdc);
 
     list_marker_draw_context ctx;
-    ctx.Box   = to_rect(marker.pos);
-    ctx.Color = to_color(marker.color);
+    ctx.Box   = ToRect(marker.pos);
+    ctx.Color = ToColor(marker.color);
     if (!marker.image.empty()) {
         ctx.Image = _images[marker.image];
         ctx.Type  = list_marker_type::Image;
@@ -402,7 +406,7 @@ void container::draw_solid_fill(litehtml::uint_ptr hdc, litehtml::background_lay
 
     solid_draw_context ctx;
     init_background(ctx, layer);
-    ctx.BackgroundColor = to_color(color);
+    ctx.BackgroundColor = ToColor(color);
 
     _painter.draw_solid_color(ctx);
 }
@@ -417,9 +421,9 @@ void container::draw_linear_gradient(litehtml::uint_ptr hdc, litehtml::backgroun
     std::vector<color_stop> colors;
     colors.reserve(gradient.color_points.size());
     for (auto const& cp : gradient.color_points) {
-        colors.emplace_back(cp.offset, to_color(cp.color));
+        colors.emplace_back(cp.offset, ToColor(cp.color));
     }
-    ctx.Gradient = _config.Canvas->create_linear_gradient(to_point(gradient.start), to_point(gradient.end), color_gradient {colors});
+    ctx.Gradient = _config.Canvas->create_linear_gradient(ToPoint(gradient.start), ToPoint(gradient.end), color_gradient {colors});
 
     _painter.draw_gradient(ctx);
 }
@@ -434,9 +438,9 @@ void container::draw_radial_gradient(litehtml::uint_ptr hdc, litehtml::backgroun
     std::vector<color_stop> colors;
     colors.reserve(gradient.color_points.size());
     for (auto const& cp : gradient.color_points) {
-        colors.emplace_back(cp.offset, to_color(cp.color));
+        colors.emplace_back(cp.offset, ToColor(cp.color));
     }
-    ctx.Gradient = _config.Canvas->create_radial_gradient(to_point(gradient.position), 0, gradient.radius.x, color_gradient {colors});
+    ctx.Gradient = _config.Canvas->create_radial_gradient(ToPoint(gradient.position), 0, gradient.radius.x, color_gradient {colors});
 
     _painter.draw_gradient(ctx);
 }
@@ -451,10 +455,10 @@ void container::draw_conic_gradient(litehtml::uint_ptr hdc, litehtml::background
     std::vector<color_stop> colors;
     colors.reserve(gradient.color_points.size());
     for (auto const& cp : gradient.color_points) {
-        colors.emplace_back(cp.offset, to_color(cp.color));
+        colors.emplace_back(cp.offset, ToColor(cp.color));
     }
     // TODO: angle, radius
-    ctx.Gradient = _config.Canvas->create_conic_gradient(to_point(gradient.position), color_gradient {colors});
+    ctx.Gradient = _config.Canvas->create_conic_gradient(ToPoint(gradient.position), color_gradient {colors});
 
     _painter.draw_gradient(ctx);
 }

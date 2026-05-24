@@ -7,7 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
-#include <unordered_map>
+#include <unordered_set>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
@@ -18,7 +18,6 @@
 #include "tcob/core/assets/Assets.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Canvas.hpp"
-#include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
@@ -37,39 +36,32 @@ namespace tcob::gfx::html {
 
 namespace detail {
     class container;
-    class element_painter;
 }
 
 ////////////////////////////////////////////////////////////
+
+struct config {
+    assets::group*             AssetGroup {nullptr};
+    std::unordered_set<string> Fonts;
+    string                     DefaultFont;
+    i32                        DefaultFontSize {0};
+    canvas*                    Canvas {nullptr};
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API document final : public entity, public transformable {
 public:
-    ////////////////////////////////////////////////////////////
-    struct config {
-        assets::group*                                     AssetGroup {nullptr};
-        std::unordered_map<string, asset_ptr<font_family>> Fonts;
-        string                                             DefaultFont;
-        i32                                                DefaultFontSize {0};
-        window*                                            Window {nullptr};
-        canvas*                                            Canvas {nullptr};
-        string                                             MasterCSSPath;
-    };
-
-    ////////////////////////////////////////////////////////////
-
-    explicit document(config c);
+    document(config c, window& window);
     ~document() override;
 
     signal<string const> AnchorClick;
 
     prop<rect_f> Bounds;
 
-    auto mouse_position() const -> point_i;
-    auto is_button_down() const -> bool;
-    auto bounds() const -> rect_f override;
+    void create_from_string(string const& html, string const& css);
 
-    void from_string(string const& html);
-    void from_string(string const& html, string const& css);
-    auto load(path const& file) noexcept -> bool;
+    auto bounds() const -> rect_f override;
 
     void force_redraw();
 
@@ -89,7 +81,8 @@ protected:
     auto convert_screen_to_world(point_i pos) const -> point_i;
 
 private:
-    config _config;
+    config  _config;
+    window& _window;
 
     std::shared_ptr<detail::container>  _container;
     std::shared_ptr<litehtml::document> _lhdoc;
@@ -99,9 +92,8 @@ private:
     bool     _isTransformDirty {true};
     bool     _needsRedraw {true};
 
-    bool    _isMouseOver {false};
-    point_i _mousePosition;
-    bool    _buttonDown {false};
+    bool _isMouseOver {false};
+    bool _buttonDown {false};
 
     asset_owner_ptr<material> _material {};
 };
