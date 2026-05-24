@@ -84,7 +84,7 @@ public:
     void pop();
 
     void start(playback_mode mode = playback_mode::Normal);
-    void stop();
+    void stop_and_clear();
 
 private:
     void on_update(milliseconds deltaTime) override;

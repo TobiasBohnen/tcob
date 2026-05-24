@@ -158,7 +158,7 @@ void tween_queue::start(playback_mode mode)
     }
 }
 
-void tween_queue::stop()
+void tween_queue::stop_and_clear()
 {
     if (_isRunning) {
         _isRunning = false;
@@ -188,7 +188,7 @@ void tween_queue::on_update(milliseconds deltaTime)
         if (!is_empty()) {
             _queue.front()->start(_mode);
         } else {
-            stop();
+            stop_and_clear();
         }
     }
 }
