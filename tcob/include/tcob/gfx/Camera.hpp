@@ -25,8 +25,8 @@ class render_target;
 ////////////////////////////////////////////////////////////
 
 struct camera_state {
-    size_f   Zoom {size_f::One};
     point_f  Position {point_f::Zero};
+    size_f   Zoom {size_f::One};
     degree_f Rotation {0.0f};
 };
 
@@ -83,19 +83,25 @@ private:
 class TCOB_API camera_controller {
 public:
     struct waypoint {
-        point_f      Position {};
-        milliseconds TimeToArrive {};
+        point_f                 Position {};
+        milliseconds            TimeToArrive {};
+        std::optional<size_f>   Zoom {};
+        std::optional<degree_f> Rotation {};
     };
 
     explicit camera_controller(camera& cam);
 
     void update(milliseconds deltaTime);
+
     void add_trauma(f32 trauma);
 
     void pan(std::vector<waypoint> path);
+    void move_by(point_f offset);
 
 private:
-    camera& _camera;
+    camera&  _camera;
+    point_f  _basePosition {point_f::Zero};
+    degree_f _baseRotation {degree_f {0}};
 
     // shake
     f32      _trauma {0.0f};
@@ -112,7 +118,7 @@ private:
     std::vector<waypoint> _panPath;
     usize                 _panIndex {0};
     milliseconds          _panElapsed {0};
-    point_f               _panOrigin {point_f::Zero};
+    camera_state          _panOrigin {};
     bool                  _panning {false};
 };
 
