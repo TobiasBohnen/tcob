@@ -96,12 +96,14 @@ public:
     void add_trauma(f32 trauma);
 
     void pan(std::vector<waypoint> path);
+
+    void zoom_by(size_f factor);
+    void zoom_to(size_f target);
     void move_by(point_f offset);
 
 private:
-    camera&  _camera;
-    point_f  _basePosition {point_f::Zero};
-    degree_f _baseRotation {degree_f {0}};
+    camera&      _camera;
+    camera_state _origin {};
 
     // shake
     f32      _trauma {0.0f};

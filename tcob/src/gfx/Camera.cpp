@@ -156,8 +156,7 @@ void camera::pop_state()
 
 camera_controller::camera_controller(camera& cam)
     : _camera {cam}
-    , _basePosition {cam.get_look_at()}
-    , _baseRotation {*cam.Rotation}
+    , _origin {.Position = cam.get_look_at(), .Zoom = cam.Zoom, .Rotation = cam.Rotation}
     , _rng {}
 {
 }
@@ -170,22 +169,33 @@ void camera_controller::add_trauma(f32 trauma)
 void camera_controller::pan(std::vector<waypoint> path)
 {
     if (path.empty()) { return; }
-    _panPath      = std::move(path);
-    _panIndex     = 0;
-    _panElapsed   = milliseconds {0};
-    _basePosition = _camera.get_look_at();
-    _baseRotation = *_camera.Rotation;
-    _panOrigin    = {
-        .Position = _basePosition,
-        .Zoom     = *_camera.Zoom,
-        .Rotation = _baseRotation,
+    _panPath         = std::move(path);
+    _panIndex        = 0;
+    _panElapsed      = milliseconds {0};
+    _origin.Position = _camera.get_look_at();
+    _origin.Zoom     = *_camera.Zoom;
+    _origin.Rotation = *_camera.Rotation;
+    _panOrigin       = {
+        .Position = _origin.Position,
+        .Zoom     = _origin.Zoom,
+        .Rotation = _origin.Rotation,
     };
     _panning = true;
 }
 
+void camera_controller::zoom_by(size_f factor)
+{
+    _origin.Zoom = (_origin.Zoom * factor);
+}
+
+void camera_controller::zoom_to(size_f target)
+{
+    _origin.Zoom = target;
+}
+
 void camera_controller::move_by(point_f offset)
 {
-    _basePosition = _basePosition + offset;
+    _origin.Position += offset;
 }
 
 void camera_controller::update(milliseconds deltaTime)
@@ -195,14 +205,14 @@ void camera_controller::update(milliseconds deltaTime)
         _panElapsed += deltaTime;
         f32 const factor {static_cast<f32>(std::clamp(_panElapsed.count() / wp.TimeToArrive.count(), 0.0, 1.0))};
 
-        _basePosition = point_f::Lerp(_panOrigin.Position, wp.Position, factor);
-        _baseRotation = degree_f::Lerp(_panOrigin.Rotation, wp.Rotation.value_or(_panOrigin.Rotation), factor);
-        _camera.Zoom  = size_f::Lerp(_panOrigin.Zoom, wp.Zoom.value_or(_panOrigin.Zoom), factor);
+        _origin.Position = point_f::Lerp(_panOrigin.Position, wp.Position, factor);
+        _origin.Rotation = degree_f::Lerp(_panOrigin.Rotation, wp.Rotation.value_or(_panOrigin.Rotation), factor);
+        _origin.Zoom     = size_f::Lerp(_panOrigin.Zoom, wp.Zoom.value_or(_panOrigin.Zoom), factor);
 
         if (_panElapsed >= wp.TimeToArrive) {
             _panOrigin = {
                 .Position = wp.Position,
-                .Zoom     = *_camera.Zoom,
+                .Zoom     = wp.Zoom.value_or(_origin.Zoom),
                 .Rotation = wp.Rotation.value_or(_panOrigin.Rotation),
             };
             _panElapsed = milliseconds {0};
@@ -226,8 +236,9 @@ void camera_controller::update(milliseconds deltaTime)
         _shakeAngle  = degree_f {0};
     }
 
-    _camera.look_at(_basePosition);
-    _camera.Rotation = (_baseRotation + _shakeAngle);
+    _camera.look_at(_origin.Position);
+    _camera.Zoom     = _origin.Zoom;
+    _camera.Rotation = (_origin.Rotation + _shakeAngle);
 }
 
 }
