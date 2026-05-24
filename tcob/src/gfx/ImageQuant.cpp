@@ -160,31 +160,6 @@ void octree_quant::merge_leaf_nodes(node* n, i32 level)
     }
 }
 
-auto octree_quant::get_quantized_color(color c) const -> color
-{
-    node* current {_root.get()};
-
-    for (i32 level {0}; level < MAX_TREE_DEPTH; ++level) {
-        if (current->IsLeaf) { break; }
-
-        i32 const shift {7 - level};
-        i32 const index {((c.R >> shift) & 1) << 2 | ((c.G >> shift) & 1) << 1 | ((c.B >> shift) & 1)};
-
-        if (current->Children[index]) {
-            current = current->Children[index].get();
-        } else {
-            break;
-        }
-    }
-
-    if (current->PixelCount == 0) { return colors::Transparent; }
-
-    return {static_cast<u8>(current->RedSum / current->PixelCount),
-            static_cast<u8>(current->GreenSum / current->PixelCount),
-            static_cast<u8>(current->BlueSum / current->PixelCount),
-            255};
-}
-
 ////////////////////////////////////////////////////////////
 
 neuquant::neuquant(i32 maxColors)

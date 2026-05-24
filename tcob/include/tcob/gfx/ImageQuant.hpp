@@ -47,7 +47,6 @@ private:
 
     void insert_color(color c);
     void reduce();
-    auto get_quantized_color(color c) const -> color;
     void merge_leaf_nodes(node* n, i32 level);
 
     i32                                            _maxColors;
