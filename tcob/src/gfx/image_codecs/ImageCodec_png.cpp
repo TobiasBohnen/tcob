@@ -94,7 +94,7 @@ png::tRNS_chunk::tRNS_chunk(std::span<std::byte const> data, color_type colorTyp
 
     case color_type::Indexed:
         if (plte) {
-            for (usize i {0}; i < data.size(); ++i) {
+            for (usize i {0}; i < data.size() && i < plte->Entries.size(); ++i) {
                 plte->Entries[i].A = to_u8(data, i);
             }
         }
