@@ -51,13 +51,13 @@ auto memory_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::strea
 {
     if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
-    auto const totalSize {size_in_bytes()};
+    std::streamsize const totalSize {size_in_bytes()};
     if (_pos > totalSize) { return 0; }
 
-    auto const remaining {totalSize - _pos};
+    std::streamsize const remaining {totalSize - _pos};
     if (remaining <= 0) { return 0; }
 
-    auto const bytesToRead {std::min(sizeInBytes, remaining)};
+    std::streamsize const bytesToRead {std::min(sizeInBytes, remaining)};
     memcpy(s, _buf.data() + static_cast<usize>(_pos), static_cast<usize>(bytesToRead));
     _pos += bytesToRead;
 

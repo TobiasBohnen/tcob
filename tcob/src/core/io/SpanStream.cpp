@@ -63,11 +63,11 @@ auto ispan_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::stream
 {
     if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
-    auto const totalSize {size_in_bytes()};
-    auto const remaining {totalSize - _pos};
+    std::streamsize const totalSize {size_in_bytes()};
+    std::streamsize const remaining {totalSize - _pos};
     if (remaining <= 0) { return 0; }
 
-    auto const bytesToRead {std::min(sizeInBytes, remaining)};
+    std::streamsize const bytesToRead {std::min(sizeInBytes, remaining)};
     memcpy(s, _span.data() + _pos, static_cast<usize>(bytesToRead));
     _pos += bytesToRead;
 
