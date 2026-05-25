@@ -22,7 +22,6 @@ namespace tcob::gfx::detail {
 
 namespace png {
     constexpr i32 BPP {4};
-    constexpr i32 MAX_SIZE {0x4000};
 
     enum class blend_op : u8 {
         Source = 0,

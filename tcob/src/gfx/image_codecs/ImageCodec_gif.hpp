@@ -33,7 +33,7 @@ namespace gif {
         string             Id;
         i32                PixelAspect;
 
-        void read(io::istream& reader);
+        auto read [[nodiscard]] (io::istream& reader) -> bool;
     };
 }
 

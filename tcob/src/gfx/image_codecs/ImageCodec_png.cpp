@@ -163,7 +163,7 @@ void png_decoder::handle_trns(png::chunk const& chunk) { _trns = {chunk.Data, _i
 auto png_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (!decode_info(in)) { return std::nullopt; }
-    if (_ihdr.Width > png::MAX_SIZE || _ihdr.Height > png::MAX_SIZE) { return std::nullopt; }
+    if (_ihdr.Width > MAX_SIZE || _ihdr.Height > MAX_SIZE) { return std::nullopt; }
 
     std::vector<std::byte>         idat {};
     std::optional<png::pHYs_chunk> phys {};
@@ -219,7 +219,7 @@ auto png_anim_decoder::open() -> std::optional<image::information>
 
     auto& in {stream()};
     if (check_sig(in) && read_header(in)) {
-        if (hdr.Width > png::MAX_SIZE || hdr.Height > png::MAX_SIZE) { return std::nullopt; }
+        if (hdr.Width > MAX_SIZE || hdr.Height > MAX_SIZE) { return std::nullopt; }
 
         for (;;) {
             if (in.is_eof()) { return std::nullopt; }

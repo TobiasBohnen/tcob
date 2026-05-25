@@ -228,6 +228,8 @@ auto pcx_decoder::decode(io::istream& in) -> std::optional<image>
 auto pcx_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     _header.read(in);
+    if (_header.Width() > MAX_SIZE || _header.Height() > MAX_SIZE) { return std::nullopt; };
+
     if (_header.Manufacturer == ManufacturerMagicNumber) {
         return image::information {.Size = {_header.Width(), _header.Height()}, .Format = image::format::RGB};
     }

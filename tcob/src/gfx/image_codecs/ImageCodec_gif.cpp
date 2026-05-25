@@ -40,7 +40,7 @@ auto gif::read_color_table(i32 ncolors, io::istream& reader) -> std::vector<colo
     return retValue;
 }
 
-void gif::header::read(io::istream& reader)
+auto gif::header::read(io::istream& reader) -> bool
 {
     Id = "";
     for (i32 i {0}; i < 6; i++) {
@@ -51,6 +51,7 @@ void gif::header::read(io::istream& reader)
     // logical screen size
     Width  = reader.read<u16, std::endian::little>();
     Height = reader.read<u16, std::endian::little>();
+    if (Width > image_decoder::MAX_SIZE || Height > image_decoder::MAX_SIZE) { return false; }
 
     // packed fields
     i32 packed {reader.read<u8>()};
@@ -65,6 +66,8 @@ void gif::header::read(io::istream& reader)
     if (GlobalColorTableFlag) {
         GlobalColorTable = read_color_table(GlobalColorTableSize, reader);
     }
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////
@@ -81,7 +84,7 @@ auto gif_decoder::decode(io::istream& in) -> std::optional<image>
 
 auto gif_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
-    _header.read(in);
+    if (!_header.read(in)) { return std::nullopt; }
     _pixelCache.resize(_header.Height * _header.Width * gif::BPP);
     if (_header.Id.starts_with("GIF")) {
         return image::information {.Size = {_header.Width, _header.Height}, .Format = image::format::RGBA};
@@ -95,7 +98,7 @@ auto gif_decoder::decode_info(io::istream& in) -> std::optional<image::informati
 auto gif_decoder::open() -> std::optional<image::information>
 {
     auto& in {stream()};
-    _header.read(in);
+    if (!_header.read(in)) { return std::nullopt; }
     _pixelCache.resize(_header.Height * _header.Width * gif::BPP);
     if (_header.Id.starts_with("GIF")) {
         read_contents(in);
@@ -152,7 +155,7 @@ auto gif_decoder::read_contents(io::istream& reader) -> animated_image_decoder::
     // read GIF file content blocks
     bool done {false};
 
-    while (!(done)) {
+    while (!done) {
         switch (reader.read<u8>()) {
 
         case 0x21:     // extension

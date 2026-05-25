@@ -21,6 +21,7 @@ option(TCOB_BUILD_TESTS "Build tests" ON)
 option(TCOB_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(TCOB_BUILD_TOOLS "Build tools" ON)
 option(TCOB_BUILD_SHARED "Build shared library" OFF)
+option(TCOB_BUILD_FUZZERS "" OFF)
 
 if(TCOB_BUILD_SHARED OR BUILD_SHARED_LIBS)
   set(TCOB_BUILD_SHARED ON CACHE BOOL "Build shared library" FORCE)
@@ -83,6 +84,10 @@ if(PROJECT_IS_TOP_LEVEL)
 
   if(TCOB_BUILD_TESTS)
     add_subdirectory(extras/tests)
+  endif()
+
+  if(TCOB_BUILD_FUZZERS AND NOT TCOB_IS_CI)
+    add_subdirectory(extras/tests/fuzzers)
   endif()
 
   if(TCOB_BUILD_BENCHMARKS)
