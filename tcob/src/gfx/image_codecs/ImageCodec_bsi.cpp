@@ -45,7 +45,7 @@ auto bsi_decoder::decode_info(io::istream& in) -> std::optional<image::informati
 {
     bsi::header header {};
     header.read(in);
-    if (header.Size.Width > MAX_SIZE || header.Size.Height > MAX_SIZE) { return std::nullopt; }
+    if (header.Size.Width > MAX_SIZE || header.Size.Height > MAX_SIZE || header.Size.Width <= 0 || header.Size.Height <= 0) { return std::nullopt; }
 
     return header.Version == 1 && header.Sig == SIGNATURE
         ? std::optional {image::information {.Size = header.Size, .Format = header.Format}}

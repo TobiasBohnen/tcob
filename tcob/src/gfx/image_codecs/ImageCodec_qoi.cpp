@@ -81,11 +81,12 @@ auto qoi_decoder::decode(io::istream& in) -> std::optional<image>
                 } else if (tag2 == QOI_OP_RUN >> 6) {
                     u8 const rl {static_cast<u8>(helper::extract_bits(tag8, 0, 6))};
                     for (u32 j {0}; j < rl; ++j) {
+                        if (i + bpp >= info->size_in_bytes()) { return std::nullopt; }
                         imgData[i + 0] = prevPixel.R;
                         imgData[i + 1] = prevPixel.G;
                         imgData[i + 2] = prevPixel.B;
                         if (format == image::format::RGBA) { imgData[i + 3] = prevPixel.A; }
-                        i += info->bytes_per_pixel();
+                        i += bpp;
                     }
                 } else {
                     return std::nullopt;
@@ -97,7 +98,9 @@ auto qoi_decoder::decode(io::istream& in) -> std::optional<image>
             imgData[i + 2] = prevPixel.B;
             if (format == image::format::RGBA) { imgData[i + 3] = prevPixel.A; }
 
-            indexCache[to_index(prevPixel)] = prevPixel;
+            usize const idx {to_index(prevPixel)};
+            if (idx >= indexCache.size()) { return std::nullopt; }
+            indexCache[idx] = prevPixel;
         }
 
         if (in.read_n<u8, 8>() != padding) { return std::nullopt; }
@@ -114,10 +117,11 @@ auto qoi_decoder::decode_info(io::istream& in) -> std::optional<image::informati
     i32 const w {static_cast<i32>(in.read<u32, std::endian::big>())};
     i32 const h {static_cast<i32>(in.read<u32, std::endian::big>())};
 
-    if (w > MAX_SIZE || h > MAX_SIZE) { return std::nullopt; }
+    if (w > MAX_SIZE || h > MAX_SIZE || w <= 0 || h <= 0) { return std::nullopt; }
 
     u8 const bpp {in.read<u8>()};
     in.read<u8>(); // colorspace
+    if (bpp != 3 && bpp != 4) { return std::nullopt; }
     return image::information {.Size = {w, h}, .Format = bpp == 3 ? image::format::RGB : image::format::RGBA};
 }
 

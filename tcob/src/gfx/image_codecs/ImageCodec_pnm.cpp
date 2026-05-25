@@ -150,7 +150,8 @@ auto pnm_decoder::decode(io::istream& in) -> std::optional<image>
 auto pnm_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     _header.read(in);
-    if (_header.Width > MAX_SIZE || _header.Height > MAX_SIZE) { return std::nullopt; }
+    if (_header.Width > MAX_SIZE || _header.Height > MAX_SIZE
+        || _header.Width <= 0 || _header.Height <= 0) { return std::nullopt; }
 
     return CheckSupported(_header)
         ? std::optional {image::information {.Size = {static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, .Format = image::format::RGB}}

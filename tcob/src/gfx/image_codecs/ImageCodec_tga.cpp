@@ -375,7 +375,8 @@ auto tga_decoder::decode_info(io::istream& in) -> std::optional<image::informati
     _footer.read(in);
     _header.read(in);
 
-    if (_header.ImageSpecs.Width > MAX_SIZE || _header.ImageSpecs.Height > MAX_SIZE) { return std::nullopt; };
+    if (_header.ImageSpecs.Width > MAX_SIZE || _header.ImageSpecs.Height > MAX_SIZE
+        || _header.ImageSpecs.Width <= 0 || _header.ImageSpecs.Height <= 0) { return std::nullopt; };
 
     i32 bpp {_header.ImageSpecs.BytesPerPixel};
     if (!IsTruecolor(_header)) {
