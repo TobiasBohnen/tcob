@@ -31,10 +31,12 @@ auto memory_sink::tell() const -> std::streamoff
 
 auto memory_sink::seek(std::streamoff off, seek_dir way) -> bool
 {
+    auto const totalSize {size_in_bytes()};
+
     switch (way) {
     case seek_dir::Current: _pos += off; break;
     case seek_dir::Begin:   _pos = off; break;
-    case seek_dir::End:     _pos = std::ssize(_buf) + off; break;
+    case seek_dir::End:     _pos = totalSize + off; break;
     }
 
     if (_pos < 0) {
@@ -47,19 +49,24 @@ auto memory_sink::seek(std::streamoff off, seek_dir way) -> bool
 
 auto memory_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
 {
-    if (sizeInBytes <= 0) { return 0; }
+    if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
-    std::streamsize const retValue {std::min(sizeInBytes, size_in_bytes() - static_cast<std::streamsize>(_pos))};
-    if (retValue > 0) {
-        memcpy(s, _buf.data() + static_cast<usize>(_pos), static_cast<usize>(retValue));
-        _pos += retValue;
-    }
-    return retValue;
+    auto const totalSize {size_in_bytes()};
+    if (_pos > totalSize) { return 0; }
+
+    auto const remaining {totalSize - _pos};
+    if (remaining <= 0) { return 0; }
+
+    auto const bytesToRead {std::min(sizeInBytes, remaining)};
+    memcpy(s, _buf.data() + static_cast<usize>(_pos), static_cast<usize>(bytesToRead));
+    _pos += bytesToRead;
+
+    return bytesToRead;
 }
 
 auto memory_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
 {
-    if (sizeInBytes <= 0) { return 0; }
+    if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
     if (std::ssize(_buf) < sizeInBytes + _pos) {
         _buf.resize(static_cast<usize>(sizeInBytes + _pos));

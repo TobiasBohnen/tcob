@@ -38,14 +38,21 @@ auto ispan_sink::tell() const -> std::streamoff
 
 auto ispan_sink::seek(std::streamoff off, seek_dir way) -> bool
 {
+    auto const totalSize {size_in_bytes()};
+
     switch (way) {
     case seek_dir::Current: _pos += off; break;
     case seek_dir::Begin:   _pos = off; break;
-    case seek_dir::End:     _pos = std::ssize(_span) + off; break;
+    case seek_dir::End:     _pos = totalSize + off; break;
     }
 
     if (_pos < 0) {
         _pos = 0;
+        return false;
+    }
+
+    if (_pos > totalSize) {
+        _pos = totalSize;
         return false;
     }
 
@@ -54,16 +61,17 @@ auto ispan_sink::seek(std::streamoff off, seek_dir way) -> bool
 
 auto ispan_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
 {
-    if (sizeInBytes <= 0) { return 0; }
+    if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
-    auto const retValue {std::min(sizeInBytes, size_in_bytes() - static_cast<std::streamsize>(_pos))};
+    auto const totalSize {size_in_bytes()};
+    auto const remaining {totalSize - _pos};
+    if (remaining <= 0) { return 0; }
 
-    if (retValue > 0) {
-        memcpy(s, _span.data() + _pos, static_cast<usize>(retValue));
-        _pos += retValue;
-    }
+    auto const bytesToRead {std::min(sizeInBytes, remaining)};
+    memcpy(s, _span.data() + _pos, static_cast<usize>(bytesToRead));
+    _pos += bytesToRead;
 
-    return retValue;
+    return bytesToRead;
 }
 
 ////////////////////////////////////////////////////////////
@@ -110,7 +118,7 @@ auto ospan_sink::seek(std::streamoff off, seek_dir way) -> bool
 
 auto ospan_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
 {
-    if (sizeInBytes <= 0) { return 0; }
+    if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
     auto const retValue {std::min(sizeInBytes, static_cast<std::streamsize>(_span.size_bytes()) - static_cast<std::streamsize>(_pos))};
 

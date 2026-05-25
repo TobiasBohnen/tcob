@@ -124,7 +124,7 @@ void file_sink::set_buffer_size(u64 size)
 
 auto file_sink::read_bytes(void* s, std::streamsize sizeInBytes) const -> std::streamsize
 {
-    if (sizeInBytes <= 0) { return 0; }
+    if (s == nullptr || sizeInBytes <= 0) { return 0; }
     if (!is_valid()) { return 0; }
 
     return static_cast<std::streamsize>(PHYSFS_readBytes(_handle, s, static_cast<u64>(sizeInBytes)));
@@ -132,7 +132,7 @@ auto file_sink::read_bytes(void* s, std::streamsize sizeInBytes) const -> std::s
 
 auto file_sink::write_bytes(void const* s, std::streamsize sizeInBytes) const -> std::streamsize
 {
-    if (sizeInBytes <= 0) { return 0; }
+    if (s == nullptr || sizeInBytes <= 0) { return 0; }
     if (!is_valid()) { return 0; }
 
     auto const retValue {static_cast<std::streamsize>(PHYSFS_writeBytes(_handle, s, static_cast<u64>(sizeInBytes)))};

@@ -8,6 +8,7 @@
 #include <bit>
 #include <cmath>
 #include <ios>
+#include <limits>
 #include <optional>
 #include <span>
 #include <vector>
@@ -153,14 +154,48 @@ static void CheckAlpha(std::vector<u8>& data)
 
 auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::span<color const> palette) const -> std::vector<u8>
 {
-    std::vector<u8> retValue(_info.size_in_bytes());
-
     auto const [width, height] {size};
-    i32 const srcStride {static_cast<i32>(std::ceil(width * bitCount / 32.0f) * 4)};
+
+    // only supported formats
+    if (bitCount != 4 && bitCount != 8 && bitCount != 24 && bitCount != 32) { return {}; }
+
+    constexpr i64 MaxImageBytes {512ll * 1024ll * 1024ll};
+
+    auto static const safe_mul {[](i64 a, i64 b) -> std::optional<i64> {
+        if (a != 0 && b > (std::numeric_limits<i64>::max() / a)) {
+            return std::nullopt;
+        }
+
+        return a * b;
+    }};
+
+    auto const bitsPerRow {safe_mul(static_cast<i64>(width), static_cast<i64>(bitCount))};
+    if (!bitsPerRow) { return {}; }
+
+    i64 const srcStride64 {(((*bitsPerRow) + 31ll) / 32ll) * 4ll};
+    if (srcStride64 <= 0 || srcStride64 > std::numeric_limits<i32>::max()) { return {}; }
+
+    i32 const srcStride {static_cast<i32>(srcStride64)};
+
+    i64 const totalBytes64 {static_cast<i64>(width) * static_cast<i64>(height) * 4ll};
+    if (totalBytes64 <= 0 || totalBytes64 > MaxImageBytes || totalBytes64 > std::numeric_limits<usize>::max()) { return {}; }
+
+    std::vector<u8> retValue(static_cast<usize>(totalBytes64));
+
     i32 const dstStride {_info.stride()};
 
-    if (bitCount == 1) { return {}; }
-    if (bitCount == 16) { return {}; }
+    auto const write_pixel {[&](i32& index, color const& c) {
+        if ((index + 3) >= static_cast<i32>(retValue.size())) {
+            return false;
+        }
+
+        retValue[index++] = c.R;
+        retValue[index++] = c.G;
+        retValue[index++] = c.B;
+        retValue[index++] = c.A == 0 ? 255 : c.A;
+
+        return true;
+    }};
 
     if (bitCount == 4) {
         i32 index {dstStride * (height - 1)};
@@ -168,27 +203,16 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
         for (i32 y {0}; y < height; y++) {
             for (i32 x {0}; x < width;) {
                 u8 const idx {in.read<u8>()};
-
                 u8 const idx1 {static_cast<u8>(idx >> 4)};
-                if (idx1 < palette.size()) {
-                    color const c {palette[idx1]};
-                    retValue[index++] = c.R;
-                    retValue[index++] = c.G;
-                    retValue[index++] = c.B;
-                    retValue[index++] = c.A == 0 ? 255 : c.A;
-                }
+                if (idx1 >= palette.size()) { return {}; }
+                if (!write_pixel(index, palette[idx1])) { return {}; }
 
                 x++;
 
                 if (x < width) {
                     u8 const idx2 {static_cast<u8>(idx & 0x0F)};
-                    if (idx2 < palette.size()) {
-                        color const c {palette[idx2]};
-                        retValue[index++] = c.R;
-                        retValue[index++] = c.G;
-                        retValue[index++] = c.B;
-                        retValue[index++] = c.A == 0 ? 255 : c.A;
-                    }
+                    if (idx2 >= palette.size()) { return {}; }
+                    if (!write_pixel(index, palette[idx2])) { return {}; }
 
                     x++;
                 }
@@ -197,33 +221,38 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
             index -= dstStride * 2;
         }
     } else if (bitCount == 8) {
-        i32 pad {srcStride - width};
+        i32 const pad {srcStride - width};
+        if (pad < 0 || pad > 3) { return {}; }
         i32 index {dstStride * (height - 1)};
 
         for (i32 y {0}; y < height; y++) {
             for (i32 x {0}; x < width; x++) {
                 u8 const idx {in.read<u8>()};
-                if (idx < palette.size()) {
-                    color const c {palette[idx]};
-                    retValue[index++] = c.R;
-                    retValue[index++] = c.G;
-                    retValue[index++] = c.B;
-                    retValue[index++] = c.A == 0 ? 255 : c.A;
-                }
+                if (idx >= palette.size()) { return {}; }
+                if (!write_pixel(index, palette[idx])) { return {}; }
             }
 
             index -= dstStride * 2;
             in.read_n<u8>(pad);
         }
     } else if (bitCount == 24) {
-        i32       index {dstStride * (height - 1)};
-        i32 const pad {srcStride - (width * 3)};
+        auto const rowBytes64 {safe_mul(static_cast<i64>(width), 3ll)};
 
+        if (!rowBytes64 || *rowBytes64 > std::numeric_limits<i32>::max()) { return {}; }
+
+        i32 const rowBytes {static_cast<i32>(*rowBytes64)};
+        if (rowBytes > srcStride) { return {}; }
+
+        i32 const pad {srcStride - rowBytes};
+        if (pad < 0 || pad > 3) { return {}; }
+
+        i32 index {dstStride * (height - 1)};
         for (i32 y {0}; y < height; y++) {
             for (i32 x {0}; x < width; x++) {
                 u8 const b {in.read<u8>()};
                 u8 const g {in.read<u8>()};
                 u8 const r {in.read<u8>()};
+                if ((index + 3) >= static_cast<i32>(retValue.size())) { return {}; }
 
                 retValue[index++] = r;
                 retValue[index++] = g;
@@ -243,13 +272,15 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
                 u8 const r {in.read<u8>()};
                 u8 const a {in.read<u8>()};
 
+                if ((index + 3) >= static_cast<i32>(retValue.size())) { return {}; }
+
                 retValue[index++] = r;
                 retValue[index++] = g;
                 retValue[index++] = b;
                 retValue[index++] = a;
             }
 
-            index -= srcStride * 2;
+            index -= dstStride * 2;
         }
 
         CheckAlpha(retValue);
