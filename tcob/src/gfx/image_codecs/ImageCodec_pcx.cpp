@@ -34,14 +34,19 @@ constexpr char ManufacturerMagicNumber {0x0a};
 constexpr char PaletteMagicNumber {12};
 constexpr i32  PaletteOffset {769};
 constexpr i32  HeaderLength {128};
+constexpr i64  MAX_PCX_SIZE {image_decoder::MAX_SIZE * image_decoder::MAX_SIZE};
 
 auto pcx::read_image_data(io::istream& reader, header const& h) -> std::vector<u8>
 {
     reader.seek(HeaderLength, io::seek_dir::Begin);
 
-    std::vector<u8> retValue(h.BytesPerLine * h.ColorPlanesCount * h.Height());
+    i64 const allocSize {static_cast<i64>(h.BytesPerLine) * h.ColorPlanesCount * h.Height()};
+    if (allocSize <= 0 || allocSize > MAX_PCX_SIZE) { return {}; }
 
-    i32 total {0};
+    std::vector<u8> retValue(allocSize);
+
+    i32       total {0};
+    i32 const maxTotal {static_cast<i32>(retValue.size())};
 
     for (i32 i {0}; i < h.Height(); i++) {
         i32 index {0};
@@ -58,7 +63,7 @@ auto pcx::read_image_data(io::istream& reader, header const& h) -> std::vector<u
                 runvalue = b;
             }
 
-            for (; runcount != 0 && index < std::ssize(retValue); runcount--, index++, total++) {
+            for (; runcount != 0 && index < h.BytesPerLine * h.ColorPlanesCount && total < maxTotal; runcount--, index++, total++) {
                 retValue[total] = runvalue;
             }
         } while (index < h.BytesPerLine * h.ColorPlanesCount);
@@ -135,100 +140,109 @@ void pcx::header::Write(image::information const& info, io::ostream& writer)
 
 auto pcx_decoder::decode(io::istream& in) -> std::optional<image>
 {
-    if (decode_info(in)) {
-        auto const palette {read_palette(in)};
-        auto const data {pcx::read_image_data(in, _header)};
+    if (!decode_info(in)) { return std::nullopt; }
 
-        i32 const width {_header.Width()};
-        i32 const height {_header.Height()};
-        i16 const bpl {_header.BytesPerLine};
+    auto const palette {read_palette(in)};
+    auto const data {pcx::read_image_data(in, _header)};
+    if (data.empty()) { return std::nullopt; }
 
-        image retValue {image::CreateEmpty({width, height}, image::format::RGB)};
-        auto* imgData {retValue.ptr()};
-        i32   index {0};
+    i32 const width {_header.Width()};
+    i32 const height {_header.Height()};
+    if (width == 0 || height == 0) { return std::nullopt; }
 
-        if (!palette.empty()) {
-            // indexed
-            if (_header.BitsPerPixel == 8 && _header.ColorPlanesCount == 1) {
-                i32 srcIndex {0};
-                for (i32 y {0}; y < height; ++y) {
-                    for (i32 x {0}; x < width; ++x) {
-                        usize const idx {data[srcIndex++]};
-                        if (idx >= palette.size()) { return std::nullopt; }
-                        color const c {palette[idx]};
-                        imgData[index++] = c.R;
-                        imgData[index++] = c.G;
-                        imgData[index++] = c.B;
-                    }
-                }
-            } else if (_header.BitsPerPixel == 1 && _header.ColorPlanesCount == 4) {
-                for (i32 y {0}; y < height; ++y) {
-                    for (i32 x {0}; x < width;) {
-                        auto const getColor {[&] -> std::optional<color> {
-                            if (x >= width) { return std::nullopt; }
+    i16 const bpl {_header.BytesPerLine};
+    i32 const imgSize {width * height * 3};
 
-                            u32 c1 {0};
-                            for (i32 i {0}; i < 4; i++) {
-                                i32 const off {(x / 8) + ((y * bpl * 4) + (bpl * i))};
-                                assert(off < std::ssize(data));
-                                u8 const  b {data[off]};
-                                u32 const l {helper::extract_bits(b, 7 - (x % 8), 1)};
-                                c1 += l << i;
-                            }
+    image retValue {image::CreateEmpty({width, height}, image::format::RGB)};
+    auto* imgData {retValue.ptr()};
+    i32   index {0};
 
-                            x++;
-                            return palette[c1];
-                        }};
-
-                        if (auto col1 {getColor()}) {
-                            imgData[index++] = col1->R;
-                            imgData[index++] = col1->G;
-                            imgData[index++] = col1->B;
-                        }
-
-                        if (auto col2 {getColor()}) {
-                            imgData[index++] = col2->R;
-                            imgData[index++] = col2->G;
-                            imgData[index++] = col2->B;
-                        }
-                    }
-                }
-            }
-        } else if (_header.BitsPerPixel == 8 && _header.ColorPlanesCount == 3) {
-            // RGB
+    if (!palette.empty()) {
+        if (_header.BitsPerPixel == 8 && _header.ColorPlanesCount == 1) {
+            i32 srcIndex {0};
             for (i32 y {0}; y < height; ++y) {
                 for (i32 x {0}; x < width; ++x) {
-                    for (i32 i {0}; i < 3; ++i) {
-                        imgData[index++] = data[x + ((y * bpl) * 3) + (bpl * i)];
+                    if (srcIndex >= std::ssize(data)) { return std::nullopt; }
+                    if (index + 2 >= imgSize) { return std::nullopt; }
+                    usize const idx {data[srcIndex++]};
+                    if (idx >= palette.size()) { return std::nullopt; }
+                    color const c {palette[idx]};
+                    imgData[index++] = c.R;
+                    imgData[index++] = c.G;
+                    imgData[index++] = c.B;
+                }
+            }
+        } else if (_header.BitsPerPixel == 1 && _header.ColorPlanesCount == 4) {
+            for (i32 y {0}; y < height; ++y) {
+                for (i32 x {0}; x < width;) {
+                    auto const getColor {[&] -> std::optional<color> {
+                        if (x >= width) { return std::nullopt; }
+                        if (index + 2 >= imgSize) { return std::nullopt; }
+
+                        u32 c1 {0};
+                        for (i32 i {0}; i < 4; i++) {
+                            i32 const off {(x / 8) + ((y * bpl * 4) + (bpl * i))};
+                            if (off >= std::ssize(data)) { return std::nullopt; }
+                            u8 const  b {data[off]};
+                            u32 const l {helper::extract_bits(b, 7 - (x % 8), 1)};
+                            c1 += l << i;
+                        }
+
+                        x++;
+                        if (c1 >= palette.size()) { return std::nullopt; }
+                        return palette[c1];
+                    }};
+
+                    if (auto col1 {getColor()}) {
+                        imgData[index++] = col1->R;
+                        imgData[index++] = col1->G;
+                        imgData[index++] = col1->B;
+                    } else {
+                        return std::nullopt;
+                    }
+
+                    if (auto col2 {getColor()}) {
+                        imgData[index++] = col2->R;
+                        imgData[index++] = col2->G;
+                        imgData[index++] = col2->B;
+                    } else {
+                        return std::nullopt;
                     }
                 }
             }
-        } else if (_header.BitsPerPixel == 1 && _header.ColorPlanesCount == 1) {
-            // monochrome
-            for (i32 i {0}; i < std::ssize(data); ++i) {
-                u8 b {data[i]};
-                for (i32 j {0}; j < 8; ++j) {
-                    u8 col {helper::extract_bits(b, 7 - j, 1) == 0 ? u8 {0} : u8 {255}};
-                    imgData[index++] = col;
-                    imgData[index++] = col;
-                    imgData[index++] = col;
+        }
+    } else if (_header.BitsPerPixel == 8 && _header.ColorPlanesCount == 3) {
+        for (i32 y {0}; y < height; ++y) {
+            for (i32 x {0}; x < width; ++x) {
+                for (i32 i {0}; i < 3; ++i) {
+                    i32 const srcIdx {x + ((y * bpl) * 3) + (bpl * i)};
+                    if (srcIdx >= std::ssize(data)) { return std::nullopt; }
+                    if (index >= imgSize) { return std::nullopt; }
+                    imgData[index++] = data[srcIdx];
                 }
             }
-
-        } else {
-            return std::nullopt;
         }
-
-        return retValue;
+    } else if (_header.BitsPerPixel == 1 && _header.ColorPlanesCount == 1) {
+        for (i32 i {0}; i < std::ssize(data) && index + 2 < imgSize; ++i) {
+            u8 b {data[i]};
+            for (i32 j {0}; j < 8 && index + 2 < imgSize; ++j) {
+                u8 col {helper::extract_bits(b, 7 - j, 1) == 0 ? u8 {0} : u8 {255}};
+                imgData[index++] = col;
+                imgData[index++] = col;
+                imgData[index++] = col;
+            }
+        }
+    } else {
+        return std::nullopt;
     }
 
-    return std::nullopt;
+    return retValue;
 }
 
 auto pcx_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     _header.read(in);
-    if (_header.Width() > MAX_SIZE || _header.Height() > MAX_SIZE) { return std::nullopt; };
+    if (_header.Width() > MAX_SIZE || _header.Height() > MAX_SIZE) { return std::nullopt; }
 
     if (_header.Manufacturer == ManufacturerMagicNumber) {
         return image::information {.Size = {_header.Width(), _header.Height()}, .Format = image::format::RGB};

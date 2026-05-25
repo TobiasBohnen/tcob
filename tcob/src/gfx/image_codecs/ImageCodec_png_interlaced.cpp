@@ -118,8 +118,8 @@ void png_decoder::interlaced_I1(i32 width, i32 height)
         i32 const dataIndex {(iRect.left() * png::BPP) + (iRect.top() * width * png::BPP)};
         if (dataIndex + 3 < std::ssize(_data)) {
             u8 const idx {static_cast<u8>(helper::extract_bits(*_curLineIt, 7 - i, 1))};
-
-            auto const color {_plte->Entries.at(idx)};
+            if (idx >= _plte->Entries.size()) { return; } // TODO: error
+            auto const color {_plte->Entries[idx]};
             _data[dataIndex]     = color.R;
             _data[dataIndex + 1] = color.G;
             _data[dataIndex + 2] = color.B;
@@ -142,8 +142,8 @@ void png_decoder::interlaced_I2(i32 width, i32 height)
         i32 const dataIndex {(iRect.left() * png::BPP) + (iRect.top() * width * png::BPP)};
         if (dataIndex + 3 < std::ssize(_data)) {
             u8 const idx {static_cast<u8>(helper::extract_bits(*_curLineIt, 6 - i, 2))};
-
-            auto const color {_plte->Entries.at(idx)};
+            if (idx >= _plte->Entries.size()) { return; } // TODO: error
+            auto const color {_plte->Entries[idx]};
             _data[dataIndex]     = color.R;
             _data[dataIndex + 1] = color.G;
             _data[dataIndex + 2] = color.B;
@@ -166,8 +166,8 @@ void png_decoder::interlaced_I4(i32 width, i32 height)
         i32 const dataIndex {(iRect.left() * png::BPP) + (iRect.top() * width * png::BPP)};
         if (dataIndex + 3 < std::ssize(_data)) {
             u8 const idx {static_cast<u8>(helper::extract_bits(*_curLineIt, 4 - i, 4))};
-
-            auto const color {_plte->Entries.at(idx)};
+            if (idx >= _plte->Entries.size()) { return; } // TODO: error
+            auto const color {_plte->Entries[idx]};
             _data[dataIndex]     = color.R;
             _data[dataIndex + 1] = color.G;
             _data[dataIndex + 2] = color.B;
@@ -191,8 +191,8 @@ void png_decoder::interlaced_I8(i32 width, i32 height)
     i32 const dataIndex {(ix * png::BPP) + (iy * width * png::BPP)};
     if (dataIndex + 3 < std::ssize(_data)) {
         u8 const idx {*_curLineIt};
-
-        auto const color {_plte->Entries.at(idx)};
+        if (idx >= _plte->Entries.size()) { return; } // TODO: error
+        auto const color {_plte->Entries[idx]};
         _data[dataIndex]     = color.R;
         _data[dataIndex + 1] = color.G;
         _data[dataIndex + 2] = color.B;

@@ -203,6 +203,8 @@ auto gif_decoder::decode_frame_data(io::istream& reader, u16 iw, u16 ih) -> std:
     //  Initialize GIF data stream decoder.
     i32 const dataSize {reader.read<u8>()};
     i32 const clear {1 << dataSize};
+    if (clear >= MAX_STACK_SIZE) { return {}; } // TODO: error
+
     i32 const endOfInformation {clear + 1};
     i32       available {clear + 2};
     i32       codeSize {dataSize + 1};
@@ -338,9 +340,10 @@ void gif_decoder::read_frame(io::istream& reader)
     u16 const iy {reader.read<u16, std::endian::little>()};
     u16 const iw {reader.read<u16, std::endian::little>()};
     u16 const ih {reader.read<u16, std::endian::little>()};
+    if (iw > MAX_SIZE || ih > MAX_SIZE) { return; } // TODO: error
 
     u8 const   packed {reader.read<u8>()};
-    bool const lctFlag {(packed & 0x80) != 0}; // 1 - local color table flag
+    bool const lctFlag {(packed & 0x80) != 0};      // 1 - local color table flag
 
     // i32               interlace = (packed & 0x40) != 0; // 2 - interlace flag
     // 3 - sort flag
@@ -351,19 +354,24 @@ void gif_decoder::read_frame(io::istream& reader)
                                 ? gif::read_color_table(lctSize, reader)
                                 : _header.GlobalColorTable};
 
-    if (_hasTransparency) {
-        act[_transIndex] = colors::Transparent;          // set transparent color if specified
+    if (act.empty()) { return; } // TODO: error
+
+    if (_hasTransparency && _transIndex < std::ssize(act)) {
+        act[_transIndex] = colors::Transparent;
     }
 
     auto const data {decode_frame_data(reader, iw, ih)}; // decode pixel data
+    if (data.empty()) { return; }                        // TODO: error
 
     u8* pixPtr {_pixelCache.data()};
 
     if (_dispose == 2 && !_firstFrame) { clear_pixel_cache(); }
 
     if (_firstFrame) {
+        u8* const pixEnd {_pixelCache.data() + _pixelCache.size()};
         for (u8 palIdx : data) {
-            assert(palIdx < act.size());
+            if (pixPtr + 3 >= pixEnd) { return; } // TODO: error
+            if (palIdx >= act.size()) { return; } // TODO: error
             auto [r, g, b, a] {act[palIdx]};
             *pixPtr++ = r;
             *pixPtr++ = g;
@@ -377,7 +385,8 @@ void gif_decoder::read_frame(io::istream& reader)
             for (usize x {0}; x < iw; x++) {
                 u8 palIdx {data[index++]};
                 if (palIdx != _transIndex || (palIdx == _header.BackgroundIndex && !_hasTransparency) || _dispose == 2) {
-                    assert(palIdx < act.size());
+                    if (palIdx >= act.size()) { return; } // TODO: error
+                    if ((x + ix) >= _header.Width || (y + iy) >= _header.Height) { continue; }
                     auto [r, g, b, a] {act[palIdx]};
                     usize const pixInd {((x + ix) * gif::BPP) + ((y + iy) * (_header.Width * gif::BPP))};
                     pixPtr[pixInd + 0] = r;

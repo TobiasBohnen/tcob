@@ -54,13 +54,16 @@ namespace pcx {
         u16          YMax;
         u16          YMin;
 
-        auto Height() const -> i32
-        {
-            return static_cast<i32>(YMax - YMin + 1);
-        }
         auto Width() const -> i32
         {
+            if (XMax < XMin) { return 0; }
             return static_cast<i32>(XMax - XMin + 1);
+        }
+
+        auto Height() const -> i32
+        {
+            if (YMax < YMin) { return 0; }
+            return static_cast<i32>(YMax - YMin + 1);
         }
 
         void        read(io::istream& reader);

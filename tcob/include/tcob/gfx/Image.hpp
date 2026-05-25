@@ -108,7 +108,7 @@ inline auto image::ptr(this auto&& self) -> decltype(auto)
 
 class TCOB_API image_decoder : public non_copyable {
 public:
-    static constexpr i32 MAX_SIZE {0x4000};
+    static constexpr i32 MAX_SIZE {0x2000};
 
     struct factory : public type_factory<std::unique_ptr<image_decoder>> {
         static inline char const* ServiceName {"gfx::image_decoder::factory"};

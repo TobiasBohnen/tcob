@@ -356,9 +356,13 @@ auto png_decoder::read_header(io::istream& in) -> bool
 
 auto png_decoder::read_chunk(io::istream& in) const -> png::chunk
 {
+    static constexpr u32 MAX_CHUNK_SIZE {256 * 1024 * 1024};
+
     png::chunk retValue;
     retValue.Length = in.read<u32, std::endian::big>();
     retValue.Type   = static_cast<png::chunk_type>(in.read<u32, std::endian::big>());
+
+    if (retValue.Length > MAX_CHUNK_SIZE) { return retValue; } // TODO: error
 
     if (retValue.Length > 0) {
         retValue.Data.resize(retValue.Length);
@@ -379,6 +383,8 @@ auto png_decoder::check_sig(io::istream& in) -> bool
 
 auto png_decoder::read_image(std::span<std::byte const> idat, i32 width, i32 height) -> bool
 {
+    if (width <= 0 || height <= 0) { return false; }
+
     auto const  idatInflated {io::zlib_filter {}.from(idat)};
     isize const idatSize {std::ssize(idatInflated)};
 

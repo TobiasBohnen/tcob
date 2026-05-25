@@ -81,8 +81,8 @@ void png_decoder::non_interlaced_I1(i32 width, i32 /* height */)
 {
     for (i32 i {0}; i < 8 && _pixel.X < width; i++) {
         u8 const idx {static_cast<u8>(helper::extract_bits(*_curLineIt, 7 - i, 1))};
-
-        auto const color {_plte->Entries.at(idx)};
+        if (idx >= _plte->Entries.size()) { return; } // TODO: error
+        auto const color {_plte->Entries[idx]};
         *_dataIt++ = color.R;
         *_dataIt++ = color.G;
         *_dataIt++ = color.B;
@@ -98,8 +98,8 @@ void png_decoder::non_interlaced_I2(i32 width, i32 /* height */)
 {
     for (i32 i {0}; i < 8 && _pixel.X < width; i += 2) {
         u8 const idx {static_cast<u8>(helper::extract_bits(*_curLineIt, 6 - i, 2))};
-
-        auto const color {_plte->Entries.at(idx)};
+        if (idx >= _plte->Entries.size()) { return; } // TODO: error
+        auto const color {_plte->Entries[idx]};
         *_dataIt++ = color.R;
         *_dataIt++ = color.G;
         *_dataIt++ = color.B;
@@ -115,8 +115,8 @@ void png_decoder::non_interlaced_I4(i32 width, i32 /* height */)
 {
     for (i32 i {0}; i < 8 && _pixel.X < width; i += 4) {
         u8 const idx {static_cast<u8>(helper::extract_bits(*_curLineIt, 4 - i, 4))};
-
-        auto const color {_plte->Entries.at(idx)};
+        if (idx >= _plte->Entries.size()) { return; } // TODO: error
+        auto const color {_plte->Entries[idx]};
         *_dataIt++ = color.R;
         *_dataIt++ = color.G;
         *_dataIt++ = color.B;
@@ -131,8 +131,8 @@ void png_decoder::non_interlaced_I4(i32 width, i32 /* height */)
 void png_decoder::non_interlaced_I8(i32 width, i32 /* height */)
 {
     u8 const idx {*_curLineIt};
-
-    auto const color {_plte->Entries.at(idx)};
+    if (idx >= _plte->Entries.size()) { return; } // TODO: error
+    auto const color {_plte->Entries[idx]};
     *_dataIt++ = color.R;
     *_dataIt++ = color.G;
     *_dataIt++ = color.B;
