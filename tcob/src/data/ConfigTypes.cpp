@@ -80,14 +80,11 @@ auto object::on_load(io::istream& in, string const& ext, bool skipBinary) noexce
 
 auto object::parse(string_view config, string const& ext) noexcept -> bool
 {
-    std::optional<object> result;
     if (auto txtParser {create_from_factory<text_reader>(ext)}) {
-        result = txtParser->read_as_object(config);
-    }
-
-    if (result) {
-        swap(*result);
-        return true;
+        if (auto result {txtParser->read_as_object(config)}) {
+            swap(*result);
+            return true;
+        }
     }
 
     return false;
@@ -233,14 +230,11 @@ auto array::on_load(io::istream& in, string const& ext, bool skipBinary) noexcep
 
 auto array::parse(string_view config, string const& ext) -> bool
 {
-    std::optional<array> result;
     if (auto txtParser {create_from_factory<text_reader>(ext)}) {
-        result = txtParser->read_as_array(config);
-    }
-
-    if (result) {
-        swap(*result);
-        return true;
+        if (auto result {txtParser->read_as_array(config)}) {
+            swap(*result);
+            return true;
+        }
     }
 
     return false;
