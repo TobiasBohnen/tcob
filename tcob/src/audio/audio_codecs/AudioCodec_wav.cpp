@@ -58,7 +58,9 @@ static auto Tell(void* userdata, drwav_int64* pCursor) -> drwav_bool32
 
 wav_decoder::~wav_decoder()
 {
-    drwav_uninit(&_wav);
+    if (_isInit) {
+        drwav_uninit(&_wav);
+    }
 }
 
 void wav_decoder::seek_from_start(milliseconds pos)
@@ -73,6 +75,7 @@ auto wav_decoder::open() -> std::optional<buffer::information>
         _info.Specs.Channels   = _wav.channels;
         _info.Specs.SampleRate = static_cast<i32>(_wav.sampleRate);
         _info.FrameCount       = static_cast<i64>(_wav.totalPCMFrameCount);
+        _isInit                = true;
         return _info;
     }
 

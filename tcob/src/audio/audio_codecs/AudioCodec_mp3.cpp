@@ -49,7 +49,9 @@ static auto Tell(void* userdata, drmp3_int64* pCursor) -> drmp3_bool32
 
 mp3_decoder::~mp3_decoder()
 {
-    drmp3_uninit(&_mp3);
+    if (_isInit) {
+        drmp3_uninit(&_mp3);
+    }
 }
 
 void mp3_decoder::seek_from_start(milliseconds pos)
@@ -64,6 +66,7 @@ auto mp3_decoder::open() -> std::optional<buffer::information>
         _info.Specs.Channels   = static_cast<i32>(_mp3.channels);
         _info.Specs.SampleRate = static_cast<i32>(_mp3.sampleRate);
         _info.FrameCount       = static_cast<i64>(drmp3_get_pcm_frame_count(&_mp3));
+        _isInit                = true;
         return _info;
     }
 

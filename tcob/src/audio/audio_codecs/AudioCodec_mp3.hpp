@@ -33,6 +33,7 @@ protected:
 private:
     buffer::information _info {};
     drmp3               _mp3 {};
+    bool                _isInit {false};
 };
 
 }

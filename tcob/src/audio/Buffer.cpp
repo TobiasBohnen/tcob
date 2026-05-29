@@ -8,6 +8,7 @@
 #include <any>
 #include <chrono>
 #include <future>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <span>
@@ -70,6 +71,15 @@ auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any c
 
     if (auto info {dec->open(std::move(in), ctx)}) {
         _info = *info;
+
+        i64 const maxFrames {std::numeric_limits<i64>::max() / _info.Specs.Channels};
+        if (_info.FrameCount > maxFrames || (_info.Specs.Channels * _info.FrameCount) > 250000000) {
+            return false;
+        }
+        if (_info.Specs.Channels <= 0 || _info.FrameCount <= 0) {
+            return false;
+        }
+
         dec->seek_from_start(0ms);
 
         std::vector<f32> buffer(static_cast<usize>(_info.Specs.Channels * _info.FrameCount));

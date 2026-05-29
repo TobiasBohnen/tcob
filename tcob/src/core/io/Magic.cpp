@@ -29,8 +29,16 @@ void add_signature(signature const& sig)
     GetSignatures().push_back(sig);
 }
 
+void clear_signatures()
+{
+    GetSignatures().clear();
+}
+
 auto get_signature(istream& stream) -> std::optional<signature>
 {
+    auto const& sigs {GetSignatures()};
+    if (sigs.empty()) { return std::nullopt; }
+
     auto const offset {stream.tell()};
     if (stream.size_in_bytes() - offset < BUFFER_LENGTH) { return std::nullopt; }
 
@@ -39,7 +47,7 @@ auto get_signature(istream& stream) -> std::optional<signature>
     auto const endBuffer {stream.read_n<std::byte, BUFFER_LENGTH>()};
     stream.seek(offset, seek_dir::Begin);
 
-    for (auto const& sig : GetSignatures()) {
+    for (auto const& sig : sigs) {
         bool found {true};
         for (auto const& part : sig.Parts) {
             std::span<std::byte const> slice;

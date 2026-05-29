@@ -33,6 +33,7 @@ protected:
 private:
     buffer::information _info {};
     drwav               _wav {};
+    bool                _isInit {false};
 };
 
 ////////////////////////////////////////////////////////////
