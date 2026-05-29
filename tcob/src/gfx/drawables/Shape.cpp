@@ -569,6 +569,10 @@ void poly_shape::update_geometry()
 
 void mesh_shape::set(std::span<vertex const> verts, std::span<u32 const> inds)
 {
+    if (inds.empty() || inds.size() % 3 != 0) {
+        return;
+    }
+
     _verts = {verts.begin(), verts.end()};
     _inds  = {inds.begin(), inds.end()};
 

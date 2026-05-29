@@ -46,15 +46,16 @@ auto obj_loader::load(io::istream& in) -> std::optional<geometry_store>
             for (i32 i {1}; i <= 3; ++i) {
                 auto const& faceStr {split[i]};
                 auto const  slashes {helper::split(faceStr, '/')};
+                if (!slashes.empty()) {
+                    auto const posIdx {helper::to_number<u32>(slashes[0])};
+                    if (!posIdx) { return std::nullopt; }
+                    posInds.push_back(*posIdx - 1);
 
-                auto const posIdx {helper::to_number<u32>(slashes[0])};
-                if (!posIdx) { return std::nullopt; }
-                posInds.push_back(*posIdx - 1);
-
-                if (slashes.size() > 1 && !slashes[1].empty()) {
-                    auto const uvIdx {helper::to_number<u32>(slashes[1])};
-                    if (!uvIdx) { return std::nullopt; }
-                    uvInds.push_back(*uvIdx - 1);
+                    if (slashes.size() > 1 && !slashes[1].empty()) {
+                        auto const uvIdx {helper::to_number<u32>(slashes[1])};
+                        if (!uvIdx) { return std::nullopt; }
+                        uvInds.push_back(*uvIdx - 1);
+                    }
                 }
             }
         }
