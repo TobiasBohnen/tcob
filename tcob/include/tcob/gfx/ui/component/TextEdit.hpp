@@ -42,6 +42,7 @@ public:
 
     auto selected_text() const -> utf8_string;
     void select_text(isize first, isize last);
+    void deselect_text();
     auto remove_selected_text() -> bool;
 
     void key_down(widget const& widget, input::key_mods keyMods, input::key_code keyCode, bool selectable);
@@ -51,7 +52,6 @@ public:
     void mouse_button_up();
 
 private:
-    void deselect_text();
     auto is_text_selected() const -> bool;
 
     void pause_blinking();

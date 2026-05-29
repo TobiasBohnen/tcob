@@ -48,7 +48,7 @@ text_box::text_box(init const& wi)
     MaxLength(std::numeric_limits<isize>::max());
 
     Selectable.Changed.connect([this](auto const& val) {
-        if (!val) { _edit.select_text(INVALID_INDEX, INVALID_INDEX); }
+        if (!val) { _edit.deselect_text(); }
         queue_redraw();
     });
     Selectable(false);

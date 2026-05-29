@@ -63,8 +63,8 @@ protected:
     auto attributes() const -> widget_attributes override;
 
 private:
-    void sync_edit();
     void commit_edit();
+    void cancel_edit();
 
     enum class arrow : u8 {
         None,
