@@ -209,7 +209,7 @@ auto yaml_tokenizer::tokenize_line(utf8_string_view line) -> bool
         if (current == '[') {
             usize const start {i};
             i = line.find_last_of(']');
-            if (i == utf8_string::npos) { return false; }
+            if (i == utf8_string::npos || i < start) { return false; }
             Tokens.emplace_back(token_type::FlowSequence,
                                 utf8_string {line.substr(start, i - start + 1)});
             continue;
@@ -217,7 +217,7 @@ auto yaml_tokenizer::tokenize_line(utf8_string_view line) -> bool
         if (current == '{') {
             usize const start {i};
             i = line.find_last_of('}');
-            if (i == utf8_string::npos) { return false; }
+            if (i == utf8_string::npos || i < start) { return false; }
             Tokens.emplace_back(token_type::FlowMapping,
                                 utf8_string {line.substr(start, i - start + 1)});
             continue;
