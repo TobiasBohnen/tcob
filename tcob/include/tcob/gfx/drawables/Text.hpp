@@ -23,7 +23,7 @@
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/Transformable.hpp"
-#include "tcob/gfx/animation/QuadTween.hpp"
+#include "tcob/gfx/animation/VertexTween.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace tcob::gfx {
@@ -48,7 +48,8 @@ public:
     prop<utf8_string>       Text;
     prop<style>             Style;
     prop<asset_ptr<shader>> Shader;
-    quad_tweens             Effects;
+
+    vertex_tweens Effects;
 
     void force_reshape();
 

@@ -8,7 +8,6 @@
 
 #include <array>
 #include <concepts>
-#include <functional>
 #include <memory>
 #include <span>
 #include <tuple>
@@ -26,40 +25,42 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
+using vertex_group = std::span<vertex>;
+
 template <typename T>
-concept QuadTweenFunction =
-    requires(T& f, f64 t, std::span<quad> quads) {
-        { f(t, quads) };
+concept VertexTweenFunction =
+    requires(T& f, f64 t, std::span<vertex_group> verts) {
+        { f(t, verts) };
     };
 
 ////////////////////////////////////////////////////////////
 
 namespace detail {
-    class TCOB_API quad_tween_base : public tween_base {
+    class TCOB_API vertex_tween_base : public tween_base {
     public:
-        quad_tween_base(milliseconds duration);
+        vertex_tween_base(milliseconds duration);
 
-        void add_quad(std::reference_wrapper<quad> q);
+        void add_group(vertex_group verts);
 
-        void clear_quads();
+        void clear_groups();
 
     protected:
-        auto source_quads() const -> std::vector<quad> const&;
-        void copy_to_dest(std::span<quad> quads);
+        auto source_groups() const -> std::vector<std::vector<vertex>> const&;
+        void copy_to_dest(std::span<std::vector<vertex>> groups);
 
     private:
-        std::vector<std::reference_wrapper<quad>> _dstQuads {};
-        std::vector<quad>                         _srcQuads {};
+        std::vector<std::vector<vertex>> _srcGroups; // copies
+        std::vector<std::span<vertex>>   _dstGroups;
     };
 
 }
 
 ////////////////////////////////////////////////////////////
 
-template <QuadTweenFunction... Funcs>
-class quad_tween final : public detail::quad_tween_base {
+template <VertexTweenFunction... Funcs>
+class vertex_tween final : public detail::vertex_tween_base {
 public:
-    quad_tween(milliseconds duration, Funcs&&... ptr);
+    vertex_tween(milliseconds duration, Funcs&&... ptr);
 
 protected:
     void update_values() override;
@@ -70,23 +71,23 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API quad_tweens final : public updatable {
+class TCOB_API vertex_tweens final : public updatable {
 public:
     template <typename... Funcs>
-    auto create(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<quad_tween<Funcs...>>;
+    auto create(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<vertex_tween<Funcs...>>;
 
     auto has(u8 id) const -> bool;
 
     void start_all(playback_mode mode = playback_mode::Normal);
     void stop_all();
 
-    void add_quad(u8 id, std::reference_wrapper<quad> q) const; // FIXME: better API
-    void clear_quads();
+    void add_group(u8 id, vertex_group verts) const; // FIXME: better API
+    void clear_groups();
 
 private:
     void on_update(milliseconds deltaTime) override;
 
-    std::unordered_map<u8, std::shared_ptr<detail::quad_tween_base>> _effects {};
+    std::unordered_map<u8, std::shared_ptr<detail::vertex_tween_base>> _effects {};
 };
 
 ////////////////////////////////////////////////////////////
@@ -95,7 +96,7 @@ namespace effect {
 
     class TCOB_API typing final { // Color
     public:
-        void operator()(f64 t, std::span<quad> quads) const;
+        void operator()(f64 t, std::span<vertex_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -104,7 +105,7 @@ namespace effect {
     public:
         i32 Width {1};             // in chars
 
-        void operator()(f64 t, std::span<quad> quads) const;
+        void operator()(f64 t, std::span<vertex_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -113,7 +114,7 @@ namespace effect {
     public:
         i32 Width {1};              // in chars
 
-        void operator()(f64 t, std::span<quad> quads) const;
+        void operator()(f64 t, std::span<vertex_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -124,7 +125,7 @@ namespace effect {
         color Color1 {colors::Black};
         f32   Frequency {1.0f};
 
-        void operator()(f64 t, std::span<quad> quads);
+        void operator()(f64 t, std::span<vertex_group> groups);
     };
 
     ////////////////////////////////////////////////////////////
@@ -133,7 +134,7 @@ namespace effect {
     public:
         std::array<color, 256> Gradient;
 
-        void operator()(f64 t, std::span<quad> quads) const;
+        void operator()(f64 t, std::span<vertex_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -143,7 +144,7 @@ namespace effect {
         f32 Intensity {1.0f};    // in pixel
         rng RNG;
 
-        void operator()(f64 t, std::span<quad> quads);
+        void operator()(f64 t, std::span<vertex_group> groups);
     };
 
     ////////////////////////////////////////////////////////////
@@ -153,7 +154,7 @@ namespace effect {
         f32 Height {0};         // in pixel
         f32 Amplitude {1.0f};
 
-        void operator()(f64 t, std::span<quad> quads) const;
+        void operator()(f64 t, std::span<vertex_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -167,7 +168,7 @@ namespace effect {
 
         alignment Anchor {};
 
-        void operator()(f64 t, std::span<quad> quads) const;
+        void operator()(f64 t, std::span<vertex_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -176,11 +177,11 @@ namespace effect {
     public:
         f32 Speed {1.0f};
 
-        void operator()(f64 t, std::span<quad> quads) const;
+        void operator()(f64 t, std::span<vertex_group> groups) const;
     };
 
 }
 
 }
 
-#include "QuadTween.inl"
+#include "VertexTween.inl"

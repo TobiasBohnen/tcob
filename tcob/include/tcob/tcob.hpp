@@ -107,7 +107,7 @@
 #include <tcob/gfx/VertexArray.hpp>
 #include <tcob/gfx/Window.hpp>
 #include <tcob/gfx/animation/Animation.hpp>
-#include <tcob/gfx/animation/QuadTween.hpp>
+#include <tcob/gfx/animation/VertexTween.hpp>
 #include <tcob/gfx/drawables/Background.hpp>
 #include <tcob/gfx/drawables/Cursor.hpp>
 #include <tcob/gfx/drawables/Drawable.hpp>

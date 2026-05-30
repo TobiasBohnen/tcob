@@ -29,7 +29,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/VertexArray.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/animation/Animation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/animation/QuadTween.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/animation/VertexTween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Background.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Cursor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Drawable.cpp
@@ -135,8 +135,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/VertexArray.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Window.hpp
     ${TCOB_INC_DIR}/tcob/gfx/animation/Animation.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/animation/QuadTween.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/animation/QuadTween.inl
+    ${TCOB_INC_DIR}/tcob/gfx/animation/VertexTween.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/animation/VertexTween.inl
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Background.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Cursor.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Drawable.hpp

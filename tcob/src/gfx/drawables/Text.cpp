@@ -183,7 +183,7 @@ void text::format()
 {
     _quads.clear();
     _inds.clear();
-    Effects.clear_quads();
+    Effects.clear_groups();
 
     _needsFormat = false;
 
@@ -238,7 +238,7 @@ void text::format()
             geometry::set_position(q, quadRect);
 
             if (currentEffectIdx != 0) {
-                Effects.add_quad(currentEffectIdx, q);
+                Effects.add_group(currentEffectIdx, q);
             }
 
             ++glyphIndex;
