@@ -149,10 +149,32 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
+    class TCOB_API jitter final { // X,Y
+    public:
+        f32 Intensity {1.0f};     // in pixel
+        rng RNG {};
+
+        void operator()(f64 t, std::span<vertex_group> groups);
+    };
+
+    ////////////////////////////////////////////////////////////
+
     class TCOB_API wave final { // Y
     public:
         f32 Height {0};         // in pixel
         f32 Amplitude {1.0f};
+
+        void operator()(f64 t, std::span<vertex_group> groups) const;
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    class TCOB_API bounce final { // Y
+    public:
+        f32 Height {0};           // in pixel
+        f32 Bounces {0};
+        f32 Damping {0};
+        f32 Spread {0};
 
         void operator()(f64 t, std::span<vertex_group> groups) const;
     };

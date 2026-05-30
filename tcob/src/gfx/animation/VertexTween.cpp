@@ -6,7 +6,10 @@
 #include "tcob/gfx/animation/VertexTween.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <cstdlib>
 #include <limits>
+#include <numbers>
 #include <span>
 #include <vector>
 
@@ -103,6 +106,18 @@ void vertex_tweens::on_update(milliseconds deltaTime)
 ////////////////////////////////////////////////////////////
 
 namespace effect {
+    static auto ComputeRect(vertex_group const& g) -> rect_f
+    {
+        f32 minX {std::numeric_limits<f32>::max()}, maxX {std::numeric_limits<f32>::lowest()};
+        f32 minY {std::numeric_limits<f32>::max()}, maxY {std::numeric_limits<f32>::lowest()};
+        for (auto const& v : g) {
+            minX = std::min(minX, v.Position.X);
+            maxX = std::max(maxX, v.Position.X);
+            minY = std::min(minY, v.Position.Y);
+            maxY = std::max(maxY, v.Position.Y);
+        }
+        return rect_f::FromLTRB(minX, minY, maxX, maxY);
+    }
 
     void typing::operator()(f64 t, std::span<vertex_group> groups) const
     {
@@ -209,11 +224,23 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
+    void jitter::operator()(f64, std::span<vertex_group> groups)
+    {
+        for (auto& g : groups) {
+            for (auto& v : g) {
+                v.Position.X += RNG(-Intensity, Intensity);
+                v.Position.Y += RNG(-Intensity, Intensity);
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////
+
     void wave::operator()(f64 t, std::span<vertex_group> groups) const
     {
         tween_func::sine_wave<f64> w {.Min = 0, .Max = 1};
         for (usize idx {0}; idx < groups.size(); ++idx) {
-            w.Phase = static_cast<f64>(idx / groups.size()) * Amplitude;
+            w.Phase = static_cast<f64>(idx) / static_cast<f64>(groups.size()) * Amplitude;
             f32 const val {static_cast<f32>(w(t) * Height)};
             for (auto& v : groups[idx]) { v.Position.Y += val; }
         }
@@ -223,23 +250,11 @@ namespace effect {
 
     void size::operator()(f64 t, std::span<vertex_group> groups) const
     {
-        auto const computeRect {[](vertex_group const& g) -> rect_f {
-            f32 minX {std::numeric_limits<f32>::max()}, maxX {std::numeric_limits<f32>::lowest()};
-            f32 minY {std::numeric_limits<f32>::max()}, maxY {std::numeric_limits<f32>::lowest()};
-            for (auto const& v : g) {
-                minX = std::min(minX, v.Position.X);
-                maxX = std::max(maxX, v.Position.X);
-                minY = std::min(minY, v.Position.Y);
-                maxY = std::max(maxY, v.Position.Y);
-            }
-            return rect_f::FromLTRB(minX, minY, maxX, maxY);
-        }};
-
         std::vector<rect_f> rects;
         rects.reserve(groups.size());
         size_f maxSize {size_f::Zero};
         for (auto const& g : groups) {
-            auto const& r {rects.emplace_back(computeRect(g))};
+            auto const& r {rects.emplace_back(ComputeRect(g))};
             maxSize.Width  = std::max(r.width(), maxSize.Width);
             maxSize.Height = std::max(r.height(), maxSize.Height);
         }
@@ -279,20 +294,25 @@ namespace effect {
     void rotate::operator()(f64 t, std::span<vertex_group> groups) const
     {
         for (auto& g : groups) {
-            f32 minX {std::numeric_limits<f32>::max()}, maxX {std::numeric_limits<f32>::lowest()};
-            f32 minY {std::numeric_limits<f32>::max()}, maxY {std::numeric_limits<f32>::lowest()};
-            for (auto const& v : g) {
-                minX = std::min(minX, v.Position.X);
-                maxX = std::max(maxX, v.Position.X);
-                minY = std::min(minY, v.Position.Y);
-                maxY = std::max(maxY, v.Position.Y);
-            }
-            point_f const center {(minX + maxX) / 2, (minY + maxY) / 2};
-            transform     rot;
-            rot.rotate_at(degree_f {static_cast<f32>(360.0 * t * Speed)}, center);
+            auto const rect {ComputeRect(g)};
+            transform  rot;
+            rot.rotate_at(degree_f {static_cast<f32>(360.0 * t * Speed)}, rect.center());
             for (auto& v : g) {
                 v.Position = rot * v.Position;
             }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////
+
+    void bounce::operator()(f64 t, std::span<vertex_group> groups) const
+    {
+        for (usize idx {0}; idx < groups.size(); ++idx) {
+            f64 const phase {static_cast<f64>(idx) / static_cast<f64>(groups.size()) * Spread};
+            f64 const local {std::fmod(t + phase, 1.0)};
+            f64 const val {std::abs(std::sin(local * std::numbers::pi * Bounces)) * Height
+                           * (1.0 - (local * Damping))};
+            for (auto& v : groups[idx]) { v.Position.Y -= static_cast<f32>(val); }
         }
     }
 
