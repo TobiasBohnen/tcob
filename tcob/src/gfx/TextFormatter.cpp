@@ -7,12 +7,10 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstdlib>
 #include <limits>
 #include <optional>
 #include <vector>
 
-#include "tcob/core/Color.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/gfx/Font.hpp"
@@ -25,13 +23,11 @@ enum class token_type : u8 {
     Text,
     Whitespace,
     Newline,
-    Command
 };
 
 struct token {
     token_type         Type {token_type::None};
     string             Text {};
-    command_definition Command {};
     f32                Width {0};
     std::vector<glyph> Glyphs {};
 };
@@ -42,52 +38,17 @@ struct line_definition {
     usize                     LineIndex {0};
 };
 
-static auto HandleCommands(token& token) -> bool
+static auto Tokenize(utf8_string_view text) -> std::vector<token>
 {
-    auto const hay {utf8::to_upper(token.Text)};
-
-    if (hay.starts_with("COLOR:")) {
-        token.Command = {
-            .Type  = command_type::Color,
-            .Value = color::FromString(token.Text.substr(6))};
-        return true;
-    }
-    if (hay.starts_with("ALPHA:")) {
-        token.Command = {
-            .Type  = command_type::Alpha,
-            .Value = static_cast<u8>(255 * std::clamp(std::strtof(token.Text.substr(6).c_str(), nullptr), 0.0f, 1.0f))};
-        return true;
-    }
-    if (hay.starts_with("EFFECT:")) {
-        token.Command = {
-            .Type  = command_type::Effect,
-            .Value = static_cast<u8>(std::strtoul(token.Text.substr(7).c_str(), nullptr, 10))};
-        return true;
-    }
-
-    return false;
-}
-
-static void FinishToken(std::vector<token>& vec, token& token)
-{
-    if (token.Type == token_type::Command) {
-        if (!HandleCommands(token)) {
-            token.Type = token_type::Text;
+    auto static finish_token {[](std::vector<token>& vec, token& token) {
+        if (token.Type != token_type::None) {
+            vec.push_back(token);
         }
-    }
-    if (token.Type != token_type::None) {
-        vec.push_back(token);
-    }
+        token.Type = token_type::None;
+        token.Text.clear();
+    }};
 
-    token.Type = token_type::None;
-    token.Text.clear();
-    token.Command = {};
-}
-
-static auto Tokenize(utf8_string_view text, bool parseCommands) -> std::vector<token>
-{
-    std::vector<token> retValue {};
-
+    std::vector<token> retValue;
     if (text.empty()) { return retValue; }
 
     token currentToken {};
@@ -96,82 +57,37 @@ static auto Tokenize(utf8_string_view text, bool parseCommands) -> std::vector<t
         case ' ':
         case '\t':
         case '\n': {
-            if (currentToken.Type == token_type::Command) { // ignore spaces in command
-                continue;
-            }
-
-            if (ch == '\n') { // handle newline
-                FinishToken(retValue, currentToken);
+            if (ch == '\n') {
+                finish_token(retValue, currentToken);
                 currentToken.Type = token_type::Newline;
-                FinishToken(retValue, currentToken);
-            } else if (currentToken.Type != token_type::Whitespace) { // start new whitespace token
-                FinishToken(retValue, currentToken);
+                finish_token(retValue, currentToken);
+            } else if (currentToken.Type != token_type::Whitespace) {
+                finish_token(retValue, currentToken);
                 currentToken.Type = token_type::Whitespace;
                 currentToken.Text += ch;
-            } else { // already whitespace -> add char
+            } else {
                 currentToken.Text += ch;
             }
         } break;
         case '\r':
             continue;
-        case '{': {
-            if (!parseCommands) {
-                if (currentToken.Type != token_type::Text && currentToken.Type != token_type::Command) { // start new text token
-                    FinishToken(retValue, currentToken);
-                    currentToken.Type = token_type::Text;
-                }
-
-                currentToken.Text += ch;
-            } else {
-                if (currentToken.Type == token_type::Command) {
-                    if (currentToken.Text.empty()) { // escaped {
-                        currentToken.Text += ch;
-                        currentToken.Type = token_type::Text;
-                    }
-                } else {
-                    FinishToken(retValue, currentToken);
-                    currentToken.Type = token_type::Command;
-                }
-            }
-        } break;
-        case '}': {
-            if (currentToken.Type == token_type::Command) {  // close command token
-                FinishToken(retValue, currentToken);
-            } else {
-                if (currentToken.Type != token_type::Text) { // start new text token
-                    FinishToken(retValue, currentToken);
-                    currentToken.Type = token_type::Text;
-                }
-                currentToken.Text += ch;
-            }
-        } break;
         default: {
-            // handle text
-            if (currentToken.Type != token_type::Text && currentToken.Type != token_type::Command) { // start new text token
-                FinishToken(retValue, currentToken);
+            if (currentToken.Type != token_type::Text) {
+                finish_token(retValue, currentToken);
                 currentToken.Type = token_type::Text;
             }
-
             currentToken.Text += ch;
         } break;
         }
     }
 
-    if (currentToken.Type == token_type::Command) { // treat unclosed command as text
-        currentToken.Type = token_type::Text;
-        if (currentToken.Text.empty()) {
-            currentToken.Text = "{";
-        }
-    }
-
-    FinishToken(retValue, currentToken);
-
+    finish_token(retValue, currentToken);
     return retValue;
 }
 
-static auto Shape(utf8_string_view text, font& font, bool kerning, bool measure, bool parseCommands) -> std::vector<token>
+static auto Shape(utf8_string_view text, font& font, bool kerning, bool measure) -> std::vector<token>
 {
-    auto retValue {Tokenize(text, parseCommands)};
+    auto retValue {Tokenize(text)};
 
     for (auto& token : retValue) {
         switch (token.Type) {
@@ -200,18 +116,7 @@ static auto Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> 
     usize lineIndex {0};
 
     for (auto const& currentToken : tokens) {
-        if (currentToken.Type == token_type::Command) {
-            currentLine.Tokens.push_back(&currentToken);
-            continue;
-        }
-
         if (std::floor(currentToken.Width * scale) > currentLine.RemainingWidth || currentToken.Type == token_type::Newline) {
-            if (!currentLine.Tokens.empty()) {
-                if (currentLine.Tokens.back()->Type == token_type::Whitespace) { // remove whitespace if last word of line
-                    currentLine.RemainingWidth += currentLine.Tokens.back()->Width * scale;
-                    currentLine.Tokens.pop_back();
-                }
-            }
             currentLine.LineIndex = lineIndex++;
             retValue.push_back(currentLine);
 
@@ -253,19 +158,21 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
     retValue.Font = &font;
 
     for (auto const& line : lines) {
-        f32 lineStartX {0};
+        f32 remainingWidth {line.RemainingWidth};
+        if (!line.Tokens.empty() && line.Tokens.back()->Type == token_type::Whitespace) {
+            remainingWidth += line.Tokens.back()->Width * scale;
+        }
 
         switch (align.Horizontal) {
         case horizontal_alignment::Left:   x = 0; break;
-        case horizontal_alignment::Right:  x = line.RemainingWidth; break;
-        case horizontal_alignment::Center: x = line.RemainingWidth / 2; break;
+        case horizontal_alignment::Right:  x = remainingWidth; break;
+        case horizontal_alignment::Center: x = remainingWidth / 2; break;
         }
 
-        lineStartX = x;
+        f32 const lineStartX {x};
 
         for (auto const* shapeToken : line.Tokens) {
             auto& formatToken {retValue.Tokens.emplace_back()};
-            formatToken.Command   = shapeToken->Command;
             formatToken.LineIndex = line.LineIndex;
 
             for (auto const& glyph : shapeToken->Glyphs) {
@@ -298,7 +205,7 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
         if (align.Vertical == vertical_alignment::Middle) {
             offset = (availableHeight - retValue.UsedSize.Height) / 2;
         } else if (align.Vertical == vertical_alignment::Bottom) {
-            offset = (availableHeight - retValue.UsedSize.Height);
+            offset = availableHeight - retValue.UsedSize.Height;
         }
 
         for (auto& token : retValue.Tokens) {
@@ -311,18 +218,18 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
     return retValue;
 }
 
-auto format(utf8_string_view text, font& font, alignment align, size_f availableSize, f32 scale, bool kerning, bool parseCommands) -> result
+auto format(utf8_string_view text, font& font, alignment align, size_f availableSize, f32 scale, bool kerning) -> result
 {
     if (scale == 0) { return {}; }
 
-    auto shaperTokens {Shape(text, font, kerning, false, parseCommands)};
+    auto shaperTokens {Shape(text, font, kerning, false)};
     auto lines {Wrap(shaperTokens, availableSize.Width, scale)};
     return Layout(lines, font, align, availableSize.Height, scale);
 }
 
 auto measure(utf8_string_view text, font& font, f32 availableHeight, bool kerning) -> size_f
 {
-    auto shaperTokens {Shape(text, font, kerning, true, true)};
+    auto shaperTokens {Shape(text, font, kerning, true)};
     auto lines {Wrap(shaperTokens, -1, 1.0f)};
     return Layout(lines, font, {}, availableHeight, 1.0f).UsedSize;
 }
@@ -353,5 +260,4 @@ auto result::get_line_index(isize idx) const -> std::optional<usize>
     return std::nullopt;
 }
 
-////////////////////////////////////////////////////////////
 }

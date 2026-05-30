@@ -153,7 +153,7 @@ namespace effect {
             } else if (idx > fadeIdx) {
                 dst[0].Color.A = dst[1].Color.A = dst[2].Color.A = dst[3].Color.A = 255;
             } else {
-                f64 const val {1.0 - (((t * (totalQuads + width) - static_cast<f64>(idx))) / static_cast<f64>(width))};
+                f64 const val {1.0 - ((((t * (totalQuads + width)) - static_cast<f64>(idx))) / static_cast<f64>(width))};
                 dst[0].Color.A = dst[1].Color.A = dst[2].Color.A = dst[3].Color.A = static_cast<u8>(val * 255.);
             }
         }
