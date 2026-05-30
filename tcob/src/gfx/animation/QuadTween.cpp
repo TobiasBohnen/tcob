@@ -246,9 +246,9 @@ namespace effect {
             point_f      center {point_f::Zero};
 
             switch (Anchor.Horizontal) {
-            case horizontal_alignment::Left:     center.X = rect.left() - maxSize.Width + rect.width(); break;
-            case horizontal_alignment::Centered: center.X = rect.center().X - ((maxSize.Width - rect.width()) / 2); break;
-            case horizontal_alignment::Right:    center.X = rect.right(); break;
+            case horizontal_alignment::Left:   center.X = rect.left() - maxSize.Width + rect.width(); break;
+            case horizontal_alignment::Center: center.X = rect.center().X - ((maxSize.Width - rect.width()) / 2); break;
+            case horizontal_alignment::Right:  center.X = rect.right(); break;
             }
             switch (Anchor.Vertical) {
             case vertical_alignment::Top:    center.Y = rect.top() - maxSize.Height + rect.height(); break;

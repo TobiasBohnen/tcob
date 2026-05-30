@@ -355,9 +355,9 @@ void vertical_layout::do_layout(size_f size)
 
             f32 x {col * colWidth};
             switch (_alignment) {
-            case gfx::horizontal_alignment::Left:     break;
-            case gfx::horizontal_alignment::Right:    x += colWidth - widgetWidth; break;
-            case gfx::horizontal_alignment::Centered: x += (colWidth - widgetWidth) / 2.f; break;
+            case gfx::horizontal_alignment::Left:   break;
+            case gfx::horizontal_alignment::Right:  x += colWidth - widgetWidth; break;
+            case gfx::horizontal_alignment::Center: x += (colWidth - widgetWidth) / 2.f; break;
             }
 
             w[idx]->Bounds = {x, y, widgetWidth, widgetHeight};

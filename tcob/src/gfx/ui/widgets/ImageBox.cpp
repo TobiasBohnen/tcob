@@ -112,9 +112,9 @@ auto image_box::image_bounds(rect_f const& rect) const -> rect_f
     }
 
     switch (Alignment->Horizontal) {
-    case gfx::horizontal_alignment::Left:     break;
-    case gfx::horizontal_alignment::Right:    targetRect.Position.X += rect.width() - targetRect.width(); break;
-    case gfx::horizontal_alignment::Centered: targetRect.Position.X += (rect.width() - targetRect.width()) / 2; break;
+    case gfx::horizontal_alignment::Left:   break;
+    case gfx::horizontal_alignment::Right:  targetRect.Position.X += rect.width() - targetRect.width(); break;
+    case gfx::horizontal_alignment::Center: targetRect.Position.X += (rect.width() - targetRect.width()) / 2; break;
     }
     switch (Alignment->Vertical) {
     case gfx::vertical_alignment::Top:    break;

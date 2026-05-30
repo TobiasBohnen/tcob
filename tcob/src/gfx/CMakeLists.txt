@@ -8,6 +8,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Font_private.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FontFamily.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Gfx.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Image.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilters.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ImageQuant.cpp

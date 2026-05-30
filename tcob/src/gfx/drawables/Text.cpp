@@ -84,6 +84,8 @@ void text::format()
     if (Text->empty()) { return; }
 
     auto const size {Bounds->Size};
+    if (size.Width == 0 || size.Height == 0) { return; }
+
     auto const formatResult {text_formatter::format(*Text, *_font, Style->Alignment, size, 1.0f, Style->KerningEnabled, true)};
     _quads.reserve(formatResult.QuadCount);
 

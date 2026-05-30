@@ -374,7 +374,7 @@ void node_graph_view::draw_minimap(gfx::canvas& canvas, rect_f const& bounds)
 
     f32 const mmX {MinimapAlignment->Horizontal == gfx::horizontal_alignment::Right
                        ? bounds.right() - mmWidth
-                       : MinimapAlignment->Horizontal == gfx::horizontal_alignment::Centered
+                       : MinimapAlignment->Horizontal == gfx::horizontal_alignment::Center
                        ? bounds.left() + ((bounds.width() - mmWidth) / 2.0f)
                        : bounds.left()};
     f32 const mmY {MinimapAlignment->Vertical == gfx::vertical_alignment::Bottom

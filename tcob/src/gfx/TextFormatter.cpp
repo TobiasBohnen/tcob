@@ -256,9 +256,9 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
         f32 lineStartX {0};
 
         switch (align.Horizontal) {
-        case horizontal_alignment::Left:     x = 0; break;
-        case horizontal_alignment::Right:    x = line.RemainingWidth; break;
-        case horizontal_alignment::Centered: x = line.RemainingWidth / 2; break;
+        case horizontal_alignment::Left:   x = 0; break;
+        case horizontal_alignment::Right:  x = line.RemainingWidth; break;
+        case horizontal_alignment::Center: x = line.RemainingWidth / 2; break;
         }
 
         lineStartX = x;

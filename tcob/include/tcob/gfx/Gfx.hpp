@@ -155,7 +155,7 @@ public:
 enum class horizontal_alignment : u8 {
     Left,
     Right,
-    Centered
+    Center
 };
 
 enum class vertical_alignment : u8 {
@@ -172,6 +172,16 @@ public:
     vertical_alignment   Vertical {vertical_alignment::Top};
 
     auto operator==(alignment const& other) const -> bool = default;
+
+    static alignment const TopLeft;
+    static alignment const TopCenter;
+    static alignment const TopRight;
+    static alignment const MiddleLeft;
+    static alignment const MiddleCenter;
+    static alignment const MiddleRight;
+    static alignment const BottomLeft;
+    static alignment const BottomCenter;
+    static alignment const BottomRight;
 
     static auto constexpr Members()
     {

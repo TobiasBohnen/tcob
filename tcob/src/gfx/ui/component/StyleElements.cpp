@@ -48,9 +48,9 @@ auto nav_arrow_element::calc(rect_f const& rect, gfx::horizontal_alignment align
     retValue.Size.Width  = Size.Width.calc(rect.width());
     retValue.Size.Height = Size.Height.calc(rect.height());
     switch (alignment) {
-    case gfx::horizontal_alignment::Left:     retValue.Position.X = rect.Position.X; break;
-    case gfx::horizontal_alignment::Right:    retValue.Position.X += rect.width() - retValue.width(); break;
-    case gfx::horizontal_alignment::Centered: retValue.Position.X += (rect.width() - retValue.width()) / 2; break;
+    case gfx::horizontal_alignment::Left:   retValue.Position.X = rect.Position.X; break;
+    case gfx::horizontal_alignment::Right:  retValue.Position.X += rect.width() - retValue.width(); break;
+    case gfx::horizontal_alignment::Center: retValue.Position.X += (rect.width() - retValue.width()) / 2; break;
     }
     retValue.Position.Y += (rect.height() - retValue.height()) / 2;
     return retValue - Border.thickness() - Padding;

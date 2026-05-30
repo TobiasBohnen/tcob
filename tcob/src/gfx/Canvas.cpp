@@ -1198,9 +1198,9 @@ void canvas::decompose_text(utf8_string_view text, rect_f const& rect)
     if (align.Horizontal != horizontal_alignment::Left || align.Vertical != vertical_alignment::Top) {
         auto const textSize {measure_text(rect.height(), text) + size_f {s.StrokeWidth, s.StrokeWidth}};
         switch (align.Horizontal) {
-        case horizontal_alignment::Left:     break;
-        case horizontal_alignment::Right:    offset.X = rect.right() - textSize.Width; break;
-        case horizontal_alignment::Centered: offset.X = rect.left() + ((rect.width() - textSize.Width) / 2); break;
+        case horizontal_alignment::Left:   break;
+        case horizontal_alignment::Right:  offset.X = rect.right() - textSize.Width; break;
+        case horizontal_alignment::Center: offset.X = rect.left() + ((rect.width() - textSize.Width) / 2); break;
         }
         switch (align.Vertical) {
         case vertical_alignment::Top:    break;
