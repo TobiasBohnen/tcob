@@ -26,6 +26,7 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Texture.hpp"
 
 #include "tcob/core/magic_enum_reduced.hpp"
@@ -51,6 +52,7 @@ struct decompose_callbacks {
     std::function<void(point_f)>                   LineTo;
     std::function<void(point_f, point_f)>          ConicTo;
     std::function<void(point_f, point_f, point_f)> CubicTo;
+    std::function<void()>                          GlyphEnd;
     point_f                                        Offset {};
 };
 
@@ -159,6 +161,9 @@ private:
 };
 
 ////////////////////////////////////////////////////////////
+
+TCOB_API auto polygonize_text(font& font, utf8_string_view text, bool kerning) -> std::vector<polygon>;
+
 }
 
 template <>

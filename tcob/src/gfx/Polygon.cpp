@@ -23,8 +23,6 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Transform.hpp"
-#include "tcob/core/tweening/TweenFunc.hpp"
-#include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
@@ -311,58 +309,6 @@ void polygons::offset(std::vector<polygon>& polygons, f64 delta, offset_join joi
     for (u32 i {0}; i < solution.Count(); ++i) {
         parseSolution(solution.Child(i), nullptr);
     }
-}
-
-auto polygonize_text(font& font, utf8_string_view text, bool kerning) -> std::vector<polygon>
-{
-    std::vector<polygon> retValue;
-
-    f32 constexpr tolerance {0.05f};
-    point_f              curPos;
-    std::vector<point_f> points;
-
-    auto const addPoly {[&] {
-        if (!points.empty()) {
-            std::ranges::reverse(points);
-            auto const winding {polygons::get_winding(points)};
-            if (winding == winding::CCW) {
-                retValue.emplace_back().Outline = points;
-            } else {
-                retValue.at(retValue.size() - 1).Holes.push_back(points);
-            }
-
-            points.clear();
-        }
-    }};
-
-    decompose_callbacks cb {};
-    cb.MoveTo = [&](point_f p) {
-        curPos = p + cb.Offset;
-        addPoly();
-    };
-    cb.LineTo = [&](point_f p) {
-        points.push_back(curPos);
-        curPos = points.emplace_back(p + cb.Offset);
-    };
-    cb.ConicTo = [&](point_f p0, point_f p1) {
-        tween_func::quad_bezier_curve func;
-        func.StartPoint   = curPos;
-        func.ControlPoint = p0 + cb.Offset;
-        curPos = func.EndPoint = p1 + cb.Offset;
-        for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
-    };
-    cb.CubicTo = [&](point_f p0, point_f p1, point_f p2) {
-        tween_func::cubic_bezier_curve func;
-        func.StartPoint    = curPos;
-        func.ControlPoint0 = p0 + cb.Offset;
-        func.ControlPoint1 = p1 + cb.Offset;
-        curPos = func.EndPoint = p2 + cb.Offset;
-        for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
-    };
-
-    font.decompose_text(text, kerning, cb);
-    addPoly();
-    return retValue;
 }
 
 }

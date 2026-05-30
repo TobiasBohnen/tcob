@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/Font.hpp"
 
+#include <algorithm>
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -22,6 +23,9 @@
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/Stream.hpp"
+#include "tcob/core/tweening/TweenFunc.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Texture.hpp"
 
 using namespace std::chrono_literals;
@@ -128,8 +132,8 @@ void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbac
     decompose_callbacks             cb {};
     cb.MoveTo  = [&cbCommands](point_f p) { cbCommands.emplace_back(decompose_move {p}); };
     cb.LineTo  = [&cbCommands](point_f p) { cbCommands.emplace_back(decompose_line {p}); };
-    cb.ConicTo = [&cbCommands](point_f p0, point_f p1) { cbCommands.emplace_back(decompose_conic {p0, p1}); };
-    cb.CubicTo = [&cbCommands](point_f p0, point_f p1, point_f p2) { cbCommands.emplace_back(decompose_cubic {p0, p1, p2}); };
+    cb.ConicTo = [&cbCommands](point_f p0, point_f p1) { cbCommands.emplace_back(decompose_conic {.Point0 = p0, .Point1 = p1}); };
+    cb.CubicTo = [&cbCommands](point_f p0, point_f p1, point_f p2) { cbCommands.emplace_back(decompose_cubic {.Point0 = p0, .Point1 = p1, .Point2 = p2}); };
 
     for (usize i {0}; i < len; ++i) {
         auto const cp0 {u32text[i]};
@@ -155,6 +159,7 @@ void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbac
         if (kerning && i < len - 1) {
             funcs.Offset.X += _engine->get_kerning(result.CodePoint, u32text[i + 1]);
         }
+        if (funcs.GlyphEnd) { funcs.GlyphEnd(); }
     }
 }
 
@@ -228,6 +233,60 @@ auto font::cache_render_glyph(u32 cp) -> bool
         _fontTextureCursor.X += bitmapSize.Width + GLYPH_PADDING;
     }
     return true;
+}
+
+////////////////////////////////////////////////////////////
+
+auto polygonize_text(font& font, utf8_string_view text, bool kerning) -> std::vector<polygon>
+{
+    std::vector<polygon> retValue;
+
+    f32 constexpr tolerance {0.05f};
+    point_f              curPos;
+    std::vector<point_f> points;
+
+    auto const addPoly {[&] {
+        if (!points.empty()) {
+            std::ranges::reverse(points);
+            auto const winding {polygons::get_winding(points)};
+            if (winding == winding::CCW) {
+                retValue.emplace_back().Outline = points;
+            } else {
+                retValue.at(retValue.size() - 1).Holes.push_back(points);
+            }
+
+            points.clear();
+        }
+    }};
+
+    decompose_callbacks cb {};
+    cb.MoveTo = [&](point_f p) {
+        curPos = p + cb.Offset;
+        addPoly();
+    };
+    cb.LineTo = [&](point_f p) {
+        points.push_back(curPos);
+        curPos = points.emplace_back(p + cb.Offset);
+    };
+    cb.ConicTo = [&](point_f p0, point_f p1) {
+        tween_func::quad_bezier_curve func;
+        func.StartPoint   = curPos;
+        func.ControlPoint = p0 + cb.Offset;
+        curPos = func.EndPoint = p1 + cb.Offset;
+        for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
+    };
+    cb.CubicTo = [&](point_f p0, point_f p1, point_f p2) {
+        tween_func::cubic_bezier_curve func;
+        func.StartPoint    = curPos;
+        func.ControlPoint0 = p0 + cb.Offset;
+        func.ControlPoint1 = p1 + cb.Offset;
+        curPos = func.EndPoint = p2 + cb.Offset;
+        for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
+    };
+
+    font.decompose_text(text, kerning, cb);
+    addPoly();
+    return retValue;
 }
 
 }
