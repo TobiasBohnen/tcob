@@ -177,7 +177,7 @@ auto isometric_grid::layout_tile(isometric_tile const& tile, point_i coord) cons
 {
     auto const [x, y] {point_f {coord}};
     return Staggered
-        ? rect_f {{TileSize.Width * (x + tile.Center.X * (coord.Y & 1)),
+        ? rect_f {{TileSize.Width * (x + (tile.Center.X * (coord.Y & 1))),
                    TileSize.Height * (tile.Center.Y * y)},
                   TileSize}
         : rect_f {{((TileSize.Width * tile.Center.X) * (x - y)),
@@ -192,9 +192,9 @@ auto hexagonal_grid::layout_tile(hexagonal_tile const& /* tile */, point_i coord
     auto const [x, y] {point_f {coord}};
     return Top == hexagonal_top::Flat
         ? rect_f {{TileSize.Width * (3.0f / 4.0f * x),
-                   TileSize.Height * (y + 0.5f * (coord.X & 1))},
+                   TileSize.Height * (y + (0.5f * (coord.X & 1)))},
                   TileSize}
-        : rect_f {{TileSize.Width * (x + 0.5f * (coord.Y & 1)),
+        : rect_f {{TileSize.Width * (x + (0.5f * (coord.Y & 1))),
                    TileSize.Height * (3.0f / 4.0f * y)},
                   TileSize};
 }
