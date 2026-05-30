@@ -161,7 +161,7 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
 
     constexpr i64 MaxImageBytes {512ll * 1024ll * 1024ll};
 
-    auto static const safe_mul {[](i64 a, i64 b) -> std::optional<i64> {
+    auto static const safeMul {[](i64 a, i64 b) -> std::optional<i64> {
         if (a != 0 && b > (std::numeric_limits<i64>::max() / a)) {
             return std::nullopt;
         }
@@ -169,7 +169,7 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
         return a * b;
     }};
 
-    auto const bitsPerRow {safe_mul(static_cast<i64>(width), static_cast<i64>(bitCount))};
+    auto const bitsPerRow {safeMul(static_cast<i64>(width), static_cast<i64>(bitCount))};
     if (!bitsPerRow) { return {}; }
 
     i64 const srcStride64 {(((*bitsPerRow) + 31ll) / 32ll) * 4ll};
@@ -184,7 +184,7 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
 
     i32 const dstStride {_info.stride()};
 
-    auto const write_pixel {[&](i32& index, color const& c) {
+    auto const writePixel {[&](i32& index, color const& c) {
         if ((index + 3) >= static_cast<i32>(retValue.size())) {
             return false;
         }
@@ -205,14 +205,14 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
                 u8 const idx {in.read<u8>()};
                 u8 const idx1 {static_cast<u8>(idx >> 4)};
                 if (idx1 >= palette.size()) { return {}; }
-                if (!write_pixel(index, palette[idx1])) { return {}; }
+                if (!writePixel(index, palette[idx1])) { return {}; }
 
                 x++;
 
                 if (x < width) {
                     u8 const idx2 {static_cast<u8>(idx & 0x0F)};
                     if (idx2 >= palette.size()) { return {}; }
-                    if (!write_pixel(index, palette[idx2])) { return {}; }
+                    if (!writePixel(index, palette[idx2])) { return {}; }
 
                     x++;
                 }
@@ -229,14 +229,14 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
             for (i32 x {0}; x < width; x++) {
                 u8 const idx {in.read<u8>()};
                 if (idx >= palette.size()) { return {}; }
-                if (!write_pixel(index, palette[idx])) { return {}; }
+                if (!writePixel(index, palette[idx])) { return {}; }
             }
 
             index -= dstStride * 2;
             in.read_n<u8>(pad);
         }
     } else if (bitCount == 24) {
-        auto const rowBytes64 {safe_mul(static_cast<i64>(width), 3ll)};
+        auto const rowBytes64 {safeMul(static_cast<i64>(width), 3ll)};
 
         if (!rowBytes64 || *rowBytes64 > std::numeric_limits<i32>::max()) { return {}; }
 

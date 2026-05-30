@@ -475,7 +475,7 @@ struct md_parser {
 
         if (rows.size() < 2) { return {}; }
 
-        auto const parse_row {[](utf8_string_view row) {
+        auto const parseRow {[](utf8_string_view row) {
             usize const start {row.find('|') + 1};
             usize const end {row.rfind('|')};
             if (start >= end) { return std::vector<utf8_string_view> {}; }
@@ -491,7 +491,7 @@ struct md_parser {
             return cleanCells;
         }};
 
-        auto const header_cells {parse_row(rows[0])};
+        auto const header_cells {parseRow(rows[0])};
         if (header_cells.empty()) { return {}; }
 
         utf8_string retValue {"<table><thead><tr>"};
@@ -501,7 +501,7 @@ struct md_parser {
         retValue += "</tr></thead><tbody>";
 
         for (usize i {2}; i < rows.size(); ++i) {
-            auto const cells {parse_row(rows[i])};
+            auto const cells {parseRow(rows[i])};
             if (cells.empty()) { continue; }
 
             retValue += "<tr>";

@@ -306,7 +306,7 @@ void canvas::border_rect(rect_f const& outer,
     bool const hasBottom {bottom > 0};
     bool const hasLeft {left > 0};
 
-    auto static const clamp_rad {[](f32 const r, f32 const limit) -> f32 {
+    auto static const clampRad {[](f32 const r, f32 const limit) -> f32 {
         return std::clamp(r, 0.f, limit);
     }};
 
@@ -324,23 +324,23 @@ void canvas::border_rect(rect_f const& outer,
     f32 const halfw {std::abs(iw) * 0.5f};
     f32 const halfh {std::abs(ih) * 0.5f};
 
-    f32 const rxoTL {clamp_rad(radTL, std::abs(ow) * 0.5f)};
-    f32 const ryoTL {clamp_rad(radTL, std::abs(oh) * 0.5f)};
-    f32 const rxoTR {clamp_rad(radTR, std::abs(ow) * 0.5f)};
-    f32 const ryoTR {clamp_rad(radTR, std::abs(oh) * 0.5f)};
-    f32 const rxoBR {clamp_rad(radBR, std::abs(ow) * 0.5f)};
-    f32 const ryoBR {clamp_rad(radBR, std::abs(oh) * 0.5f)};
-    f32 const rxoBL {clamp_rad(radBL, std::abs(ow) * 0.5f)};
-    f32 const ryoBL {clamp_rad(radBL, std::abs(oh) * 0.5f)};
+    f32 const rxoTL {clampRad(radTL, std::abs(ow) * 0.5f)};
+    f32 const ryoTL {clampRad(radTL, std::abs(oh) * 0.5f)};
+    f32 const rxoTR {clampRad(radTR, std::abs(ow) * 0.5f)};
+    f32 const ryoTR {clampRad(radTR, std::abs(oh) * 0.5f)};
+    f32 const rxoBR {clampRad(radBR, std::abs(ow) * 0.5f)};
+    f32 const ryoBR {clampRad(radBR, std::abs(oh) * 0.5f)};
+    f32 const rxoBL {clampRad(radBL, std::abs(ow) * 0.5f)};
+    f32 const ryoBL {clampRad(radBL, std::abs(oh) * 0.5f)};
 
-    f32 const rxiTL {clamp_rad(iTL, halfw)};
-    f32 const ryiTL {clamp_rad(iTL, halfh)};
-    f32 const rxiTR {clamp_rad(iTR, halfw)};
-    f32 const ryiTR {clamp_rad(iTR, halfh)};
-    f32 const rxiBR {clamp_rad(iBR, halfw)};
-    f32 const ryiBR {clamp_rad(iBR, halfh)};
-    f32 const rxiBL {clamp_rad(iBL, halfw)};
-    f32 const ryiBL {clamp_rad(iBL, halfh)};
+    f32 const rxiTL {clampRad(iTL, halfw)};
+    f32 const ryiTL {clampRad(iTL, halfh)};
+    f32 const rxiTR {clampRad(iTR, halfw)};
+    f32 const ryiTR {clampRad(iTR, halfh)};
+    f32 const rxiBR {clampRad(iBR, halfw)};
+    f32 const ryiBR {clampRad(iBR, halfh)};
+    f32 const rxiBL {clampRad(iBL, halfw)};
+    f32 const ryiBL {clampRad(iBL, halfh)};
 
     // full border
     if (hasTop && hasRight && hasBottom && hasLeft) {
@@ -392,7 +392,7 @@ void canvas::border_rect(rect_f const& outer,
         }
     }
 
-    auto const draw_out_corner {[&](i32 c) {
+    auto const drawOutCorner {[&](i32 c) {
         switch (c) {
         case 3: cmds.insert(cmds.end(), {BezierTo, ox + (rxoTL * (1 - KAPPA90)), oy, ox, oy + (ryoTL * (1 - KAPPA90)), ox, oy + ryoTL}); break;
         case 2: cmds.insert(cmds.end(), {BezierTo, ox, oy + oh - (ryoBL * (1 - KAPPA90)), ox + (rxoBL * (1 - KAPPA90)), oy + oh, ox + rxoBL, oy + oh}); break;
@@ -401,7 +401,7 @@ void canvas::border_rect(rect_f const& outer,
         }
     }};
 
-    auto const draw_out_side {[&](i32 s) {
+    auto const drawOutSide {[&](i32 s) {
         switch (s) {
         case 3: cmds.insert(cmds.end(), {LineTo, ox, oy + oh - ryoBL}); break;
         case 2: cmds.insert(cmds.end(), {LineTo, ox + ow - rxoBR, oy + oh}); break;
@@ -410,7 +410,7 @@ void canvas::border_rect(rect_f const& outer,
         }
     }};
 
-    auto const draw_in_side {[&](i32 s) {
+    auto const drawInSide {[&](i32 s) {
         switch (s) {
         case 0: cmds.insert(cmds.end(), {LineTo, ix + iw - rxiTR, iy}); break;
         case 1: cmds.insert(cmds.end(), {LineTo, ix + iw, iy + ih - ryiBR}); break;
@@ -419,7 +419,7 @@ void canvas::border_rect(rect_f const& outer,
         }
     }};
 
-    auto const draw_in_corner {[&](i32 c) {
+    auto const drawInCorner {[&](i32 c) {
         switch (c) {
         case 0: cmds.insert(cmds.end(), {BezierTo, ix + iw - (rxiTR * (1 - KAPPA90)), iy, ix + iw, iy + (ryiTR * (1 - KAPPA90)), ix + iw, iy + ryiTR}); break;
         case 1: cmds.insert(cmds.end(), {BezierTo, ix + iw, iy + ih - (ryiBR * (1 - KAPPA90)), ix + iw - (rxiBR * (1 - KAPPA90)), iy + ih, ix + iw - rxiBR, iy + ih}); break;
@@ -461,12 +461,12 @@ void canvas::border_rect(rect_f const& outer,
             break;
         }
         cmds.insert(cmds.end(), {MoveTo, sx, sy});
-        draw_out_corner(firstOutCorner);
+        drawOutCorner(firstOutCorner);
 
         for (i32 i {0}; i < chainLen; ++i) {
             i32 side {ccwChain[i]};
-            draw_out_side(side);
-            draw_out_corner((side + 3) % 4);
+            drawOutSide(side);
+            drawOutCorner((side + 3) % 4);
         }
 
         // Inner Path (Cap directly to inner starting point and trace backward)
@@ -496,10 +496,10 @@ void canvas::border_rect(rect_f const& outer,
         for (i32 i {chainLen - 1}; i >= 0; --i) {
             i32 const s {ccwChain[i]};
             if (i == chainLen - 1) {
-                draw_in_corner((s + 3) % 4);
+                drawInCorner((s + 3) % 4);
             }
-            draw_in_side(s);
-            draw_in_corner(s);
+            drawInSide(s);
+            drawInCorner(s);
         }
         cmds.push_back(Close);
     }
@@ -1218,7 +1218,7 @@ auto canvas::format_text(size_f const& size, utf8_string_view text, f32 scale) -
 {
     state const& s {_states->get()};
     if (!s.Font) { return {}; }
-    return text_formatter::format(text, *s.Font, s.TextAlign, size, scale, true, false);
+    return text_formatter::format(text, *s.Font, s.TextAlign, size, scale, true);
 }
 
 auto canvas::measure_text(f32 height, utf8_string_view text) -> size_f

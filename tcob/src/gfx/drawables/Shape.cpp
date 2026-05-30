@@ -459,7 +459,7 @@ auto poly_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
     auto const& xform {get_transform()};
 
-    auto const intersect_polyline {[&ray, &xform](polyline_span polygon) -> std::vector<ray::result> {
+    auto const intersectPolyline {[&ray, &xform](polyline_span polygon) -> std::vector<ray::result> {
         std::vector<point_f> points;
         points.reserve(polygon.size());
         for (auto const& point : polygon) { points.push_back(xform * point); }
@@ -468,11 +468,11 @@ auto poly_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 
     std::vector<ray::result> retValue;
     for (auto const& polygon : *Polygons) {
-        auto const outPoints {intersect_polyline(polygon.Outline)};
+        auto const outPoints {intersectPolyline(polygon.Outline)};
         retValue.insert(retValue.end(), outPoints.begin(), outPoints.end());
 
         for (auto const& hole : polygon.Holes) {
-            auto const holePoints {intersect_polyline(hole)};
+            auto const holePoints {intersectPolyline(hole)};
             retValue.insert(retValue.end(), holePoints.begin(), holePoints.end());
         }
     }

@@ -601,7 +601,7 @@ void form_base::on_text_input(input::keyboard::text_input_event const& ev)
 
 void form_base::handle_tab(input::keyboard::event const& ev)
 {
-    static auto const find_next_tab_widget {[](std::vector<widget*> const& vec, i32 currentTabIndex) -> widget* {
+    static auto const findNext {[](std::vector<widget*> const& vec, i32 currentTabIndex) -> widget* {
         widget* retValue {nullptr};
         i32     lowestHigherValue {std::numeric_limits<i32>::max()};
         for (auto* widget : vec) {
@@ -613,7 +613,7 @@ void form_base::handle_tab(input::keyboard::event const& ev)
         return retValue;
     }};
 
-    static auto const find_prev_tab_widget {[](std::vector<widget*> const& vec, i32 currentTabIndex) -> widget* {
+    static auto const findPrev {[](std::vector<widget*> const& vec, i32 currentTabIndex) -> widget* {
         widget* retValue {nullptr};
         i32     highestLowerValue {std::numeric_limits<i32>::min()};
         for (auto* widget : vec) {
@@ -631,18 +631,18 @@ void form_base::handle_tab(input::keyboard::event const& ev)
 
     if (ev.KeyMods.is_down(Controls->TabMod)) {
         // shift tab
-        widget* nextWidget {find_prev_tab_widget(vec, _currentTabIndex)};
+        widget* nextWidget {findPrev(vec, _currentTabIndex)};
         if (!nextWidget) {
             _currentTabIndex = std::numeric_limits<i32>::max();
-            nextWidget       = find_prev_tab_widget(vec, _currentTabIndex);
+            nextWidget       = findPrev(vec, _currentTabIndex);
         }
         if (nextWidget) { focus_widget(*nextWidget); }
     } else {
         // tab
-        widget* nextWidget {find_next_tab_widget(vec, _currentTabIndex)};
+        widget* nextWidget {findNext(vec, _currentTabIndex)};
         if (!nextWidget) {
             _currentTabIndex = -1;
-            nextWidget       = find_next_tab_widget(vec, _currentTabIndex);
+            nextWidget       = findNext(vec, _currentTabIndex);
         }
         if (nextWidget) { focus_widget(*nextWidget); }
     }
@@ -727,7 +727,7 @@ void form_base::handle_tooltip(milliseconds deltaTime)
 
     _mouseOverTime += deltaTime;
 
-    auto const shouldtooltip {[this] {
+    auto const shouldTooltip {[this] {
         if (_isTooltipVisible) { return false; }
         if (locate_service<input::system>().InputMode != input::mode::KeyboardMouse) { return false; }
 
@@ -741,7 +741,7 @@ void form_base::handle_tooltip(milliseconds deltaTime)
 
         return false;
     }};
-    if (shouldtooltip()) {
+    if (shouldTooltip()) {
         _topWidget->Tooltip->on_tooltip(_topWidget);
         _isTooltipVisible = true;
     }
