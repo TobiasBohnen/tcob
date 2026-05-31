@@ -67,7 +67,11 @@ static void build_index(archive* arc)
 
     add_dir(arc, "");
 
-    while (io->read(io, header.data(), TAR_BLOCK) == TAR_BLOCK) {
+    for (;;) {
+        io->seek(io, offset);
+
+        if (io->read(io, header.data(), TAR_BLOCK) != TAR_BLOCK) { break; }
+
         bool empty {true};
         for (char c : header) {
             if (c != 0) {
@@ -91,10 +95,8 @@ static void build_index(archive* arc)
             }
         }
 
-        PHYSFS_uint64 const skip {TAR_BLOCK + (((size + TAR_BLOCK - 1) / TAR_BLOCK) * TAR_BLOCK)};
-
-        io->seek(io, offset + skip);
-        offset += skip;
+        PHYSFS_uint64 const dataBlocks {(size + TAR_BLOCK - 1) / TAR_BLOCK};
+        offset += TAR_BLOCK + (dataBlocks * TAR_BLOCK);
     }
 }
 
@@ -202,7 +204,7 @@ static auto tar_enumerate(
         if (rest.empty()) { continue; }
 
         usize const       slash {rest.find('/')};
-        string_view const entry {slash == string_view::npos ? rest : rest.substr(0, slash + 1)};
+        string_view const entry {slash == string_view::npos ? rest : rest.substr(0, slash)};
 
         if (emitted.contains(entry)) { continue; }
         emitted.insert(entry);
@@ -259,6 +261,8 @@ static auto tar_openArchive(PHYSFS_Io* io,
 
     if (forWrite) { return nullptr; }
 
+    io->seek(io, 0);
+
     auto* arc {new archive {}};
     arc->io = io->duplicate(io);
 
@@ -280,12 +284,6 @@ static auto tar_openArchive(PHYSFS_Io* io,
     *claimed = 1;
 
     build_index(arc);
-
-    if (arc->files.size() <= 1) {
-        arc->io->destroy(arc->io);
-        delete arc; // NOLINT
-        return nullptr;
-    }
 
     return arc;
 }
