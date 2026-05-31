@@ -7,6 +7,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/AssetLoader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tweening/Tween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/input/Input.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/io/Archiver_tar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/FileStream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/FileSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/Filter.cpp

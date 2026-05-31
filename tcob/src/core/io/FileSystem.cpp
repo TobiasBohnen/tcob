@@ -18,6 +18,8 @@
 #undef crc32
 #include <physfs.h>
 
+#include "Archiver_tar.hpp"
+
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/FileStream.hpp"
@@ -98,6 +100,7 @@ void detail::init(string const& name, string const& orgName)
     } else {
         Check("setWriteDir", PHYSFS_setWriteDir("."));
     }
+    PHYSFS_init_tar();
     mount(".", "/");
 }
 
