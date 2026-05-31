@@ -17,7 +17,7 @@
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
-#include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
@@ -126,7 +126,7 @@ static auto parse_commands(utf8_string const& input, utf8_string& stripped) -> s
     return commands;
 }
 
-text::text(asset_ptr<font> font)
+text::text(asset_ptr<font_family> font)
     : _font {std::move(font)}
 {
     _font->TextureResized.connect([this] { _needsFormat = true; });
@@ -134,7 +134,6 @@ text::text(asset_ptr<font> font)
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
     Pivot.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
-    _material->first_pass().Texture = _font->texture();
     Shader.Changed.connect([this](auto const& value) { _material->first_pass().Shader = value; });
     Text.Changed.connect([this](auto const&) { _needsFormat = true; });
     Style.Changed.connect([this](auto const&) { _needsFormat = true; });
@@ -194,8 +193,10 @@ void text::format()
 
     utf8_string stripped;
     auto const  commands {parse_commands(*Text, stripped)};
-    auto const  formatResult {text_formatter::format(stripped, *_font, Style->Alignment, size, 1.0f, Style->KerningEnabled)};
+    auto const  currentFont {_font->get_font(Style->FontStyle, Style->FontSize)};
+    auto const  formatResult {text_formatter::format(stripped, *currentFont, Style->Alignment, size, 1.0f, Style->KerningEnabled)};
     _quads.reserve(formatResult.QuadCount);
+    _material->first_pass().Texture = currentFont->texture();
 
     color col {Style->Color};
     u8    alpha {col.A};
