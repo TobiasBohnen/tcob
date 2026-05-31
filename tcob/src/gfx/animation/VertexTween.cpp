@@ -37,10 +37,22 @@ namespace detail {
     {
     }
 
-    void vertex_tween_base::add_group(vertex_group verts)
+    void vertex_tween_base::add_group(std::span<vertex> verts)
     {
-        _srcGroups.emplace_back(verts.begin(), verts.end());
-        _dstGroups.emplace_back(verts);
+        static auto computeRect {[](auto&& g) -> rect_f {
+            f32 minX {std::numeric_limits<f32>::max()}, maxX {std::numeric_limits<f32>::lowest()};
+            f32 minY {std::numeric_limits<f32>::max()}, maxY {std::numeric_limits<f32>::lowest()};
+            for (auto const& v : g) {
+                minX = std::min(minX, v.Position.X);
+                maxX = std::max(maxX, v.Position.X);
+                minY = std::min(minY, v.Position.Y);
+                maxY = std::max(maxY, v.Position.Y);
+            }
+            return rect_f::FromLTRB(minX, minY, maxX, maxY);
+        }};
+
+        _srcGroups.push_back(vertex_tween_group {.Verts = {verts.begin(), verts.end()}, .BBox = computeRect(verts)});
+        _dstGroups.push_back(verts);
     }
 
     void vertex_tween_base::clear_groups()
@@ -49,15 +61,19 @@ namespace detail {
         _dstGroups.clear();
     }
 
-    auto vertex_tween_base::source_groups() const -> std::vector<std::vector<vertex>> const&
+    auto vertex_tween_base::source_groups() const -> std::vector<vertex_tween_group> const&
     {
         return _srcGroups;
     }
 
-    void vertex_tween_base::copy_to_dest(std::span<std::vector<vertex>> groups)
+    void vertex_tween_base::copy_to_dest(std::span<vertex_tween_group const> groups)
     {
         for (usize i {0}; i < groups.size(); ++i) {
-            std::ranges::copy(groups[i], _dstGroups[i].begin());
+            auto&       dstGroup {_dstGroups[i]};
+            auto const& srcGroup {groups[i]};
+            for (usize j {0}; j < srcGroup.Verts.size(); ++j) {
+                dstGroup[j] = srcGroup.Verts[j];
+            }
         }
     }
 
@@ -79,7 +95,7 @@ void vertex_tweens::stop_all()
     }
 }
 
-void vertex_tweens::add_group(u8 id, vertex_group verts) const
+void vertex_tweens::add_group(u8 id, std::span<vertex> verts) const
 {
     _effects.at(id)->add_group(verts);
 }
@@ -106,32 +122,20 @@ void vertex_tweens::on_update(milliseconds deltaTime)
 ////////////////////////////////////////////////////////////
 
 namespace effect {
-    static auto ComputeRect(vertex_group const& g) -> rect_f
-    {
-        f32 minX {std::numeric_limits<f32>::max()}, maxX {std::numeric_limits<f32>::lowest()};
-        f32 minY {std::numeric_limits<f32>::max()}, maxY {std::numeric_limits<f32>::lowest()};
-        for (auto const& v : g) {
-            minX = std::min(minX, v.Position.X);
-            maxX = std::max(maxX, v.Position.X);
-            minY = std::min(minY, v.Position.Y);
-            maxY = std::max(maxY, v.Position.Y);
-        }
-        return rect_f::FromLTRB(minX, minY, maxX, maxY);
-    }
 
-    void typing::operator()(f64 t, std::span<vertex_group> groups) const
+    void typing::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
         usize const size {groups.size()};
         usize const fadeIdx {static_cast<usize>(t * size)};
         for (usize idx {0}; idx < size; ++idx) {
             u8 const a {idx <= fadeIdx ? u8 {255} : u8 {0}};
-            for (auto& v : groups[idx]) { v.Color.A = a; }
+            for (auto& v : groups[idx].Verts) { v.Color.A = a; }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void fade_in::operator()(f64 t, std::span<vertex_group> groups) const
+    void fade_in::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
         usize const total {groups.size()};
         usize const width {static_cast<usize>(Width)};
@@ -147,13 +151,13 @@ namespace effect {
                 f64 const val {((t * (total + width)) - static_cast<f64>(idx)) / static_cast<f64>(width)};
                 a = static_cast<u8>(val * 255.0);
             }
-            for (auto& v : groups[idx]) { v.Color.A = a; }
+            for (auto& v : groups[idx].Verts) { v.Color.A = a; }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void fade_out::operator()(f64 t, std::span<vertex_group> groups) const
+    void fade_out::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
         usize const total {groups.size()};
         usize const width {static_cast<usize>(Width)};
@@ -169,49 +173,47 @@ namespace effect {
                 f64 const val {1.0 - (((t * (total + width)) - static_cast<f64>(idx)) / static_cast<f64>(width))};
                 a = static_cast<u8>(val * 255.0);
             }
-            for (auto& v : groups[idx]) { v.Color.A = a; }
+            for (auto& v : groups[idx].Verts) { v.Color.A = a; }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void blink::operator()(f64 t, std::span<vertex_group> groups)
+    void blink::operator()(f64 t, std::span<vertex_tween_group> groups)
     {
         tween_func::square_wave<bool> wave {.Frequency = Frequency};
         bool const                    flip {wave(t)};
         color const                   c {flip ? Color0 : Color1};
         for (auto& g : groups) {
-            for (auto& v : g) {
-                v.Color = c;
-            }
+            for (auto& v : g.Verts) { v.Color = c; }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void gradient::operator()(f64 t, std::span<vertex_group> groups) const
+    void gradient::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
         color const c {Gradient[static_cast<u8>(255 * t)]};
         for (auto& g : groups) {
-            for (auto& v : g) { v.Color = c; }
+            for (auto& v : g.Verts) { v.Color = c; }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void shake::operator()(f64, std::span<vertex_group> groups)
+    void shake::operator()(f64, std::span<vertex_tween_group> groups)
     {
         for (auto& g : groups) {
             f32 const r {RNG(-Intensity, Intensity)};
             switch (RNG(0, 1)) {
             case 0:
-                for (auto& v : g) {
+                for (auto& v : g.Verts) {
                     v.Position.X += r;
                     v.Position.Y += r;
                 }
                 break;
             case 1:
-                for (auto& v : g) {
+                for (auto& v : g.Verts) {
                     v.Position.X += r;
                     v.Position.Y -= r;
                 }
@@ -224,10 +226,10 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    void jitter::operator()(f64, std::span<vertex_group> groups)
+    void jitter::operator()(f64, std::span<vertex_tween_group> groups)
     {
         for (auto& g : groups) {
-            for (auto& v : g) {
+            for (auto& v : g.Verts) {
                 v.Position.X += RNG(-Intensity, Intensity);
                 v.Position.Y += RNG(-Intensity, Intensity);
             }
@@ -236,27 +238,23 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    void wave::operator()(f64 t, std::span<vertex_group> groups) const
+    void wave::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
         tween_func::sine_wave<f64> w {.Min = 0, .Max = 1};
         for (usize idx {0}; idx < groups.size(); ++idx) {
             w.Phase = static_cast<f64>(idx) / static_cast<f64>(groups.size()) * Amplitude;
             f32 const val {static_cast<f32>(w(t) * Height)};
-            for (auto& v : groups[idx]) { v.Position.Y += val; }
+            for (auto& v : groups[idx].Verts) { v.Position.Y += val; }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void size::operator()(f64 t, std::span<vertex_group> groups) const
+    void size::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
-        std::vector<rect_f> rects;
-        rects.reserve(groups.size());
-        size_f maxSize {size_f::Zero};
-        for (auto const& g : groups) {
-            auto const& r {rects.emplace_back(ComputeRect(g))};
-            maxSize.Width  = std::max(r.width(), maxSize.Width);
-            maxSize.Height = std::max(r.height(), maxSize.Height);
+        rect_f totalRect {groups[0].BBox};
+        for (usize i {1}; i < groups.size(); ++i) {
+            totalRect = totalRect.as_union_with(groups[i].BBox);
         }
 
         f32 const wDiff {WidthEnd - WidthStart};
@@ -267,23 +265,22 @@ namespace effect {
                                   : static_cast<f32>(1.0 - (t * -hDiff))};
 
         for (usize i {0}; i < groups.size(); ++i) {
-            rect_f const& rect {rects[i]};
-            point_f       center {point_f::Zero};
+            point_f center {point_f::Zero};
 
             switch (Anchor.Horizontal) {
-            case horizontal_alignment::Left:   center.X = rect.left() - maxSize.Width + rect.width(); break;
-            case horizontal_alignment::Center: center.X = rect.center().X - ((maxSize.Width - rect.width()) / 2); break;
-            case horizontal_alignment::Right:  center.X = rect.right(); break;
+            case horizontal_alignment::Left:   center.X = totalRect.left(); break;
+            case horizontal_alignment::Center: center.X = totalRect.center().X; break;
+            case horizontal_alignment::Right:  center.X = totalRect.right(); break;
             }
             switch (Anchor.Vertical) {
-            case vertical_alignment::Top:    center.Y = rect.top() - maxSize.Height + rect.height(); break;
-            case vertical_alignment::Middle: center.Y = rect.center().Y - ((maxSize.Height - rect.height()) / 2); break;
-            case vertical_alignment::Bottom: center.Y = rect.bottom(); break;
+            case vertical_alignment::Top:    center.Y = totalRect.top(); break;
+            case vertical_alignment::Middle: center.Y = totalRect.center().Y; break;
+            case vertical_alignment::Bottom: center.Y = totalRect.bottom(); break;
             }
 
             transform xform;
             xform.scale_at({wFac, hFac}, center);
-            for (auto& v : groups[i]) {
+            for (auto& v : groups[i].Verts) {
                 v.Position = xform * v.Position;
             }
         }
@@ -291,13 +288,13 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    void rotate::operator()(f64 t, std::span<vertex_group> groups) const
+    void rotate::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
         for (auto& g : groups) {
-            auto const rect {ComputeRect(g)};
+            auto const rect {g.BBox};
             transform  rot;
             rot.rotate_at(degree_f {static_cast<f32>(360.0 * t * Speed)}, rect.center());
-            for (auto& v : g) {
+            for (auto& v : g.Verts) {
                 v.Position = rot * v.Position;
             }
         }
@@ -305,14 +302,14 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    void bounce::operator()(f64 t, std::span<vertex_group> groups) const
+    void bounce::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
         for (usize idx {0}; idx < groups.size(); ++idx) {
             f64 const phase {static_cast<f64>(idx) / static_cast<f64>(groups.size()) * Spread};
             f64 const local {std::fmod(t + phase, 1.0)};
             f64 const val {std::abs(std::sin(local * std::numbers::pi * Bounces)) * Height
                            * (1.0 - (local * Damping))};
-            for (auto& v : groups[idx]) { v.Position.Y -= static_cast<f32>(val); }
+            for (auto& v : groups[idx].Verts) { v.Position.Y -= static_cast<f32>(val); }
         }
     }
 

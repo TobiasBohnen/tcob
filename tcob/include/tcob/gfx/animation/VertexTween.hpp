@@ -17,6 +17,7 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/random/Random.hpp"
 #include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/Geometry.hpp"
@@ -25,11 +26,14 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-using vertex_group = std::span<vertex>;
+struct vertex_tween_group {
+    std::vector<vertex> Verts;
+    rect_f              BBox {};
+};
 
 template <typename T>
 concept VertexTweenFunction =
-    requires(T& f, f64 t, std::span<vertex_group> verts) {
+    requires(T& f, f64 t, std::span<vertex_tween_group> verts) {
         { f(t, verts) };
     };
 
@@ -40,17 +44,17 @@ namespace detail {
     public:
         vertex_tween_base(milliseconds duration);
 
-        void add_group(vertex_group verts);
+        void add_group(std::span<vertex> verts);
 
         void clear_groups();
 
     protected:
-        auto source_groups() const -> std::vector<std::vector<vertex>> const&;
-        void copy_to_dest(std::span<std::vector<vertex>> groups);
+        auto source_groups() const -> std::vector<vertex_tween_group> const&;
+        void copy_to_dest(std::span<vertex_tween_group const> groups);
 
     private:
-        std::vector<std::vector<vertex>> _srcGroups; // copies
-        std::vector<std::span<vertex>>   _dstGroups;
+        std::vector<vertex_tween_group> _srcGroups; // copies
+        std::vector<std::span<vertex>>  _dstGroups;
     };
 
 }
@@ -81,7 +85,7 @@ public:
     void start_all(playback_mode mode = playback_mode::Normal);
     void stop_all();
 
-    void add_group(u8 id, vertex_group verts) const; // FIXME: better API
+    void add_group(u8 id, std::span<vertex> verts) const; // FIXME: better API
     void clear_groups();
 
 private:
@@ -96,7 +100,7 @@ namespace effect {
 
     class TCOB_API typing final { // Color
     public:
-        void operator()(f64 t, std::span<vertex_group> groups) const;
+        void operator()(f64 t, std::span<vertex_tween_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -105,7 +109,7 @@ namespace effect {
     public:
         i32 Width {1};             // in chars
 
-        void operator()(f64 t, std::span<vertex_group> groups) const;
+        void operator()(f64 t, std::span<vertex_tween_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -114,7 +118,7 @@ namespace effect {
     public:
         i32 Width {1};              // in chars
 
-        void operator()(f64 t, std::span<vertex_group> groups) const;
+        void operator()(f64 t, std::span<vertex_tween_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -125,7 +129,7 @@ namespace effect {
         color Color1 {colors::Black};
         f32   Frequency {1.0f};
 
-        void operator()(f64 t, std::span<vertex_group> groups);
+        void operator()(f64 t, std::span<vertex_tween_group> groups);
     };
 
     ////////////////////////////////////////////////////////////
@@ -134,7 +138,7 @@ namespace effect {
     public:
         std::array<color, 256> Gradient;
 
-        void operator()(f64 t, std::span<vertex_group> groups) const;
+        void operator()(f64 t, std::span<vertex_tween_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -144,7 +148,7 @@ namespace effect {
         f32 Intensity {1.0f};    // in pixel
         rng RNG;
 
-        void operator()(f64 t, std::span<vertex_group> groups);
+        void operator()(f64 t, std::span<vertex_tween_group> groups);
     };
 
     ////////////////////////////////////////////////////////////
@@ -154,7 +158,7 @@ namespace effect {
         f32 Intensity {1.0f};     // in pixel
         rng RNG {};
 
-        void operator()(f64 t, std::span<vertex_group> groups);
+        void operator()(f64 t, std::span<vertex_tween_group> groups);
     };
 
     ////////////////////////////////////////////////////////////
@@ -164,7 +168,7 @@ namespace effect {
         f32 Height {0};         // in pixel
         f32 Amplitude {1.0f};
 
-        void operator()(f64 t, std::span<vertex_group> groups) const;
+        void operator()(f64 t, std::span<vertex_tween_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -176,7 +180,7 @@ namespace effect {
         f32 Damping {0};
         f32 Spread {0};
 
-        void operator()(f64 t, std::span<vertex_group> groups) const;
+        void operator()(f64 t, std::span<vertex_tween_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -190,7 +194,7 @@ namespace effect {
 
         alignment Anchor {};
 
-        void operator()(f64 t, std::span<vertex_group> groups) const;
+        void operator()(f64 t, std::span<vertex_tween_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
@@ -199,7 +203,7 @@ namespace effect {
     public:
         f32 Speed {1.0f};
 
-        void operator()(f64 t, std::span<vertex_group> groups) const;
+        void operator()(f64 t, std::span<vertex_tween_group> groups) const;
     };
 
 }
