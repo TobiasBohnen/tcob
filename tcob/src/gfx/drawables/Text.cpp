@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <optional>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -27,9 +28,15 @@ namespace tcob::gfx {
 
 enum class command_type : u8 {
     None,
+
     Color,
+    ColorOff,
+
     Alpha,
-    Effect
+    AlphaOff,
+
+    Effect,
+    EffectOff
 };
 
 struct command_definition {
@@ -80,19 +87,29 @@ static auto parse_commands(utf8_string const& input, utf8_string& stripped) -> s
             command_definition cmd {};
             bool               parsed {true};
 
-            if (u.starts_with("COLOR:")) {
-                cmd.Type  = command_type::Color;
-                cmd.Value = color::FromString(utf8_string {inner.substr(6)});
-            } else if (u.starts_with("ALPHA:")) {
-                cmd.Type  = command_type::Alpha;
-                cmd.Value = static_cast<u8>(
-                    255.0f * std::clamp(std::strtof(utf8_string {inner.substr(6)}.c_str(), nullptr), 0.0f, 1.0f));
-            } else if (u.starts_with("EFFECT:")) {
-                cmd.Type  = command_type::Effect;
-                cmd.Value = static_cast<u8>(
-                    std::strtoul(utf8_string {inner.substr(7)}.c_str(), nullptr, 10));
+            if (u.starts_with("/")) {
+                if (u.starts_with("/COLOR")) {
+                    cmd.Type = command_type::ColorOff;
+                } else if (u.starts_with("/ALPHA")) {
+                    cmd.Type = command_type::AlphaOff;
+                } else if (u.starts_with("/EFFECT")) {
+                    cmd.Type = command_type::EffectOff;
+                } else {
+                    parsed = false;
+                }
             } else {
-                parsed = false;
+                if (u.starts_with("COLOR:")) {
+                    cmd.Type  = command_type::Color;
+                    cmd.Value = color::FromString(utf8_string {inner.substr(6)});
+                } else if (u.starts_with("ALPHA:")) {
+                    cmd.Type  = command_type::Alpha;
+                    cmd.Value = static_cast<u8>(255.0f * std::clamp(std::strtof(utf8_string {inner.substr(6)}.c_str(), nullptr), 0.0f, 1.0f));
+                } else if (u.starts_with("EFFECT:")) {
+                    cmd.Type  = command_type::Effect;
+                    cmd.Value = static_cast<u8>(std::strtoul(utf8_string {inner.substr(7)}.c_str(), nullptr, 10));
+                } else {
+                    parsed = false;
+                }
             }
 
             if (parsed) {
@@ -180,11 +197,11 @@ void text::force_reshape()
 
 void text::format()
 {
+    _needsFormat = false;
+
     _quads.clear();
     _inds.clear();
     Effects.clear_groups();
-
-    _needsFormat = false;
 
     if (Text->empty()) { return; }
 
@@ -193,14 +210,15 @@ void text::format()
 
     utf8_string stripped;
     auto const  commands {parse_commands(*Text, stripped)};
-    auto const  currentFont {_font->get_font(Style->FontStyle, Style->FontSize)};
-    auto const  formatResult {text_formatter::format(stripped, *currentFont, Style->Alignment, size, 1.0f, Style->KerningEnabled)};
+
+    auto const currentFont {_font->get_font(Style->FontStyle, Style->FontSize)};
+    auto const formatResult {text_formatter::format(stripped, *currentFont, Style->Alignment, size, 1.0f, Style->KerningEnabled)};
     _quads.reserve(formatResult.QuadCount);
     _material->first_pass().Texture = currentFont->texture();
 
-    color col {Style->Color};
-    u8    alpha {col.A};
-    u8    currentEffectIdx {0};
+    color             col {Style->Color};
+    u8                alpha {col.A};
+    std::optional<u8> currentEffectIdx {};
 
     auto const [x, y] {Bounds->Position};
 
@@ -211,13 +229,16 @@ void text::format()
     auto const applyCommands {[&]() {
         while (cmdIdx < cmdLen && commands[cmdIdx].GlyphIndex == glyphIndex) {
             switch (commands[cmdIdx].Command.Type) {
-            case command_type::Alpha:  alpha = std::get<u8>(commands[cmdIdx].Command.Value); break;
-            case command_type::Color:  col = std::get<color>(commands[cmdIdx].Command.Value); break;
-            case command_type::Effect: {
+            case command_type::Alpha:    alpha = std::get<u8>(commands[cmdIdx].Command.Value); break;
+            case command_type::AlphaOff: alpha = 255; break;
+            case command_type::Color:    col = std::get<color>(commands[cmdIdx].Command.Value); break;
+            case command_type::ColorOff: col = Style->Color; break;
+            case command_type::Effect:   {
                 currentEffectIdx = std::get<u8>(commands[cmdIdx].Command.Value);
-                if (!Effects.has(currentEffectIdx)) { currentEffectIdx = 0; }
+                if (!Effects.has(*currentEffectIdx)) { currentEffectIdx = std::nullopt; }
             } break;
-            default: break;
+            case command_type::EffectOff: currentEffectIdx = std::nullopt; break;
+            case command_type::None:      break;
             }
             ++cmdIdx;
         }
@@ -238,8 +259,8 @@ void text::format()
             rect_f const quadRect {x + posRect.left(), y + posRect.top(), posRect.width(), posRect.height()};
             geometry::set_position(q, quadRect);
 
-            if (currentEffectIdx != 0) {
-                Effects.add_group(currentEffectIdx, q);
+            if (currentEffectIdx) {
+                Effects.add_group(*currentEffectIdx, q);
             }
 
             ++glyphIndex;
