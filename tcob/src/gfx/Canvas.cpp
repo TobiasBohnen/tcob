@@ -980,7 +980,7 @@ auto canvas::create_conic_gradient(point_f center, color_gradient const& gradien
 
 auto canvas::create_gradient(color_gradient const& gradient) -> paint_color
 {
-    if (auto color {gradient.solid_color()}) {
+    if (auto color {gradient.try_solid_color()}) {
         return *color;
     }
 
