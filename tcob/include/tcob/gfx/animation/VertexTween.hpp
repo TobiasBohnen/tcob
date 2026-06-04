@@ -42,7 +42,7 @@ concept VertexTweenFunction =
 namespace detail {
     class TCOB_API vertex_tween_base : public tween_base {
     public:
-        vertex_tween_base(milliseconds duration);
+        explicit vertex_tween_base(milliseconds duration);
 
         void add_group(std::span<vertex> verts);
 
@@ -64,7 +64,7 @@ namespace detail {
 template <VertexTweenFunction... Funcs>
 class vertex_tween final : public detail::vertex_tween_base {
 public:
-    vertex_tween(milliseconds duration, Funcs&&... ptr);
+    explicit vertex_tween(milliseconds duration, Funcs&&... ptr);
 
 protected:
     void update_values() override;

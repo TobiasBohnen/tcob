@@ -98,8 +98,8 @@ void text::format()
     _quads.reserve(formatResult.QuadCount);
     _material->first_pass().Texture = currentFont->texture();
 
-    color             col {Style->Color};
-    u8                alpha {col.A};
+    color             currentColor {Style->Color};
+    u8                currectAlpha {currentColor.A};
     std::optional<u8> currentEffectIdx {};
 
     auto const [x, y] {Bounds->Position};
@@ -111,10 +111,10 @@ void text::format()
     auto const applyCommands {[&]() {
         while (cmdIdx < cmdLen && _commands[cmdIdx].GlyphIndex == glyphIndex) {
             switch (_commands[cmdIdx].Type) {
-            case text_command_type::Alpha:    alpha = std::get<u8>(_commands[cmdIdx].Value); break;
-            case text_command_type::AlphaOff: alpha = 255; break;
-            case text_command_type::Color:    col = std::get<color>(_commands[cmdIdx].Value); break;
-            case text_command_type::ColorOff: col = Style->Color; break;
+            case text_command_type::Alpha:    currectAlpha = std::get<u8>(_commands[cmdIdx].Value); break;
+            case text_command_type::AlphaOff: currectAlpha = 255; break;
+            case text_command_type::Color:    currentColor = std::get<color>(_commands[cmdIdx].Value); break;
+            case text_command_type::ColorOff: currentColor = Style->Color; break;
             case text_command_type::Effect:   {
                 currentEffectIdx = std::get<u8>(_commands[cmdIdx].Value);
                 if (!Effects.has(*currentEffectIdx)) { currentEffectIdx = std::nullopt; }
@@ -132,8 +132,8 @@ void text::format()
             applyCommands();
             quad& q {_quads.emplace_back()};
 
-            col.A = alpha;
-            geometry::set_color(q, col);
+            currentColor.A = currectAlpha;
+            geometry::set_color(q, currentColor);
 
             geometry::set_texcoords(q, token.Quads[i].TextureRegion);
 
