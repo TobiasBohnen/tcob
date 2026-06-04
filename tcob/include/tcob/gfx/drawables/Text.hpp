@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <optional>
+#include <variant>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -27,6 +28,26 @@
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace tcob::gfx {
+////////////////////////////////////////////////////////////
+
+enum class text_command_type : u8 {
+    None,
+
+    Color,
+    ColorOff,
+
+    Alpha,
+    AlphaOff,
+
+    Effect,
+    EffectOff
+};
+
+struct text_command {
+    usize                   GlyphIndex {};
+    text_command_type       Type {text_command_type::None};
+    std::variant<color, u8> Value;
+};
 
 ////////////////////////////////////////////////////////////
 
@@ -66,8 +87,12 @@ protected:
 
 private:
     void format();
+    void parse_commands();
 
     bool _needsFormat {true};
+
+    std::vector<text_command> _commands;
+    utf8_string               _strippedText;
 
     std::vector<quad> _quads {};
     std::vector<u32>  _inds {};
