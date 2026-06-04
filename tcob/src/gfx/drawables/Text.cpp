@@ -6,8 +6,8 @@
 #include "tcob/gfx/drawables/Text.hpp"
 
 #include <algorithm>
-#include <cstdlib>
 #include <optional>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -47,7 +47,9 @@ void text::on_update(milliseconds deltaTime)
     if (!_font.is_ready()) { return; }
     if (_needsFormat) { format(); }
 
-    if (is_visible()) {
+    if (_isRunning && is_visible()) {
+        _elapsedTime += deltaTime;
+
         for (auto& [_, effect] : _effects) {
             effect->update(deltaTime);
         }
@@ -61,8 +63,29 @@ auto text::can_draw() const -> bool
 
 void text::on_draw_to(render_target& target, transform const& xform)
 {
+    std::span<u32 const> inds;
+    if (_waitPoints.empty()) {
+        inds = _inds;
+    } else {
+        if (!_isRunning) { return; }
+
+        milliseconds timeStamp {};
+        usize        gi {0};
+        for (usize i {0}; i < _waitPoints.size(); ++i) {
+            if (timeStamp < _elapsedTime) {
+                gi = _waitPoints[i].GlyphIndex;
+            } else {
+                break;
+            }
+            timeStamp += _waitPoints[i].WaitTime;
+        }
+
+        if (gi == 0) { return; }
+        inds = {_inds.begin(), _inds.begin() + (6 * gi)};
+    }
+
     _renderer.set_geometry(
-        {.Vertices = geometry::flatten(_quads), .Indices = _inds, .Type = primitive_type::Triangles},
+        {.Vertices = geometry::flatten(_quads), .Indices = inds, .Type = primitive_type::Triangles},
         &_material->first_pass());
     _renderer.render_to_target(target, xform * get_transform());
 }
@@ -83,6 +106,9 @@ void text::on_transform_changed()
 
 void text::start(playback_mode mode)
 {
+    _elapsedTime = milliseconds::zero();
+
+    _isRunning = true;
     for (auto& [_, effect] : _effects) {
         effect->start(mode);
     }
@@ -90,6 +116,7 @@ void text::start(playback_mode mode)
 
 void text::stop()
 {
+    _isRunning = false;
     for (auto& [_, effect] : _effects) {
         effect->stop();
     }
@@ -229,10 +256,12 @@ void text::parse_commands()
                     cmd.Value = color::FromString(utf8_string {inner.substr(6)});
                 } else if (u.starts_with("ALPHA:")) {
                     cmd.Type  = text_command_type::Alpha;
-                    cmd.Value = static_cast<u8>(255.0f * std::clamp(std::strtof(utf8_string {inner.substr(6)}.c_str(), nullptr), 0.0f, 1.0f));
+                    cmd.Value = static_cast<u8>(255.0f * std::clamp(helper::to_number<f32>(inner.substr(6)).value_or(1.0f), 0.0f, 1.0f));
                 } else if (u.starts_with("EFFECT:")) {
                     cmd.Type  = text_command_type::Effect;
-                    cmd.Value = static_cast<u8>(std::strtoul(utf8_string {inner.substr(7)}.c_str(), nullptr, 10));
+                    cmd.Value = helper::to_number<u8>(inner.substr(7)).value_or(0);
+                } else if (u.starts_with("WAIT:")) {
+                    _waitPoints.emplace_back(milliseconds {helper::to_number<f32>(inner.substr(5)).value_or(0)}, glyphIndex);
                 } else {
                     parsed = false;
                 }
@@ -266,6 +295,9 @@ void text::parse_commands()
             ++glyphIndex;
         }
     }
-}
 
+    if (!_waitPoints.empty()) {
+        _waitPoints.emplace_back(milliseconds::zero(), glyphIndex);
+    }
+}
 }
