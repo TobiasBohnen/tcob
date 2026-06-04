@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/StringUtils.hpp"
@@ -45,7 +46,12 @@ void text::on_update(milliseconds deltaTime)
 {
     if (!_font.is_ready()) { return; }
     if (_needsFormat) { format(); }
-    if (is_visible()) { Effects.update(deltaTime); }
+
+    if (is_visible()) {
+        for (auto& [_, effect] : _effects) {
+            effect->update(deltaTime);
+        }
+    }
 }
 
 auto text::can_draw() const -> bool
@@ -75,6 +81,20 @@ void text::on_transform_changed()
     _needsFormat = true;
 }
 
+void text::start(playback_mode mode)
+{
+    for (auto& [_, effect] : _effects) {
+        effect->start(mode);
+    }
+}
+
+void text::stop()
+{
+    for (auto& [_, effect] : _effects) {
+        effect->stop();
+    }
+}
+
 void text::force_reshape()
 {
     _needsFormat = true;
@@ -86,7 +106,9 @@ void text::format()
 
     _quads.clear();
     _inds.clear();
-    Effects.clear_groups();
+    for (auto& [_, effect] : _effects) {
+        effect->clear_groups();
+    }
 
     if (Text->empty()) { return; }
 
@@ -117,7 +139,7 @@ void text::format()
             case text_command_type::ColorOff: currentColor = Style->Color; break;
             case text_command_type::Effect:   {
                 currentEffectIdx = std::get<u8>(_commands[cmdIdx].Value);
-                if (!Effects.has(*currentEffectIdx)) { currentEffectIdx = std::nullopt; }
+                if (!_effects.contains(*currentEffectIdx)) { currentEffectIdx = std::nullopt; }
             } break;
             case text_command_type::EffectOff: currentEffectIdx = std::nullopt; break;
             case text_command_type::None:      break;
@@ -142,7 +164,7 @@ void text::format()
             geometry::set_position(q, quadRect);
 
             if (currentEffectIdx) {
-                Effects.add_group(*currentEffectIdx, q);
+                _effects.at(*currentEffectIdx)->add_group(q);
             }
 
             ++glyphIndex;

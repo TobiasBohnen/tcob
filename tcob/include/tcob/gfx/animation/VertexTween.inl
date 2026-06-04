@@ -6,7 +6,6 @@
 #pragma once
 #include "VertexTween.hpp"
 
-#include <memory>
 #include <span>
 #include <vector>
 
@@ -34,15 +33,5 @@ inline void vertex_tween<Funcs...>::update_values()
 }
 
 ////////////////////////////////////////////////////////////
-
-template <typename... Funcs>
-inline auto vertex_tweens::create(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<vertex_tween<Funcs...>>
-{
-    if (id == 0) { return nullptr; } // TODO: log error
-
-    auto retValue {std::shared_ptr<vertex_tween<Funcs...>>(new vertex_tween<Funcs...> {duration, std::forward<Funcs>(args)...})};
-    _effects[id] = retValue;
-    return retValue;
-}
 
 }

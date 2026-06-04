@@ -8,15 +8,11 @@
 
 #include <array>
 #include <concepts>
-#include <memory>
 #include <span>
 #include <tuple>
-#include <unordered_map>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
-#include "tcob/core/Common.hpp"
-#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/random/Random.hpp"
 #include "tcob/core/tweening/Tween.hpp"
@@ -75,37 +71,16 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API vertex_tweens final : public updatable {
-public:
-    template <typename... Funcs>
-    auto create(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<vertex_tween<Funcs...>>;
-
-    auto has(u8 id) const -> bool;
-
-    void start_all(playback_mode mode = playback_mode::Normal);
-    void stop_all();
-
-    void add_group(u8 id, std::span<vertex> verts) const; // FIXME: better API
-    void clear_groups();
-
-private:
-    void on_update(milliseconds deltaTime) override;
-
-    std::unordered_map<u8, std::shared_ptr<detail::vertex_tween_base>> _effects {};
-};
-
-////////////////////////////////////////////////////////////
-
 namespace effect {
 
-    class TCOB_API typing final { // Color
+    class TCOB_API typing final { // alpha
     public:
         void operator()(f64 t, std::span<vertex_tween_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API fade_in final { // Color
+    class TCOB_API fade_in final { // alpha
     public:
         i32 Width {1};             // in chars
 
@@ -114,7 +89,7 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API fade_out final { // Color
+    class TCOB_API fade_out final { // alpha
     public:
         i32 Width {1};              // in chars
 
@@ -123,7 +98,7 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API blink final { // Color
+    class TCOB_API blink final { // color
     public:
         color Color0 {colors::White};
         color Color1 {colors::Black};
@@ -134,7 +109,7 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API gradient final { // Color
+    class TCOB_API gradient final { // color
     public:
         std::array<color, 256> Gradient;
 
@@ -143,7 +118,7 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API shake final { // X,Y
+    class TCOB_API shake final { // position
     public:
         f32 Intensity {1.0f};    // in pixel
         rng RNG;
@@ -153,7 +128,7 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API jitter final { // X,Y
+    class TCOB_API jitter final { // position
     public:
         f32 Intensity {1.0f};     // in pixel
         rng RNG {};
@@ -163,7 +138,7 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API wave final { // Y
+    class TCOB_API wave final { // y
     public:
         f32 Height {0};         // in pixel
         f32 Amplitude {1.0f};
@@ -173,19 +148,37 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API bounce final { // Y
+    class TCOB_API bounce final { // y
     public:
         f32 Height {0};           // in pixel
-        f32 Bounces {0};
-        f32 Damping {0};
-        f32 Spread {0};
 
         void operator()(f64 t, std::span<vertex_tween_group> groups) const;
     };
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API size final { // X,Y
+    class TCOB_API elastic final { // y
+    public:
+        f32 Height {0};            // in pixel
+        f64 Amplitude {1.0};
+        f64 Period {0.3};
+
+        void operator()(f64 t, std::span<vertex_tween_group> groups) const;
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    class TCOB_API back final { // y
+    public:
+        f32 Height {0};         // in pixel
+        f64 Overshoot {1.70158};
+
+        void operator()(f64 t, std::span<vertex_tween_group> groups) const;
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    class TCOB_API size final { // position
     public:
         f32 WidthStart {0};
         f32 WidthEnd {1.0f};
@@ -199,7 +192,7 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API rotate final { // X,Y
+    class TCOB_API rotate final { // position
     public:
         f32 Speed {1.0f};
 

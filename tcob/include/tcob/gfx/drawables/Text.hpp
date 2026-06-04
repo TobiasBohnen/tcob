@@ -6,11 +6,14 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <optional>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
@@ -72,7 +75,11 @@ public:
     prop<style>             Style;
     prop<asset_ptr<shader>> Shader;
 
-    vertex_tweens Effects;
+    template <typename... Funcs>
+    auto create_effect(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<vertex_tween<Funcs...>>;
+
+    void start(playback_mode mode = playback_mode::Normal);
+    void stop();
 
     void force_reshape();
 
@@ -100,7 +107,16 @@ private:
     renderer                  _renderer {buffer_usage_hint::DynamicDraw};
     asset_owner_ptr<material> _material {};
 
-    asset_ptr<font_family> _font;
+    asset_ptr<font_family>                                             _font;
+    std::unordered_map<u8, std::shared_ptr<detail::vertex_tween_base>> _effects {};
 };
+
+template <typename... Funcs>
+inline auto text::create_effect(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<vertex_tween<Funcs...>>
+{
+    auto retValue {std::shared_ptr<vertex_tween<Funcs...>>(new vertex_tween<Funcs...> {duration, std::forward<Funcs>(args)...})};
+    _effects[id] = retValue;
+    return retValue;
+}
 
 }

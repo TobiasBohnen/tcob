@@ -6,16 +6,12 @@
 #include "tcob/gfx/animation/VertexTween.hpp"
 
 #include <algorithm>
-#include <cmath>
-#include <cstdlib>
 #include <limits>
-#include <numbers>
 #include <span>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
@@ -77,46 +73,6 @@ namespace detail {
         }
     }
 
-}
-
-////////////////////////////////////////////////////////////
-
-void vertex_tweens::start_all(playback_mode mode)
-{
-    for (auto& [_, effect] : _effects) {
-        effect->start(mode);
-    }
-}
-
-void vertex_tweens::stop_all()
-{
-    for (auto& [_, effect] : _effects) {
-        effect->stop();
-    }
-}
-
-void vertex_tweens::add_group(u8 id, std::span<vertex> verts) const
-{
-    _effects.at(id)->add_group(verts);
-}
-
-auto vertex_tweens::has(u8 id) const -> bool
-{
-    return _effects.contains(id);
-}
-
-void vertex_tweens::clear_groups()
-{
-    for (auto& [_, effect] : _effects) {
-        effect->clear_groups();
-    }
-}
-
-void vertex_tweens::on_update(milliseconds deltaTime)
-{
-    for (auto& [_, effect] : _effects) {
-        effect->update(deltaTime);
-    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -250,6 +206,39 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
+    void bounce::operator()(f64 t, std::span<vertex_tween_group> groups) const
+    {
+        tween_func::bounce<f64> w {.Start = 0, .End = 1};
+        for (usize idx {0}; idx < groups.size(); ++idx) {
+            f32 const val {static_cast<f32>(w(t) * Height)};
+            for (auto& v : groups[idx].Verts) { v.Position.Y += val; }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////
+
+    void elastic::operator()(f64 t, std::span<vertex_tween_group> groups) const
+    {
+        tween_func::elastic<f64> w {.Start = 0, .End = 1, .Amplitude = Amplitude, .Period = Period};
+        for (usize idx {0}; idx < groups.size(); ++idx) {
+            f32 const val {static_cast<f32>(w(t) * Height)};
+            for (auto& v : groups[idx].Verts) { v.Position.Y += val; }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////
+
+    void back::operator()(f64 t, std::span<vertex_tween_group> groups) const
+    {
+        tween_func::back<f64> w {.Start = 0, .End = 1, .Overshoot = Overshoot};
+        for (usize idx {0}; idx < groups.size(); ++idx) {
+            f32 const val {static_cast<f32>(w(t) * Height)};
+            for (auto& v : groups[idx].Verts) { v.Position.Y += val; }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////
+
     void size::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
         rect_f totalRect {groups[0].BBox};
@@ -297,19 +286,6 @@ namespace effect {
             for (auto& v : g.Verts) {
                 v.Position = rot * v.Position;
             }
-        }
-    }
-
-    ////////////////////////////////////////////////////////////
-
-    void bounce::operator()(f64 t, std::span<vertex_tween_group> groups) const
-    {
-        for (usize idx {0}; idx < groups.size(); ++idx) {
-            f64 const phase {static_cast<f64>(idx) / static_cast<f64>(groups.size()) * Spread};
-            f64 const local {std::fmod(t + phase, 1.0)};
-            f64 const val {std::abs(std::sin(local * std::numbers::pi * Bounces)) * Height
-                           * (1.0 - (local * Damping))};
-            for (auto& v : groups[idx].Verts) { v.Position.Y -= static_cast<f32>(val); }
         }
     }
 
