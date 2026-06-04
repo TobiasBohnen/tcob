@@ -7,24 +7,22 @@
 
 ////////////////////////////////////////////////////////////
 
-#if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
+#include <TinySoundFont/tml.h>
+#include <TinySoundFont/tsf.h>
 
-    #include <TinySoundFont/tml.h>
-    #include <TinySoundFont/tsf.h>
+#include <algorithm>
+#include <any>
+#include <optional>
+#include <span>
 
-    #include <algorithm>
-    #include <any>
-    #include <optional>
-    #include <span>
-
-    #include "tcob/audio/Buffer.hpp"
-    #include "tcob/audio/synth/SoundFont.hpp"
-    #include "tcob/core/assets/Asset.hpp"
-    #include "tcob/core/io/Stream.hpp"
+#include "tcob/audio/Buffer.hpp"
+#include "tcob/audio/synth/SoundFont.hpp"
+#include "tcob/core/assets/Asset.hpp"
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::audio::detail {
 
-    #define RENDER_EFFECTSAMPLEBLOCK 64
+#define RENDER_EFFECTSAMPLEBLOCK 64
 
 static void handle_message(tsf* font, tml_message* midiMessage)
 {
@@ -108,5 +106,3 @@ auto midi_decoder::decode(std::span<f32> outputSamples) -> isize
 }
 
 }
-
-#endif

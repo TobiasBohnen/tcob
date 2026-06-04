@@ -6,8 +6,6 @@
 #pragma once
 #include "SoundFont.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
-
 namespace tcob::audio {
 
 template <DerivedFrom<sound_font::command> T>
@@ -17,5 +15,3 @@ inline void sound_font_commands::add(auto&&... args)
 }
 
 }
-
-#endif

@@ -112,8 +112,6 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-#if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
-
 class cfg_sound_font_loader final : public assets::loader<audio::sound_font> {
 public:
     cfg_sound_font_loader(assets::group& group, data::object& object);
@@ -131,8 +129,6 @@ private:
     std::vector<std::unique_ptr<asset_def>> _cache;
     data::object&                           _object;
 };
-
-#endif
 
 ////////////////////////////////////////////////////////////
 

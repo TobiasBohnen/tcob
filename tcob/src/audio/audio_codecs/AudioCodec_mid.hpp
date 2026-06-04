@@ -6,14 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
+#include <optional>
+#include <span>
 
-    #include <optional>
-    #include <span>
-
-    #include "tcob/audio/Buffer.hpp"
-    #include "tcob/audio/synth/SoundFont.hpp"
-    #include "tcob/core/assets/Asset.hpp"
+#include "tcob/audio/Buffer.hpp"
+#include "tcob/audio/synth/SoundFont.hpp"
+#include "tcob/core/assets/Asset.hpp"
 
 namespace tcob::audio::detail {
 ////////////////////////////////////////////////////////////
@@ -40,5 +38,3 @@ private:
 };
 
 }
-
-#endif

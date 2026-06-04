@@ -69,12 +69,10 @@ namespace AudioBuffer {
     static char const* source {"source"};
 }
 
-#if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
 namespace SoundFont {
     static char const* Name {"sound_font"};
     static char const* source {"source"};
 }
-#endif
 
 namespace Cursor {
     static char const* Name {"cursor"};
@@ -213,10 +211,8 @@ cfg_asset_loader_manager::cfg_asset_loader_manager(group& group)
     group.add_bucket<audio::buffer>();
     add_loader(std::make_unique<cfg_audio_buffer_loader>(group, _object));
 
-#if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
     group.add_bucket<audio::sound_font>();
     add_loader(std::make_unique<cfg_sound_font_loader>(group, _object));
-#endif
 }
 
 void cfg_asset_loader_manager::load_script(path const& file)
@@ -373,8 +369,6 @@ void cfg_audio_buffer_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-#if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
-
 cfg_sound_font_loader::cfg_sound_font_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
@@ -408,8 +402,6 @@ void cfg_sound_font_loader::prepare()
         default_check_async_load(ctx, _cache, [this](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
-
-#endif
 
 ////////////////////////////////////////////////////////////
 

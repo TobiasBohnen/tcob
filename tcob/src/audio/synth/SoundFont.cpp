@@ -7,26 +7,24 @@
 
 #include <cmath>
 
-#if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
+#if defined(_MSC_VER)
+    #pragma warning(disable : 4201)
+#endif
 
-    #if defined(_MSC_VER)
-        #pragma warning(disable : 4201)
-    #endif
+#include <cassert>
+#include <future>
+#include <memory>
+#include <utility>
+#include <vector>
 
-    #include <cassert>
-    #include <future>
-    #include <memory>
-    #include <utility>
-    #include <vector>
+#include "tcob/audio/Buffer.hpp"
+#include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/TaskManager.hpp"
+#include "tcob/core/io/FileStream.hpp"
+#include "tcob/core/io/Stream.hpp"
 
-    #include "tcob/audio/Buffer.hpp"
-    #include "tcob/core/ServiceLocator.hpp"
-    #include "tcob/core/TaskManager.hpp"
-    #include "tcob/core/io/FileStream.hpp"
-    #include "tcob/core/io/Stream.hpp"
-
-    #include <TinySoundFont/tml.h>
-    #include <TinySoundFont/tsf.h>
+#include <TinySoundFont/tml.h>
+#include <TinySoundFont/tsf.h>
 
 namespace tcob::audio {
 
@@ -282,5 +280,3 @@ void sound_font_commands::render(tsf* font, f32* buffer, u8 channels, i32 sample
 ////////////////////////////////////////////////////////////
 
 }
-
-#endif

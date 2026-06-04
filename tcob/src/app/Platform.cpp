@@ -293,6 +293,7 @@ void platform::InitAudioCodecs()
     // decoders
     auto& adFactory {register_service<audio::decoder::factory>()};
     adFactory.add(".bsa", &MakeUnique<audio::detail::bsa_decoder>);
+    adFactory.add(".mid", &MakeUnique<audio::detail::midi_decoder>);
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
     adFactory.add(".flac", &MakeUnique<audio::detail::flac_decoder>);
     adFactory.add(".mp3", &MakeUnique<audio::detail::mp3_decoder>);
@@ -300,9 +301,6 @@ void platform::InitAudioCodecs()
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_VORBIS)
     adFactory.add(".ogg", &MakeUnique<audio::detail::vorbis_decoder>);
-#endif
-#if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
-    adFactory.add(".mid", &MakeUnique<audio::detail::midi_decoder>);
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP)
     adFactory.add({".it", ".mod", ".s3m", ".xm"}, &MakeUnique<audio::detail::xmp_decoder>);
