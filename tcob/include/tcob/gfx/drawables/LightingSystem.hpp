@@ -7,7 +7,6 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <vector>
 
@@ -155,14 +154,15 @@ private:
 
     bool _isDirty {false};
     bool _updateGeometry {false};
+    bool _multiThreaded;
 
     renderer       _renderer {buffer_usage_hint::DynamicDraw};
     geometry_store _store;
 
     asset_owner_ptr<material> _material;
 
-    std::mutex _mutex {};
-    bool       _multiThreaded;
+    std::vector<vertex> _vertScratch;
+    std::vector<u32>    _indScratch;
 
     std::unique_ptr<quadtree<quadtree_node>> _quadTree;
 };

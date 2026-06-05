@@ -9,7 +9,6 @@
 #include <array>
 #include <limits>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <set>
 #include <utility>
@@ -104,16 +103,18 @@ void lighting_system::notify_shadow_changed(shadow_caster* shadow)
 {
     mark_lights_dirty();
     if (shadow->Polygon->empty()) {
-        _quadTree->remove({.Bounds = shadow->_bounds, .Caster = shadow});
+        if (_quadTree) { _quadTree->remove({.Bounds = shadow->_bounds, .Caster = shadow}); }
         shadow->_bounds = rect_f::Zero;
         return;
     }
 
     rect_f const newBounds {polygons::info(*shadow->Polygon).BoundingBox};
-    if (shadow->_bounds != rect_f::Zero) {
-        _quadTree->replace({.Bounds = shadow->_bounds, .Caster = shadow}, {.Bounds = newBounds, .Caster = shadow});
-    } else {
-        _quadTree->add({.Bounds = newBounds, .Caster = shadow});
+    if (_quadTree) {
+        if (shadow->_bounds != rect_f::Zero) {
+            _quadTree->replace({.Bounds = shadow->_bounds, .Caster = shadow}, {.Bounds = newBounds, .Caster = shadow});
+        } else {
+            _quadTree->add({.Bounds = newBounds, .Caster = shadow});
+        }
     }
     shadow->_bounds = newBounds;
 }
@@ -180,16 +181,12 @@ void lighting_system::cast_ray(light_source& light, f32 lightRange)
     bool const             lightInsideShadowCaster {IsInShadowcaster(light, casterPoints)};
     std::vector<f64> const angles {collect_angles(light, lightInsideShadowCaster, casterPoints)};
 
-    std::vector<std::pair<f64, light_collision>> collisionResult;
-    collisionResult.reserve(angles.size());
-    i32 const angleCount {static_cast<i32>(angles.size())};
+    std::vector<std::pair<f64, light_collision>> collisionResult(angles.size());
+    i32 const                                    angleCount {static_cast<i32>(angles.size())};
 
     // ray cast
     locate_service<task_manager>().run_parallel(
         [&](par_task const& ctx) {
-            std::vector<std::pair<f64, light_collision>> taskCollisionResult;
-            taskCollisionResult.reserve(ctx.End - ctx.Start);
-
             for (isize idx {ctx.Start}; idx < ctx.End; ++idx) {
                 f64 const angle {angles[idx]};
 
@@ -211,24 +208,24 @@ void lighting_system::cast_ray(light_source& light, f32 lightRange)
                             nearestPoint.Distance = lightRange;
                             nearestPoint.Caster   = nullptr;
                         } else {
-                            nearestPoint.Point    = point;
-                            nearestPoint.Distance = distance;
-                            nearestPoint.Caster   = cp.Caster;
+                            nearestPoint.Point          = point;
+                            nearestPoint.Distance       = distance;
+                            nearestPoint.Caster         = cp.Caster;
+                            nearestPoint.CollisionCount = result.size();
                         }
-
-                        nearestPoint.CollisionCount = result.size();
                     }
                 }
 
                 if (nearestPoint.Distance == std::numeric_limits<f32>::max()) { continue; }
-                taskCollisionResult.emplace_back(angle, nearestPoint);
-            }
-            {
-                std::scoped_lock lock {_mutex};
-                collisionResult.insert(collisionResult.end(), taskCollisionResult.begin(), taskCollisionResult.end());
+                collisionResult[idx] = {angle, nearestPoint};
             }
         },
         angleCount, _multiThreaded ? 64 : angleCount);
+
+    // remove slots that were skipped
+    std::erase_if(collisionResult, [](auto const& p) {
+        return p.second.Distance == std::numeric_limits<f32>::max();
+    });
 
     std::ranges::sort(collisionResult, [](auto const& a, auto const& b) { return a.first > b.first; });
 
@@ -246,15 +243,15 @@ void lighting_system::cast_ray(light_source& light, f32 lightRange)
 
 void lighting_system::build_geometry(light_source& light, f32 lightRange, u32& indOffset)
 {
-    std::vector<vertex> verts;
-    std::vector<u32>    inds;
-
     u32 const n {static_cast<u32>(light._collisionResult.size())};
     if (n <= 1) { return; }
 
-    verts.push_back({.Position  = light.Position,
-                     .Color     = light.Color,
-                     .TexCoords = {.U = 0, .V = 0, .Level = 0}});
+    _vertScratch.clear();
+    _indScratch.clear();
+
+    _vertScratch.push_back({.Position  = light.Position,
+                            .Color     = light.Color,
+                            .TexCoords = {.U = 0, .V = 0, .Level = 0}});
 
     bool const limitRange {light.is_range_limited()};
 
@@ -268,25 +265,24 @@ void lighting_system::build_geometry(light_source& light, f32 lightRange, u32& i
             col.B = static_cast<u8>(col.B * falloff);
             col.A = static_cast<u8>(col.A * falloff);
         }
-
-        verts.push_back({.Position  = p.Point,
-                         .Color     = col,
-                         .TexCoords = {.U = 0, .V = 0, .Level = 0}});
+        _vertScratch.push_back({.Position  = p.Point,
+                                .Color     = col,
+                                .TexCoords = {.U = 0, .V = 0, .Level = 0}});
     }
 
     for (u32 i {2}; i <= n; ++i) {
-        inds.push_back(0 + indOffset);
-        inds.push_back(i + indOffset);
-        inds.push_back(i - 1 + indOffset);
+        _indScratch.push_back(0 + indOffset);
+        _indScratch.push_back(i + indOffset);
+        _indScratch.push_back(i - 1 + indOffset);
     }
     if (!light.is_angle_limited()) {
-        inds.push_back(0 + indOffset);
-        inds.push_back(n + indOffset);
-        inds.push_back(1 + indOffset);
+        _indScratch.push_back(0 + indOffset);
+        _indScratch.push_back(n + indOffset);
+        _indScratch.push_back(1 + indOffset);
     }
     indOffset += n + 1;
 
-    _store.add(0, verts, inds);
+    _store.add(0, _vertScratch, _indScratch);
 }
 
 auto lighting_system::collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>
@@ -336,14 +332,14 @@ auto lighting_system::collect_angles(light_source& light, bool lightInsideShadow
 
 void lighting_system::rebuild_quadtree()
 {
-    if (_quadTree) {
-        _quadTree->clear();
-        mark_lights_dirty();
-        for (auto& sc : _shadowCasters) {
-            _quadTree->add(quadtree_node {.Bounds = polygons::info(*sc->Polygon).BoundingBox, .Caster = sc.get()});
+    _quadTree = std::make_unique<quadtree<quadtree_node>>(*Bounds);
+    mark_lights_dirty();
+    for (auto& sc : _shadowCasters) {
+        if (!sc->Polygon->empty()) {
+            rect_f const bounds {polygons::info(*sc->Polygon).BoundingBox};
+            _quadTree->add({.Bounds = bounds, .Caster = sc.get()});
+            sc->_bounds = bounds;
         }
-    } else {
-        _quadTree = std::make_unique<quadtree<quadtree_node>>(*Bounds);
     }
 }
 
