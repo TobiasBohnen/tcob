@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <tuple>
 #include <utility>
 
@@ -54,46 +55,17 @@ auto constexpr rect<T>::FromLTRB(T left, T top, T right, T bottom) -> rect
 template <Arithmetic T>
 auto constexpr rect<T>::find_edge(degree_f angle) const -> point_f
 {
-    // Ref: http://stackoverflow.com/questions/4061576/finding-points-on-a-rectangle-at-a-given-angle
-    f32 theta {radian_f {degree_f {360} - angle.as_normalized()}.Value};
+    point_f const c {center()};
+    point_f const dir {point_f::FromDirection(degree_d {angle})};
+    f32 const     hw {Size.Width / 2.0f};
+    f32 const     hh {Size.Height / 2.0f};
 
-    while (theta < -TAU_F / 2) { theta += TAU_F; }
-    while (theta > TAU_F / 2) { theta -= TAU_F; }
+    // clip ray to rect half-extents
+    f32 const tx {dir.X != 0 ? hw / std::abs(dir.X) : std::numeric_limits<f32>::max()};
+    f32 const ty {dir.Y != 0 ? hh / std::abs(dir.Y) : std::numeric_limits<f32>::max()};
+    f32 const t {std::min(tx, ty)};
 
-    f32 const rectAtan {std::atan2(Size.Height, Size.Width)};
-    f32 const tanTheta {std::tan(theta)};
-    i32       region {};
-
-    if ((theta > -rectAtan) && (theta <= rectAtan)) {
-        region = 1;
-    } else if ((theta > rectAtan) && (theta <= ((TAU_F / 2) - rectAtan))) {
-        region = 2;
-    } else if ((theta > ((TAU_F / 2) - rectAtan)) || (theta <= -((TAU_F / 2) - rectAtan))) {
-        region = 3;
-    } else {
-        region = 4;
-    }
-
-    point_f retValue {center()};
-    f32     xFactor {1};
-    f32     yFactor {1};
-
-    switch (region) {
-    case 1:
-    case 2: yFactor = -1; break;
-    case 3:
-    case 4: xFactor = -1; break;
-    }
-
-    if (region == 1 || region == 3) {
-        retValue.X += xFactor * (Size.Width / 2.0f);               // "Z0"
-        retValue.Y += yFactor * (Size.Width / 2.0f) * tanTheta;
-    } else {
-        retValue.X += xFactor * (Size.Height / (2.0f * tanTheta)); // "Z1"
-        retValue.Y += yFactor * (Size.Height / 2.0f);
-    }
-
-    return retValue;
+    return {c.X + (dir.X * t), c.Y + (dir.Y * t)};
 }
 
 template <Arithmetic T>

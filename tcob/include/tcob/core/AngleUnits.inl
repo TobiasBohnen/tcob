@@ -135,6 +135,25 @@ auto constexpr angle_unit<ValueType, OneTurn>::as_normalized(angle_normalize mod
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::is_between(angle_unit const& from, angle_unit const& to) const -> bool
+{
+    auto const nfrom {from.as_normalized(angle_normalize::PositiveFullTurn).Value};
+    auto const nto {to.as_normalized(angle_normalize::PositiveFullTurn).Value};
+    auto const nself {this->as_normalized(angle_normalize::PositiveFullTurn).Value};
+
+    if (nfrom <= nto) {
+        return nself >= nfrom && nself <= nto;
+    }
+    return nself >= nfrom || nself <= nto;
+}
+
+template <FloatingPoint ValueType, f64 OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::reflect(angle_unit const& normal) const -> angle_unit<ValueType, OneTurn>
+{
+    return angle_unit<ValueType, OneTurn> {normal.Value * static_cast<ValueType>(2) - Value};
+}
+
+template <FloatingPoint ValueType, f64 OneTurn>
 auto constexpr angle_unit<ValueType, OneTurn>::equals(angle_unit const& other, value_type tol) const -> bool
 {
     if (*this == other) { return true; }
@@ -148,6 +167,18 @@ auto constexpr angle_unit<ValueType, OneTurn>::Lerp(angle_unit const& from, angl
     ValueType const leftVal {static_cast<ValueType>(from.Value)};
     ValueType const rightVal {static_cast<ValueType>(to.Value)};
     return angle_unit<ValueType, OneTurn> {helper::lerp(leftVal, rightVal, step)};
+}
+
+template <FloatingPoint ValueType, f64 OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::Delta(angle_unit const& from, angle_unit const& to) -> angle_unit<ValueType, OneTurn>
+{
+    return (to - from).as_normalized(angle_normalize::HalfTurnSymmetric);
+}
+
+template <FloatingPoint ValueType, f64 OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::Halfway(angle_unit const& from, angle_unit const& to) -> angle_unit<ValueType, OneTurn>
+{
+    return (from + Delta(from, to) * static_cast<ValueType>(0.5)).as_normalized(angle_normalize::PositiveFullTurn);
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>

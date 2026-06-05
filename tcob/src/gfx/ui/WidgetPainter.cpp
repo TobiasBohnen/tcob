@@ -740,10 +740,9 @@ auto widget_painter::get_paint(paint const& p, rect_f const& rect) -> gfx::canva
             };
         },
         [&](linear_gradient const& arg) {
-            degree_f const angle {arg.Angle + degree_f {90}};
             return _canvas.create_linear_gradient(
-                rect.find_edge(angle),
-                rect.find_edge(angle - degree_f {180}),
+                rect.find_edge(arg.Angle + degree_f {180}),
+                rect.find_edge(arg.Angle),
                 arg.Colors);
         },
         [&](radial_gradient const& arg) {

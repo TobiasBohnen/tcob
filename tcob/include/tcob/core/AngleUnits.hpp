@@ -49,10 +49,14 @@ public:
     static auto atan2 [[nodiscard]] (ValueType y, ValueType x) -> angle_unit<ValueType, OneTurn>;
 
     auto constexpr as_normalized(angle_normalize mode = angle_normalize::FullTurnSymmetric) const -> angle_unit<ValueType, OneTurn>;
+    auto constexpr is_between [[nodiscard]] (angle_unit const& from, angle_unit const& to) const -> bool;
+    auto constexpr reflect [[nodiscard]] (angle_unit const& normal) const -> angle_unit<ValueType, OneTurn>;
 
     auto constexpr equals(angle_unit const& other, value_type tol) const -> bool;
 
     static auto constexpr Lerp(angle_unit const& from, angle_unit const& to, f64 step) -> angle_unit<ValueType, OneTurn>;
+    static auto constexpr Delta [[nodiscard]] (angle_unit const& from, angle_unit const& to) -> angle_unit<ValueType, OneTurn>;
+    static auto constexpr Halfway [[nodiscard]] (angle_unit const& from, angle_unit const& to) -> angle_unit<ValueType, OneTurn>;
 
     ValueType Value {0};
 };
