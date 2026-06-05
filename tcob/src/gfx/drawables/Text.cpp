@@ -251,49 +251,59 @@ void text::parse_commands()
             }
 
             string_view const inner {input.data() + start, end - start};
-            utf8_string const u {utf8::to_upper(inner)};
+            auto const        split {helper::split(inner, ',')};
+            for (auto const str : split) {
+                bool              parsed {true};
+                utf8_string const upper {utf8::to_upper(helper::trim(str))};
 
-            text_command cmd {};
-            bool         parsed {true};
+                text_command cmd {};
 
-            if (u.starts_with("/")) {
-                if (u.starts_with("/COLOR")) {
-                    cmd.Type = text_command_type::ColorOff;
-                } else if (u.starts_with("/ALPHA")) {
-                    cmd.Type = text_command_type::AlphaOff;
-                } else if (u.starts_with("/EFFECT")) {
-                    cmd.Type = text_command_type::EffectOff;
+                if (upper.starts_with("/")) {
+                    if (upper.starts_with("/COLOR")) {
+                        cmd.Type = text_command_type::ColorOff;
+                    } else if (upper.starts_with("/ALPHA")) {
+                        cmd.Type = text_command_type::AlphaOff;
+                    } else if (upper.starts_with("/EFFECT")) {
+                        cmd.Type = text_command_type::EffectOff;
+                    } else {
+                        parsed = false;
+                    }
                 } else {
-                    parsed = false;
+                    if (upper.starts_with("COLOR:")) {
+                        cmd.Type  = text_command_type::Color;
+                        cmd.Value = color::FromString(utf8_string {upper.substr(6)});
+                    } else if (upper.starts_with("ALPHA:")) {
+                        cmd.Type  = text_command_type::Alpha;
+                        cmd.Value = static_cast<u8>(255.0f * std::clamp(helper::to_number<f32>(upper.substr(6)).value_or(1.0f), 0.0f, 1.0f));
+                    } else if (upper.starts_with("EFFECT:")) {
+                        cmd.Type  = text_command_type::Effect;
+                        cmd.Value = helper::to_number<u8>(upper.substr(7)).value_or(0);
+                    } else if (upper.starts_with("WAIT:")) {
+                        _hasWait = true;
+                        cmd.Type = text_command_type::Wait;
+                        auto const val {upper.substr(5)};
+                        if (val == "LONG") {
+                            cmd.Value = Style->LongWait;
+                        } else if (val == "SHORT") {
+                            cmd.Value = Style->ShortWait;
+                        } else {
+                            cmd.Value = milliseconds {helper::to_number<f32>(val).value_or(0)};
+                        }
+                    } else {
+                        parsed = false;
+                    }
                 }
-            } else {
-                if (u.starts_with("COLOR:")) {
-                    cmd.Type  = text_command_type::Color;
-                    cmd.Value = color::FromString(utf8_string {inner.substr(6)});
-                } else if (u.starts_with("ALPHA:")) {
-                    cmd.Type  = text_command_type::Alpha;
-                    cmd.Value = static_cast<u8>(255.0f * std::clamp(helper::to_number<f32>(inner.substr(6)).value_or(1.0f), 0.0f, 1.0f));
-                } else if (u.starts_with("EFFECT:")) {
-                    cmd.Type  = text_command_type::Effect;
-                    cmd.Value = helper::to_number<u8>(inner.substr(7)).value_or(0);
-                } else if (u.starts_with("WAIT:")) {
-                    _hasWait  = true;
-                    cmd.Type  = text_command_type::Wait;
-                    cmd.Value = milliseconds {helper::to_number<f32>(inner.substr(5)).value_or(0)};
-                } else {
-                    parsed = false;
-                }
-            }
 
-            if (parsed) {
-                cmd.GlyphIndex = glyphIndex;
-                _commands.push_back(cmd);
-            } else {
-                _strippedText += '{';
-                _strippedText += utf8_string {inner};
-                _strippedText += '}';
-                // count the emitted codepoints
-                glyphIndex += 2 + utf8::length(inner);
+                if (parsed) {
+                    cmd.GlyphIndex = glyphIndex;
+                    _commands.push_back(cmd);
+                } else {
+                    _strippedText += '{';
+                    _strippedText += utf8_string {inner};
+                    _strippedText += '}';
+                    // count the emitted codepoints
+                    glyphIndex += 2 + utf8::length(inner);
+                }
             }
 
             i = end + 1;

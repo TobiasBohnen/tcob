@@ -66,6 +66,9 @@ public:
         font::style FontStyle {};
         u32         FontSize {32};
 
+        milliseconds LongWait {1500};
+        milliseconds ShortWait {500};
+
         auto operator==(style const& other) const -> bool = default;
     };
 
