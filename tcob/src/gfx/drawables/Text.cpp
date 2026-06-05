@@ -50,6 +50,24 @@ void text::on_update(milliseconds deltaTime)
     if (_isRunning && is_visible()) {
         _elapsedTime += deltaTime;
 
+        if (_hasWait) {
+            milliseconds timeStamp {0};
+            for (auto const& cmd : _commands) {
+                if (cmd.Type == text_command_type::Effect) {
+                    auto const id {std::get<u8>(cmd.Value)};
+                    if (_effects.contains(id) && !_startedEffects.contains(id)) {
+                        _startedEffects.insert(id);
+                        _effects[id]->start(_playbackMode);
+                    }
+                    continue;
+                }
+                if (cmd.Type != text_command_type::Wait) { continue; }
+                _visibleGlyphs = cmd.GlyphIndex;
+                timeStamp += std::get<milliseconds>(cmd.Value);
+                if (_elapsedTime < timeStamp) { break; }
+            }
+        }
+
         for (auto& [_, effect] : _effects) {
             effect->update(deltaTime);
         }
@@ -68,25 +86,8 @@ void text::on_draw_to(render_target& target, transform const& xform)
         inds = _inds;
     } else {
         if (!_isRunning) { return; }
-
-        milliseconds timeStamp {};
-        usize        gi {0};
-        for (auto const& wp : _commands) {
-            if (wp.Type == text_command_type::Effect) {
-                auto const id {std::get<u8>(wp.Value)};
-                if (_effects.contains(id) && !_startedEffects.contains(id)) {
-                    _startedEffects.insert(id);
-                    _effects.at(id)->start(_playbackMode);
-                }
-                continue;
-            }
-            if (wp.Type != text_command_type::Wait) { continue; }
-            gi = wp.GlyphIndex;
-            timeStamp += std::get<milliseconds>(wp.Value);
-            if (_elapsedTime < timeStamp) { break; }
-        }
-
-        inds = {_inds.begin(), _inds.begin() + (6 * gi)};
+        if (_visibleGlyphs == 0) { return; }
+        inds = {_inds.begin(), _inds.begin() + (6 * _visibleGlyphs)};
     }
 
     if (inds.empty()) { return; }

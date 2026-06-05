@@ -106,18 +106,18 @@ private:
 
     std::vector<text_command> _commands;
     utf8_string               _strippedText;
+    milliseconds              _elapsedTime {0};
+    usize                     _visibleGlyphs {0};
 
     std::vector<quad> _quads {};
     std::vector<u32>  _inds {};
 
     renderer                  _renderer {buffer_usage_hint::DynamicDraw};
     asset_owner_ptr<material> _material {};
+    asset_ptr<font_family>    _font;
 
-    asset_ptr<font_family>                                             _font;
     std::unordered_map<u8, std::shared_ptr<detail::vertex_tween_base>> _effects {};
     std::unordered_set<u8>                                             _startedEffects;
-
-    milliseconds _elapsedTime {};
 };
 
 template <typename... Funcs>
