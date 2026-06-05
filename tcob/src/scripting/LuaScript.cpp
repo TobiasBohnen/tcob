@@ -12,6 +12,7 @@
 #include <utility>
 #include <variant>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/scripting/Lua.hpp"
@@ -84,12 +85,12 @@ auto script::create_table() const -> table
 void script::open_addons()
 {
     auto const with {[&](string const& name, auto fn) {
-        if (_globalTable.has(name)) { fn(_globalTable[name].as<table>()); }
+        if (table t; _globalTable.try_get(t, name)) { fn(t); }
     }};
 
     with("math", [](auto&& tab) {
         tab["clamp"]    = +[](f32 v, f32 low, f32 high) { return std::clamp(v, low, high); };
-        tab["lerp"]     = +[](f32 a, f32 b, f32 t) { return a + ((b - a) * t); };
+        tab["lerp"]     = +[](f32 a, f32 b, f32 t) { return helper::lerp(a, b, t); };
         tab["round"]    = +[](f32 v) { return std::round(v); };
         tab["sign"]     = +[](f32 v) -> f32 { return static_cast<f32>((v > 0.f) - (v < 0.f)); };
         tab["saturate"] = +[](f32 v) { return std::clamp(v, 0.f, 1.f); };
