@@ -9,6 +9,7 @@
 #include <memory>
 #include <optional>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -98,9 +99,10 @@ private:
     void format();
     void parse_commands();
 
-    bool _needsFormat {true};
-    bool _isRunning {false};
-    bool _hasWait {false};
+    bool          _needsFormat {true};
+    bool          _isRunning {false};
+    bool          _hasWait {false};
+    playback_mode _playbackMode {};
 
     std::vector<text_command> _commands;
     utf8_string               _strippedText;
@@ -113,6 +115,7 @@ private:
 
     asset_ptr<font_family>                                             _font;
     std::unordered_map<u8, std::shared_ptr<detail::vertex_tween_base>> _effects {};
+    std::unordered_set<u8>                                             _startedEffects;
 
     milliseconds _elapsedTime {};
 };

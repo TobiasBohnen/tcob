@@ -144,13 +144,13 @@ auto animated_texture::is_looping() const -> bool
 
 void animated_texture::start(bool looping)
 {
-    if (state() == playback_state::Stopped) { // start if stopped
+    if (_state == playback_state::Stopped) { // start if stopped
         if (_decoder) {
             _isLooping = looping;
             _state     = playback_state::Running;
             reset_decoder();
         }
-    } else if (state() == playback_state::Paused) { // resume if paused
+    } else if (_state == playback_state::Paused) { // resume if paused
         _isLooping = looping;
         resume();
     }
@@ -158,7 +158,7 @@ void animated_texture::start(bool looping)
 
 void animated_texture::stop()
 {
-    if (state() != playback_state::Stopped) { // stop if running or paused
+    if (_state != playback_state::Stopped) { // stop if running or paused
         _state = playback_state::Stopped;
         reset_decoder();
     }
@@ -172,21 +172,21 @@ void animated_texture::restart()
 
 void animated_texture::pause()
 {
-    if (state() == playback_state::Running) { // pause if running
+    if (_state == playback_state::Running) { // pause if running
         _state = playback_state::Paused;
     }
 }
 
 void animated_texture::resume()
 {
-    if (state() == playback_state::Paused) { // resume if paused
+    if (_state == playback_state::Paused) { // resume if paused
         _state = playback_state::Running;
     }
 }
 
 void animated_texture::toggle_pause()
 {
-    state() == playback_state::Paused ? resume() : pause();
+    _state == playback_state::Paused ? resume() : pause();
 }
 
 void animated_texture::reset_decoder()
@@ -199,7 +199,7 @@ void animated_texture::reset_decoder()
 
 void animated_texture::on_update(milliseconds deltaTime)
 {
-    if (state() != playback_state::Running || !_decoder) {
+    if (_state != playback_state::Running || !_decoder) {
         return;
     }
 

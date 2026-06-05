@@ -72,15 +72,24 @@ void text::on_draw_to(render_target& target, transform const& xform)
         milliseconds timeStamp {};
         usize        gi {0};
         for (auto const& wp : _commands) {
+            if (wp.Type == text_command_type::Effect) {
+                auto const id {std::get<u8>(wp.Value)};
+                if (_effects.contains(id) && !_startedEffects.contains(id)) {
+                    _startedEffects.insert(id);
+                    _effects.at(id)->start(_playbackMode);
+                }
+                continue;
+            }
             if (wp.Type != text_command_type::Wait) { continue; }
             gi = wp.GlyphIndex;
             timeStamp += std::get<milliseconds>(wp.Value);
             if (_elapsedTime < timeStamp) { break; }
         }
-        if (gi == 0) { return; }
 
         inds = {_inds.begin(), _inds.begin() + (6 * gi)};
     }
+
+    if (inds.empty()) { return; }
 
     _renderer.set_geometry(
         {.Vertices = geometry::flatten(_quads), .Indices = inds, .Type = primitive_type::Triangles},
@@ -104,11 +113,17 @@ void text::on_transform_changed()
 
 void text::start(playback_mode mode)
 {
-    _elapsedTime = milliseconds::zero();
+    stop();
 
-    _isRunning = true;
-    for (auto& [_, effect] : _effects) {
-        effect->start(mode);
+    _elapsedTime  = milliseconds::zero();
+    _playbackMode = mode;
+    _isRunning    = true;
+    _startedEffects.clear();
+
+    if (!_hasWait) {
+        for (auto& [_, effect] : _effects) {
+            effect->start(mode);
+        }
     }
 }
 
@@ -131,6 +146,7 @@ void text::format()
 
     _quads.clear();
     _inds.clear();
+    _startedEffects.clear();
     for (auto& [_, effect] : _effects) {
         effect->clear_groups();
     }
@@ -146,7 +162,7 @@ void text::format()
     _material->first_pass().Texture = currentFont->texture();
 
     color             currentColor {Style->Color};
-    u8                currectAlpha {currentColor.A};
+    u8                currentAlpha {currentColor.A};
     std::optional<u8> currentEffectIdx {};
 
     usize       glyphIndex {0};
@@ -156,8 +172,8 @@ void text::format()
     auto const applyCommands {[&]() {
         while (cmdIdx < cmdLen && _commands[cmdIdx].GlyphIndex == glyphIndex) {
             switch (_commands[cmdIdx].Type) {
-            case text_command_type::Alpha:    currectAlpha = std::get<u8>(_commands[cmdIdx].Value); break;
-            case text_command_type::AlphaOff: currectAlpha = 255; break;
+            case text_command_type::Alpha:    currentAlpha = std::get<u8>(_commands[cmdIdx].Value); break;
+            case text_command_type::AlphaOff: currentAlpha = 255; break;
             case text_command_type::Color:    currentColor = std::get<color>(_commands[cmdIdx].Value); break;
             case text_command_type::ColorOff: currentColor = Style->Color; break;
             case text_command_type::Effect:   {
@@ -179,7 +195,7 @@ void text::format()
             applyCommands();
             quad& q {_quads.emplace_back()};
 
-            currentColor.A = currectAlpha;
+            currentColor.A = currentAlpha;
             geometry::set_color(q, currentColor);
 
             geometry::set_texcoords(q, token.Quads[i].TextureRegion);
@@ -301,4 +317,5 @@ void text::parse_commands()
         _commands.emplace_back(text_command_type::Wait, glyphIndex, milliseconds::zero());
     }
 }
+
 }
