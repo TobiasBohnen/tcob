@@ -43,13 +43,15 @@ enum class text_command_type : u8 {
     AlphaOff,
 
     Effect,
-    EffectOff
+    EffectOff,
+
+    Wait
 };
 
 struct text_command {
-    usize                   GlyphIndex {};
-    text_command_type       Type {text_command_type::None};
-    std::variant<color, u8> Value;
+    text_command_type                     Type {text_command_type::None};
+    usize                                 GlyphIndex {};
+    std::variant<color, u8, milliseconds> Value;
 };
 
 ////////////////////////////////////////////////////////////
@@ -98,6 +100,7 @@ private:
 
     bool _needsFormat {true};
     bool _isRunning {false};
+    bool _hasWait {false};
 
     std::vector<text_command> _commands;
     utf8_string               _strippedText;
@@ -110,12 +113,6 @@ private:
 
     asset_ptr<font_family>                                             _font;
     std::unordered_map<u8, std::shared_ptr<detail::vertex_tween_base>> _effects {};
-
-    struct wait_point {
-        milliseconds WaitTime;
-        usize        GlyphIndex;
-    };
-    std::vector<wait_point> _waitPoints;
 
     milliseconds _elapsedTime {};
 };

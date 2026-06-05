@@ -64,23 +64,21 @@ auto text::can_draw() const -> bool
 void text::on_draw_to(render_target& target, transform const& xform)
 {
     std::span<u32 const> inds;
-    if (_waitPoints.empty()) {
+    if (!_hasWait) {
         inds = _inds;
     } else {
         if (!_isRunning) { return; }
 
         milliseconds timeStamp {};
         usize        gi {0};
-        for (usize i {0}; i < _waitPoints.size(); ++i) {
-            if (timeStamp < _elapsedTime) {
-                gi = _waitPoints[i].GlyphIndex;
-            } else {
-                break;
-            }
-            timeStamp += _waitPoints[i].WaitTime;
+        for (auto const& wp : _commands) {
+            if (wp.Type != text_command_type::Wait) { continue; }
+            gi = wp.GlyphIndex;
+            timeStamp += std::get<milliseconds>(wp.Value);
+            if (_elapsedTime < timeStamp) { break; }
         }
-
         if (gi == 0) { return; }
+
         inds = {_inds.begin(), _inds.begin() + (6 * gi)};
     }
 
@@ -151,8 +149,6 @@ void text::format()
     u8                currectAlpha {currentColor.A};
     std::optional<u8> currentEffectIdx {};
 
-    auto const [x, y] {Bounds->Position};
-
     usize       glyphIndex {0};
     usize       cmdIdx {0};
     usize const cmdLen {_commands.size()};
@@ -169,6 +165,7 @@ void text::format()
                 if (!_effects.contains(*currentEffectIdx)) { currentEffectIdx = std::nullopt; }
             } break;
             case text_command_type::EffectOff: currentEffectIdx = std::nullopt; break;
+            case text_command_type::Wait:      break;
             case text_command_type::None:      break;
             }
             ++cmdIdx;
@@ -176,6 +173,7 @@ void text::format()
     }};
 
     // setup quads
+    auto const [x, y] {Bounds->Position};
     for (auto const& token : formatResult.Tokens) {
         for (usize i {0}; i < token.Quads.size(); ++i) {
             applyCommands();
@@ -205,6 +203,7 @@ void text::parse_commands()
 {
     auto const& input {*Text};
     _commands.clear();
+    _hasWait = false;
     _strippedText.clear();
     _strippedText.reserve(input.size());
 
@@ -261,7 +260,9 @@ void text::parse_commands()
                     cmd.Type  = text_command_type::Effect;
                     cmd.Value = helper::to_number<u8>(inner.substr(7)).value_or(0);
                 } else if (u.starts_with("WAIT:")) {
-                    _waitPoints.emplace_back(milliseconds {helper::to_number<f32>(inner.substr(5)).value_or(0)}, glyphIndex);
+                    _hasWait  = true;
+                    cmd.Type  = text_command_type::Wait;
+                    cmd.Value = milliseconds {helper::to_number<f32>(inner.substr(5)).value_or(0)};
                 } else {
                     parsed = false;
                 }
@@ -296,8 +297,8 @@ void text::parse_commands()
         }
     }
 
-    if (!_waitPoints.empty()) {
-        _waitPoints.emplace_back(milliseconds::zero(), glyphIndex);
+    if (_hasWait) {
+        _commands.emplace_back(text_command_type::Wait, glyphIndex, milliseconds::zero());
     }
 }
 }
