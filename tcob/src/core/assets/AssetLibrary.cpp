@@ -21,11 +21,9 @@ library::~library()
 
 auto library::create_or_get_group(string const& groupName) -> group&
 {
-    if (!_groups.contains(groupName)) {
-        _groups[groupName] = std::make_unique<group>(groupName);
-    }
-
-    return *_groups[groupName].get();
+    auto [it, inserted] {_groups.emplace(groupName, nullptr)};
+    if (inserted) { it->second = std::make_unique<group>(groupName); }
+    return *it->second;
 }
 
 auto library::get_group(string const& groupName) const -> group*
@@ -100,9 +98,7 @@ auto library::loading_progress() const -> f32
         }
     }
 
-    if (assets == 0.0f) {
-        return 0.0f;
-    }
+    if (assets == 0.0f) { return 1.0f; }
 
     return loaded / assets;
 }
@@ -117,7 +113,7 @@ auto library::asset_stats(string const& group) const -> group_stats
 {
     auto it {_groups.find(group)};
     if (it == _groups.end()) {
-        logger::Error("asset_library: group '{}' not found.", group);
+        logger::Error("asset_library: group '{}' not found", group);
         return {};
     }
 

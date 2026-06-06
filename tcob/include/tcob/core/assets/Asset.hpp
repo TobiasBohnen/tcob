@@ -104,7 +104,8 @@ class asset_owner_ptr {
 public:
     using type = T;
 
-    asset_owner_ptr(string const& name = "", auto&&... args);
+    template <typename... Args>
+    asset_owner_ptr(string const& name = "", Args&&... args);
 
     auto operator->() const -> type*;
     auto operator*() const -> type&;

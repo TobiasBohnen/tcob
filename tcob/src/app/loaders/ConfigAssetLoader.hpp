@@ -287,7 +287,7 @@ class cfg_asset_loader_manager final : public assets::loader_manager {
 public:
     explicit cfg_asset_loader_manager(assets::group& group);
 
-    void load_script(path const& file) override;
+    void load(path const& file) override;
 
 private:
     data::object _object;

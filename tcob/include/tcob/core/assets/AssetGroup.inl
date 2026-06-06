@@ -23,16 +23,16 @@ template <typename T>
 template <typename R, typename... Args>
 inline auto bucket<T>::create(string const& name, Args&&... args) -> asset_ptr<T>
 {
-    if (!_objects.contains(name)) {
-        auto obj {std::make_shared<R>(std::forward<Args>(args)...)};
-        _objects[name] = {obj, asset_ptr<T> {std::make_shared<asset<T>>(name, obj)}};
+    auto [it, inserted] {_objects.emplace(name, typename decltype(_objects)::mapped_type {})};
+    auto& assetEntry {it->second};
+    auto  obj {std::make_shared<R>(std::forward<Args>(args)...)};
+    if (inserted) {
+        assetEntry = {obj, asset_ptr<T> {std::make_shared<asset<T>>(name, obj)}};
     } else {
-        auto& assetEntry {_objects[name]};
-        assetEntry.first.reset(new R {std::forward<Args>(args)...});
-        assetEntry.second.get()->reset(assetEntry.first);
+        assetEntry.first = obj;
+        assetEntry.second.get()->reset(obj);
     }
-
-    return _objects[name].second;
+    return assetEntry.second;
 }
 
 template <typename T>
@@ -100,31 +100,36 @@ inline auto bucket<T>::parent() -> group&
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline void group::add_bucket()
+inline auto group::bucket() -> assets::bucket<T>*
 {
-    if (_buckets.contains(typeid(T))) {
-        return;
+    auto [it, inserted] {_buckets.emplace(typeid(T), nullptr)};
+    if (inserted) {
+        it->second = std::make_unique<assets::bucket<T>>(*this);
     }
-
-    _buckets[typeid(T)] = std::make_unique<assets::bucket<T>>(*this);
+    return dynamic_cast<assets::bucket<T>*>(it->second.get());
 }
 
 template <typename T>
-inline auto group::bucket() -> assets::bucket<T>*
+inline auto group::bucket() const -> assets::bucket<T> const*
 {
-    auto it {_buckets.find(typeid(T))};
-    return it != _buckets.end() ? dynamic_cast<assets::bucket<T>*>(it->second.get()) : nullptr;
+    return dynamic_cast<assets::bucket<T> const*>(_buckets.at(typeid(T)).get());
+}
+
+template <typename T, typename... Args>
+inline auto group::create(string const& assetName, Args&&... args) -> asset_ptr<T>
+{
+    return bucket<T>()->create(assetName, std::forward<Args>(args)...);
 }
 
 template <typename T>
 inline auto group::get(string const& assetName) const -> asset_ptr<T>
 {
     if (!has<T>(assetName)) {
-        logger::Error("asset_group '{}': asset '{}' not found.", _name, assetName);
+        logger::Error("asset_group '{}': asset '{}' not found", _name, assetName);
         return asset_ptr<T> {nullptr};
     }
 
-    return dynamic_cast<assets::bucket<T>*>(_buckets.at(typeid(T)).get())->get(assetName);
+    return bucket<T>()->get(assetName);
 }
 
 template <typename T>
@@ -133,7 +138,7 @@ inline auto group::has(string const& assetName) const -> bool
     auto it {_buckets.find(typeid(T))};
     if (it == _buckets.end()) { return false; }
 
-    return dynamic_cast<assets::bucket<T>*>(it->second.get())->has(assetName);
+    return bucket<T>()->has(assetName);
 }
 
 }

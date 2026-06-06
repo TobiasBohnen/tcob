@@ -7,6 +7,7 @@
 
 #include <utility>
 
+#include "tcob/core/Logger.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/assets/AssetLoader.hpp"
 #include "tcob/core/assets/Assets.hpp"
@@ -53,22 +54,22 @@ void group::load()
     for (auto const& file : files) {
         auto const ext {io::get_extension(file)};
 
-        if (!_loaderManagers.contains(ext)) {
+        auto it {_loaderManagers.find(ext)};
+        if (it == _loaderManagers.end()) {
             if (auto mgr {create_from_factory<loader_manager>(ext, *this)}) {
-                _loaderManagers[ext] = std::move(mgr);
+                it = _loaderManagers.emplace(ext, std::move(mgr)).first;
             } else {
                 continue;
             }
         }
-
-        loader_manager*      alm {_loaderManagers[ext].get()};
+        loader_manager*      alm {it->second.get()};
         script_preload_event ev {.Path       = file,
                                  .Hasher     = io::file_hasher {file},
                                  .ShouldLoad = true};
 
         PreScriptLoad(ev);
 
-        if (ev.ShouldLoad) { alm->load_script(file); }
+        if (ev.ShouldLoad) { alm->load(file); }
     }
 
     // declaring stage
@@ -123,6 +124,7 @@ namespace detail {
     bucket_base::bucket_base(string assetName)
         : _assetName {std::move(assetName)}
     {
+        logger::Info("asset_bucket: '{}' created", _assetName);
     }
 
     auto bucket_base::name() const -> string const&

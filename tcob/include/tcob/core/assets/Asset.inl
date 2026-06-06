@@ -176,7 +176,7 @@ inline auto asset_ptr<T>::is_ready() const -> bool
 template <typename T>
 inline void asset_ptr<T>::reset()
 {
-    if (_asset) { _asset.reset(); }
+    _asset.reset();
 }
 
 template <typename T>
@@ -202,8 +202,9 @@ inline auto operator==(asset_ptr<T> const& left, asset_ptr<T> const& right) -> b
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline asset_owner_ptr<T>::asset_owner_ptr(string const& name, auto&&... args)
-    : _object {std::make_shared<T>(args...)}
+template <typename... Args>
+inline asset_owner_ptr<T>::asset_owner_ptr(string const& name, Args&&... args)
+    : _object {std::make_shared<T>(std::forward<Args>(args)...)}
     , _assetPtr {std::make_shared<asset<T>>(name, _object, asset_status::Loaded)}
 {
 }

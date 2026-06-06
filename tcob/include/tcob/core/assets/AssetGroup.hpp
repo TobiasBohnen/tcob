@@ -96,23 +96,26 @@ public:
     auto loading_progress() const -> f32;
     auto is_loading_complete() const -> bool;
 
-    template <typename T>
-    void add_bucket();
+    void mount(path const& folderOrArchive) const;
+
+    void load();
+    void unload();
+    void destroy();
 
     template <typename T>
     auto bucket() -> assets::bucket<T>*;
+
+    template <typename T>
+    auto bucket() const -> assets::bucket<T> const*;
+
+    template <typename T, typename... Args>
+    auto create(string const& assetName, Args&&... args) -> asset_ptr<T>;
 
     template <typename T>
     auto get(string const& assetName) const -> asset_ptr<T>;
 
     template <typename T>
     auto has(string const& assetName) const -> bool;
-
-    void mount(path const& folderOrArchive) const;
-
-    void load();
-    void unload();
-    void destroy();
 
 private:
     string                                                                    _name;

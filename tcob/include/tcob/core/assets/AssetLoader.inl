@@ -28,12 +28,6 @@ inline auto loader<T>::group() -> assets::group&
 }
 
 template <typename T>
-inline auto loader<T>::bucket() -> assets::bucket<T>*
-{
-    return _group.bucket<T>();
-}
-
-template <typename T>
 inline void loader<T>::set_asset_status(asset_ptr<T> asset, asset_status status)
 {
     asset.get()->set_status(status);
@@ -44,11 +38,11 @@ inline void loader<T>::set_asset_status(asset_ptr<T> asset, asset_status status)
     case asset_status::Loading:  break;
     case asset_status::Loaded:
         logger::Info("asset_loader: group '{}' type '{}' -> asset '{}' successfully loaded",
-                     group().name(), bucket()->name(), asset.get()->name());
+                     group().name(), group().bucket<T>()->name(), asset.get()->name());
         break;
     case asset_status::Error:
         logger::Error("asset_loader: group '{}' type '{}' -> asset '{}' loading failed",
-                      group().name(), bucket()->name(), asset.get()->name());
+                      group().name(), group().bucket<T>()->name(), asset.get()->name());
         break;
     }
 }

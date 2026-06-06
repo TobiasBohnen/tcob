@@ -37,7 +37,6 @@ public:
 
 protected:
     auto group() -> assets::group&;
-    auto bucket() -> assets::bucket<T>*;
 
     void set_asset_status(asset_ptr<T> asset, asset_status status);
 
@@ -56,7 +55,7 @@ public:
     loader_manager()          = default;
     virtual ~loader_manager() = default;
 
-    virtual void load_script(path const& file) = 0;
+    virtual void load(path const& file) = 0;
     void         declare();
     void         prepare();
 
