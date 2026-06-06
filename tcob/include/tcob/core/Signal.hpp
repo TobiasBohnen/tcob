@@ -111,8 +111,8 @@ public:
     template <typename Func>
     auto operator+=(Func func) const -> connection;
 
-    auto operator-=(connection& c) const -> void;
-    auto operator-=(uid c) const -> void;
+    void operator-=(connection& c) const;
+    void operator-=(uid c) const;
 
     auto slot_count() const -> isize;
 

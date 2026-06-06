@@ -102,13 +102,13 @@ inline auto signal<EvArgs>::operator+=(Func func) const -> connection
 }
 
 template <typename EvArgs>
-inline auto signal<EvArgs>::operator-=(connection& c) const -> void
+inline void signal<EvArgs>::operator-=(connection& c) const
 {
     c.disconnect();
 }
 
 template <typename EvArgs>
-inline auto signal<EvArgs>::operator-=(uid c) const -> void
+inline void signal<EvArgs>::operator-=(uid c) const
 {
     disconnect(c);
 }
