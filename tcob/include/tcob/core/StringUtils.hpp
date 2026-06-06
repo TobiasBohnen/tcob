@@ -19,7 +19,7 @@
 namespace tcob::helper {
 ////////////////////////////////////////////////////////////
 
-TCOB_API auto get_levenshtein_distance(string_view lhs, string_view rhs) -> u32;
+TCOB_API auto levenshtein_distance(string_view lhs, string_view rhs) -> u32;
 
 template <typename T>
 auto          to_string(T&& value) -> string;
@@ -33,14 +33,14 @@ auto to_number(string_view str) -> std::optional<T>;
 auto          join(auto&& container, string_view delim) -> string;
 TCOB_API auto rep(string_view c, usize count, string_view delim) -> string;
 
-auto          split_for_each(string_view str, char delim, auto&& f) -> bool;
 TCOB_API auto split(string_view str, char delim) -> std::vector<string_view>;
 TCOB_API auto split(string_view str, string_view delim) -> std::vector<string_view>;
+auto          split(string_view str, char delim, auto&& fn) -> bool;
 TCOB_API auto split_once(string_view str, char delim) -> std::pair<string_view, string_view>;
 TCOB_API auto split_once(string_view str, string_view delim) -> std::pair<string_view, string_view>;
 
-auto          split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> bool;
 TCOB_API auto split_preserve_brackets(string_view str, char delim) -> std::vector<string_view>;
+auto          split_preserve_brackets(string_view str, char delim, auto&& fn) -> bool;
 
 TCOB_API auto trim(string_view source) -> string_view;
 

@@ -152,7 +152,7 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
         targetObject = secRes.as<object>();
     } else {
         targetObject = _mainSection;
-        helper::split_for_each(
+        helper::split(
             line.substr(1, endPos - 1), _settings.Path,
             [&targetObject](utf8_string_view token) -> bool {
                 if (token.empty()) { return false; }
@@ -214,7 +214,7 @@ auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, 
     if ((keyStr[0] == '\'' || keyStr[0] == '"') && keyStr[0] == keyStr[keyStrSize - 1]) {
         key = keyStr.substr(1, keyStrSize - 2);
     } else { // read sub-keys
-        helper::split_for_each(
+        helper::split(
             keyStr, _settings.Path,
             [&first, &key, &sec](utf8_string_view token) -> bool {
                 if (first) {
@@ -295,7 +295,7 @@ auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -
     if (arrayLine[arrayLine.size() - 1] != _settings.Array.second) { return false; }
 
     array arr {};
-    if (!helper::split_preserve_brackets_for_each(
+    if (!helper::split_preserve_brackets(
             arrayLine.substr(1, arrayLine.size() - 2), ',',
             [&arr, this](utf8_string_view token) -> bool {
                 auto const tokenString {helper::trim(token)};
@@ -327,7 +327,7 @@ auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line)
     if (sectionLine[sectionLine.size() - 1] != _settings.Object.second) { return false; }
 
     object obj {};
-    if (helper::split_preserve_brackets_for_each(
+    if (helper::split_preserve_brackets(
             sectionLine.substr(1, sectionLine.size() - 2), ',',
             [&obj, this](utf8_string_view token) -> bool {
                 auto const tokenString {helper::trim(token)};
@@ -409,7 +409,7 @@ auto ini_reader::read_settings() -> bool
     _iniEnd = 1;
     auto const line {get_trimmed_next_line()};
 
-    return helper::split_for_each(line, ' ', [&](auto kvp) {
+    return helper::split(line, ' ', [&](auto kvp) {
         auto const settings {helper::split_once(helper::trim(kvp), '=')};
         if (settings.second.empty()) { return false; }
 

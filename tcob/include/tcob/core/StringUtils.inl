@@ -12,20 +12,20 @@
 
 namespace tcob::helper {
 
-inline auto split_for_each(string_view str, char delim, auto&& f) -> bool
+inline auto split(string_view str, char delim, auto&& fn) -> bool
 {
     usize start {0};
     usize end {str.find(delim)};
     while (end != string_view::npos) {
-        if (!f(str.substr(start, end - start))) { return false; }
+        if (!fn(str.substr(start, end - start))) { return false; }
 
         start = end + 1;
         end   = str.find(delim, start);
     }
-    return f(str.substr(start));
+    return fn(str.substr(start));
 }
 
-inline auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> bool
+inline auto split_preserve_brackets(string_view str, char delim, auto&& fn) -> bool
 {
     bool inDouble {false};
     bool inSingle {false};
@@ -67,7 +67,7 @@ inline auto split_preserve_brackets_for_each(string_view str, char delim, auto&&
         }
 
         if (c == delim && !inDouble && !inSingle && bracketCount == 0) {
-            if (!f(str.substr(start, i - start))) {
+            if (!fn(str.substr(start, i - start))) {
                 return false;
             }
 
@@ -76,7 +76,7 @@ inline auto split_preserve_brackets_for_each(string_view str, char delim, auto&&
         prevC = c;
     }
 
-    return f(str.substr(start));
+    return fn(str.substr(start));
 }
 
 template <typename T>

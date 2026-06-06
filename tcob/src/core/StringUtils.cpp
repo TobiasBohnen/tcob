@@ -16,7 +16,7 @@
 
 namespace tcob::helper {
 
-auto get_levenshtein_distance(string_view lhs, string_view rhs) -> u32
+auto levenshtein_distance(string_view lhs, string_view rhs) -> u32
 {
     if (lhs == rhs) { return 0; }
 
@@ -95,7 +95,7 @@ auto split_preserve_brackets(string_view str, char delim) -> std::vector<string_
 {
     std::vector<string_view> retValue;
     retValue.reserve(10);
-    split_preserve_brackets_for_each(str, delim, [&retValue](string_view token) {
+    split_preserve_brackets(str, delim, [&retValue](string_view token) {
         retValue.emplace_back(token);
         return true;
     });

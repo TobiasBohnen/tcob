@@ -96,7 +96,7 @@ auto json_reader::ReadArray(entry& currentEntry, utf8_string_view line) -> bool
         return true;
     }
 
-    if (!helper::split_preserve_brackets_for_each(
+    if (!helper::split_preserve_brackets(
             splitLine, ',',
             [&arr](utf8_string_view token) {
                 auto const tk {helper::trim(token)};
@@ -130,7 +130,7 @@ auto json_reader::ReadObject(entry& currentEntry, utf8_string_view line) -> bool
         return true;
     }
 
-    if (helper::split_preserve_brackets_for_each(
+    if (helper::split_preserve_brackets(
             splitLine, ',',
             [&obj](utf8_string_view token) {
                 entry objValue;
