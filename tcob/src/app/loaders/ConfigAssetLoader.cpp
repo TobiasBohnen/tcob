@@ -178,6 +178,16 @@ void default_check_async_load(def_task const& ctx, auto&& cache, auto&& stateSet
     ctx.Finished = cache.empty();
 }
 
+template <typename TDef>
+void try_get_source(data::entry const& v, TDef* asset, string_view key)
+{
+    if (data::object assetSection; v.try_get(assetSection)) {
+        assetSection.try_get(asset->source, key);
+    } else if (path assetString; v.try_get(assetString)) {
+        asset->source = assetString;
+    }
+}
+
 cfg_asset_loader_manager::cfg_asset_loader_manager(group& group)
 {
     add_loader(std::make_unique<cfg_shader_loader>(group, _object));
@@ -199,7 +209,7 @@ void cfg_asset_loader_manager::load(path const& file)
     if (load.load(file)) {
         _object.merge(load, true);
     } else {
-        logger::Error("cfg_asset_loader_manager '{}': file loading failed.", file);
+        logger::Error("cfg_asset_loader_manager '{}': file loading failed", file);
     }
 }
 
@@ -251,11 +261,7 @@ void cfg_music_loader::declare()
 
     for (auto const& [k, v] : obj) {
         auto* asset {default_new<music, asset_def>(k, group(), _cache)};
-        if (object assetSection; v.try_get(assetSection)) {
-            assetSection.try_get(asset->source, API::Music::source);
-        } else if (path assetString; v.try_get(assetString)) {
-            asset->source = assetString;
-        }
+        try_get_source(v, asset, API::Music::source);
     }
 }
 
@@ -287,12 +293,7 @@ void cfg_sound_loader::declare()
 
     for (auto const& [k, v] : obj) {
         auto* asset {default_new<sound, asset_def>(k, group(), _cache)};
-
-        if (object assetSection; v.try_get(assetSection)) {
-            assetSection.try_get(asset->source, API::Sound::source);
-        } else if (path assetString; v.try_get(assetString)) {
-            asset->source = assetString;
-        }
+        try_get_source(v, asset, API::Sound::source);
     }
 }
 
@@ -323,12 +324,7 @@ void cfg_audio_buffer_loader::declare()
 
     for (auto const& [k, v] : obj) {
         auto* asset {default_new<audio::buffer, asset_def>(k, group(), _cache)};
-
-        if (object assetSection; v.try_get(assetSection)) {
-            assetSection.try_get(asset->source, API::AudioBuffer::source);
-        } else if (path assetString; v.try_get(assetString)) {
-            asset->source = assetString;
-        }
+        try_get_source(v, asset, API::AudioBuffer::source);
     }
 }
 
@@ -360,12 +356,7 @@ void cfg_sound_font_loader::declare()
 
     for (auto const& [k, v] : obj) {
         auto* asset {default_new<sound_font, asset_def>(k, group(), _cache)};
-
-        if (object assetSection; v.try_get(assetSection)) {
-            assetSection.try_get(asset->source, API::SoundFont::source);
-        } else if (path assetString; v.try_get(assetString)) {
-            asset->source = assetString;
-        }
+        try_get_source(v, asset, API::SoundFont::source);
     }
 }
 
@@ -475,13 +466,7 @@ void cfg_font_family_loader::declare()
     for (auto const& [k, v] : obj) {
         auto asset {std::make_unique<asset_def>()};
         asset->assetPtr = group().create<font_family>(k, k);
-
-        if (object assetSection; v.try_get(assetSection)) {
-            assetSection.try_get(asset->source, API::FontFamily::source);
-        } else if (path assetString; v.try_get(assetString)) {
-            asset->source = assetString;
-        }
-
+        try_get_source(v, asset.get(), API::FontFamily::source);
         _cache.push_back(std::move(asset));
     }
 }
@@ -523,11 +508,8 @@ void cfg_material_loader::declare()
             blend_func d {blendFunc["destination"].as<blend_func>()};
             def.pass.BlendFuncs.DestinationAlphaBlendFunc = d;
             def.pass.BlendFuncs.DestinationColorBlendFunc = d;
-        } else if (object separateBlendFunc; assetSection.try_get(separateBlendFunc, API::Material::separate_blend_func)) {
-            def.pass.BlendFuncs.SourceAlphaBlendFunc      = separateBlendFunc["source_alpha"].as<blend_func>();
-            def.pass.BlendFuncs.SourceColorBlendFunc      = separateBlendFunc["source_color"].as<blend_func>();
-            def.pass.BlendFuncs.DestinationAlphaBlendFunc = separateBlendFunc["destination_alpha"].as<blend_func>();
-            def.pass.BlendFuncs.DestinationColorBlendFunc = separateBlendFunc["destination_color"].as<blend_func>();
+        } else {
+            assetSection.try_get(def.pass.BlendFuncs, API::Material::separate_blend_func);
         }
 
         assetSection.try_get(def.pass.BlendEquation, API::Material::blend_equation);
@@ -684,7 +666,6 @@ void cfg_texture_loader::declare()
                             }
                         }
                     }
-
                 } else if (path file; assetSection.try_get(file, API::Texture::source)) {
                     path const f {mp + file};
                     if (io::is_file(f)) {
@@ -693,6 +674,7 @@ void cfg_texture_loader::declare()
                         logger::Error("texture asset '{}': File or folder '{}' not found", k, file);
                     }
                 }
+
                 for (u32 i {0}; i < files.size(); ++i) {
                     auto const& file {files[i]};
                     auto const  regionName {io::get_stem(file)};
@@ -750,13 +732,13 @@ void cfg_texture_loader::prepare()
         auto const& name {def->assetPtr.get()->name()};
 
         if (def->images.empty()) {
-            logger::Warning("texture asset '{}': No source files found.", name);
+            logger::Warning("texture asset '{}': No source files found", name);
             continue;
         }
 
         auto& tex {*def->assetPtr};
         if (std::ssize(def->images) > locate_service<render_system>().info().Texture.MaxLayers) {
-            logger::Error("texture asset '{}': Layer count exceeds MaxArrayTextureLayers.", name);
+            logger::Error("texture asset '{}': Layer count exceeds MaxArrayTextureLayers", name);
             set_asset_status(def->assetPtr, asset_status::Error);
             continue;
         }
@@ -769,7 +751,7 @@ void cfg_texture_loader::prepare()
             auto const& path {def->images.front().Path};
             auto        imgInfo {image::LoadInfo(path)};
             if (!imgInfo.has_value()) {
-                logger::Error("texture asset '{}': Error loading image {}.", name, path);
+                logger::Error("texture asset '{}': Error loading image {}", name, path);
                 set_asset_status(def->assetPtr, asset_status::Error);
                 continue;
             }
@@ -842,7 +824,7 @@ void cfg_texture_loader::check_async_load(def_task const& ctx)
 
                 // loading error -> log and continue
                 if (!statusFuture.get()) {
-                    logger::Error("texture asset '{}': Error loading image {}.", def->assetPtr.get()->name(), imgIt->Path);
+                    logger::Error("texture asset '{}': Error loading image {}", def->assetPtr.get()->name(), imgIt->Path);
                     set_asset_status(def->assetPtr, asset_status::Error);
                     continue;
                 }
@@ -853,7 +835,7 @@ void cfg_texture_loader::check_async_load(def_task const& ctx)
                 auto const& imgInfo {img.info()};
 
                 if (tex.info().Size != imgInfo.Size) {
-                    logger::Error("texture asset '{}': Error loading image {}.", def->assetPtr.get()->name(), imgIt->Path);
+                    logger::Error("texture asset '{}': Error loading image {}", def->assetPtr.get()->name(), imgIt->Path);
                     set_asset_status(def->assetPtr, asset_status::Error);
                     continue;
                 }
