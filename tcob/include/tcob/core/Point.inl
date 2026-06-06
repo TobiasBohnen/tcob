@@ -246,4 +246,33 @@ auto minkowski_distance(point<T> const& a, point<T> const& b, f64 p) -> f64
 {
     return std::pow(std::pow(std::abs(a.X - b.X), p) + std::pow(std::abs(a.Y - b.Y), p), 1.0 / p);
 }
+
+void bresenham_line(point_i from, point_i to, auto&& fn)
+{
+    i32       x0 {from.X};
+    i32       y0 {from.Y};
+    i32 const x1 {to.X};
+    i32 const y1 {to.Y};
+
+    i32 const dx {std::abs(x1 - x0)};
+    i32 const dy {-std::abs(y1 - y0)};
+    i32 const sx {x0 < x1 ? 1 : -1};
+    i32 const sy {y0 < y1 ? 1 : -1};
+    i32       err {dx + dy};
+
+    for (;;) {
+        fn(point_i {x0, y0});
+        if (x0 == x1 && y0 == y1) { break; }
+        i32 const e2 {2 * err};
+        if (e2 >= dy) {
+            err += dy;
+            x0 += sx;
+        }
+        if (e2 <= dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
 }

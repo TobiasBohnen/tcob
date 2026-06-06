@@ -124,6 +124,7 @@ auto chebyshev_distance(point<T> const& a, point<T> const& b) -> T;
 template <Arithmetic T>
 auto minkowski_distance(point<T> const& a, point<T> const& b, f64 p) -> f64;
 
+void bresenham_line(point_i from, point_i to, auto&& fn);
 }
 
 #include "Point.inl"
