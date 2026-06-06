@@ -204,7 +204,7 @@ void animated_texture::on_update(milliseconds deltaTime)
     }
 
     _elapsedTime += deltaTime;
-    auto const result {_decoder->advance(_elapsedTime)};
+    auto const result {_decoder->advance_to(_elapsedTime)};
 
     bool updateTexture {false};
 

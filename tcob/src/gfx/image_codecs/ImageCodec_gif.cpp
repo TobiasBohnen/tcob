@@ -113,7 +113,7 @@ auto gif_decoder::current_frame() const -> std::span<u8 const>
     return _currentFrame.data();
 }
 
-auto gif_decoder::advance(milliseconds ts) -> animated_image_decoder::status
+auto gif_decoder::advance_to(milliseconds ts) -> animated_image_decoder::status
 {
     if (!_header.Id.starts_with("GIF")) {
         return animated_image_decoder::status::DecodeFailure;

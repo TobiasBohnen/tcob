@@ -156,7 +156,7 @@ public:
     auto open(std::shared_ptr<io::istream> in) -> std::optional<image::information>;
 
     virtual auto current_frame() const -> std::span<u8 const> = 0;
-    virtual auto advance(milliseconds ts) -> status           = 0;
+    virtual auto advance_to(milliseconds ts) -> status        = 0;
     virtual void reset()                                      = 0;
 
 protected:

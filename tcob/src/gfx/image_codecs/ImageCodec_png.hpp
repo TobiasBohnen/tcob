@@ -227,10 +227,12 @@ public:
 
 class png_anim_decoder final : public png_decoder, public animated_image_decoder {
 public:
-    auto open() -> std::optional<image::information> override;
     auto current_frame() const -> std::span<u8 const> override;
-    auto advance(milliseconds ts) -> animated_image_decoder::status override;
+    auto advance_to(milliseconds ts) -> animated_image_decoder::status override;
     void reset() override;
+
+protected:
+    auto open() -> std::optional<image::information> override;
 
 private:
     auto get_next_frame(io::istream& in) -> animated_image_decoder::status;

@@ -104,7 +104,7 @@ auto theora_decoder::current_frame() const -> std::span<u8 const>
     return {_currentFrame->pixels, _currentFrame->height * _currentFrame->width * 4};
 }
 
-auto theora_decoder::advance(milliseconds ts) -> animated_image_decoder::status
+auto theora_decoder::advance_to(milliseconds ts) -> animated_image_decoder::status
 {
     auto timestamp {static_cast<i32>(ts.count())};
     if (!_decoder) { return animated_image_decoder::status::DecodeFailure; }

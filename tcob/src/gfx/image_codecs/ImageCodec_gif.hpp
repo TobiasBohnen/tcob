@@ -48,7 +48,7 @@ public:
     // animated_image_decoder
     auto open() -> std::optional<image::information> override;
     auto current_frame() const -> std::span<u8 const> override;
-    auto advance(milliseconds ts) -> animated_image_decoder::status override;
+    auto advance_to(milliseconds ts) -> animated_image_decoder::status override;
     void reset() override;
 
 protected:

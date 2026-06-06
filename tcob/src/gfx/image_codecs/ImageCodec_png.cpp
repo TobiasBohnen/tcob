@@ -317,7 +317,7 @@ auto png_anim_decoder::get_next_frame(io::istream& in) -> animated_image_decoder
     return animated_image_decoder::status::NewFrame;
 }
 
-auto png_anim_decoder::advance(milliseconds ts) -> animated_image_decoder::status
+auto png_anim_decoder::advance_to(milliseconds ts) -> animated_image_decoder::status
 {
     if (ts <= _currentTimeStamp) {
         return animated_image_decoder::status::OldFrame;
