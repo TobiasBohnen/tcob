@@ -9,7 +9,6 @@
 #include <functional>
 #include <limits>
 #include <optional>
-#include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
@@ -29,7 +28,8 @@ public:
         auto operator==(result const&) const -> bool = default;
     };
 
-    using func = std::function<point_f(f64)>;
+    using func               = std::function<point_f(f64)>;
+    using intersect_callback = std::function<void(result const&)>;
 
     ////////////////////////////////////////////////////////////
 
@@ -37,16 +37,16 @@ public:
 
     auto get_point(f64 distance) const -> point_f;
 
-    auto intersect_line(point_f a, point_f b) const -> std::optional<result>;
+    void intersect_line(point_f a, point_f b, intersect_callback const& fn) const;
 
-    auto intersect_rect(rect_f const& rect) const -> std::vector<result>;
-    auto intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, point_f bottomRight) const -> std::vector<result>;
+    void intersect_rect(rect_f const& rect, intersect_callback const& fn) const;
+    void intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, point_f bottomRight, intersect_callback const& fn) const;
 
-    auto intersect_circle(point_f const& center, f64 radius) const -> std::vector<result>;
+    void intersect_circle(point_f const& center, f64 radius, intersect_callback const& fn) const;
 
-    auto intersect_function(func const& func, f64 tolerance = 0.01) const -> std::vector<result>;
+    void intersect_function(func const& func, f64 tolerance, intersect_callback const& fn) const;
 
-    auto intersect_polyline(polyline_span polygon) const -> std::vector<result>;
+    void intersect_polyline(polyline_span polygon, intersect_callback const& fn) const;
 
 private:
     auto intersect_segment(point_d const& rd, point_d const& p0, point_d const& p1) const -> std::optional<f64>;

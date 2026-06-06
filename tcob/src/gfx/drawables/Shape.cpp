@@ -250,12 +250,14 @@ auto rect_shape::geometry(isize pass) -> geometry_view
 
 auto rect_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
-    auto const&   xform {get_transform()};
-    point_f const topLeft {xform * Bounds->top_left()};
-    point_f const topRight {xform * Bounds->top_right()};
-    point_f const bottomLeft {xform * Bounds->bottom_left()};
-    point_f const bottomRight {xform * Bounds->bottom_right()};
-    return ray.intersect_rect(topLeft, topRight, bottomLeft, bottomRight);
+    std::vector<ray::result> retValue;
+    auto const&              xform {get_transform()};
+    point_f const            topLeft {xform * Bounds->top_left()};
+    point_f const            topRight {xform * Bounds->top_right()};
+    point_f const            bottomLeft {xform * Bounds->bottom_left()};
+    point_f const            bottomRight {xform * Bounds->bottom_right()};
+    ray.intersect_rect(topLeft, topRight, bottomLeft, bottomRight, [&](ray::result const& r) { retValue.push_back(r); });
+    return retValue;
 }
 
 auto rect_shape::aabb() const -> rect_f
@@ -342,7 +344,9 @@ auto circle_shape::aabb() const -> rect_f
 
 auto circle_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
-    return ray.intersect_circle(get_transform() * Center, Radius);
+    std::vector<ray::result> retValue;
+    ray.intersect_circle(get_transform() * Center, Radius, [&](ray::result const& r) { retValue.push_back(r); });
+    return retValue;
 }
 
 void circle_shape::on_update(milliseconds /* deltaTime */)
@@ -459,21 +463,19 @@ auto poly_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
     auto const& xform {get_transform()};
 
-    auto const intersectPolyline {[&ray, &xform](polyline_span polygon) -> std::vector<ray::result> {
+    std::vector<ray::result> retValue;
+
+    auto const intersectPolyline {[&](polyline_span polygon) {
         std::vector<point_f> points;
         points.reserve(polygon.size());
         for (auto const& point : polygon) { points.push_back(xform * point); }
-        return ray.intersect_polyline(points);
+        ray.intersect_polyline(points, [&](ray::result const& r) { retValue.push_back(r); });
     }};
 
-    std::vector<ray::result> retValue;
     for (auto const& polygon : *Polygons) {
-        auto const outPoints {intersectPolyline(polygon.Outline)};
-        retValue.insert(retValue.end(), outPoints.begin(), outPoints.end());
-
+        intersectPolyline(polygon.Outline);
         for (auto const& hole : polygon.Holes) {
-            auto const holePoints {intersectPolyline(hole)};
-            retValue.insert(retValue.end(), holePoints.begin(), holePoints.end());
+            intersectPolyline(hole);
         }
     }
     return retValue;
@@ -650,7 +652,7 @@ auto mesh_shape::aabb() const -> rect_f
 
 auto mesh_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
-    std::vector<ray::result>      results {};
+    std::vector<ray::result>      retValue;
     std::set<std::pair<u32, u32>> tested;
 
     for (auto const& [edge, count] : _edgeCount) {
@@ -662,14 +664,12 @@ auto mesh_shape::intersect(ray const& ray) const -> std::vector<ray::result>
                 auto const v0 {_xformVerts[a].Position};
                 auto const v1 {_xformVerts[b].Position};
 
-                if (auto hit {ray.intersect_line(v0, v1)}) {
-                    results.push_back(*hit);
-                }
+                ray.intersect_line(v0, v1, [&](ray::result const& r) { retValue.push_back(r); });
             }
         }
     }
 
-    return results;
+    return retValue;
 }
 
 void mesh_shape::move_by(point_f offset)

@@ -9,7 +9,6 @@
 #include <cstdlib>
 #include <limits>
 #include <optional>
-#include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
@@ -32,78 +31,68 @@ auto ray::get_point(f64 distance) const -> point_f
     return _origin + (_direction * distance);
 }
 
-auto ray::intersect_line(point_f a, point_f b) const -> std::optional<result>
+void ray::intersect_line(point_f a, point_f b, intersect_callback const& fn) const
 {
     if (auto const distance {intersect_segment(_direction, point_d {a}, point_d {b})}) {
-        return result {.Point = get_point(*distance), .Distance = *distance};
+        fn(get_result(*distance));
     }
-    return std::nullopt;
 }
 
-auto ray::intersect_rect(rect_f const& rect) const -> std::vector<result>
+void ray::intersect_rect(rect_f const& rect, intersect_callback const& fn) const
 {
-    return intersect_rect(rect.top_left(), rect.top_right(), rect.bottom_left(), rect.bottom_right());
+    intersect_rect(rect.top_left(), rect.top_right(), rect.bottom_left(), rect.bottom_right(), fn);
 }
 
-auto ray::intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, point_f bottomRight) const -> std::vector<result>
+void ray::intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, point_f bottomRight, intersect_callback const& fn) const
 {
-    std::vector<result> retValue;
-    if (auto const distance {intersect_segment(_direction, point_d {topLeft}, point_d {topRight})}) { retValue.emplace_back(get_result(*distance)); }
-    if (auto const distance {intersect_segment(_direction, point_d {topRight}, point_d {bottomRight})}) { retValue.emplace_back(get_result(*distance)); }
-    if (auto const distance {intersect_segment(_direction, point_d {bottomRight}, point_d {bottomLeft})}) { retValue.emplace_back(get_result(*distance)); }
-    if (auto const distance {intersect_segment(_direction, point_d {bottomLeft}, point_d {topLeft})}) { retValue.emplace_back(get_result(*distance)); }
-    return retValue;
+    if (auto const distance {intersect_segment(_direction, point_d {topLeft}, point_d {topRight})}) { fn(get_result(*distance)); }
+    if (auto const distance {intersect_segment(_direction, point_d {topRight}, point_d {bottomRight})}) { fn(get_result(*distance)); }
+    if (auto const distance {intersect_segment(_direction, point_d {bottomRight}, point_d {bottomLeft})}) { fn(get_result(*distance)); }
+    if (auto const distance {intersect_segment(_direction, point_d {bottomLeft}, point_d {topLeft})}) { fn(get_result(*distance)); }
 }
 
-auto ray::intersect_circle(point_f const& center, f64 radius) const -> std::vector<result>
+void ray::intersect_circle(point_f const& center, f64 radius, intersect_callback const& fn) const
 {
     point_d const oc {_origin - center};
     f64 const     b {2.0 * oc.dot(_direction)};
     f64 const     c {oc.dot(oc) - (radius * radius)};
 
     f64 const discr {(b * b) - (4.0 * c)};
-    if (discr < 0) { return {}; }
+    if (discr < 0) { return; }
 
     f64 const sqrtDiscr {std::sqrt(discr)};
     f64 const s1 {(-b - sqrtDiscr) / 2};
     f64 const s2 {(-b + sqrtDiscr) / 2};
 
-    std::vector<result> retValue;
-    if (s1 >= 0 && s1 <= _maxDistance) { retValue.emplace_back(get_result(s1)); }
-    if (s2 >= 0 && s2 != s1 && s2 <= _maxDistance) { retValue.emplace_back(get_result(s2)); }
-    return retValue;
+    if (s1 >= 0 && s1 <= _maxDistance) { fn(get_result(s1)); }
+    if (s2 >= 0 && s2 != s1 && s2 <= _maxDistance) { fn(get_result(s2)); }
 }
 
-auto ray::intersect_function(func const& func, f64 tolerance) const -> std::vector<result>
+void ray::intersect_function(func const& func, f64 tolerance, intersect_callback const& fn) const
 {
-    std::vector<result> retValue;
-
-    point_f lastPoint {func(0)};
+    point_f                lastPoint {func(0)};
+    std::optional<point_f> lastHit;
     for (f64 t {0}; t <= 1; t += tolerance) {
         point_f const cp {func(t)};
         if (auto const distance {intersect_segment(_direction, point_d {lastPoint}, point_d {cp})}) {
-            auto const p {get_point(*distance)};
-            if (!retValue.empty() && retValue.back().Point == p) { continue; }
-            retValue.emplace_back(p, *distance);
+            point_f const p {get_point(*distance)};
+            if (p != lastHit) {
+                fn(get_result(*distance));
+                lastHit = p;
+            }
         }
         lastPoint = cp;
     }
-
-    return retValue;
 }
 
-auto ray::intersect_polyline(polyline_span polygon) const -> std::vector<result>
+void ray::intersect_polyline(polyline_span polygon, intersect_callback const& fn) const
 {
-    std::vector<result> retValue;
-
     usize const n {polygon.size()};
     for (usize i {0}; i < n; ++i) {
         if (auto const distance {intersect_segment(_direction, point_d {polygon[i]}, point_d {polygon[(i + 1) % n]})}) {
-            retValue.emplace_back(get_result(*distance));
+            fn(get_result(*distance));
         }
     }
-
-    return retValue;
 }
 
 auto ray::intersect_segment(point_d const& rd, point_d const& p0, point_d const& p1) const -> std::optional<f64>
