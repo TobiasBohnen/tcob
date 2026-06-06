@@ -7,7 +7,6 @@
 #include "tcob/tcob_config.hpp"
 
 #include <future>
-#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -47,8 +46,8 @@ private:
         asset_ptr<gfx::frame_animation> assetPtr;
     };
 
-    std::vector<std::unique_ptr<asset_def>> _cache;
-    data::object&                           _object;
+    std::vector<asset_def> _cache;
+    data::object&          _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -66,8 +65,8 @@ private:
         string                  source;
     };
 
-    std::vector<std::unique_ptr<asset_def>> _cache;
-    data::object&                           _object;
+    std::vector<asset_def> _cache;
+    data::object&          _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -86,8 +85,8 @@ private:
         string                  source;
     };
 
-    std::vector<std::unique_ptr<asset_def>> _cache;
-    data::object&                           _object;
+    std::vector<asset_def> _cache;
+    data::object&          _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -106,8 +105,8 @@ private:
         string                   source;
     };
 
-    std::vector<std::unique_ptr<asset_def>> _cache;
-    data::object&                           _object;
+    std::vector<asset_def> _cache;
+    data::object&          _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -126,8 +125,8 @@ private:
         string                       source;
     };
 
-    std::vector<std::unique_ptr<asset_def>> _cache;
-    data::object&                           _object;
+    std::vector<asset_def> _cache;
+    data::object&          _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -145,8 +144,8 @@ private:
         string                 material;
     };
 
-    std::vector<std::unique_ptr<asset_def>> _cache;
-    data::object&                           _object;
+    std::vector<asset_def> _cache;
+    data::object&          _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -165,9 +164,8 @@ private:
         u32                  size {0};
     };
 
-    std::vector<std::unique_ptr<asset_def>> _cache;
-
-    data::object& _object;
+    std::vector<asset_def> _cache;
+    data::object&          _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -185,8 +183,8 @@ private:
         string                      source;
     };
 
-    std::vector<std::unique_ptr<asset_def>> _cache;
-    data::object&                           _object;
+    std::vector<asset_def> _cache;
+    data::object&          _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -210,8 +208,8 @@ private:
         std::vector<pass_def>    passes;
     };
 
-    std::vector<std::unique_ptr<asset_def>> _cache;
-    data::object&                           _object;
+    std::vector<asset_def> _cache;
+    data::object&          _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -230,9 +228,8 @@ private:
         string                 fragment;
     };
 
-    std::vector<std::unique_ptr<asset_def>> _cache;
-
-    data::object& _object;
+    std::vector<asset_def> _cache;
+    data::object&          _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -249,10 +246,10 @@ private:
 
     // texture
     struct image_ftr {
-        u32               Depth {};
-        path              Path {};
-        gfx::image        Image {};
-        std::future<bool> Future {};
+        u32                      depth;
+        path                     path;
+        gfx::image               image;
+        std::shared_future<bool> future;
     };
 
     struct tex_asset_def {
@@ -262,10 +259,10 @@ private:
         size_i                                          size {size_i::Zero};
         std::unordered_map<string, gfx::texture_region> abs_regions;
 
-        std::vector<image_ftr> images;
+        std::vector<image_ftr> imageFtrs;
     };
 
-    std::vector<std::unique_ptr<tex_asset_def>> _cacheTex;
+    std::vector<tex_asset_def> _cacheTex;
 
     // animated texture
     struct ani_asset_def {
@@ -275,9 +272,8 @@ private:
         path                    textureFile;
     };
 
-    std::vector<std::unique_ptr<ani_asset_def>> _cacheAni;
+    std::vector<ani_asset_def> _cacheAni;
 
-    //
     data::object& _object;
 };
 
