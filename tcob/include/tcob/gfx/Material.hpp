@@ -50,7 +50,7 @@ public:
 
     static inline char const* AssetName {"material"};
 
-    static auto Empty() -> asset_owner_ptr<material>;
+    static auto Dummy() -> asset_owner_ptr<material>;
 
     auto operator==(material const& other) const -> bool = default;
 
