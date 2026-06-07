@@ -35,6 +35,8 @@ auto ref::operator=(ref const& other) noexcept -> ref&
             if (_ref != NO_REF()) {
                 _view.pop(1); // pop extra copy
             }
+        } else {
+            release();        // tried to assign released ref to this
         }
     }
 
@@ -64,10 +66,9 @@ void ref::acquire(state_view view, i32 idx)
     release();
     _view = view;
 
-    if (_view.is_valid()) {
-        _view.push_value(idx); // push copy of ref to top
-        _ref = _view.ref(REGISTRY_INDEX());
-    }
+    assert(_view.is_valid());
+    _view.push_value(idx); // push copy of ref to top
+    _ref = _view.ref(REGISTRY_INDEX());
 }
 
 void ref::release()
