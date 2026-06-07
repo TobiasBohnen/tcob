@@ -529,7 +529,7 @@ void widget::do_focus_lost()
 auto widget::attributes() const -> widget_attributes
 {
     return {{"name", _name},
-            {"orientation", calc_orientation()},
+            {"orientation", bounds_orientation()},
             {"level", _level}};
 }
 
@@ -545,7 +545,7 @@ auto widget::flags() -> widget_flags
     return _flags;
 }
 
-auto widget::calc_orientation() const -> orientation
+auto widget::bounds_orientation() const -> orientation
 {
     return Bounds->width() >= Bounds->height() ? orientation::Horizontal : orientation::Vertical;
 }

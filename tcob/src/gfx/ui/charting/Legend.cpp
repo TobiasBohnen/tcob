@@ -46,7 +46,7 @@ void legend::on_draw(widget_painter& painter)
 
     auto& canvas {painter.canvas()};
 
-    bool const isVertical {calc_orientation() == orientation::Vertical};
+    bool const isVertical {bounds_orientation() == orientation::Vertical};
     f32 const  itemSize {(isVertical ? rect.height() : rect.width()) / static_cast<f32>(legendDefs.size())};
     point_f    pos {rect.top_left()};
 

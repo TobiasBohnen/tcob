@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/widgets/Slider.hpp"
 
 #include <algorithm>
+#include <cstdlib>
 #include <utility>
 
 #include "tcob/core/Common.hpp"
@@ -65,7 +66,7 @@ void slider::on_draw(widget_painter& painter)
 
     scoped_scissor const guard {painter, this};
 
-    auto const orien {calc_orientation()};
+    auto const orien {bounds_orientation()};
     auto const pos {bar_element::position::CenterOrMiddle};
 
     f32 const tweenValue {_tween.current_value()};
@@ -220,7 +221,7 @@ void slider::calculate_value(point_f mp)
     rect_f const rect {_barRectCache.Bar};
     f32          frac {0.0f};
 
-    switch (calc_orientation()) {
+    switch (bounds_orientation()) {
     case orientation::Horizontal: {
         f32 const tw {_barRectCache.Thumb.width()};
         frac = (mp.X - static_cast<f32>(_dragOffset.X) - (tw / 2)) / (rect.width() - tw);
@@ -254,7 +255,7 @@ auto slider::attributes() const -> widget_attributes
 
 auto slider::handle_dir_input(direction dir) -> bool
 {
-    switch (calc_orientation()) {
+    switch (bounds_orientation()) {
     case orientation::Horizontal:
         switch (dir) {
         case direction::Left:  Value -= *Step; break;
@@ -368,7 +369,7 @@ void range_slider::on_draw(widget_painter& painter)
 
     scoped_scissor const guard {painter, this};
 
-    auto const orien {calc_orientation()};
+    auto const orien {bounds_orientation()};
     auto const pos {bar_element::position::CenterOrMiddle};
 
     // bar
@@ -451,12 +452,10 @@ void range_slider::on_mouse_drag(input::mouse::motion_event const& ev)
     auto const mp {screen_to_content(*this, ev.Position)};
 
     if (!_min.IsDragging && !_max.IsDragging && _min.Over && _max.Over) {
-        auto const orien {calc_orientation()};
-        auto const lmp {screen_to_local(*this, ev.Position)};
-        auto const center {_min.Rect.center()};
+        auto const orien {bounds_orientation()};
         bool const isMin {orien == orientation::Horizontal
-                              ? lmp.X < center.X
-                              : lmp.Y > center.Y};
+                              ? ev.RelativeMotion.X < 0
+                              : ev.RelativeMotion.Y > 0};
         (isMin ? _min : _max).IsDragging = true;
         _min.Over                        = isMin;
         _max.Over                        = !isMin;
@@ -514,13 +513,12 @@ void range_slider::on_mouse_button_down(input::mouse::button_event const& ev)
                 _dragOffset     = point_i {mp - _max.Rect.center()};
                 _max.IsDragging = true;
             } else {
-                auto const orien {calc_orientation()};
-                f64 const  distMin {mp.distance_to(_min.Rect.center())};
-                f64 const  distMax {mp.distance_to(_max.Rect.center())};
+                f64 const distMin {mp.distance_to(_min.Rect.center())};
+                f64 const distMax {mp.distance_to(_max.Rect.center())};
 
                 bool toMin {distMin < distMax};
-                if (distMin == distMax) {
-                    toMin = orien == orientation::Horizontal
+                if (std::abs(distMin - distMax) < 1.0) {
+                    toMin = bounds_orientation() == orientation::Horizontal
                         ? mp.X < _min.Rect.center().X
                         : mp.Y > _min.Rect.center().Y;
                 }
@@ -582,7 +580,7 @@ void range_slider::calculate_value(bool isMin, point_f mp)
     rect_f const rect {_barRectCache};
     f32          frac {0.0f};
 
-    switch (calc_orientation()) {
+    switch (bounds_orientation()) {
     case orientation::Horizontal: {
         f32 const tw {thumb.Rect.width()};
         frac = (mp.X - static_cast<f32>(_dragOffset.X) - (tw / 2)) / (rect.width() - tw);

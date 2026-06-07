@@ -162,7 +162,7 @@ protected:
     virtual auto attributes() const -> widget_attributes;
     virtual auto flags() -> widget_flags;
 
-    auto calc_orientation() const -> orientation;
+    auto bounds_orientation() const -> orientation;
 
     virtual auto is_inert() const -> bool;
 
