@@ -287,9 +287,11 @@ range_slider::range_slider(init const& wi)
         f32 second {std::clamp(val.second, *Min, *Max)};
         if (first > second) { std::swap(first, second); }
 
-        f32 const range {second - first};
-        if (range < *MinRange) { return *Values; }
-        if (range > *MaxRange) { return *Values; }
+        if (!*Locked) {
+            f32 const range {second - first};
+            if (range < *MinRange) { return *Values; }
+            if (range > *MaxRange) { return *Values; }
+        }
 
         return {first, second};
     }}}
@@ -344,6 +346,16 @@ range_slider::range_slider(init const& wi)
     Values.Changed.connect([this](auto val) { on_value_changed(val); });
     Values({*Min, *Min});
 
+    Locked.Changed.connect([this](auto locked) {
+        if (locked) {
+            Values = {Values->first, Values->first};
+        } else {
+            Values = {Values->first, std::min(Values->first + *MinRange, *Max)};
+        }
+        queue_redraw();
+    });
+    Locked(false);
+
     Class("range_slider");
 }
 
@@ -384,7 +396,10 @@ void range_slider::on_draw(widget_painter& painter)
                  : thumb.Tween.current_value()});
     }};
 
-    if (_min.Over) {
+    if (*Locked) {
+        drawThumb(_min, 0);
+        _max.Rect = _min.Rect;
+    } else if (_min.Over) {
         drawThumb(_max, 1);
         drawThumb(_min, 0);
     } else {
@@ -422,24 +437,38 @@ void range_slider::on_mouse_hover(input::mouse::motion_event const& ev)
         return false;
     }};
 
-    ev.Handled = hover(_min) || hover(_max);
+    if (*Locked) {
+        ev.Handled = hover(_min);
+    } else {
+        bool const a {hover(_min)};
+        bool const b {hover(_max)};
+        ev.Handled = a || b;
+    }
 }
 
 void range_slider::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     auto const mp {screen_to_content(*this, ev.Position)};
 
-    auto const drag {[&](bool isMin) {
-        thumb& thumb {isMin ? _min : _max};
-        if (thumb.IsDragging || thumb.Over) {
-            calculate_value(isMin, mp);
-            thumb.IsDragging = true;
-            return true;
-        }
-        return false;
-    }};
+    if (!_min.IsDragging && !_max.IsDragging && _min.Over && _max.Over) {
+        auto const orien {calc_orientation()};
+        auto const lmp {screen_to_local(*this, ev.Position)};
+        auto const center {_min.Rect.center()};
+        bool const isMin {orien == orientation::Horizontal
+                              ? lmp.X < center.X
+                              : lmp.Y > center.Y};
+        (isMin ? _min : _max).IsDragging = true;
+        _min.Over                        = isMin;
+        _max.Over                        = !isMin;
+    }
 
-    ev.Handled = drag(true) || drag(false);
+    if (_min.IsDragging) {
+        calculate_value(true, mp);
+        ev.Handled = true;
+    } else if (_max.IsDragging) {
+        calculate_value(false, mp);
+        ev.Handled = true;
+    }
 }
 
 void range_slider::on_mouse_button_up(input::mouse::button_event const& ev)
@@ -468,19 +497,45 @@ void range_slider::on_mouse_button_down(input::mouse::button_event const& ev)
     _max.IsDragging = false;
 
     if (ev.Button == controls().PrimaryMouseButton) {
-        if (_min.Over) {
-            _dragOffset     = point_i {mp - _min.Rect.center()};
-            _min.IsDragging = true;
-        } else if (_max.Over) {
-            _dragOffset     = point_i {mp - _max.Rect.center()};
-            _max.IsDragging = true;
+        if (*Locked) {
+            if (_min.Over) {
+                _dragOffset     = point_i {mp - _min.Rect.center()};
+                _min.IsDragging = true;
+            } else {
+                calculate_value(true, screen_to_content(*this, ev.Position));
+            }
         } else {
-            calculate_value(mp.distance_to(_min.Rect.center()) < mp.distance_to(_max.Rect.center()),
-                            screen_to_content(*this, ev.Position));
+            if (_min.Over && _max.Over) {
+                _dragOffset = point_i {mp - _min.Rect.center()};
+            } else if (_min.Over) {
+                _dragOffset     = point_i {mp - _min.Rect.center()};
+                _min.IsDragging = true;
+            } else if (_max.Over) {
+                _dragOffset     = point_i {mp - _max.Rect.center()};
+                _max.IsDragging = true;
+            } else {
+                auto const orien {calc_orientation()};
+                f64 const  distMin {mp.distance_to(_min.Rect.center())};
+                f64 const  distMax {mp.distance_to(_max.Rect.center())};
+
+                bool toMin {distMin < distMax};
+                if (distMin == distMax) {
+                    toMin = orien == orientation::Horizontal
+                        ? mp.X < _min.Rect.center().X
+                        : mp.Y > _min.Rect.center().Y;
+                }
+
+                calculate_value(toMin, screen_to_content(*this, ev.Position));
+            }
         }
 
         ev.Handled = true;
     }
+}
+
+void range_slider::on_double_click()
+{
+    Locked = !*Locked;
 }
 
 void range_slider::on_update(milliseconds deltaTime)
@@ -515,6 +570,7 @@ auto range_slider::attributes() const -> widget_attributes
     retValue["min_value"] = Values->first;
     retValue["max_value"] = Values->second;
     retValue["step"]      = *Step;
+    retValue["locked"]    = *Locked;
 
     return retValue;
 }
@@ -537,28 +593,33 @@ void range_slider::calculate_value(bool isMin, point_f mp)
     } break;
     }
 
-    f32 const  val {Min + ((*Max - *Min) * frac)};
+    f32 const  val {*Min + ((*Max - *Min) * frac)};
     auto const round {[this](f32 v) { return helper::round_to_multiple(v, *Step); }};
 
-    std::pair<f32, f32> newVal {isMin ? round(val) : Values->first,
-                                isMin ? Values->second : round(val)};
+    if (*Locked) {
+        f32 const clamped {std::clamp(round(val), *Min, *Max)};
+        Values = {clamped, clamped};
+    } else {
+        std::pair<f32, f32> newVal {isMin ? round(val) : Values->first,
+                                    isMin ? Values->second : round(val)};
 
-    f32 const range {newVal.second - newVal.first};
-    if (range < MinRange) {
-        if (isMin) {
-            newVal.first = newVal.second - MinRange;
-        } else {
-            newVal.second = newVal.first + MinRange;
+        f32 const range {newVal.second - newVal.first};
+        if (range < *MinRange) {
+            if (isMin) {
+                newVal.first = newVal.second - *MinRange;
+            } else {
+                newVal.second = newVal.first + *MinRange;
+            }
+        } else if (range > *MaxRange) {
+            if (isMin) {
+                newVal.first = newVal.second - *MaxRange;
+            } else {
+                newVal.second = newVal.first + *MaxRange;
+            }
         }
-    } else if (range > MaxRange) {
-        if (isMin) {
-            newVal.first = newVal.second - MaxRange;
-        } else {
-            newVal.second = newVal.first + MaxRange;
-        }
+
+        Values = newVal;
     }
-
-    Values = newVal;
 
     if (!thumb.Over) {
         thumb.Over = true;

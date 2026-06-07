@@ -92,6 +92,8 @@ public:
     prop<f32>                     Step;
     prop_chk<std::pair<f32, f32>> Values;
 
+    prop<bool> Locked;
+
 protected:
     void on_draw(widget_painter& painter) override;
 
@@ -100,6 +102,8 @@ protected:
     void on_mouse_drag(input::mouse::motion_event const& ev) override;
     void on_mouse_button_up(input::mouse::button_event const& ev) override;
     void on_mouse_button_down(input::mouse::button_event const& ev) override;
+
+    void on_double_click() override;
 
     void on_update(milliseconds deltaTime) override;
 
