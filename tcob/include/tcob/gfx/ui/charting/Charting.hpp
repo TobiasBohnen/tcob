@@ -39,7 +39,8 @@ struct axis {
 
 ////////////////////////////////////////////////////////////
 
-struct marker {
+class TCOB_API marker {
+public:
     enum class type : u8 {
         None,
         Disc,
@@ -52,12 +53,15 @@ struct marker {
 
     std::optional<color> Color;
     std::optional<color> OutlineColor;
+
+    auto operator==(marker const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-struct dataset {
+class TCOB_API dataset {
+public:
     utf8_string Name;
     T           Value;
 
@@ -65,6 +69,8 @@ struct dataset {
     color OutlineColor {colors::Black};
 
     marker Marker;
+
+    auto operator==(dataset const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
