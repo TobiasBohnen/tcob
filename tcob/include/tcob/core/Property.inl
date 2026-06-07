@@ -167,19 +167,18 @@ inline auto prop<T, Source>::operator[](auto&&... idx) const noexcept -> decltyp
 }
 
 template <typename T, typename Source>
-inline void prop<T, Source>::mutate(auto&& func) noexcept
+inline void prop<T, Source>::mutate(auto&& func)
 {
-    static_assert(std::is_reference_v<return_type>);
-
-    using result_t = std::invoke_result_t<decltype(func), decltype(_source.get())>;
+    T copy {_source.get()};
+    using result_t = std::invoke_result_t<decltype(func), T&>;
 
     if constexpr (std::is_same_v<result_t, bool>) {
-        if (func(_source.get())) {
-            Changed(_source.get());
+        if (func(copy)) {
+            set(copy, false);
         }
     } else if constexpr (std::is_void_v<result_t>) {
-        func(_source.get());
-        Changed(_source.get());
+        func(copy);
+        set(copy, false);
     }
 }
 
@@ -193,7 +192,8 @@ inline void prop<T, Source>::bind(auto&... others)
 template <typename T, typename Source>
 inline void prop<T, Source>::set(T const& value, bool force)
 {
-    if (_source.set(value, force) && Changed.slot_count() > 0) {
+    if (_source.set(value, force)
+        && Changed.slot_count() > 0) { // avoid unnecessary call to _source.get()
         Changed(_source.get());
     }
 }

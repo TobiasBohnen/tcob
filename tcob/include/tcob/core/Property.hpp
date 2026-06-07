@@ -110,7 +110,7 @@ namespace detail {
 
         auto operator[](auto&&... idx) const noexcept -> decltype(auto);
 
-        void mutate(auto&& func) noexcept;
+        void mutate(auto&& func);
 
         void bind(auto&... others);
 
