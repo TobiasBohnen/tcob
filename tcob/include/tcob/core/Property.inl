@@ -40,6 +40,19 @@ inline auto field_source<T>::set(type const& value, bool force) -> bool
     return true;
 }
 
+template <typename T>
+inline auto field_source<T>::mutate(auto&& func) -> bool
+{
+    using result_t = std::invoke_result_t<decltype(func), T&>;
+
+    if constexpr (std::is_same_v<result_t, bool>) {
+        return func(_value);
+    } else if constexpr (std::is_void_v<result_t>) {
+        func(_value);
+        return true;
+    }
+}
+
 ////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -71,6 +84,24 @@ inline auto checked_field_source<T>::set(type const& value, bool force) -> bool
     return true;
 }
 
+template <typename T>
+inline auto checked_field_source<T>::mutate(auto&& func) -> bool
+{
+    using result_t = std::invoke_result_t<decltype(func), T&>;
+
+    if constexpr (std::is_same_v<result_t, bool>) {
+        if (func(_value)) {
+            _value = _check(_value);
+            return true;
+        }
+        return false;
+    } else if constexpr (std::is_void_v<result_t>) {
+        func(_value);
+        _value = _check(_value);
+        return true;
+    }
+}
+
 ////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -99,6 +130,25 @@ inline auto func_source<T>::set(type const& value, bool force) -> bool
     }
     _setter(_ctx, value);
     return true;
+}
+
+template <typename T>
+inline auto func_source<T>::mutate(auto&& func) -> bool
+{
+    T copy {get()};
+    using result_t = std::invoke_result_t<decltype(func), T&>;
+
+    if constexpr (std::is_same_v<result_t, bool>) {
+        if (func(copy)) {
+            _setter(_ctx, copy);
+            return true;
+        }
+        return false;
+    } else if constexpr (std::is_void_v<result_t>) {
+        func(copy);
+        _setter(_ctx, copy);
+        return true;
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -169,16 +219,8 @@ inline auto prop<T, Source>::operator[](auto&&... idx) const noexcept -> decltyp
 template <typename T, typename Source>
 inline void prop<T, Source>::mutate(auto&& func)
 {
-    T copy {_source.get()};
-    using result_t = std::invoke_result_t<decltype(func), T&>;
-
-    if constexpr (std::is_same_v<result_t, bool>) {
-        if (func(copy)) {
-            set(copy, false);
-        }
-    } else if constexpr (std::is_void_v<result_t>) {
-        func(copy);
-        set(copy, false);
+    if (_source.mutate(std::move(func)) && Changed.slot_count() > 0) {
+        Changed(_source.get());
     }
 }
 

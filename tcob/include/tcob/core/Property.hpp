@@ -33,6 +33,8 @@ namespace detail {
         auto get() const noexcept -> const_return_type;
         auto set(type const& value, bool force) -> bool;
 
+        auto mutate(auto&& func) -> bool;
+
     private:
         type _value {};
     };
@@ -53,6 +55,8 @@ namespace detail {
         auto get() noexcept -> return_type;
         auto get() const noexcept -> const_return_type;
         auto set(type const& value, bool force) -> bool;
+
+        auto mutate(auto&& func) -> bool;
 
     private:
         chk_func _check;
@@ -77,12 +81,13 @@ namespace detail {
         auto get() const noexcept -> const_return_type;
         auto set(type const& value, bool force) -> bool;
 
+        auto mutate(auto&& func) -> bool;
+
     private:
         void*       _ctx;
         getter_func _getter;
         setter_func _setter;
     };
-
 }
 
 ////////////////////////////////////////////////////////////
