@@ -5,6 +5,8 @@
 
 #include "tcob/gfx/ui/widgets/TextBox.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <limits>
 
 #include "tcob/core/Point.hpp"
@@ -53,6 +55,8 @@ text_box::text_box(init const& wi)
     });
     Selectable(false);
 
+    NumericOnly(false);
+
     Class("text_box");
 }
 
@@ -83,6 +87,13 @@ void text_box::on_key_down(input::keyboard::event const& ev)
 
     auto const& controls {form().Controls};
     if (controls->SubmitKeys.contains(ev.KeyCode)) {
+        if (NumericOnly) {
+            auto const& t {_edit.get_text()};
+            if (!helper::to_number<f64>(t).has_value()) {
+                _edit.set_text(_lastValidText);
+                return;
+            }
+        }
         Submit({.Sender = this, .Text = *Text});
     } else if (ev.KeyMods.is_down(controls->CutCopyPasteMod)) {
         if (ev.KeyCode == controls->CopyKey) {
@@ -137,11 +148,16 @@ void text_box::on_mouse_button_up(input::mouse::button_event const& ev)
 
 void text_box::on_focus_gained()
 {
+    _lastValidText = *Text;
     _edit.start_blinking(_style.Caret.BlinkRate);
 }
 
 void text_box::on_focus_lost()
 {
+    if (NumericOnly) {
+        auto const& t {_edit.get_text()};
+        if (!helper::to_number<f64>(t).has_value()) { _edit.set_text(_lastValidText); }
+    }
     _edit.stop_blinking();
     FocusLost({.Sender = this});
 }
@@ -154,6 +170,7 @@ auto text_box::attributes() const -> widget_attributes
     retValue["selected_text"] = selected_text();
     retValue["max_length"]    = *MaxLength;
     retValue["selectable"]    = *Selectable;
+    retValue["numeric_only"]  = *NumericOnly;
 
     return retValue;
 }
@@ -162,6 +179,14 @@ void text_box::insert_text(utf8_string const& newText)
 {
     text_event ev {.Sender = this, .Text = newText};
     BeforeTextInserted(ev);
+
+    if (NumericOnly) {
+        bool const valid {std::ranges::all_of(ev.Text, [](char c) {
+            return std::isdigit(c) || c == '-' || c == '.';
+        })};
+        if (!valid) { return; }
+    }
+
     isize const newTextLength {utf8::length(ev.Text)};
     if (newTextLength > 0 && _edit.text_length() + newTextLength <= MaxLength) {
         _edit.insert_text(ev.Text);

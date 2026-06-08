@@ -37,6 +37,7 @@ public:
     prop_fn<utf8_string> Text;
     prop<isize>          MaxLength;
     prop<bool>           Selectable;
+    prop<bool>           NumericOnly;
 
     auto selected_text() const -> utf8_string;
 
@@ -62,8 +63,8 @@ protected:
 private:
     void insert_text(utf8_string const& newText);
 
-    text_edit _edit;
-
+    text_edit       _edit;
+    utf8_string     _lastValidText;
     text_box::style _style;
 };
 }
