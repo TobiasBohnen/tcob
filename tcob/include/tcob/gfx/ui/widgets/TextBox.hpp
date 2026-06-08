@@ -37,7 +37,9 @@ public:
     prop_fn<utf8_string> Text;
     prop<isize>          MaxLength;
     prop<bool>           Selectable;
-    prop<bool>           NumericOnly;
+
+    prop<bool> PasswordMode;
+    prop<bool> NumericOnly;
 
     auto selected_text() const -> utf8_string;
 

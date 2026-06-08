@@ -57,6 +57,9 @@ text_box::text_box(init const& wi)
 
     NumericOnly(false);
 
+    PasswordMode.Changed.connect([this] { queue_redraw(); });
+    PasswordMode(false);
+
     Class("text_box");
 }
 
@@ -70,7 +73,15 @@ void text_box::on_draw(widget_painter& painter)
     rect_f const         rect {draw_base(_style, painter)};
     scoped_scissor const guard {painter, this};
 
-    _edit.draw(painter, rect, _style.Text, _style.Caret);
+    if (PasswordMode) {
+        auto const real {_edit.get_text()};
+        auto const masked {utf8_string(utf8::length(real), '*')};
+        _edit.set_text(masked);
+        _edit.draw(painter, rect, _style.Text, _style.Caret);
+        _edit.set_text(real);
+    } else {
+        _edit.draw(painter, rect, _style.Text, _style.Caret);
+    }
 }
 
 void text_box::on_update(milliseconds deltaTime)
@@ -170,6 +181,7 @@ auto text_box::attributes() const -> widget_attributes
     retValue["selected_text"] = selected_text();
     retValue["max_length"]    = *MaxLength;
     retValue["selectable"]    = *Selectable;
+    retValue["password_mode"] = *PasswordMode;
     retValue["numeric_only"]  = *NumericOnly;
 
     return retValue;
