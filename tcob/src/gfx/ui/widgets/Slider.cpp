@@ -385,7 +385,7 @@ void range_slider::on_draw(widget_painter& painter)
     thumb_style thumbStyle {};
 
     auto const drawThumb {[&](thumb& thumb, i32 idx) {
-        auto const thumbFlags {!thumb.Over ? widget_flags {.Disabled = !is_enabled()} : flags()};
+        auto const thumbFlags {!thumb.IsOver ? widget_flags {.Disabled = !is_enabled()} : flags()};
         prepare_sub_style(thumbStyle, idx, _style.ThumbClass, thumbFlags);
 
         thumb.Rect = painter.draw_thumb(
@@ -400,7 +400,7 @@ void range_slider::on_draw(widget_painter& painter)
     if (*Locked) {
         drawThumb(_min, 0);
         _max.Rect = _min.Rect;
-    } else if (_min.Over) {
+    } else if (_min.IsOver) {
         drawThumb(_max, 1);
         drawThumb(_min, 0);
     } else {
@@ -419,9 +419,9 @@ void range_slider::on_draw(widget_painter& painter)
 
 void range_slider::on_mouse_leave()
 {
-    if (_min.Over || _max.Over) {
-        _min.Over = false;
-        _max.Over = false;
+    if (_min.IsOver || _max.IsOver) {
+        _min.IsOver = false;
+        _max.IsOver = false;
     }
 }
 
@@ -431,8 +431,8 @@ void range_slider::on_mouse_hover(input::mouse::motion_event const& ev)
 
     auto const hover {[&](thumb& thumb) {
         bool const overThumb {thumb.Rect.contains(mp)};
-        if (overThumb != thumb.Over) {
-            thumb.Over = overThumb;
+        if (overThumb != thumb.IsOver) {
+            thumb.IsOver = overThumb;
             return true;
         }
         return false;
@@ -451,14 +451,14 @@ void range_slider::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     auto const mp {screen_to_content(*this, ev.Position)};
 
-    if (!_min.IsDragging && !_max.IsDragging && _min.Over && _max.Over) {
+    if (!_min.IsDragging && !_max.IsDragging && _min.IsOver && _max.IsOver) {
         auto const orien {bounds_orientation()};
         bool const isMin {orien == orientation::Horizontal
                               ? ev.RelativeMotion.X < 0
                               : ev.RelativeMotion.Y > 0};
         (isMin ? _min : _max).IsDragging = true;
-        _min.Over                        = isMin;
-        _max.Over                        = !isMin;
+        _min.IsOver                      = isMin;
+        _max.IsOver                      = !isMin;
     }
 
     if (_min.IsDragging) {
@@ -478,8 +478,8 @@ void range_slider::on_mouse_button_up(input::mouse::button_event const& ev)
     _max.IsDragging = false;
 
     auto const buttonUp {[&](thumb& thumb) {
-        if (thumb.Over && !hit_test(ev.Position)) {
-            thumb.Over = false;
+        if (thumb.IsOver && !hit_test(ev.Position)) {
+            thumb.IsOver = false;
             return true;
         }
         return false;
@@ -497,19 +497,19 @@ void range_slider::on_mouse_button_down(input::mouse::button_event const& ev)
 
     if (ev.Button == controls().PrimaryMouseButton) {
         if (*Locked) {
-            if (_min.Over) {
-                _dragOffset     = point_i {mp - _min.Rect.center()};
-                _min.IsDragging = true;
+            if (_min.IsOver) {
+                _dragOffset = point_i {mp - _min.Rect.center()};
             } else {
                 calculate_value(true, screen_to_content(*this, ev.Position));
             }
+            _min.IsDragging = true;
         } else {
-            if (_min.Over && _max.Over) {
+            if (_min.IsOver && _max.IsOver) {
                 _dragOffset = point_i {mp - _min.Rect.center()};
-            } else if (_min.Over) {
+            } else if (_min.IsOver) {
                 _dragOffset     = point_i {mp - _min.Rect.center()};
                 _min.IsDragging = true;
-            } else if (_max.Over) {
+            } else if (_max.IsOver) {
                 _dragOffset     = point_i {mp - _max.Rect.center()};
                 _max.IsDragging = true;
             } else {
@@ -522,7 +522,7 @@ void range_slider::on_mouse_button_down(input::mouse::button_event const& ev)
                         ? mp.X < _min.Rect.center().X
                         : mp.Y > _min.Rect.center().Y;
                 }
-
+                (toMin ? _min : _max).IsDragging = true;
                 calculate_value(toMin, screen_to_content(*this, ev.Position));
             }
         }
@@ -546,7 +546,7 @@ void range_slider::on_value_changed(std::pair<f32, f32> newVal)
 {
     auto const value {[&](thumb& thumb, f32 val) {
         f32 const newFrac0 {Max != Min ? (val - *Min) / (*Max - *Min) : 0.0f};
-        if (thumb.IsDragging) {
+        if (thumb.IsDragging && thumb.IsOver) {
             thumb.Tween.reset(newFrac0);
         } else {
             thumb.Tween.start(newFrac0, _style.Bar.Delay);
@@ -619,8 +619,8 @@ void range_slider::calculate_value(bool isMin, point_f mp)
         Values = newVal;
     }
 
-    if (!thumb.Over) {
-        thumb.Over = true;
+    if (!thumb.IsOver) {
+        thumb.IsOver = true;
         queue_redraw();
     }
 }

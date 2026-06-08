@@ -113,7 +113,7 @@ protected:
 
 private:
     struct thumb {
-        bool           Over {false};
+        bool           IsOver {false};
         bool           IsDragging {false};
         rect_f         Rect;
         widget_tweener Tween;
