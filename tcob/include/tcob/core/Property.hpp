@@ -95,6 +95,9 @@ namespace detail {
 namespace detail {
     template <typename T, typename Source>
     class prop final : public non_copyable {
+    private:
+        signal<T const> _changed;
+
     public:
         using return_type       = typename Source::return_type;
         using const_return_type = typename Source::const_return_type;
@@ -103,7 +106,7 @@ namespace detail {
         explicit constexpr prop(T val); // HACK: only field_source
         explicit constexpr prop(Source source);
 
-        signal<T const> Changed;
+        signal_view<T const> Changed {_changed};
 
              operator T() const;
         auto operator!() const -> bool;
