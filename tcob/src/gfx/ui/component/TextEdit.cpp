@@ -116,6 +116,7 @@ void text_edit::insert_text(utf8_string const& ch)
     _textLength += utf8::length(ch);
     _caretPos += utf8::length(ch);
     mark_dirty();
+    TextChanged();
 }
 
 void text_edit::delete_backward()
@@ -125,6 +126,7 @@ void text_edit::delete_backward()
         _text = utf8::remove(_text, _caretPos);
         --_textLength;
         mark_dirty();
+        TextChanged();
     }
 }
 
@@ -171,10 +173,13 @@ auto text_edit::get_text() const -> utf8_string const& { return _text; }
 
 void text_edit::set_text(utf8_string const& t)
 {
+    if (_text == t) { return; }
+
     _text       = t;
     _textLength = utf8::length(t);
     _caretPos   = std::min(_caretPos, _textLength);
     mark_dirty();
+    TextChanged();
 }
 
 void text_edit::select_text(isize first, isize last)

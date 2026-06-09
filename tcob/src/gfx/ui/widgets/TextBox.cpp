@@ -35,15 +35,15 @@ void text_box::style::Transition(style& target, style const& from, style const& 
 
 text_box::text_box(init const& wi)
     : widget {wi}
-    , Text {make_prop_fn<string,
-                         [](text_box const& w) { return w._edit.get_text(); },
-                         [](text_box& w, string const& value) { w._edit.set_text(value); }>(this)}
 {
     _edit.Invalidated.connect([this] { queue_redraw(); });
+    _edit.TextChanged.connect([this] { Text = _edit.get_text(); });
+
+    Text.Changed.connect([this](auto const& val) { _edit.set_text(val); });
 
     MaxLength.Changed.connect([this](auto const& val) {
         if (_edit.text_length() > val) {
-            _edit.set_text(utf8::substr(_edit.get_text(), 0, val));
+            Text = utf8::substr(_edit.get_text(), 0, val);
             queue_redraw();
         }
     });
@@ -74,8 +74,8 @@ void text_box::on_draw(widget_painter& painter)
     scoped_scissor const guard {painter, this};
 
     if (PasswordMode) {
-        auto const real {_edit.get_text()};
-        auto const masked {utf8_string(utf8::length(real), '*')};
+        auto const& real {*Text};
+        auto const  masked {utf8_string(utf8::length(real), '*')};
         _edit.set_text(masked);
         _edit.draw(painter, rect, _style.Text, _style.Caret);
         _edit.set_text(real);
@@ -99,9 +99,8 @@ void text_box::on_key_down(input::keyboard::event const& ev)
     auto const& controls {form().Controls};
     if (controls->SubmitKeys.contains(ev.KeyCode)) {
         if (NumericOnly) {
-            auto const& t {_edit.get_text()};
-            if (!helper::to_number<f64>(t).has_value()) {
-                _edit.set_text(_lastValidText);
+            if (!helper::to_number<f64>(*Text).has_value()) {
+                Text = _lastValidText;
                 return;
             }
         }
@@ -166,11 +165,11 @@ void text_box::on_focus_gained()
 void text_box::on_focus_lost()
 {
     if (NumericOnly) {
-        auto const& t {_edit.get_text()};
-        if (!helper::to_number<f64>(t).has_value()) { _edit.set_text(_lastValidText); }
+        if (!helper::to_number<f64>(*Text).has_value()) { Text = _lastValidText; }
     }
     _edit.stop_blinking();
     FocusLost({.Sender = this});
+    Submit({.Sender = this, .Text = *Text});
 }
 
 auto text_box::attributes() const -> widget_attributes

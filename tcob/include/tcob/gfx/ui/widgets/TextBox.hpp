@@ -34,9 +34,9 @@ public:
     signal<text_event>       BeforeTextInserted;
     signal<text_event const> Submit;
 
-    prop_fn<utf8_string> Text;
-    prop<isize>          MaxLength;
-    prop<bool>           Selectable;
+    prop<utf8_string> Text;
+    prop<isize>       MaxLength;
+    prop<bool>        Selectable;
 
     prop<bool> PasswordMode;
     prop<bool> NumericOnly;
