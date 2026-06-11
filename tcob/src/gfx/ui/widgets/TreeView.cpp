@@ -154,7 +154,7 @@ void tree_view::on_mouse_button_down(input::mouse::button_event const& ev)
             _selectedNode->Expanded = !_selectedNode->Expanded;
         }
 
-        ItemClick(_selectedNode);
+        ItemClick({.Sender = this, .Item = &_selectedNode->Item});
         ev.Handled = true;
         queue_redraw();
     }

@@ -55,4 +55,9 @@ struct drop_event {
     point_i Position {point_i::Zero};
 };
 
+struct item_event {
+    widget* Sender {nullptr};
+    item*   Item {nullptr};
+};
+
 }

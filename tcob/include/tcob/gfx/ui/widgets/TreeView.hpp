@@ -15,6 +15,7 @@
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Length.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/UIEvents.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/component/Item.hpp"
 #include "tcob/gfx/ui/widgets/VScrollWidget.hpp"
@@ -46,7 +47,7 @@ public:
 
     explicit tree_view(init const& wi);
 
-    signal<node*> ItemClick; // TODO: change to *_event
+    signal<item_event const> ItemClick;
 
     prop<std::vector<node>> Nodes;
 

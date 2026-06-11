@@ -23,6 +23,7 @@ namespace tcob::ui {
 
 class style;
 class widget_style;
+class item;
 
 // widgets
 class button;
