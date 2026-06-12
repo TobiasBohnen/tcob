@@ -33,7 +33,7 @@ public:
     auto state() const -> playback_state;
     auto is_looping() const -> bool;
 
-    void start(playback_mode mode = playback_mode::Normal);
+    void start(playback_mode mode = playback_mode::Once);
     void stop();
     void restart();
 
@@ -83,7 +83,7 @@ public:
     void push(auto&&... autom);
     void pop();
 
-    void start(playback_mode mode = playback_mode::Normal);
+    void start(playback_mode mode = playback_mode::Once);
     void stop_and_clear();
 
 private:

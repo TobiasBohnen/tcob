@@ -84,7 +84,7 @@ public:
     template <typename... Funcs>
     auto create_effect(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<vertex_tween<Funcs...>>;
 
-    void start(playback_mode mode = playback_mode::Normal);
+    void start(playback_mode mode = playback_mode::Once);
     void stop();
 
     void force_reshape();

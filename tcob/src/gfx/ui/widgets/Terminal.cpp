@@ -191,7 +191,7 @@ void terminal::flash()
         }
         redraw();
     });
-    _flashTween->start(playback_mode::Normal);
+    _flashTween->start(playback_mode::Once);
 }
 
 void terminal::rectangle(rect_i const& rect)

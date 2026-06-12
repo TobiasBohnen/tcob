@@ -31,7 +31,7 @@ auto tween_base::progress() const -> f64
     auto const retValue {_duration.count() == 0 ? 1.0 : static_cast<f64>(_elapsedTime / _duration)};
 
     switch (_mode) {
-    case playback_mode::Normal:
+    case playback_mode::Once:
     case playback_mode::Looped:
         return retValue;
     case playback_mode::Reversed:
