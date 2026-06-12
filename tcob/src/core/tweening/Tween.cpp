@@ -36,15 +36,13 @@ auto tween_base::progress() const -> f64
         return retValue;
     case playback_mode::Reversed:
     case playback_mode::ReversedLooped:
-        return 1. - retValue;
+        return 1.0 - retValue;
     case playback_mode::Alternated:
     case playback_mode::AlternatedLooped:
-        return retValue <= 0.5
-            ? retValue * 2.
-            : (1. - retValue) * 2.;
+        return 2.0 * std::abs(std::round(retValue) - retValue);
     }
 
-    return 0.;
+    return 0.0;
 }
 
 auto tween_base::state() const -> playback_state
