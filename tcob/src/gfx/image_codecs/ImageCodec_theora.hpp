@@ -35,7 +35,7 @@ protected:
 
 private:
     size_i _size {size_i::Zero};
-    i32    _currentTimeStamp {0};
+    i32    _currentTimestamp {0};
 
     THEORAPLAY_Io                _io {};
     THEORAPLAY_Decoder*          _decoder {nullptr};

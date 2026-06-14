@@ -74,7 +74,7 @@ private:
     bool           _firstFrame {true};
 
     image        _currentFrame;
-    milliseconds _currentTimeStamp {0};
+    milliseconds _currentTimestamp {0};
 
     gif::header _header {};
 };

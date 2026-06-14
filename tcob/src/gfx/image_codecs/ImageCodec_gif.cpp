@@ -119,13 +119,13 @@ auto gif_decoder::advance_to(milliseconds ts) -> animated_image_decoder::status
         return animated_image_decoder::status::DecodeFailure;
     }
 
-    if (ts <= _currentTimeStamp) {
+    if (ts <= _currentTimestamp) {
         return animated_image_decoder::status::OldFrame;
     }
 
     auto& in {stream()};
     while (read_contents(in) != animated_image_decoder::status::NoMoreFrames) {
-        if (ts <= _currentTimeStamp) {
+        if (ts <= _currentTimestamp) {
             return animated_image_decoder::status::NewFrame;
         }
     }
@@ -138,7 +138,7 @@ void gif_decoder::reset()
     _firstFrame      = true;
     _hasTransparency = false;
 
-    _currentTimeStamp = milliseconds::zero();
+    _currentTimestamp = milliseconds::zero();
     stream().seek(_contentOffset, io::seek_dir::Begin);
 }
 
@@ -328,7 +328,7 @@ void gif_decoder::read_graphic_control_ext(io::istream& reader)
     _hasTransparency = (packed & 1) != 0;
 
     milliseconds const delay {reader.read<u16, std::endian::little>() * 10};
-    _currentTimeStamp += delay;
+    _currentTimestamp += delay;
 
     _transIndex = reader.read<u8>(); // transparent color index
     reader.read<u8>();               // block terminator

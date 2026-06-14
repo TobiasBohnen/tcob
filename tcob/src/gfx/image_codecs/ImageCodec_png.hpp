@@ -240,7 +240,7 @@ private:
     std::optional<png::fcTL_chunk> _previousFctl {};
     std::optional<image>           _previousFrame;
     image                          _currentFrame;
-    milliseconds                   _currentTimeStamp {0};
+    milliseconds                   _currentTimestamp {0};
     std::streamoff                 _contentOffset {0};
 };
 

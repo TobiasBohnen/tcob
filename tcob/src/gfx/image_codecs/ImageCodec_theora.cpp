@@ -109,14 +109,14 @@ auto theora_decoder::advance_to(milliseconds ts) -> animated_image_decoder::stat
     auto timestamp {static_cast<i32>(ts.count())};
     if (!_decoder) { return animated_image_decoder::status::DecodeFailure; }
     if (!THEORAPLAY_isDecoding(_decoder)) { return animated_image_decoder::status::NoMoreFrames; }
-    if (timestamp <= _currentTimeStamp) { return animated_image_decoder::status::OldFrame; }
+    if (timestamp <= _currentTimestamp) { return animated_image_decoder::status::OldFrame; }
 
-    while (timestamp > _currentTimeStamp) {
+    while (timestamp > _currentTimestamp) {
         if (_currentFrame) { THEORAPLAY_freeVideo(_currentFrame); }
 
         _currentFrame = THEORAPLAY_getVideo(_decoder);
         if (_currentFrame) {
-            _currentTimeStamp = _currentFrame->playms;
+            _currentTimestamp = _currentFrame->playms;
         } else {
             return animated_image_decoder::status::NoMoreFrames;
         }
@@ -132,7 +132,7 @@ void theora_decoder::reset()
         _currentFrame = nullptr;
     }
 
-    _currentTimeStamp = 0;
+    _currentTimestamp = 0;
     if (_decoder) {
         THEORAPLAY_stopDecode(_decoder);
 

@@ -267,7 +267,7 @@ auto png_anim_decoder::get_next_frame(io::istream& in) -> animated_image_decoder
                 break;
             }
             fctl = {chunk.Data};
-            _currentTimeStamp += fctl->Duration;
+            _currentTimestamp += fctl->Duration;
         } else if (chunk.Type == png::chunk_type::IDAT) {
             idat.insert(idat.end(), chunk.Data.begin(), chunk.Data.end());
         } else if (chunk.Type == png::chunk_type::fdAT) {
@@ -319,13 +319,13 @@ auto png_anim_decoder::get_next_frame(io::istream& in) -> animated_image_decoder
 
 auto png_anim_decoder::advance_to(milliseconds ts) -> animated_image_decoder::status
 {
-    if (ts <= _currentTimeStamp) {
+    if (ts <= _currentTimestamp) {
         return animated_image_decoder::status::OldFrame;
     }
 
     auto& in {stream()};
     while (get_next_frame(in) != animated_image_decoder::status::NoMoreFrames) {
-        if (ts <= _currentTimeStamp) {
+        if (ts <= _currentTimestamp) {
             return animated_image_decoder::status::NewFrame;
         }
     }
@@ -336,7 +336,7 @@ auto png_anim_decoder::advance_to(milliseconds ts) -> animated_image_decoder::st
 void png_anim_decoder::reset()
 {
     auto const& hdr {ihdr()};
-    _currentTimeStamp = milliseconds::zero();
+    _currentTimestamp = milliseconds::zero();
     _currentFrame     = image::CreateEmpty({hdr.Width, hdr.Height}, image::format::RGBA);
     _previousFrame    = {};
     stream().seek(_contentOffset, io::seek_dir::Begin);
