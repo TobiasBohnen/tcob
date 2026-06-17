@@ -68,6 +68,7 @@ public:
 
     class TCOB_API frame final {
     public:
+        string       Name {};
         milliseconds Duration {};
 
         point_f  Translation {};
@@ -79,6 +80,7 @@ public:
         static auto constexpr Members()
         {
             return std::tuple {
+                member<&frame::Name> {"name"},
                 member<&frame::Duration> {"duration"},
                 member<&frame::Translation> {"translation"},
                 member<&frame::Rotation> {"rotation"},
@@ -86,9 +88,11 @@ public:
         }
     };
 
-    struct bone {
-        string             Name {};
-        string             Parent {};
+    class TCOB_API bone final {
+    public:
+        string Name {};
+        string Parent {};
+
         transform          Rest {};
         std::vector<frame> Track {};
 
@@ -103,7 +107,14 @@ public:
         }
     };
 
-    using pose = std::vector<transform>;
+    class TCOB_API pose final {
+    public:
+        transform   Transform {};
+        string_view Region {};
+
+        auto operator==(pose const& other) const -> bool = default;
+    };
+    using poses = std::vector<pose>;
 
     ////////////////////////////////////////////////////////////
 
@@ -113,14 +124,14 @@ public:
     auto bone_count() const -> isize;
     auto is_empty() const -> bool;
 
-    auto operator()(f64 t) const -> pose;
+    auto operator()(f64 t) const -> poses;
 
     auto operator==(skeletal_animation const& other) const -> bool = default;
 
     // static inline char const* AssetName {"skeletal_animation"};
 
 private:
-    void compute_pose(std::map<isize, transform> const& locals, pose& pose) const;
+    void compute_pose(std::map<isize, transform> const& locals, poses& poses) const;
 
     std::vector<bone>  _bones {};
     milliseconds       _duration {};
