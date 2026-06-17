@@ -34,16 +34,16 @@
 namespace tcob::detail {
 ////////////////////////////////////////////////////////////
 
-class cfg_frame_animation_loader final : public assets::loader<gfx::frame_animation> {
+class cfg_animation_loader final : public assets::loader<gfx::sprite_animation> {
 public:
-    cfg_frame_animation_loader(assets::group& group, data::object& object);
+    cfg_animation_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
 
 private:
     struct asset_def {
-        asset_ptr<gfx::frame_animation> assetPtr;
+        asset_ptr<gfx::sprite_animation> assetPtr;
     };
 
     std::vector<asset_def> _cache;

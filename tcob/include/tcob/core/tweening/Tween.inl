@@ -37,7 +37,7 @@ inline auto tween<Func>::add_output(value_type* dest) -> connection
 template <tween_func::Function Func>
 inline void tween<Func>::update_values()
 {
-    Value = Function(progress());
+    Value = Function(playback_progress());
 }
 
 ////////////////////////////////////////////////////////////

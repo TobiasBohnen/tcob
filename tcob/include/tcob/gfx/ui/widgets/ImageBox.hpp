@@ -44,7 +44,7 @@ public:
 
     bool Draggable {false};
 
-    void start_animation(gfx::frame_animation const& ani, playback_mode mode);
+    void start_animation(gfx::sprite_animation const& ani, playback_mode mode);
     void stop_animation();
 
     auto image_bounds() -> rect_f;

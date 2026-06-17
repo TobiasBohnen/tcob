@@ -103,8 +103,8 @@ enum class direction : u8 {
 
 enum class playback_mode : u8 {
     Once,
-    Reversed,
     Looped,
+    Reversed,
     ReversedLooped,
     Alternated,
     AlternatedLooped

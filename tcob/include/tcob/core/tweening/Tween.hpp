@@ -30,6 +30,8 @@ public:
     std::optional<milliseconds> Interval {};
 
     auto progress() const -> f64;
+    auto playback_progress() const -> f64;
+
     auto state() const -> playback_state;
     auto is_looping() const -> bool;
 

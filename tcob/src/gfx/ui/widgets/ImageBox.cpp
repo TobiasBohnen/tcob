@@ -61,7 +61,7 @@ image_box::image_box(init const& wi)
     });
 }
 
-void image_box::start_animation(gfx::frame_animation const& ani, playback_mode mode)
+void image_box::start_animation(gfx::sprite_animation const& ani, playback_mode mode)
 {
     _animationTween.start(ani, mode);
 }

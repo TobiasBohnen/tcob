@@ -20,46 +20,28 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API frame final {
+class TCOB_API sprite_animation final {
 public:
-    string       Name {};
-    milliseconds Duration {};
+    ////////////////////////////////////////////////////////////
 
-    auto operator==(frame const& other) const -> bool = default;
+    class TCOB_API frame final {
+    public:
+        string       Name {};
+        milliseconds Duration {};
 
-    static auto constexpr Members()
-    {
-        return std::tuple {
-            member<&frame::Name> {"name"},
-            member<&frame::Duration> {"duration"}};
-    }
-};
+        auto operator==(frame const& other) const -> bool = default;
 
-class TCOB_API keyframe final {
-public:
-    milliseconds Timestamp {};
+        static auto constexpr Members()
+        {
+            return std::tuple {
+                member<&frame::Name> {"name"},
+                member<&frame::Duration> {"duration"}};
+        }
+    };
 
-    point_f  Translation {};
-    radian_f Rotation {};
-    size_f   Scale {1.0f, 1.0f};
+    ////////////////////////////////////////////////////////////
 
-    auto operator==(keyframe const& other) const -> bool = default;
-
-    static auto constexpr Members()
-    {
-        return std::tuple {
-            member<&keyframe::Timestamp> {"timestamp"},
-            member<&keyframe::Translation> {"translation"},
-            member<&keyframe::Rotation> {"rotation"},
-            member<&keyframe::Scale> {"scale"}};
-    }
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API frame_animation final {
-public:
-    explicit frame_animation(std::vector<frame> const& frames);
+    explicit sprite_animation(std::vector<frame> const& frames);
 
     auto get_frame_at(milliseconds time) const -> string_view;
     auto duration() const -> milliseconds;
@@ -67,58 +49,82 @@ public:
 
     auto operator()(f64 t) const -> string_view;
 
-    static inline char const* AssetName {"frame_animation"};
+    static inline char const* AssetName {"sprite_animation"};
 
-    auto operator==(frame_animation const& other) const -> bool = default;
+    auto operator==(sprite_animation const& other) const -> bool = default;
 
 private:
     std::vector<frame> _frames;
     milliseconds       _duration {};
 };
 
-using frame_animation_tween = callable_tween<frame_animation>;
+using sprite_animation_tween = callable_tween<sprite_animation>;
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API skeletal_animation final {
 public:
-    using tracks = std::map<i32, std::vector<keyframe>>;
+    ////////////////////////////////////////////////////////////
+
+    class TCOB_API frame final {
+    public:
+        milliseconds Duration {};
+
+        point_f  Translation {};
+        radian_f Rotation {};
+        size_f   Scale {1.0f, 1.0f};
+
+        auto operator==(frame const& other) const -> bool = default;
+
+        static auto constexpr Members()
+        {
+            return std::tuple {
+                member<&frame::Duration> {"duration"},
+                member<&frame::Translation> {"translation"},
+                member<&frame::Rotation> {"rotation"},
+                member<&frame::Scale> {"scale"}};
+        }
+    };
 
     struct bone {
-        string    Name {};
-        i32       Parent {-1};
-        transform Rest {};
+        string             Name {};
+        string             Parent {};
+        transform          Rest {};
+        std::vector<frame> Track {};
 
         auto operator==(bone const& other) const -> bool = default;
-
         static auto constexpr Members()
         {
             return std::tuple {
                 member<&bone::Name> {"name"},
                 member<&bone::Parent> {"parent"},
-                member<&bone::Rest> {"rest"}};
+                member<&bone::Rest> {"rest"},
+                member<&bone::Track> {"track"}};
         }
     };
+
+    using pose = std::vector<transform>;
+
     ////////////////////////////////////////////////////////////
 
-    skeletal_animation(std::vector<bone> const& bones, tracks const& tracks);
+    explicit skeletal_animation(std::vector<bone> const& bones);
 
     auto duration() const -> milliseconds;
     auto bone_count() const -> isize;
     auto is_empty() const -> bool;
 
-    auto operator()(f64 t) const -> std::vector<transform>;
+    auto operator()(f64 t) const -> pose;
 
     auto operator==(skeletal_animation const& other) const -> bool = default;
 
     // static inline char const* AssetName {"skeletal_animation"};
 
 private:
-    void compute_pose(std::map<i32, transform> const& locals, std::vector<transform>& pose) const;
+    void compute_pose(std::map<isize, transform> const& locals, pose& pose) const;
 
-    std::vector<bone> _bones {};
-    milliseconds      _duration {};
-    tracks            _tracks {};
+    std::vector<bone>  _bones {};
+    milliseconds       _duration {};
+    std::vector<isize> _parentIndices {};
 };
 
 using skeletal_animation_tween = callable_tween<skeletal_animation>;

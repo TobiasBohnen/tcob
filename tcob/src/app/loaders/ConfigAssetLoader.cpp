@@ -49,8 +49,8 @@ using namespace std::chrono_literals;
 namespace io = tcob::io;
 
 namespace tcob::API {
-namespace Animation {
-    static char const* Name {"animation"};
+namespace SpriteAnimation {
+    static char const* Name {"sprite_animation"};
     static char const* frames {"frames"};
 }
 
@@ -193,7 +193,7 @@ cfg_asset_loader_manager::cfg_asset_loader_manager(group& group)
     add_loader(std::make_unique<cfg_cursor_loader>(group, _object));
     add_loader(std::make_unique<cfg_font_loader>(group, _object));
     add_loader(std::make_unique<cfg_font_family_loader>(group, _object));
-    add_loader(std::make_unique<cfg_frame_animation_loader>(group, _object));
+    add_loader(std::make_unique<cfg_animation_loader>(group, _object));
     add_loader(std::make_unique<cfg_music_loader>(group, _object));
     add_loader(std::make_unique<cfg_sound_loader>(group, _object));
     add_loader(std::make_unique<cfg_audio_buffer_loader>(group, _object));
@@ -212,29 +212,29 @@ void cfg_asset_loader_manager::load(path const& file)
 
 ////////////////////////////////////////////////////////////
 
-cfg_frame_animation_loader::cfg_frame_animation_loader(assets::group& group, data::object& object)
+cfg_animation_loader::cfg_animation_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {
 }
 
-void cfg_frame_animation_loader::declare()
+void cfg_animation_loader::declare()
 {
     object obj;
-    if (!_object.try_get(obj, API::Animation::Name)) { return; }
+    if (!_object.try_get(obj, API::SpriteAnimation::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
-            std::vector<frame> frames;
-            assetSection.try_get(frames, API::Animation::frames);
+            std::vector<sprite_animation::frame> frames;
+            assetSection.try_get(frames, API::SpriteAnimation::frames);
 
             asset_def& def {_cache.emplace_back()};
-            def.assetPtr = group().create<frame_animation>(k, frames);
+            def.assetPtr = group().create<sprite_animation>(k, frames);
         }
     }
 }
 
-void cfg_frame_animation_loader::prepare()
+void cfg_animation_loader::prepare()
 {
     for (auto& def : _cache) {
         set_asset_status(def.assetPtr, asset_status::Loaded);

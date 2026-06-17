@@ -21,7 +21,7 @@ inline vertex_tween<Funcs...>::vertex_tween(milliseconds duration, Funcs&&... pt
 template <VertexTweenFunction... Funcs>
 inline void vertex_tween<Funcs...>::update_values()
 {
-    f64 const   p {progress()};
+    f64 const   p {playback_progress()};
     auto const& src {source_groups()};
     if (src.empty()) { return; }
 

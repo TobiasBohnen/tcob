@@ -28,18 +28,23 @@ tween_base::~tween_base()
 
 auto tween_base::progress() const -> f64
 {
-    auto const retValue {_duration.count() == 0 ? 1.0 : static_cast<f64>(_elapsedTime / _duration)};
+    return _duration.count() == 0 ? 1.0 : static_cast<f64>(_elapsedTime / _duration);
+}
+
+auto tween_base::playback_progress() const -> f64
+{
+    auto const t {progress()};
 
     switch (_mode) {
     case playback_mode::Once:
     case playback_mode::Looped:
-        return retValue;
+        return t;
     case playback_mode::Reversed:
     case playback_mode::ReversedLooped:
-        return 1.0 - retValue;
+        return 1.0 - t;
     case playback_mode::Alternated:
     case playback_mode::AlternatedLooped:
-        return 2.0 * std::abs(std::round(retValue) - retValue);
+        return 2.0 * std::abs(std::round(t) - t);
     }
 
     return 0.0;

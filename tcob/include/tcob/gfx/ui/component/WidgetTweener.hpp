@@ -47,13 +47,13 @@ public:
 
     signal<string_view const> Changed;
 
-    void start(gfx::frame_animation const& ani, playback_mode mode);
+    void start(gfx::sprite_animation const& ani, playback_mode mode);
     void stop();
 
     void update(milliseconds deltaTime);
 
 private:
-    std::unique_ptr<gfx::frame_animation_tween> _tween;
+    std::unique_ptr<gfx::sprite_animation_tween> _tween;
 };
 
 }
