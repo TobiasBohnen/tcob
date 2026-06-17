@@ -58,19 +58,22 @@ auto sprite_animation ::is_empty() const -> bool
 skeletal_animation::skeletal_animation(std::vector<bone> const& bones)
     : _bones {bones}
 {
-    std::unordered_map<string, isize> nameToIndex;
-    for (isize i {0}; i < std::ssize(_bones); ++i) {
+    auto const boneCount {_bones.size()};
+
+    std::unordered_map<string, usize> nameToIndex;
+    for (usize i {0}; i < boneCount; ++i) {
         nameToIndex[_bones[i].Name] = i;
     }
 
-    _parentIndices.resize(_bones.size(), -1);
-    for (isize i {0}; i < std::ssize(_bones); ++i) {
-        // parent index
+    _parentIndices.resize(boneCount, -1);
+    for (usize i {0}; i < boneCount; ++i) {
         auto const& bone {_bones[i]};
+
+        // parent index
         if (!bone.Parent.empty()) {
             auto const it {nameToIndex.find(bone.Parent)};
             if (it != nameToIndex.end()) {
-                _parentIndices[i] = it->second;
+                _parentIndices[i] = static_cast<isize>(it->second);
             }
         }
 
@@ -88,15 +91,7 @@ auto skeletal_animation::operator()(f64 t) const -> pose
     milliseconds const         time {t * _duration.count()};
     std::map<isize, transform> locals;
 
-    auto const make_transform {[](frame const& f) {
-        transform xf {};
-        xf.translate(f.Translation);
-        xf.rotate(f.Rotation);
-        xf.scale(f.Scale);
-        return xf;
-    }};
-
-    for (isize i {0}; i < std::ssize(_bones); ++i) {
+    for (usize i {0}; i < _bones.size(); ++i) {
         auto const& keys {_bones[i].Track};
         if (keys.empty()) { continue; }
 
@@ -107,16 +102,15 @@ auto skeletal_animation::operator()(f64 t) const -> pose
             ++idx;
         }
 
-        auto const&        a {keys[idx]};
-        auto const&        b {idx + 1 < keys.size() ? keys[idx + 1] : keys.front()};
-        milliseconds const duration {idx + 1 < keys.size() ? a.Duration : (_duration - cursor)};
-        f32 const          t2 {static_cast<f32>((time - cursor) / duration)};
+        auto const& a {keys[idx]};
+        auto const& b {idx + 1 < keys.size() ? keys[idx + 1] : keys.front()};
+        auto const  duration {idx + 1 < keys.size() ? a.Duration : (_duration - cursor)};
+        f32 const   t2 {static_cast<f32>((time - cursor) / duration)};
 
-        frame f {};
-        f.Translation = point_f::Lerp(a.Translation, b.Translation, t2);
-        f.Rotation    = radian_f::Lerp(a.Rotation, b.Rotation, t2);
-        f.Scale       = size_f::Lerp(a.Scale, b.Scale, t2);
-        locals[i]     = make_transform(f);
+        auto& xf {locals[i]};
+        xf.translate(point_f::Lerp(a.Translation, b.Translation, t2));
+        xf.rotate(radian_f::Lerp(a.Rotation, b.Rotation, t2));
+        xf.scale(size_f::Lerp(a.Scale, b.Scale, t2));
     }
 
     pose retValue(_bones.size());
@@ -141,10 +135,10 @@ auto skeletal_animation::is_empty() const -> bool
 
 void skeletal_animation::compute_pose(std::map<isize, transform> const& locals, std::vector<transform>& pose) const
 {
-    for (isize i {0}; i < std::ssize(_bones); ++i) {
-        auto const      it {locals.find(i)};
-        transform const local {it != locals.end() ? it->second : transform::Identity};
-        isize const     parent {_parentIndices[i]};
+    for (usize i {0}; i < _bones.size(); ++i) {
+        auto const  it {locals.find(i)};
+        auto const  local {it != locals.end() ? it->second : transform::Identity};
+        isize const parent {_parentIndices[i]};
         pose[i] = parent < 0 ? _bones[i].Rest * local : pose[parent] * _bones[i].Rest * local;
     }
 }
