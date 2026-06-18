@@ -23,7 +23,7 @@ public:
     timer() = default;
     ~timer();
 
-    signal<milliseconds const> Tick;
+    signal<milliseconds const, timer> Tick;
 
     auto is_running() const -> bool;
 

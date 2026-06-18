@@ -35,20 +35,20 @@ public:
 
     ~window() override;
 
-    signal<event const> Shown;
-    signal<event const> Hidden;
-    signal<event const> Exposed;
-    signal<event const> Moved;
-    signal<event const> Resized;
-    signal<event const> Minimized;
-    signal<event const> Maximized;
-    signal<event const> Restored;
-    signal<event const> Enter;
-    signal<event const> Leave;
-    signal<event const> FocusGained;
-    signal<event const> FocusLost;
-    signal<event const> Close;
-    signal<event const> HitTest;
+    signal<event const, window> Shown;
+    signal<event const, window> Hidden;
+    signal<event const, window> Exposed;
+    signal<event const, window> Moved;
+    signal<event const, window> Resized;
+    signal<event const, window> Minimized;
+    signal<event const, window> Maximized;
+    signal<event const, window> Restored;
+    signal<event const, window> Enter;
+    signal<event const, window> Leave;
+    signal<event const, window> FocusGained;
+    signal<event const, window> FocusLost;
+    signal<event const, window> Close;
+    signal<event const, window> HitTest;
 
     prop_fn<bool>   FullScreen;
     prop_fn<string> Title;

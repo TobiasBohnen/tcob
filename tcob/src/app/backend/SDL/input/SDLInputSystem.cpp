@@ -11,6 +11,7 @@
 #include <unordered_map>
 
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/core/input/Input_Codes.hpp"
 
@@ -216,7 +217,7 @@ void sdl_input_system::process_events(void* ev)
             .ScanCode = convert_enum(sev->key.scancode),
             .KeyMods  = key_mods {convert_enum(sev->key.mod)},
             .KeyCode  = convert_enum(sev->key.key)};
-        KeyDown(event);
+        emit_signal(KeyDown, event);
         InputMode = mode::KeyboardMouse;
     } break;
     case SDL_EVENT_KEY_UP: {
@@ -227,19 +228,19 @@ void sdl_input_system::process_events(void* ev)
             .ScanCode = convert_enum(sev->key.scancode),
             .KeyMods  = key_mods {convert_enum(sev->key.mod)},
             .KeyCode  = convert_enum(sev->key.key)};
-        KeyUp(event);
+        emit_signal(KeyUp, event);
         InputMode = mode::KeyboardMouse;
     } break;
     case SDL_EVENT_TEXT_INPUT: {
         sdl_keyboard::text_input_event const event {.Text = sev->text.text};
-        TextInput(event);
+        emit_signal(TextInput, event);
     } break;
     case SDL_EVENT_MOUSE_MOTION: {
         sdl_mouse::motion_event const event {
             .Mouse          = _mouse.get(),
             .Position       = {static_cast<i32>(sev->motion.x), static_cast<i32>(sev->motion.y)},
             .RelativeMotion = {static_cast<i32>(sev->motion.xrel), static_cast<i32>(sev->motion.yrel)}};
-        MouseMotion(event);
+        emit_signal(MouseMotion, event);
         InputMode = mode::KeyboardMouse;
     } break;
     case SDL_EVENT_MOUSE_BUTTON_DOWN: {
@@ -249,7 +250,7 @@ void sdl_input_system::process_events(void* ev)
             .Pressed  = sev->button.down,
             .Clicks   = sev->button.clicks,
             .Position = {static_cast<i32>(sev->button.x), static_cast<i32>(sev->button.y)}};
-        MouseButtonDown(event);
+        emit_signal(MouseButtonDown, event);
         InputMode = mode::KeyboardMouse;
     } break;
     case SDL_EVENT_MOUSE_BUTTON_UP: {
@@ -259,7 +260,7 @@ void sdl_input_system::process_events(void* ev)
             .Pressed  = !sev->button.down,
             .Clicks   = sev->button.clicks,
             .Position = {static_cast<i32>(sev->button.x), static_cast<i32>(sev->button.y)}};
-        MouseButtonUp(event);
+        emit_signal(MouseButtonUp, event);
         InputMode = mode::KeyboardMouse;
     } break;
     case SDL_EVENT_MOUSE_WHEEL: {
@@ -267,7 +268,7 @@ void sdl_input_system::process_events(void* ev)
             .Mouse    = _mouse.get(),
             .Scroll   = sev->wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? point_f {-sev->wheel.x, -sev->wheel.y} : point_f {sev->wheel.x, sev->wheel.y},
             .Position = {static_cast<i32>(sev->wheel.mouse_x), static_cast<i32>(sev->wheel.mouse_y)}};
-        MouseWheel(event);
+        emit_signal(MouseWheel, event);
         InputMode = mode::KeyboardMouse;
     } break;
     case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
@@ -277,7 +278,7 @@ void sdl_input_system::process_events(void* ev)
             .Axis          = convert_enum(static_cast<SDL_GamepadAxis>(sev->gaxis.axis)),
             .Value         = sev->gaxis.value,
             .RelativeValue = static_cast<f32>(sev->gaxis.value) / std::numeric_limits<i16>::max()};
-        ControllerAxisMotion(event);
+        emit_signal(ControllerAxisMotion, event);
         InputMode = mode::Controller;
     } break;
     case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
@@ -286,7 +287,7 @@ void sdl_input_system::process_events(void* ev)
             .Controller = _controllers[sev->gbutton.which].get(),
             .Button     = convert_enum(static_cast<SDL_GamepadButton>(sev->gbutton.button)),
             .Pressed    = sev->gbutton.down};
-        ControllerButtonDown(event);
+        emit_signal(ControllerButtonDown, event);
         InputMode = mode::Controller;
     } break;
     case SDL_EVENT_GAMEPAD_BUTTON_UP: {
@@ -295,22 +296,22 @@ void sdl_input_system::process_events(void* ev)
             .Controller = _controllers[sev->gbutton.which].get(),
             .Button     = convert_enum(static_cast<SDL_GamepadButton>(sev->gbutton.button)),
             .Pressed    = !sev->gbutton.down};
-        ControllerButtonUp(event);
+        emit_signal(ControllerButtonUp, event);
         InputMode = mode::Controller;
     } break;
     case SDL_EVENT_GAMEPAD_ADDED: {
         u32 const id {sev->gdevice.which};
         _controllers[id] = std::make_shared<sdl_controller>(SDL_OpenGamepad(id), id);
-        ControllerAdded(id);
+        emit_signal(ControllerAdded, id);
     } break;
     case SDL_EVENT_GAMEPAD_REMOVED: {
         u32 const id {sev->gdevice.which};
         SDL_CloseGamepad(std::dynamic_pointer_cast<sdl_controller>(_controllers[id])->_controller);
         _controllers.erase(id);
-        ControllerRemoved(id);
+        emit_signal(ControllerRemoved, id);
     } break;
     case SDL_EVENT_CLIPBOARD_UPDATE: {
-        ClipboardUpdated();
+        emit_signal(ClipboardUpdated);
     } break;
     }
 }

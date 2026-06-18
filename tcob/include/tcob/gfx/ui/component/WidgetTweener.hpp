@@ -21,7 +21,7 @@ class TCOB_API widget_tweener : public non_copyable {
 public:
     widget_tweener() = default;
 
-    signal<> Changed;
+    signal<void, widget_tweener> Changed;
 
     void start(f32 toValue, milliseconds delay);
     void reset(f32 value);
@@ -45,7 +45,7 @@ class TCOB_API animation_tweener {
 public:
     animation_tweener() = default;
 
-    signal<string_view const> Changed;
+    signal<string_view const, animation_tweener> Changed;
 
     void start(gfx::sprite_animation const& ani, playback_mode mode);
     void stop();

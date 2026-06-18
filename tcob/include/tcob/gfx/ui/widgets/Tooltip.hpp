@@ -28,7 +28,7 @@ class TCOB_API tooltip : public panel {
     friend class form_base;
 
 public:
-    signal<tooltip_event const> Popup;
+    signal<tooltip_event const, tooltip> Popup;
 
     explicit tooltip(init const& wi);
 

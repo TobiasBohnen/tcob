@@ -40,11 +40,11 @@ public:
 
     virtual ~game();
 
-    signal<>                   Start;       //!< Signal emitted when the game starts.
-    signal<>                   Finish;      //!< Signal emitted when the game finishes.
-    signal<milliseconds const> FixedUpdate; //!< Signal emitted at a fixed time interval.
-    signal<milliseconds const> Update;      //!< Signal emitted during the main update.
-    signal<gfx::render_target> Draw;        //!< Signal emitted when rendering is required.
+    signal<void, game>               Start;       //!< Signal emitted when the game starts.
+    signal<void, game>               Finish;      //!< Signal emitted when the game finishes.
+    signal<milliseconds const, game> FixedUpdate; //!< Signal emitted at a fixed time interval.
+    signal<milliseconds const, game> Update;      //!< Signal emitted during the main update.
+    signal<gfx::render_target, game> Draw;        //!< Signal emitted when rendering is required.
 
     void start();
 

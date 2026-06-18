@@ -99,8 +99,8 @@ public:
     wrapper(state_view view, table* globaltable, string name, bool autoMeta);
     ~wrapper();
 
-    signal<unknown_get_event<WrappedType>> UnknownGet;
-    signal<unknown_set_event<WrappedType>> UnknownSet;
+    signal<unknown_get_event<WrappedType>, wrapper> UnknownGet;
+    signal<unknown_set_event<WrappedType>, wrapper> UnknownSet;
 
     auto operator[](string const& name) -> proxy<false>;
     auto operator[](metamethod_type type) -> proxy<true>;

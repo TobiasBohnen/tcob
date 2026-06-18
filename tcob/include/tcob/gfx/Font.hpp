@@ -85,6 +85,7 @@ class truetype_font_engine;
 class TCOB_API font final : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
+
     struct information final {
         f32 Ascender {0};
         f32 Descender {0};
@@ -120,7 +121,7 @@ public:
     explicit font(string name = "");
     ~font();
 
-    signal<font const&> TextureResized;
+    signal<font const&, font> TextureResized;
 
     auto info() const -> information const&;
     auto texture() const -> asset_ptr<gfx::texture>;

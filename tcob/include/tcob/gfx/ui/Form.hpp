@@ -43,7 +43,7 @@ public:
     prop<nav_map>                NavMap;
     prop<asset_ptr<gfx::shader>> Shader;
 
-    signal<widget_painter> DrawOverlay;
+    signal<widget_painter, form_base> DrawOverlay;
 
     asset_ptr<gfx::cursor> Cursor;
 

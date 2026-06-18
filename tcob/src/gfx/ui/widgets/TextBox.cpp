@@ -168,7 +168,7 @@ void text_box::on_focus_lost()
         if (!helper::to_number<f64>(*Text).has_value()) { Text = _lastValidText; }
     }
     _edit.stop_blinking();
-    FocusLost({.Sender = this});
+
     Submit({.Sender = this, .Text = *Text});
 }
 

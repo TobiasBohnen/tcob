@@ -14,6 +14,7 @@
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/scripting/Lua.hpp"
 #include "tcob/scripting/LuaTypes.hpp"
@@ -25,7 +26,7 @@ extern "C" {
 static void Warn(void* ud, char const* msg, int toCont)
 {
     auto* scr {static_cast<script*>(ud)};
-    scr->Warning({.Message = msg, .ToCont = toCont != 0});
+    emit_signal(scr->Warning, script::warning_event {.Message = msg, .ToCont = toCont != 0});
 }
 
 static void Hook(lua_State* l, lua_Debug* ar)

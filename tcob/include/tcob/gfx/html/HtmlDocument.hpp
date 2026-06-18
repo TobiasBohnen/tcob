@@ -54,7 +54,7 @@ public:
     document(config c, window& window);
     ~document() override;
 
-    signal<string const> AnchorClick;
+    signal<string const, document> AnchorClick;
 
     prop<rect_f> Bounds;
 

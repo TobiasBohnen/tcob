@@ -24,8 +24,8 @@ namespace tcob::ui {
 
 class TCOB_API text_edit {
 public:
-    signal<> Invalidated;
-    signal<> TextChanged;
+    signal<void, text_edit> Invalidated;
+    signal<void, text_edit> TextChanged;
 
     void update(milliseconds deltaTime);
     void draw(widget_painter& painter, rect_f const& rect, text_element const& text, caret_element const& caret);

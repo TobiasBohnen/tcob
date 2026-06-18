@@ -220,8 +220,8 @@ public:
 
     ~particle_system() override = default;
 
-    signal<particle_event const> ParticleUpdate;
-    signal<particle_event const> ParticleDeath;
+    signal<particle_event const, particle_system> ParticleUpdate;
+    signal<particle_event const, particle_system> ParticleDeath;
 
     particles Particles;
 

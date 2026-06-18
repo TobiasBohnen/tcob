@@ -23,7 +23,7 @@ class TCOB_API font_family final {
 public:
     explicit font_family(string name);
 
-    signal<font const&> TextureResized;
+    signal<font const&, font_family> TextureResized;
 
     auto name() const -> string const&;
     auto get_font(font::style style, u32 size) -> asset_ptr<font>;

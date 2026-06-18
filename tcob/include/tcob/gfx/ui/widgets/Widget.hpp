@@ -34,22 +34,22 @@ class TCOB_API widget : public updatable {
 public:
     ~widget() override = default;
 
-    signal<keyboard_event const>          KeyDown;
-    signal<keyboard_event const>          KeyUp;
-    signal<widget_event const>            MouseEnter;
-    signal<widget_event const>            MouseLeave;
-    signal<mouse_button_event const>      MouseButtonDown;
-    signal<mouse_button_event const>      MouseButtonUp;
-    signal<mouse_motion_event const>      MouseHover;
-    signal<mouse_motion_event const>      MouseDrag;
-    signal<mouse_wheel_event const>       MouseWheel;
-    signal<widget_event const>            Click;
-    signal<widget_event const>            DoubleClick;
-    signal<controller_button_event const> ControllerButtonDown;
-    signal<controller_button_event const> ControllerButtonUp;
+    signal<keyboard_event const, widget>          KeyDown;
+    signal<keyboard_event const, widget>          KeyUp;
+    signal<widget_event const, widget>            MouseEnter;
+    signal<widget_event const, widget>            MouseLeave;
+    signal<mouse_button_event const, widget>      MouseButtonDown;
+    signal<mouse_button_event const, widget>      MouseButtonUp;
+    signal<mouse_motion_event const, widget>      MouseHover;
+    signal<mouse_motion_event const, widget>      MouseDrag;
+    signal<mouse_wheel_event const, widget>       MouseWheel;
+    signal<widget_event const, widget>            Click;
+    signal<widget_event const, widget>            DoubleClick;
+    signal<controller_button_event const, widget> ControllerButtonDown;
+    signal<controller_button_event const, widget> ControllerButtonUp;
 
-    signal<widget_event const> FocusGained;
-    signal<widget_event const> FocusLost;
+    signal<widget_event const, widget> FocusGained;
+    signal<widget_event const, widget> FocusLost;
 
     prop<string>       Class;
     prop_fn<f32>       Alpha;

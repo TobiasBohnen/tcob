@@ -42,7 +42,7 @@ public:
         uid From;
         uid To;
     };
-    signal<transition_event const> StateChanged;
+    signal<transition_event const, fsm> StateChanged;
 
     void add_state(state const& s);
     void add_global_transition(transition const& t);

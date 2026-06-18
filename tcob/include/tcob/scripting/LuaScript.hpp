@@ -43,8 +43,8 @@ public:
     script();
     ~script();
 
-    signal<require_event>       Require;
-    signal<warning_event const> Warning;
+    signal<require_event, script>       Require;
+    signal<warning_event const, script> Warning;
 
     prop<std::optional<table>> Environment {std::nullopt};
 

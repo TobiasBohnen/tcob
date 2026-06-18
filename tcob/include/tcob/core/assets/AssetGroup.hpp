@@ -87,7 +87,7 @@ public:
     explicit group(string name);
     ~group();
 
-    signal<script_preload_event> PreScriptLoad;
+    signal<script_preload_event, group> PreScriptLoad;
 
     auto name() const -> string const&;
     auto mount_point() const -> string;

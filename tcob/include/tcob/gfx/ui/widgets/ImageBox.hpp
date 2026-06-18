@@ -36,7 +36,7 @@ public:
 
     explicit image_box(init const& wi);
 
-    signal<drop_event const> Dropped;
+    signal<drop_event const, image_box> Dropped;
 
     prop<icon>           Image;
     prop<fit_mode>       Fit;

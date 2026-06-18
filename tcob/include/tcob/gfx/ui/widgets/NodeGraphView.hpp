@@ -72,7 +72,7 @@ public:
 
     explicit node_graph_view(init const& wi);
 
-    signal<widget_event const> GraphChanged;
+    signal<widget_event const, node_graph_view> GraphChanged;
 
     prop<gfx::alignment> MinimapAlignment;
 

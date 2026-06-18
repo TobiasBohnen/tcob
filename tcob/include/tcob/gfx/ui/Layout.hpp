@@ -46,7 +46,7 @@ public:
 
     virtual ~layout() = default;
 
-    signal<> Changed;
+    signal<void, layout> Changed;
 
     void apply(size_f size);
 

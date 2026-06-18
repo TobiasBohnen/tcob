@@ -8,31 +8,23 @@
 
 namespace tcob {
 
-template <typename EvArgs>
-inline void signal<EvArgs>::operator()() const
+template <typename EvArgs, typename Emitter>
+inline void signal<EvArgs, Emitter>::operator()() const
     requires(IsVoid)
 {
-    bool needsCleanup {false};
     for (isize i {0}; i < std::ssize(_slots); ++i) {
         auto const& [id, func] {_slots[i]};
         if (func) {
             func();
-        } else {
-            needsCleanup = true;
         }
-    }
-
-    if (needsCleanup) {
-        std::erase_if(_slots, [](auto const& slot) { return !slot.second; });
     }
 }
 
-template <typename EvArgs>
+template <typename EvArgs, typename Emitter>
 template <typename S>
-inline void signal<EvArgs>::operator()(S&& args) const // NOLINT
+inline void signal<EvArgs, Emitter>::operator()(S&& args) const // NOLINT
     requires(!IsVoid)
 {
-    bool needsCleanup {false};
     for (isize i {0}; i < std::ssize(_slots); ++i) {
         auto const& [id, func] {_slots[i]};
         if (func) {
@@ -40,18 +32,13 @@ inline void signal<EvArgs>::operator()(S&& args) const // NOLINT
                 if (args.Handled) { break; }
             }
             func(args);
-        } else {
-            needsCleanup = true;
         }
-    }
-    if (needsCleanup) {
-        std::erase_if(_slots, [](auto const& slot) { return !slot.second; });
     }
 }
 
-template <typename EvArgs>
+template <typename EvArgs, typename Emitter>
 template <typename Func>
-inline auto signal<EvArgs>::connect(Func func) const -> connection
+inline auto signal<EvArgs, Emitter>::connect(Func func) const -> connection
 {
     if constexpr (std::is_convertible_v<Func, slot_func>) {
         uid const id {next_id()};
@@ -66,9 +53,9 @@ inline auto signal<EvArgs>::connect(Func func) const -> connection
     }
 }
 
-template <typename EvArgs>
+template <typename EvArgs, typename Emitter>
 template <auto Func, typename T>
-inline auto signal<EvArgs>::connect(T* inst) const -> connection
+inline auto signal<EvArgs, Emitter>::connect(T* inst) const -> connection
 {
     if constexpr (IsVoid) {
         return connect([inst] { (inst->*Func)(); });
@@ -77,8 +64,8 @@ inline auto signal<EvArgs>::connect(T* inst) const -> connection
     }
 }
 
-template <typename EvArgs>
-inline void signal<EvArgs>::disconnect(uid id) const
+template <typename EvArgs, typename Emitter>
+inline void signal<EvArgs, Emitter>::disconnect(uid id) const
 {
     for (auto it {_slots.begin()}; it != _slots.end(); ++it) {
         if (it->first == id) {
@@ -88,33 +75,33 @@ inline void signal<EvArgs>::disconnect(uid id) const
     }
 }
 
-template <typename EvArgs>
-inline void signal<EvArgs>::disconnect_all() const
+template <typename EvArgs, typename Emitter>
+inline void signal<EvArgs, Emitter>::disconnect_all() const
 {
     _slots.clear();
 }
 
-template <typename EvArgs>
+template <typename EvArgs, typename Emitter>
 template <typename Func>
-inline auto signal<EvArgs>::operator+=(Func func) const -> connection
+inline auto signal<EvArgs, Emitter>::operator+=(Func func) const -> connection
 {
     return connect(std::move(func));
 }
 
-template <typename EvArgs>
-inline void signal<EvArgs>::operator-=(connection& c) const
+template <typename EvArgs, typename Emitter>
+inline void signal<EvArgs, Emitter>::operator-=(connection& c) const
 {
     c.disconnect();
 }
 
-template <typename EvArgs>
-inline void signal<EvArgs>::operator-=(uid c) const
+template <typename EvArgs, typename Emitter>
+inline void signal<EvArgs, Emitter>::operator-=(uid c) const
 {
     disconnect(c);
 }
 
-template <typename EvArgs>
-inline auto signal<EvArgs>::slot_count() const -> isize
+template <typename EvArgs, typename Emitter>
+inline auto signal<EvArgs, Emitter>::slot_count() const -> isize
 {
     return std::ssize(_slots);
 }

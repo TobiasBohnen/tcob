@@ -28,7 +28,7 @@ class TCOB_API platform : public non_copyable {
 public:
     virtual ~platform();
 
-    signal<path const> DropFile;
+    signal<path const, platform> DropFile;
 
     prop<i32> FrameLimit;
 

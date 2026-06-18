@@ -81,8 +81,8 @@ class TCOB_API shadow_caster : public non_copyable {
 public:
     virtual ~shadow_caster() = default;
 
-    signal<light_collision const> Hit;
-    prop<polyline>                Polygon;
+    signal<light_collision const, lighting_system> Hit;
+    prop<polyline>                                 Polygon;
 
 protected:
     shadow_caster(lighting_system* parent);

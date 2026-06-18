@@ -20,7 +20,7 @@ class TCOB_API drawable {
 public:
     virtual ~drawable() = default;
 
-    signal<bool const> VisibilityChanged;
+    signal<bool const, drawable> VisibilityChanged;
 
     u32 VisibilityMask {0xFFFFFFFF};
 

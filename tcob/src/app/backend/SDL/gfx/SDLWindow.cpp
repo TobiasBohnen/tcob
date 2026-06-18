@@ -12,6 +12,7 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -114,23 +115,23 @@ void sdl_window::process_events(void* xev)
     ev.Data2    = sev->window.data2;
 
     switch (sev->window.type) {
-    case SDL_EVENT_WINDOW_SHOWN:           Shown(ev); break;
-    case SDL_EVENT_WINDOW_HIDDEN:          Hidden(ev); break;
-    case SDL_EVENT_WINDOW_EXPOSED:         Exposed(ev); break;
-    case SDL_EVENT_WINDOW_MOVED:           Moved(ev); break;
-    case SDL_EVENT_WINDOW_MINIMIZED:       Minimized(ev); break;
-    case SDL_EVENT_WINDOW_MAXIMIZED:       Maximized(ev); break;
-    case SDL_EVENT_WINDOW_RESTORED:        Restored(ev); break;
-    case SDL_EVENT_WINDOW_MOUSE_ENTER:     Enter(ev); break;
-    case SDL_EVENT_WINDOW_MOUSE_LEAVE:     Leave(ev); break;
-    case SDL_EVENT_WINDOW_FOCUS_GAINED:    FocusGained(ev); break;
-    case SDL_EVENT_WINDOW_FOCUS_LOST:      FocusLost(ev); break;
-    case SDL_EVENT_WINDOW_CLOSE_REQUESTED: Close(ev); break;
-    case SDL_EVENT_WINDOW_HIT_TEST:        HitTest(ev); break;
+    case SDL_EVENT_WINDOW_SHOWN:           emit_signal(Shown, ev); break;
+    case SDL_EVENT_WINDOW_HIDDEN:          emit_signal(Hidden, ev); break;
+    case SDL_EVENT_WINDOW_EXPOSED:         emit_signal(Exposed, ev); break;
+    case SDL_EVENT_WINDOW_MOVED:           emit_signal(Moved, ev); break;
+    case SDL_EVENT_WINDOW_MINIMIZED:       emit_signal(Minimized, ev); break;
+    case SDL_EVENT_WINDOW_MAXIMIZED:       emit_signal(Maximized, ev); break;
+    case SDL_EVENT_WINDOW_RESTORED:        emit_signal(Restored, ev); break;
+    case SDL_EVENT_WINDOW_MOUSE_ENTER:     emit_signal(Enter, ev); break;
+    case SDL_EVENT_WINDOW_MOUSE_LEAVE:     emit_signal(Leave, ev); break;
+    case SDL_EVENT_WINDOW_FOCUS_GAINED:    emit_signal(FocusGained, ev); break;
+    case SDL_EVENT_WINDOW_FOCUS_LOST:      emit_signal(FocusLost, ev); break;
+    case SDL_EVENT_WINDOW_CLOSE_REQUESTED: emit_signal(Close, ev); break;
+    case SDL_EVENT_WINDOW_HIT_TEST:        emit_signal(HitTest, ev); break;
 
     case SDL_EVENT_WINDOW_RESIZED:
         set_size({ev.Data1, ev.Data2});
-        Resized(ev);
+        emit_signal(Resized, ev);
         break;
 
     default: break;

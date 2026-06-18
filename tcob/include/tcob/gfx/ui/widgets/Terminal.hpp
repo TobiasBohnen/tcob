@@ -54,7 +54,7 @@ public:
 
     explicit terminal(init const& wi);
 
-    signal<widget_event const> Submit;
+    signal<widget_event const, terminal> Submit;
 
     prop<size_i>  Size;
     prop<point_i> HoveredCell;

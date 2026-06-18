@@ -72,8 +72,30 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////
 
-template <typename EvArgs = void>
+template <typename Signal, typename Arg>
+void emit_signal(Signal& signal, Arg&& arg)
+{
+    signal(std::forward<decltype(arg)>(arg));
+}
+
+template <typename Signal>
+void emit_signal(Signal& signal)
+{
+    signal();
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename EvArgs, typename Emitter>
 class signal final : public detail::signal_base {
+    friend Emitter;
+
+    template <typename Signal, typename Arg>
+    friend void emit_signal(Signal& signal, Arg&& arg);
+
+    template <typename Signal>
+    friend void emit_signal(Signal& signal);
+
     static constexpr bool IsVoid {std::is_void_v<std::remove_cvref_t<EvArgs>>};
 
     template <typename T, bool IsVoid>
@@ -93,13 +115,6 @@ class signal final : public detail::signal_base {
     using slots     = std::vector<std::pair<uid, slot_func>>;
 
 public:
-    void operator()() const
-        requires(IsVoid);
-
-    template <typename S = EvArgs>
-    void operator()(S&& args) const
-        requires(!IsVoid);
-
     template <typename Func>
     auto connect(Func func) const -> connection;
     template <auto Func, typename T>
@@ -117,6 +132,13 @@ public:
     auto slot_count() const -> isize;
 
 private:
+    void operator()() const
+        requires(IsVoid);
+
+    template <typename S = EvArgs>
+    void operator()(S&& args) const
+        requires(!IsVoid);
+
     mutable slots _slots;
 };
 

@@ -25,7 +25,7 @@ public:
     explicit tween_base(milliseconds duration);
     ~tween_base() override;
 
-    signal<> Finished;
+    signal<void, tween_base> Finished;
 
     std::optional<milliseconds> Interval {};
 

@@ -43,9 +43,9 @@ class container : public litehtml::document_container {
 public:
     explicit container(config& config);
 
-    signal<string const> AnchorClick;
-    signal<string const> CursorChanged;
-    signal<>             ForceRedraw;
+    signal<string const, container> AnchorClick;
+    signal<string const, container> CursorChanged;
+    signal<void, container>         ForceRedraw;
 
     void set_size(size_i size);
 

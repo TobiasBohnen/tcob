@@ -31,8 +31,8 @@ public:
 
     explicit text_box(init const& wi);
 
-    signal<text_event>       BeforeTextInserted;
-    signal<text_event const> Submit;
+    signal<text_event, text_box>       BeforeTextInserted;
+    signal<text_event const, text_box> Submit;
 
     prop<utf8_string> Text;
     prop<isize>       MaxLength;

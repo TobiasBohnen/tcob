@@ -47,7 +47,7 @@ public:
 
     explicit tree_view(init const& wi);
 
-    signal<item_event const> ItemClick;
+    signal<item_event const, tree_view> ItemClick;
 
     prop<std::vector<node>> Nodes;
 

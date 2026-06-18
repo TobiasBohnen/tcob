@@ -103,7 +103,7 @@ namespace detail {
         explicit constexpr prop(T val); // HACK: only field_source
         explicit constexpr prop(Source source);
 
-        signal<T const> Changed {};
+        signal<T const, prop> Changed {};
 
              operator T() const;
         auto operator!() const -> bool;

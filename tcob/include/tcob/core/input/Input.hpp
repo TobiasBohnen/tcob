@@ -263,22 +263,22 @@ public:
 
     virtual ~system() = default;
 
-    signal<input::keyboard::event const>            KeyDown;
-    signal<input::keyboard::event const>            KeyUp;
-    signal<input::keyboard::text_input_event const> TextInput;
+    signal<input::keyboard::event const, system>            KeyDown;
+    signal<input::keyboard::event const, system>            KeyUp;
+    signal<input::keyboard::text_input_event const, system> TextInput;
 
-    signal<input::mouse::motion_event const> MouseMotion;
-    signal<input::mouse::button_event const> MouseButtonDown;
-    signal<input::mouse::button_event const> MouseButtonUp;
-    signal<input::mouse::wheel_event const>  MouseWheel;
+    signal<input::mouse::motion_event const, system> MouseMotion;
+    signal<input::mouse::button_event const, system> MouseButtonDown;
+    signal<input::mouse::button_event const, system> MouseButtonUp;
+    signal<input::mouse::wheel_event const, system>  MouseWheel;
 
-    signal<controller::axis_event const>   ControllerAxisMotion;
-    signal<controller::button_event const> ControllerButtonDown;
-    signal<controller::button_event const> ControllerButtonUp;
-    signal<i32 const>                      ControllerAdded;
-    signal<i32 const>                      ControllerRemoved;
+    signal<controller::axis_event const, system>   ControllerAxisMotion;
+    signal<controller::button_event const, system> ControllerButtonDown;
+    signal<controller::button_event const, system> ControllerButtonUp;
+    signal<i32 const, system>                      ControllerAdded;
+    signal<i32 const, system>                      ControllerRemoved;
 
-    signal<> ClipboardUpdated;
+    signal<void, system> ClipboardUpdated;
 
     prop<mode> InputMode;
 

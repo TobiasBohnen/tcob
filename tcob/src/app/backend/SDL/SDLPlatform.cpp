@@ -18,6 +18,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/data/ConfigConversions.hpp"
@@ -93,7 +94,7 @@ auto sdl_platform::process_events() const -> bool
     while (SDL_PollEvent(&ev)) {
         switch (ev.type) {
         case SDL_EVENT_DROP_FILE: {
-            DropFile(ev.drop.data);
+            emit_signal(DropFile, ev.drop.data);
         } break;
         case SDL_EVENT_QUIT: return false;
         case SDL_EVENT_KEY_DOWN:
