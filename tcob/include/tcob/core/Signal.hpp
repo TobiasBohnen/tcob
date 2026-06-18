@@ -122,32 +122,6 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-template <typename EvArgs = void>
-class signal_view {
-public:
-    explicit signal_view(signal<EvArgs>& sig);
-
-    template <typename Func>
-    auto connect(Func func) const -> connection;
-
-    template <auto Func, typename T>
-    auto connect(T* inst) const -> connection;
-
-    void disconnect(uid id) const;
-    void disconnect_all() const;
-
-    auto operator+=(auto func) const -> connection;
-    void operator-=(connection& c) const;
-    void operator-=(uid id) const;
-
-    auto slot_count() const -> isize;
-
-private:
-    signal<EvArgs>& _sig;
-};
-
-////////////////////////////////////////////////////////////
-
 namespace detail {
     class connection_manager final : public non_copyable {
     public:

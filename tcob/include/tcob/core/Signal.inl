@@ -121,33 +121,6 @@ inline auto signal<EvArgs>::slot_count() const -> isize
 
 ////////////////////////////////////////////////////////////
 
-template <typename EvArgs>
-inline signal_view<EvArgs>::signal_view(signal<EvArgs>& sig)
-    : _sig {sig}
-{
-}
-
-template <typename EvArgs>
-template <typename Func>
-inline auto signal_view<EvArgs>::connect(Func func) const -> connection { return _sig.connect(std::move(func)); }
-template <typename EvArgs>
-template <auto Func, typename T>
-inline auto signal_view<EvArgs>::connect(T* inst) const -> connection { return _sig.connect<Func>(inst); }
-template <typename EvArgs>
-inline void signal_view<EvArgs>::disconnect(uid id) const { _sig.disconnect(id); }
-template <typename EvArgs>
-inline void signal_view<EvArgs>::disconnect_all() const { _sig.disconnect_all(); }
-template <typename EvArgs>
-inline auto signal_view<EvArgs>::operator+=(auto func) const -> connection { return _sig += std::move(func); }
-template <typename EvArgs>
-inline void signal_view<EvArgs>::operator-=(connection& c) const { _sig -= c; }
-template <typename EvArgs>
-inline void signal_view<EvArgs>::operator-=(uid id) const { _sig -= id; }
-template <typename EvArgs>
-inline auto signal_view<EvArgs>::slot_count() const -> isize { return _sig.slot_count(); }
-
-////////////////////////////////////////////////////////////
-
 namespace detail {
     template <typename Signal, typename Func>
     inline void connection_manager::connect(Signal const& sig, Func func)

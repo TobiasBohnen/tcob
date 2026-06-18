@@ -220,7 +220,7 @@ template <typename T, typename Source>
 inline void prop<T, Source>::mutate(auto&& func)
 {
     if (_source.mutate(std::move(func)) && Changed.slot_count() > 0) {
-        _changed(_source.get());
+        Changed(_source.get());
     }
 }
 
@@ -236,7 +236,7 @@ inline void prop<T, Source>::set(T const& value, bool force)
 {
     if (_source.set(value, force)
         && Changed.slot_count() > 0) { // avoid unnecessary call to _source.get()
-        _changed(_source.get());
+        Changed(_source.get());
     }
 }
 
