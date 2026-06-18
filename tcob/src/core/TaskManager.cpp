@@ -6,8 +6,8 @@
 #include "tcob/core/TaskManager.hpp"
 
 #include <algorithm>
-#include <atomic>
 #include <cassert>
+#include <latch>
 #include <mutex>
 #include <stop_token>
 #include <thread>
@@ -42,19 +42,19 @@ void task_manager::run_parallel(par_func const& func, isize count, isize minRang
         par_task const ctx {.Start = 0, .End = count, .Thread = 0};
         func(ctx);
     } else {
-        isize const        partitionSize {count / numThreads};
-        std::atomic<isize> activeTasks {numThreads};
+        isize const partitionSize {count / numThreads};
+        std::latch  latch {numThreads};
 
         for (isize i {0}; i < numThreads; ++i) {
             isize const start {i * partitionSize};
             isize const end {(i == numThreads - 1) ? count : start + partitionSize};
-            add_task([func, ctx = par_task {.Start = start, .End = end, .Thread = i}, &activeTasks] {
+            add_task([func, ctx = par_task {.Start = start, .End = end, .Thread = i}, &latch] {
                 func(ctx);
-                --activeTasks;
+                latch.count_down();
             });
         }
 
-        while (activeTasks > 0) { std::this_thread::yield(); }
+        latch.wait();
     }
 }
 
@@ -80,18 +80,20 @@ void task_manager::drop_deferred(uid id)
 auto task_manager::process_defer_queue(milliseconds deltaTime, bool abort) -> bool
 {
     assert(std::this_thread::get_id() == _mainThreadID);
-    std::scoped_lock lock {_deferredMutex};
-    if (_deferredQueueFront.empty()) { return true; }
-
-    std::swap(_deferredQueueFront, _deferredQueueBack);
-
+    {
+        std::scoped_lock lock {_deferredMutex};
+        if (_deferredQueueFront.empty()) { return true; }
+        std::swap(_deferredQueueFront, _deferredQueueBack);
+    }
     for (auto& task : _deferredQueueBack) {
         def_task const ctx {.DeltaTime = deltaTime, .AbortRequested = abort};
         task.first(ctx);
         if (!ctx.Finished) {
+            std::scoped_lock lock {_deferredMutex};
             _deferredQueueFront.emplace_back(std::move(task));
         }
     }
+    std::scoped_lock lock {_deferredMutex};
     _deferredQueueBack.clear();
 
     return _deferredQueueFront.empty();
