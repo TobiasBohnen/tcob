@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <tuple>
+#include <type_traits>
 
 #include "tcob/core/Concepts.hpp"
 
@@ -25,9 +26,9 @@ public:
     auto operator=(auto&& other) const -> proxy& = delete;
 
     template <typename Key>
-    auto operator[](Key key) -> proxy<Object, Keys..., Key>;
+    auto operator[](Key&& key) -> proxy<Object, Keys..., Key>;
     template <typename Key>
-    auto operator[](Key key) const -> proxy<Object const, Keys..., Key>;
+    auto operator[](Key&& key) const -> proxy<Object const, Keys..., Key>;
 
     template <typename T>
     auto as() const -> T;
@@ -42,7 +43,7 @@ public:
     auto try_get(T& val) const -> bool;
 
     template <typename Key, typename T>
-    auto try_get(T& val, Key key) const -> bool;
+    auto try_get(T& val, Key&& key) const -> bool;
 
 private:
     Object&             _object;

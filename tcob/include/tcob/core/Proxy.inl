@@ -7,6 +7,7 @@
 #include "Proxy.hpp"
 
 #include <tuple>
+#include <type_traits>
 
 namespace tcob {
 
@@ -28,24 +29,26 @@ template <typename Object, typename... Keys>
 inline auto proxy<Object, Keys...>::operator=(auto&& other) -> proxy&
 {
     static_assert(!std::is_const_v<Object>, "object is const");
-    if constexpr (!std::is_const_v<Object>) {
-        std::apply([&](auto&&... args) { return _object.set(args..., std::forward<decltype(other)>(other)); }, _keys);
-    }
+    std::apply([&](auto&&... args) { _object.set(args..., std::forward<decltype(other)>(other)); }, _keys);
     return *this;
 }
 
 template <typename Object, typename... Keys>
 template <typename Key>
-inline auto proxy<Object, Keys...>::operator[](Key key) -> proxy<Object, Keys..., Key>
+inline auto proxy<Object, Keys...>::operator[](Key&& key) -> proxy<Object, Keys..., Key>
 {
-    return proxy<Object, Keys..., Key>(_object, std::tuple_cat(_keys, std::tuple {key}));
+    return proxy<Object, Keys..., Key>(
+        _object,
+        std::tuple_cat(_keys, std::tuple<Key> {std::forward<Key>(key)}));
 }
 
 template <typename Object, typename... Keys>
 template <typename Key>
-inline auto proxy<Object, Keys...>::operator[](Key key) const -> proxy<Object const, Keys..., Key>
+inline auto proxy<Object, Keys...>::operator[](Key&& key) const -> proxy<Object const, Keys..., Key>
 {
-    return proxy<Object, Keys..., Key>(_object, std::tuple_cat(_keys, std::tuple {key}));
+    return proxy<Object const, Keys..., Key>(
+        _object,
+        std::tuple_cat(_keys, std::tuple<Key> {std::forward<Key>(key)}));
 }
 
 template <typename Object, typename... Keys>
@@ -83,9 +86,9 @@ inline auto proxy<Object, Keys...>::try_get(T& val) const -> bool
 
 template <typename Object, typename... Keys>
 template <typename Key, typename T>
-inline auto proxy<Object, Keys...>::try_get(T& val, Key key) const -> bool
+inline auto proxy<Object, Keys...>::try_get(T& val, Key&& key) const -> bool
 {
-    if (auto const newval {operator[](key).template get<T>()}) {
+    if (auto const newval {operator[](std::forward<Key>(key)).template get<T>()}) {
         val = *newval;
         return true;
     }
