@@ -92,16 +92,19 @@ template <Arithmetic T>
 rect<T> const rect<T>::Zero = {0, 0, 0, 0};
 
 template <Arithmetic T, Arithmetic R>
-auto constexpr operator*(rect<T> const& left, R const& right) -> rect<T>;
+auto constexpr operator*(rect<T> const& left, R right) -> rect<T>;
 
 template <Arithmetic T, Arithmetic R>
-auto constexpr operator*=(rect<T>& left, R const& right) -> rect<T>&;
+auto constexpr operator*(R left, rect<T> const& right) -> rect<T>;
 
 template <Arithmetic T, Arithmetic R>
-auto constexpr operator/(rect<T> const& left, R const& right) -> rect<T>;
+auto constexpr operator*=(rect<T>& left, R right) -> rect<T>&;
 
 template <Arithmetic T, Arithmetic R>
-auto constexpr operator/=(rect<T>& left, R const& right) -> rect<T>&;
+auto constexpr operator/(rect<T> const& left, R right) -> rect<T>;
+
+template <Arithmetic T, Arithmetic R>
+auto constexpr operator/=(rect<T>& left, R right) -> rect<T>&;
 
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator==(rect<T> const& left, rect<R> const& right) -> bool;

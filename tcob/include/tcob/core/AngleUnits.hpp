@@ -77,7 +77,10 @@ template <FloatingPoint ValueType, f64 OneTurn>
 auto constexpr operator-=(angle_unit<ValueType, OneTurn>& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>&;
 
 template <FloatingPoint ValueType, f64 OneTurn, Arithmetic R>
-auto constexpr operator*(angle_unit<ValueType, OneTurn> const& left, R const& right) -> angle_unit<ValueType, OneTurn>;
+auto constexpr operator*(angle_unit<ValueType, OneTurn> const& left, R right) -> angle_unit<ValueType, OneTurn>;
+
+template <FloatingPoint ValueType, f64 OneTurn, Arithmetic R>
+auto constexpr operator*(R left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>;
 
 template <FloatingPoint ValueType, f64 OneTurn, Arithmetic R>
 auto constexpr operator*=(angle_unit<ValueType, OneTurn>& left, R right) -> angle_unit<ValueType, OneTurn>&;
