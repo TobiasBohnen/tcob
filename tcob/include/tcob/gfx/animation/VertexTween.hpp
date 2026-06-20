@@ -71,7 +71,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-namespace effect {
+namespace effects {
 
     class TCOB_API typing final { // alpha
     public:

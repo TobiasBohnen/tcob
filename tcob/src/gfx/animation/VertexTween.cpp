@@ -77,7 +77,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////
 
-namespace effect {
+namespace effects {
 
     void typing::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
