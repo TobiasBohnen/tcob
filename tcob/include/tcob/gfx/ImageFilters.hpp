@@ -8,18 +8,19 @@
 
 #include <array>
 
+#include "tcob/core/Color.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Image.hpp"
 
-namespace tcob::gfx {
+namespace tcob::gfx::filters {
 ////////////////////////////////////////////////////////////
 
 template <i32 Width, i32 Height>
-class convolution_filter {
+class convolution {
     static constexpr i32 Size {Width * Height};
 
 public:
-    virtual ~convolution_filter() = default;
+    virtual ~convolution() = default;
 
     bool IncludeAlpha {false};
 
@@ -33,7 +34,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API blur_filter final : public convolution_filter<5, 5> {
+class TCOB_API blur final : public convolution<5, 5> {
 protected:
     auto factor() const -> f64 override;
     auto offset() const -> u8 override;
@@ -42,7 +43,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API edge_detect_filter final : public convolution_filter<3, 3> {
+class TCOB_API edge_detect final : public convolution<3, 3> {
 protected:
     auto factor() const -> f64 override;
     auto offset() const -> u8 override;
@@ -51,7 +52,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API edge_enhance_filter final : public convolution_filter<3, 3> {
+class TCOB_API edge_enhance final : public convolution<3, 3> {
 protected:
     auto factor() const -> f64 override;
     auto offset() const -> u8 override;
@@ -60,7 +61,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API emboss_filter final : public convolution_filter<3, 3> {
+class TCOB_API emboss final : public convolution<3, 3> {
 protected:
     auto factor() const -> f64 override;
     auto offset() const -> u8 override;
@@ -69,7 +70,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API motion_blur_filter final : public convolution_filter<9, 9> {
+class TCOB_API motion_blur final : public convolution<9, 9> {
 protected:
     auto factor() const -> f64 override;
     auto offset() const -> u8 override;
@@ -78,7 +79,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sharpen_filter final : public convolution_filter<5, 5> {
+class TCOB_API sharpen final : public convolution<5, 5> {
 protected:
     auto factor() const -> f64 override;
     auto offset() const -> u8 override;
@@ -87,7 +88,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API grayscale_filter final {
+class TCOB_API grayscale final {
 public:
     f32 RedFactor {0.299f};
     f32 GreenFactor {0.587f};
@@ -118,6 +119,16 @@ public:
 
 class TCOB_API alpha_remover final {
 public:
+    auto operator()(image const& img) const -> image;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API color_changer final {
+public:
+    color From;
+    color To;
+
     auto operator()(image const& img) const -> image;
 };
 

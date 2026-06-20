@@ -192,7 +192,7 @@ auto png_decoder::decode(io::istream& in) -> std::optional<image>
     auto         retValue {image::Create(size, image::format::RGBA, _data)};
 
     if (phys && phys->Value != 1.0f) {
-        nearest_neighbor_resizer filter;
+        filters::nearest_neighbor_resizer filter;
         filter.NewSize = phys->Value > 1.0f
             ? size_i {size.Width, static_cast<i32>(static_cast<f32>(size.Height) * phys->Value)}
             : size_i {static_cast<i32>(static_cast<f32>(size.Width) / phys->Value), size.Height};

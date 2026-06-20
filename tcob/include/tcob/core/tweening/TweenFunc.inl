@@ -15,7 +15,7 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 
-namespace tcob::tween_func {
+namespace tcob::tween_funcs {
 
 template <typename T, ease_mode Mode>
 inline auto polynomial<T, Mode>::operator()(f64 t) const -> type

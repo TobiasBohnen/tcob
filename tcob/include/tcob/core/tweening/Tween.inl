@@ -15,26 +15,26 @@ namespace tcob {
 
 ////////////////////////////////////////////////////////////
 
-template <tween_func::Function Func>
+template <tween_funcs::Function Func>
 inline tween<Func>::tween(milliseconds duration)
     : tween_base {duration}
 {
 }
 
-template <tween_func::Function Func>
+template <tween_funcs::Function Func>
 inline tween<Func>::tween(milliseconds duration, func_type&& func)
     : tween_base {duration}
     , Function {std::move(func)}
 {
 }
 
-template <tween_func::Function Func>
+template <tween_funcs::Function Func>
 inline auto tween<Func>::add_output(value_type* dest) -> connection
 {
     return Value.Changed.connect([dest](value_type const& val) { *dest = val; });
 }
 
-template <tween_func::Function Func>
+template <tween_funcs::Function Func>
 inline void tween<Func>::update_values()
 {
     Value = Function(playback_progress());

@@ -58,7 +58,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-template <tween_func::Function Func>
+template <tween_funcs::Function Func>
 class tween final : public tween_base {
 public:
     using func_type  = Func;
@@ -99,62 +99,62 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::In>
-using polynomial_tween = tween<tween_func::polynomial<T, Mode>>;
+template <typename T, tween_funcs::ease_mode Mode = tween_funcs::ease_mode::In>
+using polynomial_tween = tween<tween_funcs::polynomial<T, Mode>>;
 
-template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::In>
-using exponential_tween = tween<tween_func::exponential<T, Mode>>;
-
-template <typename T>
-using linear_tween = tween<tween_func::linear<T>>;
+template <typename T, tween_funcs::ease_mode Mode = tween_funcs::ease_mode::In>
+using exponential_tween = tween<tween_funcs::exponential<T, Mode>>;
 
 template <typename T>
-using smoothstep_tween = tween<tween_func::smoothstep<T>>;
+using linear_tween = tween<tween_funcs::linear<T>>;
 
 template <typename T>
-using smootherstep_tween = tween<tween_func::smootherstep<T>>;
-
-template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::Out>
-using bounce_tween = tween<tween_func::bounce<T, Mode>>;
-
-template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::Out>
-using elastic_tween = tween<tween_func::elastic<T, Mode>>;
-
-template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::Out>
-using back_tween = tween<tween_func::back<T, Mode>>;
-
-template <typename T, tween_func::ease_mode Mode = tween_func::ease_mode::Out>
-using circular_tween = tween<tween_func::circular<T, Mode>>;
+using smoothstep_tween = tween<tween_funcs::smoothstep<T>>;
 
 template <typename T>
-using sine_wave_tween = tween<tween_func::sine_wave<T>>;
+using smootherstep_tween = tween<tween_funcs::smootherstep<T>>;
+
+template <typename T, tween_funcs::ease_mode Mode = tween_funcs::ease_mode::Out>
+using bounce_tween = tween<tween_funcs::bounce<T, Mode>>;
+
+template <typename T, tween_funcs::ease_mode Mode = tween_funcs::ease_mode::Out>
+using elastic_tween = tween<tween_funcs::elastic<T, Mode>>;
+
+template <typename T, tween_funcs::ease_mode Mode = tween_funcs::ease_mode::Out>
+using back_tween = tween<tween_funcs::back<T, Mode>>;
+
+template <typename T, tween_funcs::ease_mode Mode = tween_funcs::ease_mode::Out>
+using circular_tween = tween<tween_funcs::circular<T, Mode>>;
 
 template <typename T>
-using triangle_wave_tween = tween<tween_func::triangle_wave<T>>;
+using sine_wave_tween = tween<tween_funcs::sine_wave<T>>;
 
 template <typename T>
-using square_wave_tween = tween<tween_func::square_wave<T>>;
+using triangle_wave_tween = tween<tween_funcs::triangle_wave<T>>;
 
 template <typename T>
-using sawtooth_wave_tween = tween<tween_func::sawtooth_wave<T>>;
-
-using quad_bezier_curve_tween = tween<tween_func::quad_bezier_curve>;
-
-using cubic_bezier_curve_tween = tween<tween_func::cubic_bezier_curve>;
-
-using bezier_curve_tween = tween<tween_func::bezier_curve>;
-
-using catmull_rom_tween = tween<tween_func::catmull_rom>;
-
-using circular_motion_tween = tween<tween_func::circular_motion>;
+using square_wave_tween = tween<tween_funcs::square_wave<T>>;
 
 template <typename T>
-using curve_tween = tween<tween_func::curve<T>>;
-template <typename T>
-using curve_point = tween_func::curve<T>::point;
+using sawtooth_wave_tween = tween<tween_funcs::sawtooth_wave<T>>;
+
+using quad_bezier_curve_tween = tween<tween_funcs::quad_bezier_curve>;
+
+using cubic_bezier_curve_tween = tween<tween_funcs::cubic_bezier_curve>;
+
+using bezier_curve_tween = tween<tween_funcs::bezier_curve>;
+
+using catmull_rom_tween = tween<tween_funcs::catmull_rom>;
+
+using circular_motion_tween = tween<tween_funcs::circular_motion>;
 
 template <typename T>
-using callable_tween = tween<tween_func::callable<T>>;
+using curve_tween = tween<tween_funcs::curve<T>>;
+template <typename T>
+using curve_point = tween_funcs::curve<T>::point;
+
+template <typename T>
+using callable_tween = tween<tween_funcs::callable<T>>;
 
 }
 

@@ -137,9 +137,9 @@ namespace effect {
 
     void blink::operator()(f64 t, std::span<vertex_tween_group> groups)
     {
-        tween_func::square_wave<bool> wave {.Frequency = Frequency};
-        bool const                    flip {wave(t)};
-        color const                   c {flip ? Color0 : Color1};
+        tween_funcs::square_wave<bool> wave {.Frequency = Frequency};
+        bool const                     flip {wave(t)};
+        color const                    c {flip ? Color0 : Color1};
         for (auto& g : groups) {
             for (auto& v : g.Verts) { v.Color = c; }
         }
@@ -196,7 +196,7 @@ namespace effect {
 
     void wave::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
-        tween_func::sine_wave<f64> w {.Min = 0, .Max = 1};
+        tween_funcs::sine_wave<f64> w {.Min = 0, .Max = 1};
         for (usize idx {0}; idx < groups.size(); ++idx) {
             w.Phase = static_cast<f64>(idx) / static_cast<f64>(groups.size()) * Amplitude;
             f32 const val {static_cast<f32>(w(t) * Height)};
@@ -208,7 +208,7 @@ namespace effect {
 
     void bounce::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
-        tween_func::bounce<f64> w {.Start = 0, .End = 1};
+        tween_funcs::bounce<f64> w {.Start = 0, .End = 1};
         for (usize idx {0}; idx < groups.size(); ++idx) {
             f32 const val {static_cast<f32>(w(t) * Height)};
             for (auto& v : groups[idx].Verts) { v.Position.Y += val; }
@@ -219,7 +219,7 @@ namespace effect {
 
     void elastic::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
-        tween_func::elastic<f64> w {.Start = 0, .End = 1, .Amplitude = Amplitude, .Period = Period};
+        tween_funcs::elastic<f64> w {.Start = 0, .End = 1, .Amplitude = Amplitude, .Period = Period};
         for (usize idx {0}; idx < groups.size(); ++idx) {
             f32 const val {static_cast<f32>(w(t) * Height)};
             for (auto& v : groups[idx].Verts) { v.Position.Y += val; }
@@ -230,7 +230,7 @@ namespace effect {
 
     void back::operator()(f64 t, std::span<vertex_tween_group> groups) const
     {
-        tween_func::back<f64> w {.Start = 0, .End = 1, .Overshoot = Overshoot};
+        tween_funcs::back<f64> w {.Start = 0, .End = 1, .Overshoot = Overshoot};
         for (usize idx {0}; idx < groups.size(); ++idx) {
             f32 const val {static_cast<f32>(w(t) * Height)};
             for (auto& v : groups[idx].Verts) { v.Position.Y += val; }

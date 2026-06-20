@@ -336,7 +336,7 @@ auto path2d::polygonize() -> std::vector<polygon>
             idx += 3;
         } break;
         case BezierTo: {
-            tween_func::cubic_bezier_curve func;
+            tween_funcs::cubic_bezier_curve func;
             func.StartPoint    = curPos;
             func.ControlPoint0 = {Commands[idx + 1], Commands[idx + 2]};
             func.ControlPoint1 = {Commands[idx + 3], Commands[idx + 4]};
@@ -346,7 +346,7 @@ auto path2d::polygonize() -> std::vector<polygon>
             idx += 7;
         } break;
         case Close: {
-            tween_func::linear<point_f> func;
+            tween_funcs::linear<point_f> func;
             func.Start = points[0];
             func.End   = curPos;
             for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }

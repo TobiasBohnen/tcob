@@ -16,7 +16,7 @@ namespace tcob::ui {
 
 auto style::ease_value(f64 t) const -> f64
 {
-    using namespace tween_func;
+    using namespace tween_funcs;
 
     switch (EasingFunc) {
     case easing_func::Linear:        return t;

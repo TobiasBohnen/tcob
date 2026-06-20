@@ -14,7 +14,7 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 
-namespace tcob::tween_func {
+namespace tcob::tween_funcs {
 ////////////////////////////////////////////////////////////
 
 enum class ease_mode : u8 {

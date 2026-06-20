@@ -14,21 +14,21 @@
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/gfx/Image.hpp"
 
-namespace tcob::gfx {
+namespace tcob::gfx::filters {
 
 ////////////////////////////////////////////////////////////
 
-auto blur_filter::factor() const -> f64
+auto blur::factor() const -> f64
 {
     return 1.0 / 9;
 }
 
-auto blur_filter::offset() const -> u8
+auto blur::offset() const -> u8
 {
     return 0;
 }
 
-auto blur_filter::matrix() const -> std::array<i32, 25>
+auto blur::matrix() const -> std::array<i32, 25>
 {
     return {0, 0, 0, 0, 0,
             0, 1, 1, 1, 0,
@@ -39,17 +39,17 @@ auto blur_filter::matrix() const -> std::array<i32, 25>
 
 ////////////////////////////////////////////////////////////
 
-auto edge_detect_filter::factor() const -> f64
+auto edge_detect::factor() const -> f64
 {
     return 1.5;
 }
 
-auto edge_detect_filter::offset() const -> u8
+auto edge_detect::offset() const -> u8
 {
     return 0;
 }
 
-auto edge_detect_filter::matrix() const -> std::array<i32, 9>
+auto edge_detect::matrix() const -> std::array<i32, 9>
 {
     return {0, 1, 0,
             1, -4, 1,
@@ -58,17 +58,17 @@ auto edge_detect_filter::matrix() const -> std::array<i32, 9>
 
 ////////////////////////////////////////////////////////////
 
-auto emboss_filter::factor() const -> f64
+auto emboss::factor() const -> f64
 {
     return 1.0;
 }
 
-auto emboss_filter::offset() const -> u8
+auto emboss::offset() const -> u8
 {
     return 128;
 }
 
-auto emboss_filter::matrix() const -> std::array<i32, 9>
+auto emboss::matrix() const -> std::array<i32, 9>
 {
     return {-1, -1, 0,
             -1, 0, 1,
@@ -77,17 +77,17 @@ auto emboss_filter::matrix() const -> std::array<i32, 9>
 
 ////////////////////////////////////////////////////////////
 
-auto edge_enhance_filter::factor() const -> f64
+auto edge_enhance::factor() const -> f64
 {
     return 2.0;
 }
 
-auto edge_enhance_filter::offset() const -> u8
+auto edge_enhance::offset() const -> u8
 {
     return 0;
 }
 
-auto edge_enhance_filter::matrix() const -> std::array<i32, 9>
+auto edge_enhance::matrix() const -> std::array<i32, 9>
 {
     return {0, 0, 0,
             -1, 1, 0,
@@ -96,17 +96,17 @@ auto edge_enhance_filter::matrix() const -> std::array<i32, 9>
 
 ////////////////////////////////////////////////////////////
 
-auto motion_blur_filter::factor() const -> f64
+auto motion_blur::factor() const -> f64
 {
     return 1.0 / 9.0;
 }
 
-auto motion_blur_filter::offset() const -> u8
+auto motion_blur::offset() const -> u8
 {
     return 0;
 }
 
-auto motion_blur_filter::matrix() const -> std::array<i32, 81>
+auto motion_blur::matrix() const -> std::array<i32, 81>
 {
     return {1, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -121,17 +121,17 @@ auto motion_blur_filter::matrix() const -> std::array<i32, 81>
 
 ////////////////////////////////////////////////////////////
 
-auto sharpen_filter::factor() const -> f64
+auto sharpen::factor() const -> f64
 {
     return 1.0;
 }
 
-auto sharpen_filter::offset() const -> u8
+auto sharpen::offset() const -> u8
 {
     return 0;
 }
 
-auto sharpen_filter::matrix() const -> std::array<i32, 25>
+auto sharpen::matrix() const -> std::array<i32, 25>
 {
     return {0, 0, 0, 0, 0,
             0, 0, -1, 0, 0,
@@ -142,7 +142,7 @@ auto sharpen_filter::matrix() const -> std::array<i32, 25>
 
 ////////////////////////////////////////////////////////////
 
-auto grayscale_filter::operator()(image const& img) const -> image
+auto grayscale::operator()(image const& img) const -> image
 {
     auto const& info {img.info()};
     auto        retValue {image::CreateEmpty(info.Size, info.Format)};
@@ -274,6 +274,30 @@ auto alpha_remover::operator()(image const& img) const -> image
 
                 color const src {img.get_pixel({x, y})};
                 retValue.set_pixel({x, y}, color {src.R, src.G, src.B});
+            }
+        },
+        width * height);
+
+    return retValue;
+}
+
+////////////////////////////////////////////////////////////
+
+auto color_changer::operator()(image const& img) const -> image
+{
+    auto const& info {img.info()};
+    auto const [width, height] {info.Size};
+
+    auto retValue {image::CreateEmpty(info.Size, image::format::RGB)};
+
+    locate_service<task_manager>().run_parallel(
+        [&](par_task const& ctx) {
+            for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
+                i32 const x {static_cast<i32>(pixIdx % width)};
+                i32 const y {static_cast<i32>(pixIdx / width)};
+
+                color const src {img.get_pixel({x, y})};
+                retValue.set_pixel({x, y}, src == From ? To : src);
             }
         },
         width * height);
