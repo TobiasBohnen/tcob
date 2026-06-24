@@ -10,8 +10,6 @@
 #include <span>
 #include <vector>
 
-#include "tcob/core/TypeFactory.hpp"
-
 // TODO:
 // master volume/pan in audio::system -> signals
 // source position and listener -> volume scaling
@@ -58,10 +56,6 @@ constexpr i32 RECORDING_SAMPLE_RATE {22050};
 
 class TCOB_API system {
 public:
-    struct factory : public type_factory<std::shared_ptr<system>> {
-        static inline char const* ServiceName {"audio::system::factory"};
-    };
-
     virtual ~system() = default;
 
     virtual auto create_output(specification const& info) const -> std::unique_ptr<audio_stream> = 0;

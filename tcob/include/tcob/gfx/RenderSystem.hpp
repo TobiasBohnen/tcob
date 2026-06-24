@@ -12,7 +12,6 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
-#include "tcob/core/TypeFactory.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
@@ -47,10 +46,6 @@ class TCOB_API render_system : public non_copyable {
     friend class ::tcob::platform;
 
 public:
-    struct factory : public type_factory<std::shared_ptr<render_system>> {
-        static inline char const* ServiceName {"gfx::render_system::factory"};
-    };
-
     render_system();
     virtual ~render_system();
 

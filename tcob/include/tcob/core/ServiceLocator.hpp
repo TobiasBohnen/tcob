@@ -40,10 +40,16 @@ private:
 };
 
 template <typename T, typename R = T>
-auto register_service(std::shared_ptr<R> service = std::make_shared<R>()) -> R&
+auto register_service(std::shared_ptr<R> service) -> R&
 {
     service_locator::GetInstance().set<T>(service);
     return *service;
+}
+
+template <typename T>
+auto make_service() -> T&
+{
+    return register_service<T>(std::make_shared<T>());
 }
 
 template <typename T>

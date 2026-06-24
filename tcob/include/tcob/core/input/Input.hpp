@@ -13,7 +13,6 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/core/TypeFactory.hpp"
 #include "tcob/core/input/Input_Codes.hpp"
 
 namespace tcob::input {
@@ -257,10 +256,6 @@ public:
 
 class TCOB_API system {
 public:
-    struct factory : public type_factory<std::shared_ptr<system>> {
-        static inline char const* ServiceName {"input::system::factory"};
-    };
-
     virtual ~system() = default;
 
     signal<input::keyboard::event const, system>            KeyDown;

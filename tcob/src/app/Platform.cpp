@@ -213,14 +213,14 @@ void platform::InitConfigFormats()
 {
     // text
     // readers
-    auto& trFactory {register_service<data::text_reader::factory>()};
+    auto& trFactory {make_service<data::text_reader::factory>()};
     trFactory.add(".ini", &MakeUnique<data::detail::ini_reader>);
     trFactory.add(".json", &MakeUnique<data::detail::json_reader>);
     trFactory.add(".xml", &MakeUnique<data::detail::xml_reader>);
     trFactory.add(".yaml", &MakeUnique<data::detail::yaml_reader>);
 
     // writers
-    auto& twFactory {register_service<data::text_writer::factory>()};
+    auto& twFactory {make_service<data::text_writer::factory>()};
     twFactory.add(".ini", &MakeUnique<data::detail::ini_writer>);
     twFactory.add(".json", &MakeUnique<data::detail::json_writer>);
     twFactory.add(".xml", &MakeUnique<data::detail::xml_writer>);
@@ -228,17 +228,17 @@ void platform::InitConfigFormats()
 
     // binary
     // readers
-    auto& brFactory {register_service<data::binary_reader::factory>()};
+    auto& brFactory {make_service<data::binary_reader::factory>()};
     brFactory.add(".bsbd", &MakeUnique<data::detail::bsbd_reader>);
 
     // writers
-    auto& bwFactory {register_service<data::binary_writer::factory>()};
+    auto& bwFactory {make_service<data::binary_writer::factory>()};
     bwFactory.add(".bsbd", &MakeUnique<data::detail::bsbd_writer>);
 }
 
 void platform::InitAssetFormats()
 {
-    auto& factory {register_service<assets::loader_manager::factory>()};
+    auto& factory {make_service<assets::loader_manager::factory>()};
     factory.add({".ini", ".json", ".xml", ".yaml"},
                 [](assets::group& group) {
                     return std::make_unique<detail::cfg_asset_loader_manager>(group);
@@ -247,7 +247,7 @@ void platform::InitAssetFormats()
 
 void platform::InitMeshFormats()
 {
-    auto& factory {register_service<gfx::mesh_loader::factory>()};
+    auto& factory {make_service<gfx::mesh_loader::factory>()};
     factory.add(".obj", &MakeUnique<gfx::detail::obj_loader>);
     factory.add(".ply", &MakeUnique<gfx::detail::ply_loader>);
 }
@@ -255,7 +255,7 @@ void platform::InitMeshFormats()
 void platform::InitImageCodecs()
 {
     // decoders
-    auto& idFactory {register_service<gfx::image_decoder::factory>()};
+    auto& idFactory {make_service<gfx::image_decoder::factory>()};
     idFactory.add(".bmp", &MakeUnique<gfx::detail::bmp_decoder>);
     idFactory.add(".bsi", &MakeUnique<gfx::detail::bsi_decoder>);
     idFactory.add(".tga", &MakeUnique<gfx::detail::tga_decoder>);
@@ -266,7 +266,7 @@ void platform::InitImageCodecs()
     idFactory.add(".qoi", &MakeUnique<gfx::detail::qoi_decoder>);
 
     // encoders
-    auto& ieFactory {register_service<gfx::image_encoder::factory>()};
+    auto& ieFactory {make_service<gfx::image_encoder::factory>()};
     ieFactory.add(".bmp", &MakeUnique<gfx::detail::bmp_encoder>);
     ieFactory.add(".bsi", &MakeUnique<gfx::detail::bsi_encoder>);
     ieFactory.add(".tga", &MakeUnique<gfx::detail::tga_encoder>);
@@ -277,7 +277,7 @@ void platform::InitImageCodecs()
 
     // animated
     // decoders
-    auto& iadFactory {register_service<gfx::animated_image_decoder::factory>()};
+    auto& iadFactory {make_service<gfx::animated_image_decoder::factory>()};
     iadFactory.add(".gif", &MakeUnique<gfx::detail::gif_decoder>);
     iadFactory.add(".png", &MakeUnique<gfx::detail::png_anim_decoder>);
 #if defined(TCOB_ENABLE_FILETYPES_GFX_THEORA)
@@ -285,7 +285,7 @@ void platform::InitImageCodecs()
 #endif
 
     // encoders
-    auto& iaeFactory {register_service<gfx::animated_image_encoder::factory>()};
+    auto& iaeFactory {make_service<gfx::animated_image_encoder::factory>()};
     iaeFactory.add(".gif", &MakeUnique<gfx::detail::gif_encoder>);
     iaeFactory.add(".png", &MakeUnique<gfx::detail::png_anim_encoder>);
 }
@@ -293,7 +293,7 @@ void platform::InitImageCodecs()
 void platform::InitAudioCodecs()
 {
     // decoders
-    auto& adFactory {register_service<audio::decoder::factory>()};
+    auto& adFactory {make_service<audio::decoder::factory>()};
     adFactory.add(".bsa", &MakeUnique<audio::detail::bsa_decoder>);
     adFactory.add(".mid", &MakeUnique<audio::detail::midi_decoder>);
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
@@ -309,7 +309,7 @@ void platform::InitAudioCodecs()
 #endif
 
     // encoders
-    auto& aeFactory {register_service<audio::encoder::factory>()};
+    auto& aeFactory {make_service<audio::encoder::factory>()};
     aeFactory.add(".bsa", &MakeUnique<audio::detail::bsa_encoder>);
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
     aeFactory.add(".wav", &MakeUnique<audio::detail::wav_encoder>);
