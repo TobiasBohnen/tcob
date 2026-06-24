@@ -75,6 +75,12 @@ inline auto point<T>::angle_to(point const& p) const -> degree_d
 }
 
 template <Arithmetic T>
+inline auto point<T>::moved_along(degree_d angle, T distance) const -> point<T>
+{
+    return *this + FromDirection(angle) * distance;
+}
+
+template <Arithmetic T>
 auto constexpr point<T>::as_perpendicular() const -> point<T>
 {
     return {-Y, X};

@@ -39,7 +39,8 @@ public:
     auto length() const -> f64;
     auto distance_to(point const& p) const -> f64;
 
-    auto angle_to(point const& p) const -> degree<f64>;
+    auto angle_to(point const& p) const -> degree_d;
+    auto moved_along(degree_d angle, T distance) const -> point<T>;
 
     auto constexpr as_perpendicular() const -> point;
     auto as_normalized() const -> point<f64>;
@@ -48,7 +49,7 @@ public:
     auto constexpr equals(point<U> const& other, T tol) const -> bool;
 
     static auto constexpr Lerp(point const& from, point const& to, f64 step) -> point;
-    static auto constexpr FromDirection(degree<f64> angle) -> point;
+    static auto constexpr FromDirection(degree_d angle) -> point;
 
     T X {0};
     T Y {0};

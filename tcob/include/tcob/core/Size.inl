@@ -141,7 +141,7 @@ auto constexpr operator*(size<T> const& left, R right) -> size<T>
 }
 
 template <Arithmetic T, Arithmetic R>
-auto constexpr operator*(R left, size<T> const right) -> size<T>
+auto constexpr operator*(R left, size<T> const& right) -> size<T>
 {
     return right * left;
 }
