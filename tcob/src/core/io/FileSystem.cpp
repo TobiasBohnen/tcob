@@ -8,7 +8,6 @@
 #include <array>
 #include <cstddef>
 #include <filesystem>
-#include <format>
 #include <ios>
 #include <unordered_set>
 #include <utility>
@@ -16,11 +15,8 @@
 
 #include <miniz/miniz.h>
 #undef crc32
-#include <physfs.h>
 
-#include "Archiver_tar.hpp"
-
-#include "tcob/core/Logger.hpp"
+#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/Stream.hpp"
@@ -39,74 +35,6 @@ auto file_hasher::crc32() const -> u32
     ifstream        fs {_path};
     std::vector<u8> fileData {fs.read_all<u8>()};
     return static_cast<u32>(mz_crc32(MZ_CRC32_INIT, fileData.data(), fileData.size()));
-}
-
-static auto Check(string const& msg, i32 c) -> bool
-{
-    if (c == 0) {
-        logger::Error("{}: {}", msg, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    }
-
-    return c != 0;
-}
-extern "C" {
-struct callback_data {
-    std::unordered_set<string> Files;
-    std::unordered_set<string> Folders;
-    pattern                    Pattern;
-};
-
-static auto EnumerateCallback(void* data, char const* origdir, char const* fname) -> PHYSFS_EnumerateCallbackResult
-{
-    if (!origdir || !fname) { return PHYSFS_ENUM_ERROR; }
-
-    auto* cd {static_cast<callback_data*>(data)};
-
-    string       folder {origdir};
-    string const file {fname};
-    if (!folder.ends_with("/")) { folder += "/"; }
-    string const entry {folder == "/" ? file : folder + file};
-
-    switch (get_stat(entry).Type) {
-    case file_type::File: {
-        if (cd->Pattern.String == "*.*" || helper::wildcard_match(cd->Pattern.MatchWholePath ? entry : file, cd->Pattern.String)) {
-            cd->Files.insert(entry);
-        }
-    } break;
-    case file_type::Folder: cd->Folders.insert(entry); break;
-    default:                break;
-    }
-
-    return PHYSFS_ENUM_OK;
-}
-
-static auto EmptyEnumCallback(void* data, char const*, char const*) -> PHYSFS_EnumerateCallbackResult
-{
-    bool* ok {static_cast<bool*>(data)};
-    *ok = false;
-
-    return PHYSFS_ENUM_STOP;
-}
-}
-
-////////////////////////////////////////////////////////////
-
-void detail::init(string const& name, string const& orgName)
-{
-    auto const cp {std::filesystem::current_path()};
-    Check("init", PHYSFS_init(reinterpret_cast<char const*>(cp.c_str())));
-    if (!orgName.empty() && !name.empty()) {
-        Check("setSaneConfig", PHYSFS_setSaneConfig(orgName.c_str(), name.c_str(), "", 0, 0));
-    } else {
-        Check("setWriteDir", PHYSFS_setWriteDir("."));
-    }
-    PHYSFS_init_tar();
-    mount(".", "/");
-}
-
-void detail::done()
-{
-    PHYSFS_deinit();
 }
 
 ////////////////////////////////////////////////////////////
@@ -185,12 +113,12 @@ auto unzip(ifstream& srcStream, path const& dstFolder) -> bool
 
 auto mount(path const& folderOrArchive, string const& mp) -> bool
 {
-    return Check(std::format("mount (mount point: {}, folder: {})", mp, folderOrArchive), PHYSFS_mount(folderOrArchive.c_str(), mp.c_str(), true));
+    return locate_service<file_system>().mount(folderOrArchive, mp);
 }
 
 auto unmount(path const& folderOrArchive) -> bool
 {
-    return Check("ummount", PHYSFS_unmount(folderOrArchive.c_str()));
+    return locate_service<file_system>().unmount(folderOrArchive);
 }
 
 auto get_file_size(path const& file) -> i64
@@ -245,72 +173,29 @@ auto is_folder(path const& folder) -> bool
 auto is_folder_empty(path const& folder) -> bool
 {
     if (!is_folder(folder)) { return false; }
-
-    bool retValue {true};
-    PHYSFS_enumerate(folder.c_str(), &EmptyEnumCallback, &retValue);
-    return retValue;
+    return locate_service<file_system>().is_folder_empty(folder);
 }
 
 auto get_stat(path const& fileOrFolder) -> stat
 {
-    PHYSFS_Stat stat;
-    if (Check("stat", PHYSFS_stat(fileOrFolder.c_str(), &stat))) {
-        file_type type {};
-        switch (stat.filetype) {
-        case PHYSFS_FILETYPE_REGULAR:
-            type = file_type::File;
-            break;
-        case PHYSFS_FILETYPE_DIRECTORY:
-            type = file_type::Folder;
-            break;
-        case PHYSFS_FILETYPE_SYMLINK:
-            type = file_type::Symlink;
-            break;
-        default:
-            type = file_type::Other;
-            break;
-        }
-
-        return {
-            .FileSize   = stat.filesize,
-            .ModTime    = stat.modtime,
-            .CreateTime = stat.createtime,
-            .AccessTime = stat.accesstime,
-            .Type       = type,
-            .ReadOnly   = stat.readonly != 0};
-    }
-
-    return {};
+    return locate_service<file_system>().get_stat(fileOrFolder);
 }
 
 auto exists(path const& fileOrFolder) -> bool
 {
-    return fileOrFolder.empty() ? false : PHYSFS_exists(fileOrFolder.c_str());
+    return fileOrFolder.empty() ? false : locate_service<file_system>().exists(fileOrFolder);
 }
 
 auto delete_file(path const& file) -> bool
 {
     if (!is_file(file)) { return false; }
-
-    return Check(std::format("delete file ({})", file), PHYSFS_delete(file.c_str()));
+    return locate_service<file_system>().delete_file(file);
 }
 
 auto delete_folder(path const& folder) -> bool
 {
     if (!is_folder(folder)) { return false; }
-
-    char** items {PHYSFS_enumerateFiles(folder.c_str())};
-    for (char** item {items}; *item != nullptr; item++) {
-        path const file {folder + "/" + *item};
-        if (is_folder(file)) {
-            delete_folder(file);
-        } else {
-            delete_file(file);
-        }
-    }
-
-    PHYSFS_freeList(items);
-    return Check(std::format("delete folder ({})", folder), PHYSFS_delete(folder.c_str()));
+    return locate_service<file_system>().delete_folder(folder);
 }
 
 auto create_file(path const& file) -> bool
@@ -325,39 +210,24 @@ auto create_file(path const& file) -> bool
         }
     }
 
-    return PHYSFS_close(PHYSFS_openWrite(file.c_str())) != 0;
+    return locate_service<file_system>().create_file(file);
 }
 
 auto create_folder(path const& folder) -> bool
 {
-    return Check(std::format("create folder ({})", folder), PHYSFS_mkdir(folder.c_str()));
+    return locate_service<file_system>().create_folder(folder);
 }
 
 auto enumerate(path const& folder, pattern const& pattern, bool recursive) -> std::unordered_set<string>
 {
     if (!is_folder(folder)) { return {}; }
-
-    callback_data cd;
-    cd.Pattern = pattern;
-    PHYSFS_enumerate(folder.c_str(), &EnumerateCallback, &cd);
-    if (recursive) {
-        for (auto const& f : cd.Folders) {
-            auto files {enumerate(f, pattern, true)};
-            cd.Files.insert(files.begin(), files.end());
-        }
-    }
-
-    return cd.Files;
+    return locate_service<file_system>().enumerate(folder, pattern, recursive);
 }
 
 auto get_sub_folders(path const& folder) -> std::unordered_set<string>
 {
     if (!is_folder(folder)) { return {}; }
-
-    callback_data cd;
-    PHYSFS_enumerate(folder.c_str(), &EnumerateCallback, &cd);
-
-    return cd.Folders;
+    return locate_service<file_system>().get_sub_folders(folder);
 }
 
 }

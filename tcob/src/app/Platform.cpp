@@ -18,6 +18,8 @@
 
 #include "../gfx/Font_private.hpp"
 
+#include "../core/io/FileSystem_physfs.hpp"
+
 #include "loaders/ConfigAssetLoader.hpp"
 
 #include "tcob/app/Game.hpp"
@@ -62,7 +64,7 @@ static auto MakeUnique() -> std::unique_ptr<T>
 platform::platform(bool headless, game::init const& ginit)
 {
     //  file system
-    io::detail::init(ginit.Name, ginit.OrgName);
+    register_service<io::file_system>(std::make_shared<io::physfs_file_system>(ginit.Name, ginit.OrgName));
 
     //  logger
     if (ginit.LogFile.empty() || ginit.LogFile == "null") {
@@ -100,7 +102,7 @@ platform::~platform()
     // file system
     logger::Info("exiting");
     remove_service<logger>();
-    io::detail::done();
+    remove_service<io::file_system>();
 
     // FreeType
     gfx::truetype_font_engine::Done();

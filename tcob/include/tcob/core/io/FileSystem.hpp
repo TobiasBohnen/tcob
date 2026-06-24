@@ -45,10 +45,33 @@ struct pattern {
 };
 
 ////////////////////////////////////////////////////////////
-namespace detail {
-    TCOB_API void init(string const& name, string const& orgName);
-    TCOB_API void done();
-}
+
+class TCOB_API file_system {
+public:
+    virtual ~file_system() = default;
+
+    virtual auto mount(path const& folderOrArchive, string const& mp) -> bool = 0;
+    virtual auto unmount(path const& folderOrArchive) -> bool                 = 0;
+
+    virtual auto create_file(path const& file) -> bool     = 0;
+    virtual auto create_folder(path const& folder) -> bool = 0;
+
+    virtual auto delete_file(path const& file) -> bool     = 0;
+    virtual auto delete_folder(path const& folder) -> bool = 0;
+
+    virtual auto get_stat(path const& fileOrFolder) -> stat = 0;
+
+    virtual auto exists(path const& fileOrFolder) -> bool = 0;
+
+    virtual auto is_folder_empty(path const& folder) -> bool = 0;
+
+    virtual auto enumerate(path const& folder, pattern const& pattern = {}, bool recursive = true) -> std::unordered_set<string> = 0;
+    virtual auto get_sub_folders(path const& folder) -> std::unordered_set<string>                                               = 0;
+
+    static inline char const* ServiceName {"io::file_system"};
+};
+
+////////////////////////////////////////////////////////////
 
 TCOB_API auto mount(path const& folderOrArchive, string const& mp) -> bool;
 TCOB_API auto unmount(path const& folderOrArchive) -> bool;

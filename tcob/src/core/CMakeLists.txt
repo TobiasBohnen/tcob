@@ -10,6 +10,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/io/Archiver_tar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/FileStream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/FileSystem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/io/FileSystem_physfs.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/Filter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/Magic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/MemoryStream.cpp
