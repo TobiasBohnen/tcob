@@ -204,19 +204,8 @@ auto read_as_string(path const& file) -> string
 {
     if (!is_file(file)) { return ""; }
 
-    string retValue {};
-    retValue.reserve(static_cast<usize>(get_file_size(file)));
-
-    PHYSFS_File* handle {PHYSFS_openRead(file.c_str())};
-    i64          read {0};
-    do {
-        std::array<string::value_type, 1024> buffer {};
-        read = PHYSFS_readBytes(handle, buffer.data(), buffer.size());
-        retValue.append(buffer.data(), static_cast<usize>(read));
-    } while (read != 0);
-
-    Check("close", PHYSFS_close(handle));
-    return retValue;
+    ifstream str {file};
+    return str.read_string(str.size_in_bytes());
 }
 
 auto get_extension(path const& file) -> string
