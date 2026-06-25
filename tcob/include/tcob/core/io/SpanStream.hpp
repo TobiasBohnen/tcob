@@ -38,6 +38,10 @@ class TCOB_API isstream final : public sink_istream<ispan_sink> {
 public:
     explicit isstream(std::span<std::byte const> span);
 
+protected:
+    auto get_sink() -> ispan_sink* override;
+    auto get_sink() const -> ispan_sink const* override;
+
 private:
     ispan_sink _sink;
 };
@@ -64,6 +68,10 @@ private:
 class TCOB_API osstream final : public sink_ostream<ospan_sink> {
 public:
     explicit osstream(std::span<std::byte> span);
+
+protected:
+    auto get_sink() -> ospan_sink* override;
+    auto get_sink() const -> ospan_sink const* override;
 
 private:
     ospan_sink _sink;

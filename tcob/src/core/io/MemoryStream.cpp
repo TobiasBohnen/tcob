@@ -80,11 +80,7 @@ auto memory_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std
 
 ////////////////////////////////////////////////////////////
 
-iomstream::iomstream()
-    : sink_istream<memory_sink> {&_sink}
-    , sink_ostream<memory_sink> {&_sink}
-{
-}
+iomstream::iomstream() = default;
 
 auto iomstream::tell() const -> std::streamoff
 {
@@ -94,6 +90,16 @@ auto iomstream::tell() const -> std::streamoff
 auto iomstream::seek(std::streamoff off, seek_dir way) -> bool
 {
     return _sink.seek(off, way);
+}
+
+auto iomstream::get_sink() -> memory_sink*
+{
+    return &_sink;
+}
+
+auto iomstream::get_sink() const -> memory_sink const*
+{
+    return &_sink;
 }
 
 }

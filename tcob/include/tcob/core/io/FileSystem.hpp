@@ -6,7 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <unordered_set>
+
+#include "tcob/core/io/FileStream.hpp"
 
 namespace tcob::io {
 ////////////////////////////////////////////////////////////
@@ -67,6 +70,10 @@ public:
 
     virtual auto enumerate(path const& folder, pattern const& pattern = {}, bool recursive = true) -> std::unordered_set<string> = 0;
     virtual auto get_sub_folders(path const& folder) -> std::unordered_set<string>                                               = 0;
+
+    virtual auto open_read(path const& path, usize bufferSize) -> std::unique_ptr<file_sink>   = 0;
+    virtual auto open_write(path const& path, usize bufferSize) -> std::unique_ptr<file_sink>  = 0;
+    virtual auto open_append(path const& path, usize bufferSize) -> std::unique_ptr<file_sink> = 0;
 
     static inline char const* ServiceName {"io::file_system"};
 };

@@ -8,8 +8,8 @@
 
 #include <expected>
 #include <ios>
+#include <memory>
 
-#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/io/Stream.hpp"
 
 struct PHYSFS_File;
@@ -17,36 +17,23 @@ struct PHYSFS_File;
 namespace tcob::io {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API file_sink final : public non_copyable {
+class TCOB_API file_sink {
 public:
-    file_sink(file_sink&& other) noexcept;
-    auto operator=(file_sink&& other) noexcept -> file_sink&;
-    ~file_sink();
+    virtual ~file_sink() = default;
 
-    auto size_in_bytes() const -> std::streamsize;
-    auto is_eof() const -> bool;
+    virtual auto size_in_bytes() const -> std::streamsize = 0;
+    virtual auto is_eof() const -> bool                   = 0;
 
-    auto close() -> bool;
-    auto flush() const -> bool;
+    virtual auto close() -> bool       = 0;
+    virtual auto flush() const -> bool = 0;
 
-    auto tell() const -> std::streamoff;
-    auto seek(std::streamoff off, seek_dir way) const -> bool;
+    virtual auto tell() const -> std::streamoff                       = 0;
+    virtual auto seek(std::streamoff off, seek_dir way) const -> bool = 0;
 
-    void set_buffer_size(u64 size);
+    virtual auto read_bytes(void* s, std::streamsize sizeInBytes) const -> std::streamsize        = 0;
+    virtual auto write_bytes(void const* s, std::streamsize sizeInBytes) const -> std::streamsize = 0;
 
-    auto read_bytes(void* s, std::streamsize sizeInBytes) const -> std::streamsize;
-    auto write_bytes(void const* s, std::streamsize sizeInBytes) const -> std::streamsize;
-
-    auto is_valid() const -> bool;
-
-    static auto OpenRead(path const& path) -> file_sink;
-    static auto OpenWrite(path const& path) -> file_sink;
-    static auto OpenAppend(path const& path) -> file_sink;
-
-private:
-    explicit file_sink(PHYSFS_File* handle);
-
-    PHYSFS_File* _handle {nullptr};
+    virtual auto is_valid() const -> bool = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -67,8 +54,12 @@ public:
 
     static auto Open(path const& path, u64 bufferSize = 4096) -> std::expected<ifstream, error_code>;
 
+protected:
+    auto get_sink() -> file_sink* override;
+    auto get_sink() const -> file_sink const* override;
+
 private:
-    file_sink _sink;
+    std::unique_ptr<file_sink> _sink;
 };
 
 ////////////////////////////////////////////////////////////
@@ -80,8 +71,12 @@ public:
     auto close() -> bool;
     auto flush() -> bool;
 
+protected:
+    auto get_sink() -> file_sink* override;
+    auto get_sink() const -> file_sink const* override;
+
 private:
-    file_sink _sink;
+    std::unique_ptr<file_sink> _sink;
 };
 
 ////////////////////////////////////////////////////////////

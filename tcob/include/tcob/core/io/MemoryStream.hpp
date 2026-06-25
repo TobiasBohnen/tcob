@@ -40,6 +40,10 @@ public:
     auto tell() const -> std::streamoff override;
     auto seek(std::streamoff off, seek_dir way) -> bool override;
 
+protected:
+    auto get_sink() -> memory_sink* override;
+    auto get_sink() const -> memory_sink const* override;
+
 private:
     memory_sink _sink {};
 };

@@ -7,6 +7,8 @@
 
 #include <filesystem>
 #include <format>
+#include <ios>
+#include <memory>
 #include <unordered_set>
 
 #include <physfs.h>
@@ -15,7 +17,9 @@
 
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::io {
 
@@ -65,6 +69,102 @@ static auto EmptyEnumCallback(void* data, char const*, char const*) -> PHYSFS_En
 
     return PHYSFS_ENUM_STOP;
 }
+}
+
+////////////////////////////////////////////////////////////
+
+physfs_file_sink::physfs_file_sink(PHYSFS_File* handle, usize bufferSize)
+    : _handle {handle}
+{
+    set_buffer_size(bufferSize);
+}
+
+physfs_file_sink::~physfs_file_sink()
+{
+    if (_handle) { close(); }
+}
+
+auto physfs_file_sink::close() -> bool
+{
+    if (!is_valid()) { return false; }
+
+    if (Check("close", PHYSFS_close(_handle))) {
+        _handle = nullptr;
+        return true;
+    }
+
+    return false;
+}
+
+auto physfs_file_sink::flush() const -> bool
+{
+    if (!is_valid()) { return false; }
+    return Check("flush", PHYSFS_flush(_handle));
+}
+
+auto physfs_file_sink::is_eof() const -> bool
+{
+    if (!is_valid()) { return true; }
+    return PHYSFS_eof(_handle) != 0;
+}
+
+auto physfs_file_sink::tell() const -> std::streamoff
+{
+    if (!is_valid()) { return 0; }
+    return static_cast<std::streamoff>(PHYSFS_tell(_handle));
+}
+
+auto physfs_file_sink::size_in_bytes() const -> std::streamsize
+{
+    if (!is_valid()) { return 0; }
+    return static_cast<std::streamsize>(PHYSFS_fileLength(_handle));
+}
+
+auto physfs_file_sink::seek(std::streamoff off, seek_dir way) const -> bool
+{
+    if (!is_valid()) { return false; }
+
+    PHYSFS_sint64 pos {off};
+    if (way == seek_dir::Current) {
+        pos = PHYSFS_tell(_handle) + off;
+    } else if (way == seek_dir::End) {
+        pos = PHYSFS_fileLength(_handle) + off;
+    }
+
+    if (pos < 0) { return false; }
+
+    return Check("seek", PHYSFS_seek(_handle, static_cast<PHYSFS_uint64>(pos)));
+}
+
+void physfs_file_sink::set_buffer_size(usize size)
+{
+    if (!is_valid()) { return; }
+    Check("set_buffer_size", PHYSFS_setBuffer(_handle, size));
+}
+
+auto physfs_file_sink::read_bytes(void* s, std::streamsize sizeInBytes) const -> std::streamsize
+{
+    if (s == nullptr || sizeInBytes <= 0) { return 0; }
+    if (!is_valid()) { return 0; }
+
+    return static_cast<std::streamsize>(PHYSFS_readBytes(_handle, s, static_cast<u64>(sizeInBytes)));
+}
+
+auto physfs_file_sink::write_bytes(void const* s, std::streamsize sizeInBytes) const -> std::streamsize
+{
+    if (s == nullptr || sizeInBytes <= 0) { return 0; }
+    if (!is_valid()) { return 0; }
+
+    auto const retValue {static_cast<std::streamsize>(PHYSFS_writeBytes(_handle, s, static_cast<u64>(sizeInBytes)))};
+    if (retValue != sizeInBytes) {
+        logger::Error("write_bytes: " + string {PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())});
+    }
+    return retValue;
+}
+
+auto physfs_file_sink::is_valid() const -> bool
+{
+    return _handle != nullptr;
 }
 
 ////////////////////////////////////////////////////////////
@@ -193,6 +293,19 @@ auto physfs_file_system::get_sub_folders(path const& folder) -> std::unordered_s
     PHYSFS_enumerate(folder.c_str(), &EnumerateCallback, &cd);
 
     return cd.Folders;
+}
+
+auto physfs_file_system::open_read(path const& path, usize bufferSize) -> std::unique_ptr<file_sink>
+{
+    return std::make_unique<physfs_file_sink>(PHYSFS_openRead(path.c_str()), bufferSize);
+}
+auto physfs_file_system::open_write(path const& path, usize bufferSize) -> std::unique_ptr<file_sink>
+{
+    return std::make_unique<physfs_file_sink>(PHYSFS_openWrite(path.c_str()), bufferSize);
+}
+auto physfs_file_system::open_append(path const& path, usize bufferSize) -> std::unique_ptr<file_sink>
+{
+    return std::make_unique<physfs_file_sink>(PHYSFS_openAppend(path.c_str()), bufferSize);
 }
 
 }

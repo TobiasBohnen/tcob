@@ -85,7 +85,7 @@ concept ISink =
 template <ISink Sink>
 class sink_istream : public istream {
 public:
-    explicit sink_istream(Sink* sink);
+    sink_istream();
 
     auto size_in_bytes() const -> std::streamsize override;
     auto is_eof() const -> bool override;
@@ -94,10 +94,10 @@ public:
     auto seek(std::streamoff off, seek_dir way) -> bool override;
 
 protected:
-    auto read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize override;
+    virtual auto get_sink() -> Sink*             = 0;
+    virtual auto get_sink() const -> Sink const* = 0;
 
-private:
-    Sink* _sink;
+    auto read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize override;
 };
 
 ////////////////////////////////////////////////////////////
@@ -144,16 +144,16 @@ concept OSink =
 template <OSink Sink>
 class sink_ostream : public ostream {
 public:
-    explicit sink_ostream(Sink* sink);
+    sink_ostream();
 
     auto tell() const -> std::streamoff override;
     auto seek(std::streamoff off, seek_dir way) -> bool override;
 
 protected:
-    auto write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize override;
+    virtual auto get_sink() -> Sink*             = 0;
+    virtual auto get_sink() const -> Sink const* = 0;
 
-private:
-    Sink* _sink;
+    auto write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize override;
 };
 
 }

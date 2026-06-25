@@ -93,39 +93,36 @@ inline auto operator>>(istream& is, T& m) -> istream&
 ////////////////////////////////////////////////////////////
 
 template <ISink Sink>
-inline sink_istream<Sink>::sink_istream(Sink* sink)
-    : _sink {sink}
-{
-}
+inline sink_istream<Sink>::sink_istream() = default;
 
 template <ISink Sink>
 inline auto sink_istream<Sink>::size_in_bytes() const -> std::streamsize
 {
-    return _sink->size_in_bytes();
+    return get_sink()->size_in_bytes();
 }
 
 template <ISink Sink>
 inline auto sink_istream<Sink>::is_eof() const -> bool
 {
-    return _sink->is_eof();
+    return get_sink()->is_eof();
 }
 
 template <ISink Sink>
 inline auto sink_istream<Sink>::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
 {
-    return _sink->read_bytes(s, sizeInBytes);
+    return get_sink()->read_bytes(s, sizeInBytes);
 }
 
 template <ISink Sink>
 inline auto sink_istream<Sink>::tell() const -> std::streamoff
 {
-    return _sink->tell();
+    return get_sink()->tell();
 }
 
 template <ISink Sink>
 inline auto sink_istream<Sink>::seek(std::streamoff off, seek_dir way) -> bool
 {
-    return _sink->seek(off, way);
+    return get_sink()->seek(off, way);
 }
 
 ////////////////////////////////////////////////////////////
@@ -172,10 +169,7 @@ inline auto operator<<(ostream& os, T const& m) -> ostream&
 ////////////////////////////////////////////////////////////
 
 template <OSink Sink>
-inline sink_ostream<Sink>::sink_ostream(Sink* sink)
-    : _sink {sink}
-{
-}
+inline sink_ostream<Sink>::sink_ostream() = default;
 
 template <OSink Sink>
 inline auto sink_ostream<Sink>::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
@@ -184,19 +178,19 @@ inline auto sink_ostream<Sink>::write_bytes(void const* s, std::streamsize sizeI
         return 0;
     }
 
-    return _sink->write_bytes(s, sizeInBytes);
+    return get_sink()->write_bytes(s, sizeInBytes);
 }
 
 template <OSink Sink>
 inline auto sink_ostream<Sink>::tell() const -> std::streamoff
 {
-    return _sink->tell();
+    return get_sink()->tell();
 }
 
 template <OSink Sink>
 inline auto sink_ostream<Sink>::seek(std::streamoff off, seek_dir way) -> bool
 {
-    return _sink->seek(off, way);
+    return get_sink()->seek(off, way);
 }
 
 }

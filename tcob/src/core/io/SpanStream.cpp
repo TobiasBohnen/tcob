@@ -77,9 +77,18 @@ auto ispan_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::stream
 ////////////////////////////////////////////////////////////
 
 isstream::isstream(std::span<std::byte const> span)
-    : sink_istream<ispan_sink> {&_sink}
-    , _sink {span}
+    : _sink {span}
 {
+}
+
+auto isstream::get_sink() -> ispan_sink*
+{
+    return &_sink;
+}
+
+auto isstream::get_sink() const -> ispan_sink const*
+{
+    return &_sink;
 }
 
 ////////////////////////////////////////////////////////////
@@ -133,9 +142,18 @@ auto ospan_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std:
 ////////////////////////////////////////////////////////////
 
 osstream::osstream(std::span<std::byte> span)
-    : sink_ostream<ospan_sink> {&_sink}
-    , _sink {span}
+    : _sink {span}
 {
+}
+
+auto osstream::get_sink() -> ospan_sink*
+{
+    return &_sink;
+}
+
+auto osstream::get_sink() const -> ospan_sink const*
+{
+    return &_sink;
 }
 
 }
