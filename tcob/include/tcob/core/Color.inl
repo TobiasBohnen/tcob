@@ -148,9 +148,14 @@ auto constexpr color::as_alpha_premultiplied() const -> color
     return {nr, ng, nb, A};
 }
 
-auto constexpr color::value() const -> u32
+auto constexpr color::to_rgba() const -> u32
 {
     return (static_cast<u32>(R) << 24) | (static_cast<u32>(G) << 16) | (static_cast<u32>(B) << 8) | static_cast<u32>(A);
+}
+
+auto constexpr color::to_abgr() const -> u32
+{
+    return (static_cast<u32>(A) << 24) | (static_cast<u32>(B) << 16) | (static_cast<u32>(G) << 8) | static_cast<u32>(R);
 }
 
 auto constexpr color::to_array() const -> std::array<u8, 4>

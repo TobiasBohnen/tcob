@@ -40,7 +40,8 @@ public:
 
     auto constexpr as_alpha_premultiplied [[nodiscard]] () const -> color;
 
-    auto constexpr value() const -> u32;
+    auto constexpr to_rgba() const -> u32;
+    auto constexpr to_abgr() const -> u32;
 
     auto constexpr to_array [[nodiscard]] () const -> std::array<u8, 4>;
     auto constexpr to_float_array [[nodiscard]] () const -> std::array<f32, 4>;
@@ -76,6 +77,6 @@ template <>
 struct std::hash<tcob::color> {
     auto operator()(tcob::color const& r) const noexcept -> std::size_t
     {
-        return std::hash<tcob::u32> {}(r.value());
+        return std::hash<tcob::u32> {}(r.to_rgba());
     }
 };

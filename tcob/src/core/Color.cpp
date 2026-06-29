@@ -193,7 +193,7 @@ auto color::FromString(string_view name) -> color // FIXME: should be optional
 
 auto color::ToString(color col) -> string
 {
-    return std::format("#{:08x}", col.value()); // RRGGBBAA
+    return std::format("#{:08x}", col.to_rgba()); // RRGGBBAA
 }
 
 }
