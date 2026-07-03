@@ -287,4 +287,37 @@ void bresenham_line(point_i from, point_i to, auto&& fn)
     }
 }
 
+void bresenham_circle(point_i center, i32 radius, auto&& fn)
+{
+    i32 x {0};
+    i32 y {radius};
+    i32 d {3 - (2 * radius)};
+
+    auto const draw_horizontal_lines {[&]() {
+        for (i32 i {center.X - x}; i <= center.X + x; ++i) {
+            fn(point_i {i, center.Y + y});
+            fn(point_i {i, center.Y - y});
+        }
+        for (i32 i {center.X - y}; i <= center.X + y; ++i) {
+            fn(point_i {i, center.Y + x});
+            fn(point_i {i, center.Y - x});
+        }
+    }};
+
+    draw_horizontal_lines();
+
+    while (y >= x) {
+        x++;
+
+        if (d > 0) {
+            y--;
+            d = d + (4 * (x - y)) + 10;
+        } else {
+            d = d + (4 * x) + 6;
+        }
+
+        draw_horizontal_lines();
+    }
+}
+
 }
