@@ -49,8 +49,8 @@ auto node_graph::can_connect(uid outNodeID, uid outPortID, uid inNodeID, uid inP
     auto const* inN {find_node(inNodeID)};
     if (!outN || !inN) { return false; }
 
-    auto const* out {find_port(outN->Outputs, outPortID)};
-    auto const* in {find_port(inN->Inputs, inPortID)};
+    auto const* out {FindPort(outN->Outputs, outPortID)};
+    auto const* in {FindPort(inN->Inputs, inPortID)};
     if (!out || !in) { return false; }
 
     // type check
@@ -97,7 +97,7 @@ auto node_graph::evaluate(uid nodeID, node_compute_func const& fn) const -> void
     auto const* n {find_node(nodeID)};
     if (!n) { return; }
 
-    fn(gather_inputs(*n, cache), gather_params(*n));
+    fn(gather_inputs(*n, cache), GatherParams(*n));
 }
 
 auto node_graph::compute_node(uid nodeID, uid portID, cache& cache) const -> node_value_types
@@ -110,7 +110,7 @@ auto node_graph::compute_node(uid nodeID, uid portID, cache& cache) const -> nod
     auto const* n {find_node(nodeID)};
     if (!n || !n->Compute) { return 0.0f; }
 
-    auto const results {n->Compute(gather_inputs(*n, cache), gather_params(*n))};
+    auto const results {n->Compute(gather_inputs(*n, cache), GatherParams(*n))};
     for (auto const& [k, v] : results) {
         cache[nodeID][k] = v;
     }
@@ -134,7 +134,7 @@ auto node_graph::gather_inputs(node const& n, cache& cache) const -> std::vector
     return inputs;
 }
 
-auto node_graph::gather_params(node const& n) const -> std::vector<node_value_types>
+auto node_graph::GatherParams(node const& n) -> std::vector<node_value_types>
 {
     std::vector<node_value_types> params;
     params.reserve(n.Parameters.size());
@@ -184,10 +184,10 @@ auto node_graph::get_port_type(uid nodeID, uid portID, bool isInput) const -> u3
 auto node_graph::find_port(uid nodeID, uid portID, bool isInput) const -> node_port const*
 {
     auto const* n {find_node(nodeID)};
-    return n ? find_port(isInput ? n->Inputs : n->Outputs, portID) : nullptr;
+    return n ? FindPort(isInput ? n->Inputs : n->Outputs, portID) : nullptr;
 }
 
-auto node_graph::find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*
+auto node_graph::FindPort(std::vector<node_port> const& ports, uid id) -> node_port const*
 {
     auto it {std::ranges::find(ports, id, &node_port::ID)};
     return it != ports.end() ? &*it : nullptr;

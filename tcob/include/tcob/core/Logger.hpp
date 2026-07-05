@@ -51,7 +51,7 @@ public:
 
 protected:
     virtual void log(string const& message, level level) const = 0;
-    auto         format_message(string const& message, level level) const -> string;
+    static auto  FormatMessage(string const& message, level level) -> string;
 
 private:
     static void FormatDebug(string const& message, std::format_args const& args);

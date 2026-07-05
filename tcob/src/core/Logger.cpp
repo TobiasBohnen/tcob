@@ -21,6 +21,7 @@
 #if defined(_MSC_VER)
     #define WIN32_LEAN_AND_MEAN
     #include "Windows.h"
+    #undef FormatMessage
 #endif
 #if defined(__EMSCRIPTEN__)
     #include "emscripten.h"
@@ -70,7 +71,7 @@ void logger::Log(string const& message, level level)
     locate_service<logger>().log(message, level);
 }
 
-auto logger::format_message(string const& message, level level) const -> string
+auto logger::FormatMessage(string const& message, level level) -> string
 {
     string prefix;
 
@@ -116,7 +117,7 @@ void file_logger::log(string const& message, level level) const
 {
     if (level < MinLevel) { return; }
 
-    *_logStream << format_message(message, level);
+    *_logStream << FormatMessage(message, level);
 }
 
 ////////////////////////////////////////////////////////////
@@ -161,7 +162,7 @@ void stdout_logger::log(string const& message, level level) const
     }
 
     std::cout << "m"
-              << format_message(message, level)
+              << FormatMessage(message, level)
               << "\033[0m";
 #endif
 }

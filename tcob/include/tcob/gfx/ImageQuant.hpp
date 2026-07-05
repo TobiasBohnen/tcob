@@ -23,7 +23,7 @@ namespace tcob::gfx {
 
 class TCOB_API octree_quant final {
 public:
-    auto static GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
+    static auto GetPalette(image const& img, i32 maxColors) -> std::vector<color>;
 
 private:
     explicit octree_quant(i32 maxColors);
@@ -60,7 +60,7 @@ private:
 
 class TCOB_API neuquant final {
 public:
-    auto static GetPalette(image const& img, i32 maxColors, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count())) -> std::vector<color>;
+    static auto GetPalette(image const& img, i32 maxColors, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count())) -> std::vector<color>;
 
 private:
     explicit neuquant(i32 maxColors, u64 seed);

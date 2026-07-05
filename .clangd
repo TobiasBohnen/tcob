@@ -85,7 +85,6 @@ Diagnostics:
             - "readability-implicit-bool-conversion"
             - "readability-magic-numbers"
             - "readability-named-parameter"
-            - "readability-const-return-type"
             - "readability-function-size"
             - "readability-function-cognitive-complexity"
             - "readability-convert-member-functions-to-static"

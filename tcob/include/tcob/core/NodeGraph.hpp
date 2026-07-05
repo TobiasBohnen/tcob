@@ -124,14 +124,14 @@ public:
     static auto GetObject(std::span<node_value_types const> in, usize i) -> T const*;
 
 private:
-    auto find_port(uid nodeID, uid portID, bool isInput) const -> node_port const*;
-    auto find_port(std::vector<node_port> const& ports, uid id) const -> node_port const*;
+    auto        find_port(uid nodeID, uid portID, bool isInput) const -> node_port const*;
+    static auto FindPort(std::vector<node_port> const& ports, uid id) -> node_port const*;
 
     using cache = std::unordered_map<uid, std::unordered_map<uid, node_value_types>>;
     auto compute_node(uid nodeID, uid portID, cache& cache) const -> node_value_types;
 
-    auto gather_inputs(node const& n, cache& cache) const -> std::vector<node_value_types>;
-    auto gather_params(node const& n) const -> std::vector<node_value_types>;
+    auto        gather_inputs(node const& n, cache& cache) const -> std::vector<node_value_types>;
+    static auto GatherParams(node const& n) -> std::vector<node_value_types>;
 
     std::vector<node>       _nodes;
     std::vector<connection> _connections;
