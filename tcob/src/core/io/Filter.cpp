@@ -98,6 +98,133 @@ auto zlib_filter::from(std::span<std::byte const> bytes) const -> std::vector<st
 }
 
 ////////////////////////////////////////////////////////////
+
+gzip_filter::gzip_filter(i32 complevel)
+    : _level {complevel}
+{
+}
+
+auto gzip_filter::to(std::span<std::byte const> bytes) const -> std::vector<std::byte>
+{
+    if (bytes.size() > std::numeric_limits<unsigned int>::max()) { return {}; } // Input too large
+
+    // gzip header: magic, CM=8, FLG=0, MTIME=0, XFL=0, OS=255 (unknown)
+    static constexpr std::array<u8, 10> HEADER {0x1F, 0x8B, 0x08, 0, 0, 0, 0, 0, 0, 0xFF};
+
+    mz_ulong const         bound {mz_compressBound(static_cast<mz_ulong>(bytes.size()))};
+    std::vector<std::byte> retValue(HEADER.size() + bound + 8);
+    memcpy(retValue.data(), HEADER.data(), HEADER.size());
+
+    mz_stream stream {};
+    memset(&stream, 0, sizeof(stream));
+
+    stream.next_in   = reinterpret_cast<u8 const*>(bytes.data());
+    stream.avail_in  = static_cast<u32>(bytes.size());
+    stream.next_out  = reinterpret_cast<u8*>(retValue.data()) + HEADER.size();
+    stream.avail_out = static_cast<u32>(bound);
+
+    i32 status {mz_deflateInit2(&stream, _level, MZ_DEFLATED, -MZ_DEFAULT_WINDOW_BITS, 9, MZ_DEFAULT_STRATEGY)};
+    if (status == MZ_OK) { status = mz_deflate(&stream, MZ_FINISH); }
+
+    if (status != MZ_STREAM_END) {
+        mz_deflateEnd(&stream);
+        return {};
+    }
+
+    usize const compressedSize {stream.total_out};
+    mz_deflateEnd(&stream);
+
+    retValue.resize(HEADER.size() + compressedSize + 8);
+
+    // trailer: CRC32 of uncompressed data + ISIZE (mod 2^32), both little-endian
+    mz_ulong const crc {mz_crc32(MZ_CRC32_INIT, reinterpret_cast<u8 const*>(bytes.data()),
+                                 static_cast<mz_uint32>(bytes.size()))};
+    u32 const      isize {static_cast<u32>(bytes.size())};
+
+    u8* const trailer {reinterpret_cast<u8*>(retValue.data()) + HEADER.size() + compressedSize};
+    trailer[0] = static_cast<u8>(crc & 0xFF);
+    trailer[1] = static_cast<u8>((crc >> 8) & 0xFF);
+    trailer[2] = static_cast<u8>((crc >> 16) & 0xFF);
+    trailer[3] = static_cast<u8>((crc >> 24) & 0xFF);
+    trailer[4] = static_cast<u8>(isize & 0xFF);
+    trailer[5] = static_cast<u8>((isize >> 8) & 0xFF);
+    trailer[6] = static_cast<u8>((isize >> 16) & 0xFF);
+    trailer[7] = static_cast<u8>((isize >> 24) & 0xFF);
+
+    return retValue;
+}
+
+auto gzip_filter::from(std::span<std::byte const> bytes) const -> std::vector<std::byte>
+{
+    if (bytes.size() > std::numeric_limits<unsigned int>::max()) { return {}; } // Input too large
+    static constexpr usize MAX_DECOMPRESSED_SIZE {512 * 1024 * 1024};
+
+    if (bytes.size() < 18 || static_cast<u8>(bytes[0]) != 0x1F || static_cast<u8>(bytes[1]) != 0x8B
+        || static_cast<u8>(bytes[2]) != 0x08) {
+        return {}; // not gzip
+    }
+
+    u8 const flg {static_cast<u8>(bytes[3])};
+    usize    pos {10};
+
+    if (flg & 0x04) { // FEXTRA
+        if (pos + 2 > bytes.size()) { return {}; }
+        u16 const xlen {static_cast<u16>(static_cast<u8>(bytes[pos]) | (static_cast<u8>(bytes[pos + 1]) << 8))};
+        pos += 2 + xlen;
+    }
+    if (flg & 0x08) {
+        while (pos < bytes.size() && bytes[pos] != std::byte {0}) { ++pos; }
+        ++pos;
+    } // FNAME
+    if (flg & 0x10) {
+        while (pos < bytes.size() && bytes[pos] != std::byte {0}) { ++pos; }
+        ++pos;
+    } // FCOMMENT
+    if (flg & 0x02) { pos += 2; } // FHCRC
+
+    if (pos + 8 > bytes.size()) { return {}; }
+    usize const payloadSize {bytes.size() - pos - 8};
+
+    u8 const* const trailer {reinterpret_cast<u8 const*>(bytes.data()) + pos + payloadSize};
+    u32 const       expectedIsize {static_cast<u32>(trailer[4]) | (static_cast<u32>(trailer[5]) << 8)
+                                   | (static_cast<u32>(trailer[6]) << 16) | (static_cast<u32>(trailer[7]) << 24)};
+
+    if (expectedIsize > MAX_DECOMPRESSED_SIZE) { return {}; } // Decompressed data too large
+
+    std::vector<std::byte> retValue(expectedIsize);
+
+    mz_stream stream {};
+    memset(&stream, 0, sizeof(stream));
+
+    stream.next_in   = reinterpret_cast<u8 const*>(bytes.data()) + pos;
+    stream.avail_in  = static_cast<u32>(payloadSize);
+    stream.next_out  = reinterpret_cast<u8*>(retValue.data());
+    stream.avail_out = static_cast<u32>(expectedIsize);
+
+    i32 status {mz_inflateInit2(&stream, -MZ_DEFAULT_WINDOW_BITS)};
+    if (status == MZ_OK) { status = mz_inflate(&stream, MZ_FINISH); }
+
+    mz_inflateEnd(&stream);
+
+    if (status != MZ_STREAM_END && (status != MZ_OK || stream.total_out != expectedIsize)) {
+        return {};
+    }
+
+    retValue.resize(stream.total_out);
+
+    u32 const expectedCrc {static_cast<u32>(trailer[0]) | (static_cast<u32>(trailer[1]) << 8)
+                           | (static_cast<u32>(trailer[2]) << 16) | (static_cast<u32>(trailer[3]) << 24)};
+    u32 const actualCrc {static_cast<u32>(mz_crc32(MZ_CRC32_INIT, reinterpret_cast<u8 const*>(retValue.data()),
+                                                   static_cast<mz_uint32>(retValue.size())))};
+
+    if (actualCrc != expectedCrc || static_cast<u32>(retValue.size()) != expectedIsize) {
+        return {};
+    }
+
+    return retValue;
+}
+
+////////////////////////////////////////////////////////////
 // based on:https://stackoverflow.com/a/13935718/13220389
 
 static inline auto is_base64(char c) -> bool

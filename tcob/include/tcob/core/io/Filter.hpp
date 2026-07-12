@@ -28,6 +28,21 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+class TCOB_API gzip_filter {
+public:
+    explicit gzip_filter(i32 complevel = -1);
+
+    auto to(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
+    auto from(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
+
+private:
+    static constexpr usize BUFFER_SIZE {8192};
+
+    i32 _level;
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API base64_filter {
 public:
     auto to(std::span<std::byte const> bytes) const -> std::vector<std::byte>;
