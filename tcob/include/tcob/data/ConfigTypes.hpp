@@ -86,7 +86,7 @@ public:
     template <typename Key>
     auto operator[](Key key) -> proxy<object, Key>;
     template <typename Key>
-    auto operator[](Key key) const -> proxy<object const, Key> const;
+    auto operator[](Key key) const -> proxy<object const, Key>;
 
     auto parse(string_view config, string const& ext) noexcept -> bool;
 

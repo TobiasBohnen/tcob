@@ -156,7 +156,7 @@ inline auto object::operator[](Key key) -> proxy<object, Key>
 }
 
 template <typename Key>
-inline auto object::operator[](Key key) const -> proxy<object const, Key> const
+inline auto object::operator[](Key key) const -> proxy<object const, Key>
 {
     return proxy<object const, Key> {*this, std::tuple {key}};
 }

@@ -178,7 +178,7 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
     i32 const srcStride {static_cast<i32>(srcStride64)};
 
     i64 const totalBytes64 {static_cast<i64>(width) * static_cast<i64>(height) * 4ll};
-    if (totalBytes64 <= 0 || totalBytes64 > MaxImageBytes || totalBytes64 > std::numeric_limits<usize>::max()) { return {}; }
+    if (totalBytes64 <= 0 || totalBytes64 > MaxImageBytes || static_cast<usize>(totalBytes64) > std::numeric_limits<usize>::max()) { return {}; }
 
     std::vector<u8> retValue(static_cast<usize>(totalBytes64));
 
