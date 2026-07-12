@@ -34,7 +34,6 @@ inline auto native_closure<R(Args...)>::operator()(state_view view) -> i32
 
     if (!result) {
         view.error("parameter type mismatch");
-        return 0;
     }
 
     i32 const oldTop {view.get_top()};

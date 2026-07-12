@@ -183,11 +183,8 @@ inline auto prop<T, Source>::operator->() const
     if constexpr (OverloadsArrowOp<T> || std::is_pointer_v<T>) {
         return _source.get();
     } else {
-        static_assert(std::is_reference_v<return_type>);
-        if constexpr (std::is_reference_v<return_type>) {
-            return &_source.get();
-        }
-        std::unreachable();
+        static_assert(std::is_reference_v<return_type>, "operator-> requires get() to return a reference");
+        return &_source.get();
     }
 }
 

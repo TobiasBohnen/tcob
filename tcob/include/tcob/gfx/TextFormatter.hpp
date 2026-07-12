@@ -37,7 +37,6 @@ public:
     font*                     Font {nullptr};
 
     auto get_quad(isize idx) const -> std::optional<quad_definition>;
-    auto get_line_index(isize idx) const -> std::optional<usize>;
 };
 
 ////////////////////////////////////////////////////////////

@@ -248,16 +248,4 @@ auto result::get_quad(isize idx) const -> std::optional<quad_definition>
     return std::nullopt;
 }
 
-auto result::get_line_index(isize idx) const -> std::optional<usize>
-{
-    for (auto const& token : Tokens) {
-        for (auto const& _ : token.Quads) {
-            if (idx == 0) { return token.LineIndex; }
-            --idx;
-        }
-    }
-
-    return std::nullopt;
-}
-
 }
