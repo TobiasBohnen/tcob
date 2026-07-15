@@ -305,7 +305,7 @@ auto yaml_tokenizer::is_eof() const -> bool
 
 void yaml_tokenizer::optimize()
 {
-    for (usize i {0}; i < Tokens.size(); ++i) {
+    for (usize i {0}; i < Tokens.size();) {
         // Optimize MappingKey followed by KeyOrScalar, Newline, and Indent
         if (i + 3 < Tokens.size()
             && Tokens[i].Type == token_type::MappingKey
@@ -314,18 +314,21 @@ void yaml_tokenizer::optimize()
             && Tokens[i + 3].Type == token_type::Indent) {
             Tokens[i].Type  = token_type::KeyOrScalar;
             Tokens[i].Value = Tokens[i + 1].Value;
-            Tokens.erase(Tokens.begin() + i + 1,
-                         Tokens.begin() + i + 4);
+            Tokens.erase(Tokens.begin() + i + 1, Tokens.begin() + i + 4);
+            continue;
         }
         // Optimize Tag token: remove Tag and following Whitespace (if any)
-        if (i + 1 < Tokens.size() && Tokens[i].Type == token_type::Tag) {
-            if (Tokens[i + 1].Type == token_type::Whitespace) {
-                Tokens.erase(Tokens.begin() + i,
-                             Tokens.begin() + i + 2);
+        if (Tokens[i].Type == token_type::Tag) {
+            if (i + 1 < Tokens.size() && Tokens[i + 1].Type == token_type::Whitespace) {
+                Tokens.erase(Tokens.begin() + i, Tokens.begin() + i + 2);
             } else {
                 Tokens.erase(Tokens.begin() + i);
             }
+
+            continue;
         }
+
+        ++i;
     }
 }
 
