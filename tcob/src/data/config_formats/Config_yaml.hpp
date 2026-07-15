@@ -87,6 +87,7 @@ private:
     auto parse_scalar(entry& currentEntry, multiline_style style) -> bool;
     auto parse_anchor() -> utf8_string;
     auto parse_alias() -> utf8_string;
+
     auto convert_scalar(entry& currentEntry, utf8_string const& value) -> bool;
 
     void next();

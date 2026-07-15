@@ -589,8 +589,7 @@ auto yaml_reader::parse_scalar(entry& currentEntry, multiline_style style) -> bo
             value += _currentToken.Value;
             next();
         }
-
-        convert_scalar(currentEntry, value);
+        currentEntry.set_value(value);
         next();
         return true;
     }
@@ -659,7 +658,11 @@ void yaml_reader::next()
     }
 
     if (!check_current(token_type::EoF)) {
-        _nextToken = _tokenizer.Tokens[_nextTokenIndex];
+        usize idx {_nextTokenIndex};
+        _nextToken = _tokenizer.Tokens[idx];
+        while (IsIgnored(_nextToken) && idx + 1 < _tokenizer.Tokens.size()) {
+            _nextToken = _tokenizer.Tokens[++idx];
+        }
     }
 }
 
