@@ -420,6 +420,30 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
         if (!check_current(token_type::Sequence)) { return retValue; }
         next();
 
+        // inline map entry: "- key: value" (map keys continue at the column right after "- ")
+        {
+            usize const oldIndent {_currentIndent};
+            usize       inlineIndent {oldIndent + 2};
+            while (check_current(token_type::Whitespace)) {
+                inlineIndent += _currentToken.Value.size();
+                next();
+            }
+
+            if (check_current(token_type::KeyOrScalar) && check_next(token_type::MappingValue)) {
+                _currentIndent = inlineIndent;
+                if (auto obj {parse_map()}) {
+                    _currentIndent = oldIndent;
+                    currentEntry.set_comment(currentComment);
+                    currentEntry.set_value(*obj);
+                    retValue.add_entry(currentEntry);
+                    currentComment = {};
+                    continue;
+                }
+
+                return std::nullopt;
+            }
+        }
+
         // flow
         if (parse_flow_map(currentEntry) || parse_flow_sequence(currentEntry)) {
             retValue.add_entry(currentEntry);
