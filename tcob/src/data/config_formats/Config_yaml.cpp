@@ -77,6 +77,54 @@ static auto IsIgnored(yaml_tokenizer::token const& token) -> bool
     }
 }
 
+static auto FindMatchingDelimiter(utf8_string_view line, usize start) -> std::optional<usize>
+{
+    if (start >= line.size()) {
+        return std::nullopt;
+    }
+
+    std::vector<char> stack;
+
+    switch (line[start]) {
+    case '[': stack.push_back(']'); break;
+    case '{': stack.push_back('}'); break;
+    default:  return std::nullopt;
+    }
+
+    bool inSingleQuote {false};
+    bool inDoubleQuote {false};
+
+    for (usize i {start + 1}; i < line.size(); ++i) {
+        char const c {line[i]};
+
+        if (inSingleQuote) {
+            if (c == '\'') { inSingleQuote = false; }
+            continue;
+        }
+
+        if (inDoubleQuote) {
+            if (c == '"' && line[i - 1] != '\\') { inDoubleQuote = false; }
+            continue;
+        }
+
+        switch (c) {
+        case '\'': inSingleQuote = true; break;
+        case '"':  inDoubleQuote = true; break;
+        case '[':  stack.push_back(']'); break;
+        case '{':  stack.push_back('}'); break;
+        case ']':
+        case '}':
+            if (stack.empty() || stack.back() != c) { return std::nullopt; }
+            stack.pop_back();
+            if (stack.empty()) { return i; }
+            break;
+        default: break;
+        }
+    }
+
+    return std::nullopt;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 auto yaml_tokenizer::tokenize(utf8_string_view yaml) -> bool
@@ -108,8 +156,8 @@ auto yaml_tokenizer::tokenize_line(utf8_string_view line) -> bool
                 i += 2;
                 continue;
             }
-            if (current == '+' && next == '+' && line[i + 2] == '+') {
-                Tokens.emplace_back(token_type::EndOfDocument, "+++");
+            if (current == '.' && next == '.' && line[i + 2] == '.') {
+                Tokens.emplace_back(token_type::EndOfDocument, "...");
                 i += 2;
                 continue;
             }
@@ -207,24 +255,23 @@ auto yaml_tokenizer::tokenize_line(utf8_string_view line) -> bool
 
         // FlowSequence and FlowMapping tokens are extracted as whole blocks
         if (current == '[') {
-            usize const start {i};
-            i = line.find_last_of(']');
-            if (i == utf8_string::npos || i < start) { return false; }
-            Tokens.emplace_back(token_type::FlowSequence,
-                                utf8_string {line.substr(start, i - start + 1)});
+            auto const end {FindMatchingDelimiter(line, i)};
+            if (!end) { return false; }
+            Tokens.emplace_back(token_type::FlowSequence, utf8_string {line.substr(i, *end - i + 1)});
+            i = *end;
             continue;
         }
+
         if (current == '{') {
-            usize const start {i};
-            i = line.find_last_of('}');
-            if (i == utf8_string::npos || i < start) { return false; }
-            Tokens.emplace_back(token_type::FlowMapping,
-                                utf8_string {line.substr(start, i - start + 1)});
+            auto const end {FindMatchingDelimiter(line, i)};
+            if (!end) { return false; }
+            Tokens.emplace_back(token_type::FlowMapping, utf8_string {line.substr(i, *end - i + 1)});
+            i = *end;
             continue;
         }
 
         // KeyOrScalar: merge adjacent valid characters
-        if (!std::iscntrl(current)) {
+        if (!std::iscntrl(static_cast<unsigned char>(current))) {
             if (!Tokens.empty() && Tokens.back().Type == token_type::KeyOrScalar) {
                 Tokens.back().Value.push_back(current);
             } else {
@@ -289,6 +336,12 @@ auto yaml_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
     if (!_tokenizer.tokenize(txt)) { return std::nullopt; }
 
     next();
+    if (check_current(token_type::FlowMapping)) {
+        entry currentEntry;
+        if (!parse_flow_map(currentEntry)) { return std::nullopt; }
+        return currentEntry.as<object>();
+    }
+
     auto        obj {parse_map()};
     auto const& tokens {_tokenizer.Tokens};
 
@@ -304,6 +357,15 @@ auto yaml_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
     if (!_tokenizer.tokenize(txt)) { return std::nullopt; }
 
     next();
+    if (check_current(token_type::FlowSequence)) {
+        entry ent;
+        if (!parse_flow_sequence(ent)) {
+            return std::nullopt;
+        }
+
+        return ent.as<array>();
+    }
+
     auto        arr {parse_sequence()};
     auto const& tokens {_tokenizer.Tokens};
 
