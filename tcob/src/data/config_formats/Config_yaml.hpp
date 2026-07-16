@@ -31,15 +31,14 @@ public:
         FlowSequence,    // '[]'
         FlowMapping,     // '{}'
         StartOfDocument, // '---'
-        EndOfDocument,   // '+++'
+        EndOfDocument,   // '...'
         LiteralStyle,    // '|'
         FoldedStyle,     // '>'
         DoubleQuote,     // '"'
         SingleQuote,     // '''
         Tag,             // '!'
         Anchor,          // '&'
-        Alias,           // '*'
-        EoF,
+        Alias            // '*'
     };
 
     struct token {
@@ -57,7 +56,7 @@ private:
     auto get_next_line() -> utf8_string_view;
     auto is_eof() const -> bool;
 
-    void optimize();
+    void normalize();
 
     usize            _yamlBegin {0};
     usize            _yamlEnd {0};
@@ -97,8 +96,8 @@ private:
 
     yaml_tokenizer        _tokenizer;
     yaml_tokenizer::token _currentToken;
-    usize                 _currentIndent {0};
     yaml_tokenizer::token _nextToken;
+    usize                 _currentIndent {0};
     usize                 _nextTokenIndex {0};
 
     std::unordered_map<utf8_string, entry> _anchors;

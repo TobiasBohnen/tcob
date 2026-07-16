@@ -50,7 +50,6 @@ using token_type = yaml_tokenizer::token_type;
         case token_type::Tag:             type = "Tag"; break;
         case token_type::Anchor:          type = "Anchor"; break;
         case token_type::Alias:           type = "Alias"; break;
-        case token_type::EoF:             type = "EoF"; break;
         case token_type::Indent:          type = "Indent"; break;
         }
 
@@ -68,9 +67,8 @@ static auto IsIgnored(yaml_tokenizer::token const& token) -> bool
     switch (token.Type) {
     case token_type::None:            // should never happen...
     case token_type::StartOfDocument: // don't care
-    case token_type::EndOfDocument:   // don't care
     case token_type::Tag:             // not supported
-    case token_type::MappingKey:      // gets 'optimized' away
+    case token_type::MappingKey:      // gets normalized away
         return true;
     default:
         return false;
@@ -125,6 +123,16 @@ static auto FindMatchingDelimiter(utf8_string_view line, usize start) -> std::op
     return std::nullopt;
 }
 
+static auto FindClosingQuote(utf8_string_view line, usize start) -> std::optional<usize>
+{
+    char const quoteChar {line[start]};
+    for (usize i {start + 1}; i < line.size(); ++i) {
+        if (quoteChar == '"' && line[i] == '"' && line[i - 1] != '\\') { return i; }
+        if (quoteChar == '\'' && line[i] == '\'') { return i; }
+    }
+    return std::nullopt;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 auto yaml_tokenizer::tokenize(utf8_string_view yaml) -> bool
@@ -138,8 +146,8 @@ auto yaml_tokenizer::tokenize(utf8_string_view yaml) -> bool
         }
     }
 
-    Tokens.emplace_back(token_type::EoF, "");
-    optimize();
+    Tokens.emplace_back(token_type::EndOfDocument, "...");
+    normalize();
     return true;
 }
 
@@ -157,9 +165,9 @@ auto yaml_tokenizer::tokenize_line(utf8_string_view line) -> bool
                 continue;
             }
             if (current == '.' && next == '.' && line[i + 2] == '.') {
-                Tokens.emplace_back(token_type::EndOfDocument, "...");
-                i += 2;
-                continue;
+                // force EOF
+                _yamlEnd = _yaml.size();
+                return true;
             }
         }
 
@@ -234,12 +242,17 @@ auto yaml_tokenizer::tokenize_line(utf8_string_view line) -> bool
         }
 
         // Quoted strings
-        if (current == '"') {
-            Tokens.emplace_back(token_type::DoubleQuote, "\"");
-            continue;
-        }
-        if (current == '\'') {
-            Tokens.emplace_back(token_type::SingleQuote, "'");
+        if (current == '"' || current == '\'') {
+            token_type const quoteType {current == '"' ? token_type::DoubleQuote : token_type::SingleQuote};
+            auto const       closeIdx {FindClosingQuote(line, i)};
+            if (!closeIdx) { return false; }
+
+            Tokens.emplace_back(quoteType, utf8_string {1, current});
+            if (*closeIdx > i + 1) {
+                Tokens.emplace_back(token_type::KeyOrScalar, utf8_string {line.substr(i + 1, *closeIdx - i - 1)});
+            }
+            Tokens.emplace_back(quoteType, utf8_string {1, current});
+            i = *closeIdx;
             continue;
         }
 
@@ -303,10 +316,10 @@ auto yaml_tokenizer::is_eof() const -> bool
     return _yamlEnd >= _yaml.size();
 }
 
-void yaml_tokenizer::optimize()
+void yaml_tokenizer::normalize()
 {
     for (usize i {0}; i < Tokens.size();) {
-        // Optimize MappingKey followed by KeyOrScalar, Newline, and Indent
+        // Fold MappingKey + KeyOrScalar + Newline + Indent into a plain KeyOrScalar
         if (i + 3 < Tokens.size()
             && Tokens[i].Type == token_type::MappingKey
             && Tokens[i + 1].Type == token_type::KeyOrScalar
@@ -317,14 +330,30 @@ void yaml_tokenizer::optimize()
             Tokens.erase(Tokens.begin() + i + 1, Tokens.begin() + i + 4);
             continue;
         }
-        // Optimize Tag token: remove Tag and following Whitespace (if any)
+
+        // Drop Tag tokens (and following Whitespace, if any) — tags are unsupported
         if (Tokens[i].Type == token_type::Tag) {
             if (i + 1 < Tokens.size() && Tokens[i + 1].Type == token_type::Whitespace) {
                 Tokens.erase(Tokens.begin() + i, Tokens.begin() + i + 2);
             } else {
                 Tokens.erase(Tokens.begin() + i);
             }
+            continue;
+        }
 
+        // Merge same-line KeyOrScalar words separated by a single Whitespace
+        if (Tokens[i].Type == token_type::KeyOrScalar
+            && i + 2 < Tokens.size()
+            && Tokens[i + 1].Type == token_type::Whitespace
+            && Tokens[i + 2].Type == token_type::KeyOrScalar) {
+            Tokens[i].Value += " " + Tokens[i + 2].Value;
+            Tokens.erase(Tokens.begin() + i + 1, Tokens.begin() + i + 3);
+            continue;
+        }
+
+        // Drop any remaining standalone Whitespace
+        if (Tokens[i].Type == token_type::Whitespace) {
+            Tokens.erase(Tokens.begin() + i);
             continue;
         }
 
@@ -336,19 +365,22 @@ void yaml_tokenizer::optimize()
 
 auto yaml_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
 {
+    _anchors.clear();
     if (!_tokenizer.tokenize(txt)) { return std::nullopt; }
 
     next();
+
+    std::optional<object> obj;
     if (check_current(token_type::FlowMapping)) {
         entry currentEntry;
         if (!parse_flow_map(currentEntry)) { return std::nullopt; }
-        return currentEntry.as<object>();
+        obj = currentEntry.as<object>();
+    } else {
+        obj = parse_map();
     }
 
-    auto        obj {parse_map()};
     auto const& tokens {_tokenizer.Tokens};
-
-    if (_nextTokenIndex >= tokens.size() || (_nextTokenIndex == tokens.size() - 1 && tokens.back().Type == token_type::EoF)) {
+    if (_nextTokenIndex >= tokens.size() || (_nextTokenIndex == tokens.size() - 1 && tokens.back().Type == token_type::EndOfDocument)) {
         return obj;
     }
 
@@ -357,22 +389,22 @@ auto yaml_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
 
 auto yaml_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
 {
+    _anchors.clear();
     if (!_tokenizer.tokenize(txt)) { return std::nullopt; }
 
     next();
-    if (check_current(token_type::FlowSequence)) {
-        entry ent;
-        if (!parse_flow_sequence(ent)) {
-            return std::nullopt;
-        }
 
-        return ent.as<array>();
+    std::optional<array> arr;
+    if (check_current(token_type::FlowSequence)) {
+        entry currentEntry;
+        if (!parse_flow_sequence(currentEntry)) { return std::nullopt; }
+        arr = currentEntry.as<array>();
+    } else {
+        arr = parse_sequence();
     }
 
-    auto        arr {parse_sequence()};
     auto const& tokens {_tokenizer.Tokens};
-
-    if (_nextTokenIndex >= tokens.size() || (_nextTokenIndex == tokens.size() - 1 && tokens.back().Type == token_type::EoF)) {
+    if (_nextTokenIndex >= tokens.size() || (_nextTokenIndex == tokens.size() - 1 && tokens.back().Type == token_type::EndOfDocument)) {
         return arr;
     }
 
@@ -389,7 +421,7 @@ auto yaml_reader::parse_map() -> std::optional<object>
     for (;;) {
         entry currentEntry;
 
-        if (check_current(token_type::EoF)) { return retValue; }
+        if (check_current(token_type::EndOfDocument)) { return retValue; }
 
         if (check_current(token_type::Newline)) {
             if (!check_next(token_type::Indent) && _currentIndent > 0) { return retValue; }
@@ -401,11 +433,6 @@ auto yaml_reader::parse_map() -> std::optional<object>
             usize const newIndent {_currentToken.Value.size()};
             if (newIndent < _currentIndent) { return retValue; }
             if (newIndent > _currentIndent) { break; } // ERROR: unexpected indent
-            next();
-            continue;
-        }
-
-        if (check_current(token_type::Whitespace)) {
             next();
             continue;
         }
@@ -477,42 +504,28 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
             continue;
         }
 
-        if (check_current(token_type::Whitespace)) {
-            next();
-            continue;
-        }
-
         if (!check_current(token_type::Sequence)) { return retValue; }
         next();
 
         // inline map entry: "- key: value" (map keys continue at the column right after "- ")
-        {
+        if (check_current(token_type::KeyOrScalar) && check_next(token_type::MappingValue)) {
             usize const oldIndent {_currentIndent};
-            usize       inlineIndent {oldIndent + 2};
-            while (check_current(token_type::Whitespace)) {
-                inlineIndent += _currentToken.Value.size();
-                next();
+            _currentIndent = oldIndent + 2;
+            if (auto obj {parse_map()}) {
+                _currentIndent = oldIndent;
+                currentEntry.set_comment(currentComment);
+                currentEntry.set_value(*obj);
+                retValue.add_entry(currentEntry);
+                currentComment = {};
+                continue;
             }
 
-            if (check_current(token_type::KeyOrScalar) && check_next(token_type::MappingValue)) {
-                _currentIndent = inlineIndent;
-                if (auto obj {parse_map()}) {
-                    _currentIndent = oldIndent;
-                    currentEntry.set_comment(currentComment);
-                    currentEntry.set_value(*obj);
-                    retValue.add_entry(currentEntry);
-                    currentComment = {};
-                    continue;
-                }
-
-                return std::nullopt;
-            }
+            return std::nullopt;
         }
 
         // flow
         if (parse_flow_map(currentEntry) || parse_flow_sequence(currentEntry)) {
             retValue.add_entry(currentEntry);
-            next();
             continue;
         }
 
@@ -527,6 +540,7 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
         if (parse_block(currentEntry) || parse_scalar(currentEntry, multiline_style::Normal)) {
             currentEntry.set_comment(currentComment);
             retValue.add_entry(currentEntry);
+            if (!anchorKey.empty()) { _anchors[anchorKey] = currentEntry; }
             currentComment = {};
             continue;
         }
@@ -537,7 +551,7 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
             continue;
         }
 
-        if (check_current(token_type::EoF)) { return retValue; }
+        if (check_current(token_type::EndOfDocument)) { return retValue; }
 
         break;
     }
@@ -573,7 +587,7 @@ auto yaml_reader::parse_comment() -> std::optional<comment>
         utf8_string cmt;
         next();
 
-        while (!check_current(token_type::Newline) && !check_current(token_type::EoF)) {
+        while (!check_current(token_type::Newline) && !check_current(token_type::EndOfDocument)) {
             cmt += _currentToken.Value;
             next();
         }
@@ -674,10 +688,11 @@ auto yaml_reader::parse_scalar(entry& currentEntry, multiline_style style) -> bo
         next();
 
         while (!check_current(type)) {
-            if (check_current(token_type::EoF)) { return false; }
+            if (check_current(token_type::EndOfDocument)) { return false; }
             value += _currentToken.Value;
             next();
         }
+
         currentEntry.set_value(value);
         next();
         return true;
@@ -746,7 +761,7 @@ void yaml_reader::next()
         _currentToken = _tokenizer.Tokens[_nextTokenIndex++];
     }
 
-    if (!check_current(token_type::EoF)) {
+    if (!check_current(token_type::EndOfDocument)) {
         usize idx {_nextTokenIndex};
         _nextToken = _tokenizer.Tokens[idx];
         while (IsIgnored(_nextToken) && idx + 1 < _tokenizer.Tokens.size()) {
