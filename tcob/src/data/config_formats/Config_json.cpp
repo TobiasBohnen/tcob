@@ -18,20 +18,30 @@ namespace tcob::data::detail {
 
 static auto FindUnquoted(string_view source, char needle) -> string_view::size_type
 {
-    char const quote {source[0]};
-    if (quote != '"' && quote != '\'') {
-        return source.find(needle);
-    }
+    bool inQuotes {false};
+    bool escaped {false};
 
-    bool  inQuotes {false};
-    usize pos {0};
-    for (auto const c : source) {
-        if (c == quote) {
-            inQuotes = !inQuotes;
-        } else if (!inQuotes && c == needle) {
-            return pos;
+    for (usize i {0}; i < source.size(); ++i) {
+        char const c {source[i]};
+
+        if (escaped) {
+            escaped = false;
+            continue;
         }
-        ++pos;
+
+        if (c == '\\') {
+            escaped = true;
+            continue;
+        }
+
+        if (c == '"') {
+            inQuotes = !inQuotes;
+            continue;
+        }
+
+        if (!inQuotes && c == needle) {
+            return i;
+        }
     }
 
     return string_view::npos;
@@ -189,7 +199,38 @@ auto json_reader::ReadScalar(entry& currentEntry, utf8_string_view line) -> bool
                 case 'n':  unescaped += '\n'; break;
                 case 'r':  unescaped += '\r'; break;
                 case 't':  unescaped += '\t'; break;
-                default:   unescaped += next; break;
+                case 'u':  {
+                    if (i + 4 >= raw.size()) { return false; }
+
+                    u32 cp {0};
+                    for (i32 j {0}; j < 4; ++j) {
+                        char const h {raw[++i]};
+
+                        cp <<= 4;
+                        if (h >= '0' && h <= '9') {
+                            cp |= h - '0';
+                        } else if (h >= 'A' && h <= 'F') {
+                            cp |= h - 'A' + 10;
+                        } else if (h >= 'a' && h <= 'f') {
+                            cp |= h - 'a' + 10;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    if (cp <= 0x7F) {
+                        unescaped += static_cast<char>(cp);
+                    } else if (cp <= 0x7FF) {
+                        unescaped += static_cast<char>(0xC0 | (cp >> 6));
+                        unescaped += static_cast<char>(0x80 | (cp & 0x3F));
+                    } else {
+                        unescaped += static_cast<char>(0xE0 | (cp >> 12));
+                        unescaped += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+                        unescaped += static_cast<char>(0x80 | (cp & 0x3F));
+                    }
+                    break;
+                }
+                default: unescaped += next; break;
                 }
             } else {
                 unescaped += c;
