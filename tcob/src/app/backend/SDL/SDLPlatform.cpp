@@ -57,6 +57,8 @@ static auto MakeShared() -> std::shared_ptr<T>
 sdl_platform::sdl_platform(bool headless, game::init const& ginit)
     : platform {headless, ginit}
 {
+    if (IsRunningOnWine()) { throw std::runtime_error {"unsupported platform"}; };
+
     InitSDL();
 
     init_input_system();
