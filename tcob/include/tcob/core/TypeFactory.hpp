@@ -20,12 +20,11 @@ class type_factory : public non_copyable {
     using func = std::function<ReturnType(Args...)>;
 
 public:
-    void add(string const& name, func&& func);
-    void add(std::vector<string> const& names, func const& func);
+    void add(string const& ext, func&& func);
+    void add(std::vector<string> const& exts, func const& func);
 
-    auto create(string const& name, Args&&... args) -> ReturnType;
-
-    auto create_from_magic(io::istream& in, string const& fallback, Args&&... args) -> ReturnType;
+    auto create(string const& ext, Args&&... args) -> ReturnType;
+    auto create(io::istream& in, string const& fallbackExt, Args&&... args) -> ReturnType;
 
 private:
     std::unordered_map<string, func> _functions;

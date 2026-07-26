@@ -81,7 +81,7 @@ auto create_from_factory(string const& name, Args&&... args)
 template <typename Factory, typename... Args>
 auto create_from_factory(io::istream& in, string const& fallback, Args&&... args)
 {
-    return locate_service<typename Factory::factory>().create_from_magic(in, fallback, std::forward<Args>(args)...);
+    return locate_service<typename Factory::factory>().create(in, fallback, std::forward<Args>(args)...);
 }
 
 }

@@ -35,8 +35,8 @@ public:
     void constexpr scale(size_f factors);
     void constexpr scale_at(size_f factors, point_f center);
 
-    void skew(std::pair<radian_f, radian_f> const& skew);
-    void skew_at(std::pair<radian_f, radian_f> const& skew, point_f center);
+    void skew(std::pair<radian_f, radian_f> skew);
+    void skew_at(std::pair<radian_f, radian_f> skew, point_f center);
 
     void constexpr combine(transform const& xform);
 
