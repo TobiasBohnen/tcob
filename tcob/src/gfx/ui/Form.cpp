@@ -494,7 +494,11 @@ void form_base::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     hide_tooltip();
 
-    if (_topWidget) { focus_widget(*_topWidget); }
+    if (_topWidget) {
+        focus_widget(*_topWidget);
+    } else {
+        clear_focus();
+    }
 
     if (!_focusWidget) { return; }
     _injector.on_mouse_button_down(_focusWidget, ev);
