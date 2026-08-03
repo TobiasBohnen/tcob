@@ -77,14 +77,14 @@ inline void bucket<T>::unload(string const& name)
 {
     auto& obj {_objects[name]};
     obj.first.reset();
-    obj.second.get()->set_status(asset_status::Unloaded);
+    obj.second.get()->Status = asset_status::Unloaded;
 }
 
 template <typename T>
 inline void bucket<T>::asset_stats(bucket_stats& out) const
 {
     for (auto& [name, ptr] : _objects) {
-        auto st {ptr.second.get()->status()};
+        auto const st {ptr.second.get()->Status};
         out.Assets[name] = {.Status   = st,
                             .UseCount = ptr.second.use_count()};
         out.Statuses[st]++;

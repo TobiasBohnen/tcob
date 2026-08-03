@@ -72,10 +72,10 @@ void group::load()
         if (ev.ShouldLoad) { alm->load(file); }
     }
 
-    // declaring stage
-    for (auto& loaderMgr : _loaderManagers) { loaderMgr.second->declare(); }
     // preparing stage
     for (auto& loaderMgr : _loaderManagers) { loaderMgr.second->prepare(); }
+    // loading stage
+    for (auto& loaderMgr : _loaderManagers) { loaderMgr.second->load(); }
 }
 
 void group::unload()
@@ -94,12 +94,7 @@ void group::destroy()
 
 auto group::is_loading_complete() const -> bool
 {
-    auto stats {asset_stats().Buckets};
-    for (auto& [_, bucketStats] : stats) {
-        if (bucketStats.Statuses[asset_status::Loading] > 0) { return false; }
-    }
-
-    return true;
+    return loading_progress() == 1.0f;
 }
 
 auto group::loading_progress() const -> f32

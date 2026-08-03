@@ -30,12 +30,13 @@ inline auto loader<T>::group() -> assets::group&
 template <typename T>
 inline void loader<T>::set_asset_status(asset_ptr<T> asset, asset_status status)
 {
-    asset.get()->set_status(status);
+    asset.get()->Status = status;
 
     switch (status) {
-    case asset_status::Unloaded: break;
-    case asset_status::Created:  break;
-    case asset_status::Loading:  break;
+    case asset_status::Uninitiated: break;
+    case asset_status::Unloaded:    break;
+    case asset_status::Prepared:    break;
+    case asset_status::Loading:     break;
     case asset_status::Loaded:
         logger::Info("asset_loader: group '{}' type '{}' -> asset '{}' successfully loaded",
                      group().name(), group().bucket<T>()->name(), asset.get()->name());

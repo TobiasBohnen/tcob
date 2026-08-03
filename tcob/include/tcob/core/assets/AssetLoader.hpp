@@ -23,8 +23,8 @@ namespace detail {
     public:
         virtual ~loader_base() = default;
 
-        virtual void declare() { }
         virtual void prepare() { }
+        virtual void load() { }
     };
 }
 
@@ -56,8 +56,9 @@ public:
     virtual ~loader_manager() = default;
 
     virtual void load(path const& file) = 0;
-    void         declare();
-    void         prepare();
+
+    void prepare();
+    void load();
 
 protected:
     void add_loader(std::unique_ptr<detail::loader_base> loader);

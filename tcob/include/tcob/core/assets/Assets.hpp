@@ -10,8 +10,9 @@
 
 namespace tcob {
 enum class asset_status : u8 {
+    Uninitiated,
     Unloaded,
-    Created,
+    Prepared,
     Loading,
     Loaded,
     Error

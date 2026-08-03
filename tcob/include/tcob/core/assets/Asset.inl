@@ -15,11 +15,10 @@
 namespace tcob {
 
 template <typename T>
-inline asset<T>::asset(string name, std::weak_ptr<T> ptr, asset_status status)
+inline asset<T>::asset(string name, std::weak_ptr<T> ptr)
     : _name {std::move(name)}
     , _object {std::move(ptr)}
 {
-    set_status(status);
 }
 
 template <typename T>
@@ -33,8 +32,8 @@ template <typename T>
 template <BaseOfOrDerivedFrom<T> U>
 inline auto asset<T>::operator=(asset<U> const& other) noexcept -> asset<T>&
 {
-    _name   = other._name;
-    _status = other._status;
+    _name  = other._name;
+    Status = other.Status;
     if (other._object.expired()) { return *this; }
 
     _object = std::dynamic_pointer_cast<T>(other._object.lock());
@@ -67,12 +66,6 @@ inline auto asset<T>::name() const -> string const&
 }
 
 template <typename T>
-inline auto asset<T>::status() const -> asset_status
-{
-    return _status;
-}
-
-template <typename T>
 inline auto asset<T>::is_expired() const -> bool
 {
     return _object.expired();
@@ -87,13 +80,7 @@ inline asset<T>::operator bool() const
 template <typename T>
 inline auto asset<T>::is_ready() const -> bool
 {
-    return _status == asset_status::Loaded && !is_expired();
-}
-
-template <typename T>
-inline void asset<T>::set_status(asset_status status)
-{
-    _status = status;
+    return Status == asset_status::Loaded && !is_expired();
 }
 
 template <typename T>
@@ -205,8 +192,9 @@ template <typename T>
 template <typename... Args>
 inline asset_owner_ptr<T>::asset_owner_ptr(string const& name, Args&&... args)
     : _object {std::make_shared<T>(std::forward<Args>(args)...)}
-    , _assetPtr {std::make_shared<asset<T>>(name, _object, asset_status::Loaded)}
+    , _assetPtr {std::make_shared<asset<T>>(name, _object)}
 {
+    _assetPtr.get()->Status = asset_status::Loaded;
 }
 
 template <typename T>

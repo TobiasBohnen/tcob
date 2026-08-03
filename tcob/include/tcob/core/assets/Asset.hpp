@@ -19,15 +19,11 @@ template <typename T>
 class asset {
     template <typename U>
     friend class asset;
-    template <typename U>
-    friend class assets::loader;
-    template <typename U>
-    friend class assets::bucket;
 
 public:
     using type = T;
 
-    asset(string name, std::weak_ptr<T> ptr, asset_status status = asset_status::Created);
+    asset(string name, std::weak_ptr<T> ptr);
     template <BaseOfOrDerivedFrom<T> U>
     asset(asset<U> const& other) noexcept;
 
@@ -37,8 +33,9 @@ public:
     auto operator->() const -> type*;
     auto operator*() const -> type&;
 
+    asset_status Status {asset_status::Uninitiated};
+
     auto name() const -> string const&;
-    auto status() const -> asset_status;
 
     auto get() const -> type*;
 
@@ -48,13 +45,9 @@ public:
     auto     is_expired() const -> bool;
     auto     is_ready() const -> bool;
 
-protected:
-    void set_status(asset_status status);
-
 private:
     string           _name {};
     std::weak_ptr<T> _object {};
-    asset_status     _status {asset_status::Error};
 };
 
 ////////////////////////////////////////////////////////////

@@ -12,17 +12,17 @@ namespace tcob::assets {
 
 ////////////////////////////////////////////////////////////
 
-void loader_manager::declare()
-{
-    for (auto& loader : _loaders) {
-        loader->declare();
-    }
-}
-
 void loader_manager::prepare()
 {
     for (auto& loader : _loaders) {
         loader->prepare();
+    }
+}
+
+void loader_manager::load()
+{
+    for (auto& loader : _loaders) {
+        loader->load();
     }
 }
 
