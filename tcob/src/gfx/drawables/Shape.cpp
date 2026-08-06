@@ -151,9 +151,9 @@ void shape_batch::on_draw_to(render_target& target, transform const& xform)
             maxPasses = std::max(maxPasses, shape->Material->pass_count());
         }
 
-        for (auto& shape : _children) {
-            if (!shape->is_visible()) { continue; }
-            for (isize p {0}; p < maxPasses; ++p) {
+        for (isize p {0}; p < maxPasses; ++p) {
+            for (auto& shape : _children) {
+                if (!shape->is_visible()) { continue; }
                 if (p >= shape->Material->pass_count()) { continue; }
 
                 auto const& pass {shape->Material->get_pass(p)};
