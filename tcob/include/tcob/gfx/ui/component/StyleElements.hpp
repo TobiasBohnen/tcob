@@ -254,7 +254,7 @@ public:
     border_element Border {};
     milliseconds   Delay {0};
 
-    auto calc(rect_f const& rect, orientation orien, position align) const -> rect_f;
+    auto calc(rect_f const& rect, context const& ctx) const -> rect_f;
 
     void lerp(bar_element const& from, bar_element const& to, f64 step);
 

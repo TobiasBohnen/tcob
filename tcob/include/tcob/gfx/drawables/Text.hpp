@@ -123,12 +123,6 @@ private:
     std::unordered_set<u8>                                             _startedEffects;
 };
 
-template <typename... Funcs>
-inline auto text::create_effect(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<vertex_tween<Funcs...>>
-{
-    auto retValue {std::shared_ptr<vertex_tween<Funcs...>>(new vertex_tween<Funcs...> {duration, std::forward<Funcs>(args)...})};
-    _effects[id] = retValue;
-    return retValue;
 }
 
-}
+#include "Text.inl"

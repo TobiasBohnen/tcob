@@ -56,15 +56,15 @@ auto nav_arrow_element::calc(rect_f const& rect, gfx::horizontal_alignment align
     return retValue - Border.thickness() - Padding;
 }
 
-auto bar_element::calc(rect_f const& rect, orientation orien, position align) const -> rect_f
+auto bar_element::calc(rect_f const& rect, context const& ctx) const -> rect_f
 {
     rect_f retValue {rect};
 
-    switch (orien) {
+    switch (ctx.Orientation) {
     case orientation::Horizontal:
         retValue.Size.Height = Size.calc(rect.height());
 
-        switch (align) {
+        switch (ctx.Position) {
         case position::RightOrBottom:  retValue.Position.Y += rect.height() - retValue.height(); break;
         case position::CenterOrMiddle: retValue.Position.Y += (rect.height() - retValue.height()) / 2.0f; break;
         default:                       break;
@@ -73,7 +73,7 @@ auto bar_element::calc(rect_f const& rect, orientation orien, position align) co
     case orientation::Vertical:
         retValue.Size.Width = Size.calc(rect.width());
 
-        switch (align) {
+        switch (ctx.Position) {
         case position::RightOrBottom:  retValue.Position.X += rect.width() - retValue.width(); break;
         case position::CenterOrMiddle: retValue.Position.X += (rect.width() - retValue.width()) / 2.0f; break;
         default:                       break;

@@ -365,7 +365,7 @@ void widget_painter::draw_caret(caret_element const& element, rect_f const& rect
 
 auto widget_painter::draw_bar(bar_element const& element, rect_f const& rect, bar_element::context const& barCtx) -> rect_f
 {
-    rect_f retValue {element.calc(rect, barCtx.Orientation, barCtx.Position)};
+    rect_f retValue {element.calc(rect, barCtx)};
 
     if (element.HigherBackground == element.LowerBackground || barCtx.Stops.size() < 3) {
         do_bordered_rect(retValue, element.HigherBackground, element.Border);

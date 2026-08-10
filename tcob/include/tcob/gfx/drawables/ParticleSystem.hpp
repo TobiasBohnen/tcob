@@ -9,7 +9,6 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <tuple>
 #include <variant>
 #include <vector>
 
@@ -20,7 +19,6 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/Serialization.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/Transform.hpp"
@@ -67,26 +65,7 @@ public:
 
     auto operator==(particle_settings const& other) const -> bool = default;
 
-    static auto constexpr Members()
-    {
-        return std::tuple {
-            member<&particle_settings::Speed> {"speed"},
-            member<&particle_settings::Direction> {"direction"},
-
-            member<&particle_settings::LinearAcceleration> {"linear_acceleration"},
-            member<&particle_settings::LinearDamping> {"linear_dampling"},
-            member<&particle_settings::RadialAcceleration> {"radial_acceleration"},
-            member<&particle_settings::TangentialAcceleration> {"tangential_acceleration"},
-
-            member<&particle_settings::Gravity> {"gravity"},
-
-            member<&particle_settings::TextureRegion> {"texture_region"},
-            member<&particle_settings::Colors> {"colors"},
-            member<&particle_settings::Transparency> {"transparency"},
-
-            member<&particle_settings::Lifetime> {"lifetime"},
-        };
-    }
+    static auto constexpr Members();
 };
 
 ////////////////////////////////////////////////////////////
@@ -101,7 +80,7 @@ public:
 
         auto operator==(emit_linear const& other) const -> bool = default;
 
-        static auto constexpr Members() { return std::tuple {member<&particle_emitter::emit_linear::Rate> {"rate"}}; }
+        static auto constexpr Members();
     };
 
     class emit_burst {
@@ -112,11 +91,7 @@ public:
 
         auto operator==(emit_burst const& other) const -> bool = default;
 
-        static auto constexpr Members() { return std::tuple {
-            member<&particle_emitter::emit_burst::Count> {"count"},
-            member<&particle_emitter::emit_burst::Interval> {"interval"},
-            member<&particle_emitter::emit_burst::Repeats> {"repeats"},
-        }; }
+        static auto constexpr Members();
     };
 
     using emit_pattern = std::variant<emit_linear, emit_burst>;
@@ -134,16 +109,7 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        static auto constexpr Members()
-        {
-            return std::tuple {
-                member<&particle_emitter::settings::Template> {"template"},
-                member<&particle_emitter::settings::Transient> {"transient"},
-                member<&particle_emitter::settings::Pattern> {"pattern"},
-                member<&particle_emitter::settings::SpawnArea> {"spawn_area"},
-                member<&particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
-            };
-        }
+        static auto constexpr Members();
     };
 
     ////////////////////////////////////////////////////////////
@@ -268,3 +234,5 @@ private:
 ////////////////////////////////////////////////////////////
 
 }
+
+#include "ParticleSystem.inl"

@@ -6,7 +6,10 @@
 #pragma once
 #include "Length.hpp"
 
+#include <tuple>
+
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Serialization.hpp"
 
 namespace tcob::ui {
 
@@ -69,6 +72,29 @@ inline auto operator+=(rect_f& left, thickness const& right) -> rect_f&
     left.Size.Height += (t + b);
 
     return left;
+}
+
+auto constexpr length::Members()
+{
+    return std::tuple {
+        member<&length::Value> {"value"},
+        member<&length::Type> {"type"}};
+}
+
+auto constexpr thickness::Members()
+{
+    return std::tuple {
+        member<&thickness::Left> {"left"},
+        member<&thickness::Right> {"right"},
+        member<&thickness::Top> {"top"},
+        member<&thickness::Bottom> {"bottom"}};
+}
+
+auto constexpr dimensions::Members()
+{
+    return std::tuple {
+        member<&dimensions::Width> {"width"},
+        member<&dimensions::Height> {"height"}};
 }
 
 }

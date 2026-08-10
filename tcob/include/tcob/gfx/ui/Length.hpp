@@ -6,10 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <tuple>
-
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/Serialization.hpp"
 #include "tcob/core/Size.hpp"
 
 namespace tcob::ui {
@@ -38,12 +35,7 @@ public:
 
     static auto Lerp(length const& from, length const& to, f64 step) -> length;
 
-    static auto constexpr Members()
-    {
-        return std::tuple {
-            member<&length::Value> {"value"},
-            member<&length::Type> {"type"}};
-    }
+    static auto constexpr Members();
 };
 
 auto operator/(length const& left, f32 right) -> length;
@@ -66,14 +58,7 @@ public:
 
     static auto Lerp(thickness const& from, thickness const& to, f64 step) -> thickness;
 
-    static auto constexpr Members()
-    {
-        return std::tuple {
-            member<&thickness::Left> {"left"},
-            member<&thickness::Right> {"right"},
-            member<&thickness::Top> {"top"},
-            member<&thickness::Bottom> {"bottom"}};
-    }
+    static auto constexpr Members();
 };
 
 auto operator-(rect_f const& left, thickness const& right) -> rect_f;
@@ -94,12 +79,7 @@ public:
 
     static auto Lerp(dimensions const& from, dimensions const& to, f64 step) -> dimensions;
 
-    static auto constexpr Members()
-    {
-        return std::tuple {
-            member<&dimensions::Width> {"width"},
-            member<&dimensions::Height> {"height"}};
-    }
+    static auto constexpr Members();
 };
 
 }
