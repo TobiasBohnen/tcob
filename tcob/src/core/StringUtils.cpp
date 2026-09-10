@@ -6,11 +6,12 @@
 #include "tcob/core/StringUtils.hpp"
 
 #include <algorithm>
+#include <array>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <utf8/utf8.h>
+#include <utf8proc.h>
 
 #include "tcob/core/random/Random.hpp"
 
@@ -194,86 +195,168 @@ auto rep(string_view c, usize count, string_view delim) -> string
 
 namespace tcob::utf8 {
 
+static auto advance_codepoints(char const*& ptr, char const* end, usize n) -> void
+{
+    while (n > 0 && ptr < end) {
+        utf8proc_int32_t       cp {};
+        utf8proc_ssize_t const len {utf8proc_iterate(reinterpret_cast<utf8proc_uint8_t const*>(ptr), end - ptr, &cp)};
+        if (len <= 0) { break; }
+        ptr += len;
+        --n;
+    }
+}
+
+static auto is_space_cp(utf8proc_int32_t cp) -> bool
+{
+    switch (cp) {
+    case ' ':
+    case '\t':
+    case '\n':
+    case '\r':
+    case '\f':
+    case '\v':
+        return true;
+    default:
+        return utf8proc_category(cp) == UTF8PROC_CATEGORY_ZS;
+    }
+}
+
+static auto encode_append(utf8_string& out, utf8proc_int32_t cp) -> void
+{
+    std::array<utf8proc_uint8_t, 4> buf {};
+    utf8proc_ssize_t                len {utf8proc_encode_char(cp, buf.data())};
+    if (len > 0) {
+        out.append(reinterpret_cast<char const*>(buf.data()), static_cast<usize>(len));
+    }
+}
+
 auto length(utf8_string_view str) -> isize
 {
-    return static_cast<isize>(::utf8::length(str));
+    isize            count {0};
+    auto const*      ptr {str.data()};
+    char const*      end {str.data() + str.size()};
+    utf8proc_int32_t cp {};
+
+    while (ptr < end) {
+        utf8proc_ssize_t const len {utf8proc_iterate(reinterpret_cast<utf8proc_uint8_t const*>(ptr), end - ptr, &cp)};
+        if (len <= 0) { break; }
+        ptr += len;
+        ++count;
+    }
+
+    return count;
 }
 
 auto insert(utf8_string_view str, utf8_string_view what, usize pos) -> utf8_string
 {
-    string retValue {str};
+    utf8_string retValue {str};
 
-    auto it {retValue.begin()};
-    for (usize i {0}; i < pos; ++i) {
-        ::utf8::next(it, retValue.end());
-    }
+    char const* ptr {retValue.data()};
+    char const* end {retValue.data() + retValue.size()};
+    advance_codepoints(ptr, end, pos);
 
-    retValue.insert(it, what.begin(), what.end());
+    usize const byteOffset {static_cast<usize>(ptr - retValue.data())};
+    retValue.insert(byteOffset, what.data(), what.size());
 
     return retValue;
 }
 
 auto remove(utf8_string_view str, usize pos, usize count) -> utf8_string
 {
-    string retValue {str};
+    utf8_string retValue {str};
 
-    auto start {retValue.begin()};
-    for (usize i {0}; i < pos; ++i) {
-        ::utf8::next(start, retValue.end());
-    }
-    auto end {start};
-    for (usize i {0}; i < count; ++i) {
-        ::utf8::next(end, retValue.end());
-    }
+    char const* base {retValue.data()};
+    char const* end {retValue.data() + retValue.size()};
 
-    retValue.erase(start, end);
+    char const* start {base};
+    advance_codepoints(start, end, pos);
+
+    char const* stop {start};
+    advance_codepoints(stop, end, count);
+
+    usize startByte {static_cast<usize>(start - base)};
+    usize stopByte {static_cast<usize>(stop - base)};
+    retValue.erase(startByte, stopByte - startByte);
 
     return retValue;
 }
 
 auto substr(utf8_string_view str, usize pos, usize count) -> utf8_string
 {
-    auto start {str.begin()};
-    for (usize i {0}; i < pos; ++i) {
-        ::utf8::next_ex(start, str.end());
-    }
-    auto end {start};
-    for (usize i {0}; i < count; ++i) {
-        ::utf8::next_ex(end, str.end());
-    }
+    char const* base {str.data()};
+    char const* end {str.data() + str.size()};
 
-    return {start, end};
+    char const* start {base};
+    advance_codepoints(start, end, pos);
+
+    char const* stop {start};
+    advance_codepoints(stop, end, count);
+
+    return utf8_string {start, static_cast<usize>(stop - start)};
 }
 
 auto to_lower(utf8_string_view str) -> utf8_string
 {
-    return ::utf8::tolower({str.data(), str.size()});
+    utf8_string retValue;
+    retValue.reserve(str.size());
+
+    char const*      ptr {str.data()};
+    char const*      end {str.data() + str.size()};
+    utf8proc_int32_t cp {};
+
+    while (ptr < end) {
+        utf8proc_ssize_t const len {utf8proc_iterate(reinterpret_cast<utf8proc_uint8_t const*>(ptr), end - ptr, &cp)};
+        if (len <= 0) { break; }
+        ptr += len;
+        encode_append(retValue, utf8proc_tolower(cp));
+    }
+
+    return retValue;
 }
 
 auto to_upper(utf8_string_view str) -> utf8_string
 {
-    return ::utf8::toupper({str.data(), str.size()});
+    utf8_string retValue;
+    retValue.reserve(str.size());
+
+    char const*      ptr {str.data()};
+    char const*      end {str.data() + str.size()};
+    utf8proc_int32_t cp {};
+
+    while (ptr < end) {
+        utf8proc_ssize_t const len {utf8proc_iterate(reinterpret_cast<utf8proc_uint8_t const*>(ptr), end - ptr, &cp)};
+        if (len <= 0) { break; }
+        ptr += len;
+        encode_append(retValue, utf8proc_toupper(cp));
+    }
+
+    return retValue;
 }
 
 auto capitalize(utf8_string_view str) -> utf8_string
 {
     utf8_string retValue;
+    retValue.reserve(str.size());
 
-    usize const len {::utf8::length(str)};
-    auto        it {str.begin()};
-    bool        newWord {true};
+    char const*      ptr {str.data()};
+    char const*      end {str.data() + str.size()};
+    utf8proc_int32_t cp {};
+    bool             newWord {true};
 
-    for (usize i {0}; i < len; ++i) {
-        if (::utf8::isspace(*it)) {
+    while (ptr < end) {
+        utf8proc_ssize_t const len {utf8proc_iterate(reinterpret_cast<utf8proc_uint8_t const*>(ptr), end - ptr, &cp)};
+        if (len <= 0) { break; }
+        ptr += len;
+
+        if (is_space_cp(cp)) {
             newWord = true;
-            retValue += utf8::substr(str, i, 1);
+            encode_append(retValue, cp);
         } else if (newWord) {
             newWord = false;
-            retValue += utf8::to_upper(utf8::substr(str, i, 1));
+            encode_append(retValue, utf8proc_totitle(cp));
         } else {
-            retValue += utf8::to_lower(utf8::substr(str, i, 1));
+            encode_append(retValue, utf8proc_tolower(cp));
         }
-        ::utf8::next_ex(it, str.end());
     }
 
     return retValue;
@@ -281,9 +364,22 @@ auto capitalize(utf8_string_view str) -> utf8_string
 
 auto to_utf32(utf8_string_view str) -> std::u32string
 {
-    return ::utf8::runes(str.data(), str.size());
-}
+    std::u32string retValue;
+    retValue.reserve(str.size());
 
+    char const*      ptr {str.data()};
+    char const*      end {str.data() + str.size()};
+    utf8proc_int32_t cp {};
+
+    while (ptr < end) {
+        utf8proc_ssize_t const len {utf8proc_iterate(reinterpret_cast<utf8proc_uint8_t const*>(ptr), end - ptr, &cp)};
+        if (len <= 0) { break; }
+        ptr += len;
+        retValue.push_back(static_cast<char32_t>(cp));
+    }
+
+    return retValue;
+}
 }
 
 ////////////////////////////////////////////////////////////
