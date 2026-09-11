@@ -26,14 +26,17 @@ public:
     using distribution_type  = D;
 
     explicit prng(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()), auto&&... distArgs);
-    explicit prng(state_type state, auto&&... distArgs);
 
     auto operator()(auto&&... distArgs);
 
     auto next() -> result_type;
     auto state() const -> state_type const&;
 
+    static auto FromState(state_type state, auto&&... distArgs) -> prng;
+
 private:
+    explicit prng(state_type state, auto&&... distArgs);
+
     random_engine_type _engine;
     state_type         _state;
     distribution_type  _distribution;
@@ -66,7 +69,6 @@ class dice final {
 
 public:
     explicit dice(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
-    explicit dice(state_type state);
 
     auto state() const -> state_type const&;
 
@@ -75,7 +77,11 @@ public:
     auto roll_n(usize n) -> std::vector<i32>;
     auto roll_n_sum(usize n) -> i32;
 
+    static auto FromState(state_type state) -> dice;
+
 private:
+    explicit dice(state_type state);
+
     prng<E, core_uniform_distribution> _random;
 };
 
@@ -88,13 +94,16 @@ public:
     using seed_type  = typename E::seed_type;
 
     explicit shuffle(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
-    explicit shuffle(state_type state);
 
     auto state() const -> state_type const&;
 
     void operator()(auto&& span);
 
+    static auto FromState(state_type state) -> shuffle;
+
 private:
+    explicit shuffle(state_type state);
+
     prng<E, core_uniform_distribution> _random {};
 };
 

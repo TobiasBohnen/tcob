@@ -8,6 +8,7 @@
 
 #include <vector>
 
+#include "tcob/core/random/Distribution.hpp"
 #include "tcob/core/random/Engine.hpp"
 
 namespace tcob::random {
@@ -26,6 +27,12 @@ inline prng<E, D>::prng(state_type state, auto&&... distArgs)
     : _state {state}
     , _distribution {distArgs...}
 {
+}
+
+template <RandomEngine E, typename D>
+inline auto prng<E, D>::FromState(state_type state, auto&&... distArgs) -> prng
+{
+    return prng {state, std::move(distArgs)...};
 }
 
 template <RandomEngine E, typename D>
@@ -56,8 +63,14 @@ inline dice<N, E>::dice(seed_type seed)
 
 template <i32 N, RandomEngine E>
 inline dice<N, E>::dice(state_type state)
-    : _random {state}
+    : _random {prng<E, core_uniform_distribution>::FromState(state)}
 {
+}
+
+template <i32 N, RandomEngine E>
+inline auto dice<N, E>::FromState(state_type state) -> dice
+{
+    return dice {state};
 }
 
 template <i32 N, RandomEngine E>
@@ -97,8 +110,14 @@ inline shuffle<E>::shuffle(seed_type seed)
 
 template <RandomEngine E>
 inline shuffle<E>::shuffle(state_type state)
-    : _random {state}
+    : _random {prng<E, core_uniform_distribution>::FromState(state)}
 {
+}
+
+template <RandomEngine E>
+inline auto shuffle<E>::FromState(state_type state) -> shuffle
+{
+    return shuffle {state};
 }
 
 template <RandomEngine E>
