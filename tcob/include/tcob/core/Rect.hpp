@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <format>
 #include <functional>
+#include <type_traits>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Common.hpp"
@@ -22,6 +23,8 @@ namespace tcob {
 
 template <Arithmetic T>
 class [[nodiscard]] rect final {
+    using center_type = std::conditional_t<std::is_same_v<T, f64>, f64, f32>;
+
 public:
     using type = T;
 
@@ -46,8 +49,8 @@ public:
     auto constexpr width() const -> T;
     auto constexpr height() const -> T;
 
-    auto constexpr center() const -> point_f;
-    auto constexpr local_center() const -> point_f;
+    auto constexpr center() const -> point<center_type>;
+    auto constexpr local_center() const -> point<center_type>;
 
     template <Arithmetic U>
     void constexpr move_by(point<U> const& point);

@@ -181,15 +181,15 @@ auto constexpr rect<T>::height() const -> T
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::center() const -> point_f
+auto constexpr rect<T>::center() const -> point<center_type>
 {
-    return {static_cast<f32>(Position.X) + (static_cast<f32>(Size.Width) / 2), static_cast<f32>(Position.Y) + (static_cast<f32>(Size.Height) / 2)};
+    return {static_cast<center_type>(Position.X) + (static_cast<center_type>(Size.Width) / 2), static_cast<center_type>(Position.Y) + (static_cast<center_type>(Size.Height) / 2)};
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::local_center() const -> point_f
+auto constexpr rect<T>::local_center() const -> point<center_type>
 {
-    return {static_cast<f32>(Size.Width) / 2, static_cast<f32>(Size.Height) / 2};
+    return {static_cast<center_type>(Size.Width) / 2, static_cast<center_type>(Size.Height) / 2};
 }
 
 template <Arithmetic T>
