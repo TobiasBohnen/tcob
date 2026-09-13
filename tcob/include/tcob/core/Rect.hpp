@@ -61,8 +61,8 @@ public:
     auto constexpr contains [[nodiscard]] (point<U> const& other, bool includeEdges = false) const -> bool;
     template <Arithmetic U>
     auto constexpr contains [[nodiscard]] (rect<U> const& other, bool includeEdges = false) const -> bool;
-
-    auto constexpr intersects [[nodiscard]] (rect const& other, bool includeEdges = false) const -> bool;
+    template <Arithmetic U>
+    auto constexpr intersects [[nodiscard]] (rect<U> const& other, bool includeEdges = false) const -> bool;
 
     template <Arithmetic U = T>
     auto constexpr equals(rect<U> const& other, f32 tol) const -> bool;
