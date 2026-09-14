@@ -105,7 +105,7 @@ void image::flip_vertically()
 auto image::get_pixel(point_i pos) const -> color
 {
     assert(_info.Size.contains(pos));
-    return get_pixel(static_cast<usize>((pos.X + (pos.Y * _info.Size.Width))));
+    return get_pixel(static_cast<usize>(pos.X) + (static_cast<usize>(pos.Y) * static_cast<usize>(_info.Size.Width)));
 }
 
 auto image::get_pixel(usize idx) const -> color
@@ -237,7 +237,7 @@ auto image::Create(size_i size, format f, std::span<std::byte const> data) -> im
 auto image::CreateEmpty(size_i size, format f) -> image
 {
     image retValue {size, f};
-    retValue._buffer.resize(static_cast<usize>(size.Width * size.Height * image::information::GetBPP(f)));
+    retValue._buffer.resize(static_cast<usize>(size.Width) * static_cast<usize>(size.Height) * image::information::GetBPP(f));
     return retValue;
 }
 
