@@ -13,8 +13,10 @@ AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortCaseLabelsOnASingleLine: True
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: True
-BinPackArguments: True
-BinPackParameters: BinPack
+PackArguments:
+  BinPack: BinPack
+PackParameters:
+  BinPack: BinPack
 BreakConstructorInitializers: BeforeComma
 AllowAllArgumentsOnNextLine: True
 BreakBeforeBinaryOperators: NonAssignment

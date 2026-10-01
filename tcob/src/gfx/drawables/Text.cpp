@@ -258,7 +258,7 @@ void text::parse_commands()
 
                 text_command cmd {};
 
-                if (upper.starts_with("/")) {
+                if (upper.starts_with('/')) {
                     if (upper.starts_with("/COLOR")) {
                         cmd.Type = text_command_type::ColorOff;
                     } else if (upper.starts_with("/ALPHA")) {

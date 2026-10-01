@@ -46,7 +46,7 @@ static auto EnumerateCallback(void* data, char const* origdir, char const* fname
 
     string       folder {origdir};
     string const file {fname};
-    if (!folder.ends_with("/")) { folder += "/"; }
+    if (!folder.ends_with('/')) { folder += '/'; }
     string const entry {folder == "/" ? file : folder + file};
 
     switch (get_stat(entry).Type) {

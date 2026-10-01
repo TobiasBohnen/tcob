@@ -98,7 +98,7 @@ auto object::clone(bool deep) const -> object
         for (auto const& [k, v] : *values()) {
             auto const type {get_type(k)};
             switch (type) {
-            case type::Null: break;
+            case type::Null:    break;
             case type::String:
             case type::Float:
             case type::Integer:
@@ -322,27 +322,27 @@ void entry::set_comment(comment const& comment)
 auto tcob::literals::operator""_ini(char const* str, usize) -> tcob::data::object
 {
     tcob::data::object retValue {};
-    retValue.parse(string {str}, ".ini");
+    retValue.parse(str, ".ini");
     return retValue;
 }
 
 auto tcob::literals::operator""_json(char const* str, usize) -> tcob::data::object
 {
     tcob::data::object retValue {};
-    retValue.parse(string {str}, ".json");
+    retValue.parse(str, ".json");
     return retValue;
 }
 
 auto tcob::literals::operator""_xml(char const* str, usize) -> tcob::data::object
 {
     tcob::data::object retValue {};
-    retValue.parse(string {str}, ".xml");
+    retValue.parse(str, ".xml");
     return retValue;
 }
 
 auto tcob::literals::operator""_yaml(char const* str, usize) -> tcob::data::object
 {
     tcob::data::object retValue {};
-    retValue.parse(string {str}, ".yaml");
+    retValue.parse(str, ".yaml");
     return retValue;
 }

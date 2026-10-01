@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <format>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -416,7 +417,7 @@ struct md_parser {
             ++CurrentPos;
         }
         md_parser sub {};
-        sub.Lines = inner;
+        sub.Lines = std::move(inner);
         return std::format("<blockquote>{}</blockquote>", sub.parse());
     }
 

@@ -101,7 +101,7 @@ static void WriteLine(std::span<string const> row, io::ostream& ss, csv_table::s
 {
     for (usize i {0}; i < row.size(); ++i) {
         string const& value {row[i]};
-        if (value.find(s.Separator) != string::npos || value.find(' ') != string::npos || value.find('\t') != string::npos) {
+        if (value.contains(s.Separator) || value.contains(' ') || value.contains('\t')) {
             ss << s.Quote << value << s.Quote;
         } else {
             ss << value;

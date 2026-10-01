@@ -674,7 +674,7 @@ auto yaml_reader::parse_scalar(entry& currentEntry, multiline_style style) -> bo
             }
 
             if (style != multiline_style::Normal) {
-                val += "\n";
+                val += '\n';
             }
         }
 

@@ -11,6 +11,7 @@
 #include <span>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -165,7 +166,7 @@ auto node_graph::mutate_param(uid nodeID, usize paramIndex, std::function<bool(n
         [](node_param_bool&) { },
         [](node_param_user_object&) { });
 
-    it->Parameters[paramIndex] = param;
+    it->Parameters[paramIndex] = std::move(param);
 
     return true;
 }

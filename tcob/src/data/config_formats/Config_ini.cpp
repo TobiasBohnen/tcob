@@ -115,7 +115,7 @@ auto ini_reader::read_comment(object& targetObject, utf8_string_view line) -> bo
     if (_settings.Comment.contains(line[0])) {
         if (line.size() > 1) {
             _currentComment.Text += line.substr(1);
-            _currentComment.Text += "\n";
+            _currentComment.Text += '\n';
         }
         return true;
     }
@@ -124,7 +124,7 @@ auto ini_reader::read_comment(object& targetObject, utf8_string_view line) -> bo
         if (split.size() != 3) { return false; }
 
         _currentComment.Text += split[1];
-        _currentComment.Text += "\n";
+        _currentComment.Text += '\n';
 
         auto const newline {helper::trim(split[0])};
         return read_section_header(targetObject, newline)
@@ -373,7 +373,7 @@ auto ini_reader::read_scalar(entry& currentEntry, utf8_string_view line) -> bool
             if (firstLine) {
                 firstLine = false;
             } else {
-                stringLine += "\n";
+                stringLine += '\n';
             }
             stringLine += get_next_line();
         }

@@ -246,7 +246,7 @@ auto quote_file(utf8_string_view str) -> utf8_string
             result += c;
         }
     }
-    result += "'";
+    result += '\'';
     return result;
 }
 

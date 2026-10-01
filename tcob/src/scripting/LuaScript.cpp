@@ -23,172 +23,170 @@
 namespace tcob::scripting {
 
 extern "C" {
-static void Warn(void* ud, char const* msg, int toCont)
-{
-    auto* scr {static_cast<script*>(ud)};
-    emit_signal(scr->Warning, script::warning_event {.Message = msg, .ToCont = toCont != 0});
+static void Warn(void *ud, char const *msg, int toCont) {
+  auto *scr{static_cast<script *>(ud)};
+  emit_signal(scr->Warning,
+              script::warning_event{.Message = msg, .ToCont = toCont != 0});
 }
 
-static void Hook(lua_State* l, lua_Debug* ar)
-{
-    state_view ls {l};
-    auto*      hook {*reinterpret_cast<script::HookFunc**>(ls.get_extraspace())};
-    if (hook) {
-        debug dbg {&ls, ar};
-        (*hook)(dbg);
+static void Hook(lua_State *l, lua_Debug *ar) {
+  state_view ls{l};
+  auto *hook{*reinterpret_cast<script::HookFunc **>(ls.get_extraspace())};
+  if (hook) {
+    debug dbg{&ls, ar};
+    (*hook)(dbg);
+  }
+}
+}
+
+script::script() : _view{state_view::NewState()} {
+  _view.require_library(library::Base);
+  _view.pop(1);
+
+  _view.push_globaltable();
+  _globalTable.acquire(_view, -1);
+  _view.pop(1);
+
+  _view.set_warnf(&Warn, this);
+}
+
+script::~script() {
+  if (*Environment) {
+    Environment.mutate([](auto &env) { env->release(); });
+  }
+  _globalTable.release();
+  clear_wrappers();
+  _view.close();
+}
+
+auto script::global_table() -> table & { return _globalTable; }
+
+auto script::view() const -> state_view { return _view; }
+
+auto script::gc() const -> garbage_collector {
+  return garbage_collector{_view};
+}
+
+auto script::create_table() const -> table { return table::Create(_view); }
+
+void script::open_addons() {
+  auto const with{[&](string const &name, auto fn) {
+    if (table t; _globalTable.try_get(t, name)) {
+      fn(t);
     }
-}
-}
+  }};
 
-script::script()
-    : _view {state_view::NewState()}
-{
-    _view.require_library(library::Base);
-    _view.pop(1);
-
-    _view.push_globaltable();
-    _globalTable.acquire(_view, -1);
-    _view.pop(1);
-
-    _view.set_warnf(&Warn, this);
-}
-
-script::~script()
-{
-    if (*Environment) {
-        Environment.mutate([](auto& env) { env->release(); });
-    }
-    _globalTable.release();
-    clear_wrappers();
-    _view.close();
-}
-
-auto script::global_table() -> table&
-{
-    return _globalTable;
-}
-
-auto script::view() const -> state_view
-{
-    return _view;
-}
-
-auto script::gc() const -> garbage_collector
-{
-    return garbage_collector {_view};
-}
-
-auto script::create_table() const -> table
-{
-    return table::Create(_view);
-}
-
-void script::open_addons()
-{
-    auto const with {[&](string const& name, auto fn) {
-        if (table t; _globalTable.try_get(t, name)) { fn(t); }
-    }};
-
-    with("math", [](auto&& tab) {
-        tab["clamp"]    = +[](f32 v, f32 low, f32 high) { return std::clamp(v, low, high); };
-        tab["lerp"]     = +[](f32 a, f32 b, f32 t) { return helper::lerp(a, b, t); };
-        tab["round"]    = +[](f32 v) { return std::round(v); };
-        tab["sign"]     = +[](f32 v) -> f32 { return static_cast<f32>((v > 0.f) - (v < 0.f)); };
-        tab["saturate"] = +[](f32 v) { return std::clamp(v, 0.f, 1.f); };
-        tab["wrap"]     = +[](f32 v, f32 low, f32 high) {
-            f32 const range {high - low};
-            f32       result {std::fmod(v - low, range)};
-            if (result < 0.f) { result += range; }
-            return low + result;
-        };
-    });
-
-    with("string", [](auto&& tab) {
-        tab["trim"]        = +[](string_view s) { return helper::trim(s); };
-        tab["starts_with"] = +[](string_view s, string_view prefix) { return s.starts_with(prefix); };
-        tab["ends_with"]   = +[](string_view s, string_view suffix) { return s.ends_with(suffix); };
-        tab["split"]       = +[](string_view s, string_view delim) { return helper::split(s, delim); };
-        tab["replace"]     = +[](string_view s, string_view from, string_view to) { return helper::replace(s, from, to); };
-    });
-
-    with("table", [](auto&& tab) {
-        tab["contains"] = +[](table const& t, std::variant<string, i32> s) { return t.has(s); };
-        tab["keys"]     = +[](table const& t) { return t.get_keys<std::variant<i32, string>>(); };
-    });
-}
-
-auto script::call_buffer(string_view script, string const& name) const -> std::optional<error_code>
-{
-    if (_view.load_buffer(script, name)) {
-        if (*Environment) {
-            function<void> func {function<void>::Acquire(_view, -1)};
-            if (!func.set_environment(**Environment)) {
-                return error_code::Error;
-            }
-        }
-        return _view.pcall(0);
-    }
-
-    logger::Error("Lua: {}", _view.to_string(_view.get_top()));
-
-    return error_code::Error;
-}
-
-auto script::load_binary_buffer(string_view script, string const& name) const -> bool
-{
-    return _view.load_buffer(script, name, "b");
-}
-
-void script::load_library(library lib)
-{
-    _view.require_library(lib);
-    _view.pop(1);
-
-    if (lib == library::Package) { register_searcher(); }
-}
-
-void script::register_searcher()
-{
-    if (!_globalTable.has("package", "searchers")) { return; }
-
-    _loader = [this](string const& name) -> table {
-        require_event ev {.Name = name, .Table = std::nullopt};
-        Require(ev);
-        return ev.Table.has_value() ? *ev.Table : run_file<table>(name + ".lua").value();
+  with("math", [](auto &&tab) {
+    tab["clamp"] =
+        +[](f32 v, f32 low, f32 high) { return std::clamp(v, low, high); };
+    tab["lerp"] = +[](f32 a, f32 b, f32 t) { return helper::lerp(a, b, t); };
+    tab["round"] = +[](f32 v) { return std::round(v); };
+    tab["sign"] =
+        +[](f32 v) -> f32 { return static_cast<f32>((v > 0.f) - (v < 0.f)); };
+    tab["saturate"] = +[](f32 v) { return std::clamp(v, 0.f, 1.f); };
+    tab["wrap"] = +[](f32 v, f32 low, f32 high) {
+      f32 const range{high - low};
+      f32 result{std::fmod(v - low, range)};
+      if (result < 0.f) {
+        result += range;
+      }
+      return low + result;
     };
+  });
 
-    _searcher = [this](string const&) -> LoaderFunc* { return &_loader; };
+  with("string", [](auto &&tab) {
+    tab["trim"] = +[](string_view s) { return helper::trim(s); };
+    tab["starts_with"] = +[](string_view s, string_view prefix) {
+      return s.starts_with(prefix);
+    };
+    tab["ends_with"] =
+        +[](string_view s, string_view suffix) { return s.ends_with(suffix); };
+    tab["split"] = +[](string_view s, string_view delim) {
+      return helper::split(s, delim);
+    };
+    tab["replace"] = +[](string_view s, string_view from, string_view to) {
+      return helper::replace(s, from, to);
+    };
+  });
 
-    table tab {_globalTable["package"]["searchers"].as<table>()};
-    tab[tab.raw_length() + 1] = &_searcher;
+  with("table", [](auto &&tab) {
+    tab["contains"] =
+        +[](table const &t, std::variant<string, i32> s) { return t.has(s); };
+    tab["keys"] =
+        +[](table const &t) { return t.get_keys<std::variant<i32, string>>(); };
+  });
 }
 
-void script::set_hook(HookFunc&& func, debug_mask mask, i32 count)
-{
-    _hookFunc                                             = std::move(func);
-    *reinterpret_cast<HookFunc**>(_view.get_extraspace()) = &_hookFunc;
-    _view.set_hook(&Hook, debug::GetMask(mask), count);
+auto script::call_buffer(string_view script, string const &name) const
+    -> std::optional<error_code> {
+  if (_view.load_buffer(script, name)) {
+    if (*Environment) {
+      function<void> func{function<void>::Acquire(_view, -1)};
+      if (!func.set_environment(**Environment)) {
+        return error_code::Error;
+      }
+    }
+    return _view.pcall(0);
+  }
+
+  logger::Error("Lua: {}", _view.to_string(_view.get_top()));
+
+  return error_code::Error;
 }
 
-void script::remove_hook()
-{
-    *reinterpret_cast<HookFunc**>(_view.get_extraspace()) = nullptr;
-    _hookFunc                                             = nullptr;
-    _view.set_hook(nullptr, 0, 0);
+auto script::load_binary_buffer(string_view script, string const &name) const
+    -> bool {
+  return _view.load_buffer(script, name, "b");
 }
 
-void script::clear_wrappers()
-{
-    _wrappers.clear();
+void script::load_library(library lib) {
+  _view.require_library(lib);
+  _view.pop(1);
+
+  if (lib == library::Package) {
+    register_searcher();
+  }
 }
 
+void script::register_searcher() {
+  if (!_globalTable.has("package", "searchers")) {
+    return;
+  }
+
+  _loader = [this](string const &name) -> table {
+    require_event ev{.Name = name, .Table = std::nullopt};
+    Require(ev);
+    return ev.Table.has_value() ? *ev.Table
+                                : run_file<table>(name + ".lua").value();
+  };
+
+  _searcher = [this](string const &) -> LoaderFunc * { return &_loader; };
+
+  table tab{_globalTable["package"]["searchers"].as<table>()};
+  tab[tab.raw_length() + 1] = &_searcher;
 }
+
+void script::set_hook(HookFunc &&func, debug_mask mask, i32 count) {
+  _hookFunc = std::move(func);
+  *reinterpret_cast<HookFunc **>(_view.get_extraspace()) = &_hookFunc;
+  _view.set_hook(&Hook, debug::GetMask(mask), count);
+}
+
+void script::remove_hook() {
+  *reinterpret_cast<HookFunc **>(_view.get_extraspace()) = nullptr;
+  _hookFunc = nullptr;
+  _view.set_hook(nullptr, 0, 0);
+}
+
+void script::clear_wrappers() { _wrappers.clear(); }
+
+} // namespace tcob::scripting
 
 ////////////////////////////////////////////////////////////
 
-auto tcob::literals::operator""_lua(char const* str, usize) -> std::unique_ptr<tcob::scripting::script>
-{
-    auto retValue {std::make_unique<tcob::scripting::script>()};
-    (void)retValue->run(string {str});
-    return retValue;
+auto tcob::literals::operator""_lua(char const *str, usize)
+    -> std::unique_ptr<tcob::scripting::script> {
+  auto retValue{std::make_unique<tcob::scripting::script>()};
+  (void)retValue->run(str);
+  return retValue;
 }
