@@ -149,14 +149,11 @@ inline auto ostream::write(std::span<T const> s) -> std::streamsize
     return write_bytes(s.data(), static_cast<std::streamsize>(s.size_bytes()));
 }
 
-inline auto ostream::write_filtered(std::span<std::byte const> s, auto&& filter, auto&&... filters) -> std::streamsize
+inline auto ostream::write_filtered(std::span<std::byte const> s, auto&&... filters) -> std::streamsize
 {
-    auto vec {filter.to(s)};
-    if constexpr (sizeof...(filters) > 0) {
-        return write_filtered(vec, filters...);
-    } else {
-        return write<std::byte>(vec);
-    }
+    std::vector<std::byte> vec {s.begin(), s.end()};
+    ((vec = filters.to(vec)), ...);
+    return write<std::byte>(vec);
 }
 
 template <typename T>

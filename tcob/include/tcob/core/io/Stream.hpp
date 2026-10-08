@@ -116,7 +116,7 @@ public:
     template <POD T>
     auto write(std::span<T const> s) -> std::streamsize;
 
-    auto write_filtered(std::span<std::byte const> s, auto&& filter, auto&&... filters) -> std::streamsize;
+    auto write_filtered(std::span<std::byte const> s, auto&&... filters) -> std::streamsize;
 
     virtual auto tell() const -> std::streamoff                 = 0;
     virtual auto seek(std::streamoff off, seek_dir way) -> bool = 0;
