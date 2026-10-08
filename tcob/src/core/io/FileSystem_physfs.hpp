@@ -18,7 +18,7 @@
 namespace tcob::io {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API physfs_file_sink final : public file_sink, public non_copyable {
+class TCOB_API physfs_file_sink final : public file_device, public non_copyable {
 public:
     physfs_file_sink(PHYSFS_File* handle, usize bufferSize);
     ~physfs_file_sink() override;
@@ -71,9 +71,9 @@ public:
 
     auto get_sub_folders(path const& folder) -> std::unordered_set<string> override;
 
-    auto open_read(path const& path, usize bufferSize) -> std::unique_ptr<file_sink> override;
-    auto open_write(path const& path, usize bufferSize) -> std::unique_ptr<file_sink> override;
-    auto open_append(path const& path, usize bufferSize) -> std::unique_ptr<file_sink> override;
+    auto open_read(path const& path, usize bufferSize) -> std::unique_ptr<file_device> override;
+    auto open_write(path const& path, usize bufferSize) -> std::unique_ptr<file_device> override;
+    auto open_append(path const& path, usize bufferSize) -> std::unique_ptr<file_device> override;
 };
 
 }

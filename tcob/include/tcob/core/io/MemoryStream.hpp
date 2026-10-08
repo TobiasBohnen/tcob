@@ -15,7 +15,7 @@
 namespace tcob::io {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API memory_sink final {
+class TCOB_API memory_device final {
 public:
     auto size_in_bytes() const -> std::streamsize;
     auto is_eof() const -> bool;
@@ -36,7 +36,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API iomstream final : public sink_istream<memory_sink>, public sink_ostream<memory_sink> {
+class TCOB_API iomstream final : public source_istream<memory_device>, public sink_ostream<memory_device> {
 public:
     iomstream();
 
@@ -47,11 +47,14 @@ public:
     auto capacity() const -> usize;
 
 protected:
-    auto get_sink() -> memory_sink* override;
-    auto get_sink() const -> memory_sink const* override;
+    auto get_source() -> memory_device* override;
+    auto get_source() const -> memory_device const* override;
+
+    auto get_sink() -> memory_device* override;
+    auto get_sink() const -> memory_device const* override;
 
 private:
-    memory_sink _sink {};
+    memory_device _device {};
 };
 
 ////////////////////////////////////////////////////////////

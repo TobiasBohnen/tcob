@@ -16,27 +16,27 @@
 
 namespace tcob::io {
 
-ispan_sink::ispan_sink(std::span<std::byte const> span)
+span_source::span_source(std::span<std::byte const> span)
     : _span {span}
 {
 }
 
-auto ispan_sink::size_in_bytes() const -> std::streamsize
+auto span_source::size_in_bytes() const -> std::streamsize
 {
     return static_cast<std::streamsize>(_span.size_bytes());
 }
 
-auto ispan_sink::is_eof() const -> bool
+auto span_source::is_eof() const -> bool
 {
     return _pos >= std::ssize(_span);
 }
 
-auto ispan_sink::tell() const -> std::streamoff
+auto span_source::tell() const -> std::streamoff
 {
     return _pos;
 }
 
-auto ispan_sink::seek(std::streamoff off, seek_dir way) -> bool
+auto span_source::seek(std::streamoff off, seek_dir way) -> bool
 {
     auto const totalSize {size_in_bytes()};
 
@@ -59,7 +59,7 @@ auto ispan_sink::seek(std::streamoff off, seek_dir way) -> bool
     return true;
 }
 
-auto ispan_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
+auto span_source::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
 {
     if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
@@ -77,33 +77,33 @@ auto ispan_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::stream
 ////////////////////////////////////////////////////////////
 
 isstream::isstream(std::span<std::byte const> span)
-    : _sink {span}
+    : _source {span}
 {
 }
 
-auto isstream::get_sink() -> ispan_sink*
+auto isstream::get_source() -> span_source*
 {
-    return &_sink;
+    return &_source;
 }
 
-auto isstream::get_sink() const -> ispan_sink const*
+auto isstream::get_source() const -> span_source const*
 {
-    return &_sink;
+    return &_source;
 }
 
 ////////////////////////////////////////////////////////////
 
-ospan_sink::ospan_sink(std::span<std::byte> span)
+span_sink::span_sink(std::span<std::byte> span)
     : _span {span}
 {
 }
 
-auto ospan_sink::tell() const -> std::streamoff
+auto span_sink::tell() const -> std::streamoff
 {
     return _pos;
 }
 
-auto ospan_sink::seek(std::streamoff off, seek_dir way) -> bool
+auto span_sink::seek(std::streamoff off, seek_dir way) -> bool
 {
     switch (way) {
     case seek_dir::Current:
@@ -125,7 +125,7 @@ auto ospan_sink::seek(std::streamoff off, seek_dir way) -> bool
     return true;
 }
 
-auto ospan_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
+auto span_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
 {
     if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
@@ -146,12 +146,12 @@ osstream::osstream(std::span<std::byte> span)
 {
 }
 
-auto osstream::get_sink() -> ospan_sink*
+auto osstream::get_sink() -> span_sink*
 {
     return &_sink;
 }
 
-auto osstream::get_sink() const -> ospan_sink const*
+auto osstream::get_sink() const -> span_sink const*
 {
     return &_sink;
 }

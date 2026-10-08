@@ -295,15 +295,15 @@ auto physfs_file_system::get_sub_folders(path const& folder) -> std::unordered_s
     return cd.Folders;
 }
 
-auto physfs_file_system::open_read(path const& path, usize bufferSize) -> std::unique_ptr<file_sink>
+auto physfs_file_system::open_read(path const& path, usize bufferSize) -> std::unique_ptr<file_device>
 {
     return std::make_unique<physfs_file_sink>(PHYSFS_openRead(path.c_str()), bufferSize);
 }
-auto physfs_file_system::open_write(path const& path, usize bufferSize) -> std::unique_ptr<file_sink>
+auto physfs_file_system::open_write(path const& path, usize bufferSize) -> std::unique_ptr<file_device>
 {
     return std::make_unique<physfs_file_sink>(PHYSFS_openWrite(path.c_str()), bufferSize);
 }
-auto physfs_file_system::open_append(path const& path, usize bufferSize) -> std::unique_ptr<file_sink>
+auto physfs_file_system::open_append(path const& path, usize bufferSize) -> std::unique_ptr<file_device>
 {
     return std::make_unique<physfs_file_sink>(PHYSFS_openAppend(path.c_str()), bufferSize);
 }

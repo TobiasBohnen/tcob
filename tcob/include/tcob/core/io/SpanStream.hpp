@@ -15,9 +15,9 @@
 namespace tcob::io {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API ispan_sink final {
+class TCOB_API span_source final {
 public:
-    explicit ispan_sink(std::span<std::byte const> span);
+    explicit span_source(std::span<std::byte const> span);
 
     auto size_in_bytes() const -> std::streamsize;
     auto is_eof() const -> bool;
@@ -34,24 +34,24 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API isstream final : public sink_istream<ispan_sink> {
+class TCOB_API isstream final : public source_istream<span_source> {
 public:
     explicit isstream(std::span<std::byte const> span);
 
 protected:
-    auto get_sink() -> ispan_sink* override;
-    auto get_sink() const -> ispan_sink const* override;
+    auto get_source() -> span_source* override;
+    auto get_source() const -> span_source const* override;
 
 private:
-    ispan_sink _sink;
+    span_source _source;
 };
 
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-class TCOB_API ospan_sink final {
+class TCOB_API span_sink final {
 public:
-    explicit ospan_sink(std::span<std::byte> span);
+    explicit span_sink(std::span<std::byte> span);
 
     auto tell() const -> std::streamoff;
     auto seek(std::streamoff off, seek_dir way) -> bool;
@@ -65,16 +65,16 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API osstream final : public sink_ostream<ospan_sink> {
+class TCOB_API osstream final : public sink_ostream<span_sink> {
 public:
     explicit osstream(std::span<std::byte> span);
 
 protected:
-    auto get_sink() -> ospan_sink* override;
-    auto get_sink() const -> ospan_sink const* override;
+    auto get_sink() -> span_sink* override;
+    auto get_sink() const -> span_sink const* override;
 
 private:
-    ospan_sink _sink;
+    span_sink _sink;
 };
 
 ////////////////////////////////////////////////////////////

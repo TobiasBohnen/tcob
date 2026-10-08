@@ -14,22 +14,22 @@
 
 namespace tcob::io {
 
-auto memory_sink::size_in_bytes() const -> std::streamsize
+auto memory_device::size_in_bytes() const -> std::streamsize
 {
     return static_cast<std::streamsize>(_buf.size());
 }
 
-auto memory_sink::is_eof() const -> bool
+auto memory_device::is_eof() const -> bool
 {
     return _pos >= std::ssize(_buf);
 }
 
-auto memory_sink::tell() const -> std::streamoff
+auto memory_device::tell() const -> std::streamoff
 {
     return _pos;
 }
 
-auto memory_sink::seek(std::streamoff off, seek_dir way) -> bool
+auto memory_device::seek(std::streamoff off, seek_dir way) -> bool
 {
     auto const totalSize {size_in_bytes()};
 
@@ -47,7 +47,7 @@ auto memory_sink::seek(std::streamoff off, seek_dir way) -> bool
     return true;
 }
 
-auto memory_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
+auto memory_device::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
 {
     if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
@@ -62,7 +62,7 @@ auto memory_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::strea
     return bytesToRead;
 }
 
-auto memory_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
+auto memory_device::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
 {
     if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
@@ -76,12 +76,12 @@ auto memory_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std
     return sizeInBytes;
 }
 
-void memory_sink::reserve(usize capacity)
+void memory_device::reserve(usize capacity)
 {
     _buf.reserve(capacity);
 }
 
-auto memory_sink::capacity() const -> usize
+auto memory_device::capacity() const -> usize
 {
     return _buf.capacity();
 }
@@ -92,32 +92,42 @@ iomstream::iomstream() = default;
 
 auto iomstream::tell() const -> std::streamoff
 {
-    return _sink.tell();
+    return _device.tell();
 }
 
 auto iomstream::seek(std::streamoff off, seek_dir way) -> bool
 {
-    return _sink.seek(off, way);
+    return _device.seek(off, way);
 }
 
 void iomstream::reserve(usize capacity)
 {
-    _sink.reserve(capacity);
+    _device.reserve(capacity);
 }
 
 auto iomstream::capacity() const -> usize
 {
-    return _sink.capacity();
+    return _device.capacity();
 }
 
-auto iomstream::get_sink() -> memory_sink*
+auto iomstream::get_source() -> memory_device*
 {
-    return &_sink;
+    return &_device;
 }
 
-auto iomstream::get_sink() const -> memory_sink const*
+auto iomstream::get_source() const -> memory_device const*
 {
-    return &_sink;
+    return &_device;
+}
+
+auto iomstream::get_sink() -> memory_device*
+{
+    return &_device;
+}
+
+auto iomstream::get_sink() const -> memory_device const*
+{
+    return &_device;
 }
 
 }

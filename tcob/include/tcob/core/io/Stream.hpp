@@ -71,7 +71,7 @@ inline auto operator>>(istream& is, T& m) -> istream&;
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-concept ISink =
+concept Source =
     requires(T& t, void* s, std::streamsize sib, std::streamoff off, seek_dir way) {
         { t.size_in_bytes() } -> std::same_as<std::streamsize>;
         { t.is_eof() } -> std::same_as<bool>;
@@ -82,10 +82,10 @@ concept ISink =
 
 ////////////////////////////////////////////////////////////
 
-template <ISink Sink>
-class sink_istream : public istream {
+template <Source T>
+class source_istream : public istream {
 public:
-    sink_istream();
+    source_istream();
 
     auto size_in_bytes() const -> std::streamsize override;
     auto is_eof() const -> bool override;
@@ -94,8 +94,8 @@ public:
     auto seek(std::streamoff off, seek_dir way) -> bool override;
 
 protected:
-    virtual auto get_sink() -> Sink*             = 0;
-    virtual auto get_sink() const -> Sink const* = 0;
+    virtual auto get_source() -> T*             = 0;
+    virtual auto get_source() const -> T const* = 0;
 
     auto read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize override;
 };
@@ -132,7 +132,7 @@ inline auto operator<<(ostream& os, T const& m) -> ostream&;
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-concept OSink =
+concept Sink =
     requires(T& t, void const* cs, std::streamsize sib, std::streamoff off, seek_dir way) {
         { t.write_bytes(cs, sib) } -> std::same_as<std::streamsize>;
         { t.tell() } -> std::same_as<std::streamoff>;
@@ -141,7 +141,7 @@ concept OSink =
 
 ////////////////////////////////////////////////////////////
 
-template <OSink Sink>
+template <Sink T>
 class sink_ostream : public ostream {
 public:
     sink_ostream();
@@ -150,8 +150,8 @@ public:
     auto seek(std::streamoff off, seek_dir way) -> bool override;
 
 protected:
-    virtual auto get_sink() -> Sink*             = 0;
-    virtual auto get_sink() const -> Sink const* = 0;
+    virtual auto get_sink() -> T*             = 0;
+    virtual auto get_sink() const -> T const* = 0;
 
     auto write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize override;
 };

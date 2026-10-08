@@ -17,9 +17,9 @@ struct PHYSFS_File;
 namespace tcob::io {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API file_sink {
+class TCOB_API file_device {
 public:
-    virtual ~file_sink() = default;
+    virtual ~file_device() = default;
 
     virtual auto size_in_bytes() const -> std::streamsize = 0;
     virtual auto is_eof() const -> bool                   = 0;
@@ -44,7 +44,7 @@ enum class error_code : u8 {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API ifstream final : public sink_istream<file_sink> {
+class TCOB_API ifstream final : public source_istream<file_device> {
 public:
     explicit ifstream(path const& path, u64 bufferSize = 4096);
 
@@ -55,16 +55,16 @@ public:
     static auto Open(path const& path, u64 bufferSize = 4096) -> std::expected<ifstream, error_code>;
 
 protected:
-    auto get_sink() -> file_sink* override;
-    auto get_sink() const -> file_sink const* override;
+    auto get_source() -> file_device* override;
+    auto get_source() const -> file_device const* override;
 
 private:
-    std::unique_ptr<file_sink> _sink;
+    std::unique_ptr<file_device> _source;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API ofstream final : public sink_ostream<file_sink> {
+class TCOB_API ofstream final : public sink_ostream<file_device> {
 public:
     explicit ofstream(path const& path, u64 bufferSize = 4096, bool append = false);
 
@@ -72,11 +72,11 @@ public:
     auto flush() -> bool;
 
 protected:
-    auto get_sink() -> file_sink* override;
-    auto get_sink() const -> file_sink const* override;
+    auto get_sink() -> file_device* override;
+    auto get_sink() const -> file_device const* override;
 
 private:
-    std::unique_ptr<file_sink> _sink;
+    std::unique_ptr<file_device> _sink;
 };
 
 ////////////////////////////////////////////////////////////

@@ -17,18 +17,18 @@ namespace tcob::io {
 ////////////////////////////////////////////////////////////
 
 ifstream::ifstream(path const& path, u64 bufferSize)
-    : _sink {locate_service<file_system>().open_read(path, bufferSize)}
+    : _source {locate_service<file_system>().open_read(path, bufferSize)}
 {
 }
 
 auto ifstream::close() -> bool
 {
-    return _sink->close();
+    return _source->close();
 }
 
 auto ifstream::is_valid() const -> bool
 {
-    return _sink->is_valid();
+    return _source->is_valid();
 }
 
 auto ifstream::Open(path const& path, u64 bufferSize) -> std::expected<ifstream, error_code>
@@ -40,15 +40,16 @@ auto ifstream::Open(path const& path, u64 bufferSize) -> std::expected<ifstream,
     return std::unexpected<error_code> {error_code::FileNotFound};
 }
 
-auto ifstream::get_sink() -> file_sink*
+auto ifstream::get_source() -> file_device*
 {
-    return _sink.get();
+    return _source.get();
 }
 
-auto ifstream::get_sink() const -> file_sink const*
+auto ifstream::get_source() const -> file_device const*
 {
-    return _sink.get();
+    return _source.get();
 }
+
 ////////////////////////////////////////////////////////////
 
 ofstream::ofstream(path const& path, u64 bufferSize, bool append)
@@ -66,12 +67,12 @@ auto ofstream::flush() -> bool
     return _sink->flush();
 }
 
-auto ofstream::get_sink() -> file_sink*
+auto ofstream::get_sink() -> file_device*
 {
     return _sink.get();
 }
 
-auto ofstream::get_sink() const -> file_sink const*
+auto ofstream::get_sink() const -> file_device const*
 {
     return _sink.get();
 }

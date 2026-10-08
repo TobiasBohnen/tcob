@@ -92,37 +92,37 @@ inline auto operator>>(istream& is, T& m) -> istream&
 
 ////////////////////////////////////////////////////////////
 
-template <ISink Sink>
-inline sink_istream<Sink>::sink_istream() = default;
+template <Source T>
+inline source_istream<T>::source_istream() = default;
 
-template <ISink Sink>
-inline auto sink_istream<Sink>::size_in_bytes() const -> std::streamsize
+template <Source T>
+inline auto source_istream<T>::size_in_bytes() const -> std::streamsize
 {
-    return get_sink()->size_in_bytes();
+    return get_source()->size_in_bytes();
 }
 
-template <ISink Sink>
-inline auto sink_istream<Sink>::is_eof() const -> bool
+template <Source T>
+inline auto source_istream<T>::is_eof() const -> bool
 {
-    return get_sink()->is_eof();
+    return get_source()->is_eof();
 }
 
-template <ISink Sink>
-inline auto sink_istream<Sink>::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
+template <Source T>
+inline auto source_istream<T>::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
 {
-    return get_sink()->read_bytes(s, sizeInBytes);
+    return get_source()->read_bytes(s, sizeInBytes);
 }
 
-template <ISink Sink>
-inline auto sink_istream<Sink>::tell() const -> std::streamoff
+template <Source T>
+inline auto source_istream<T>::tell() const -> std::streamoff
 {
-    return get_sink()->tell();
+    return get_source()->tell();
 }
 
-template <ISink Sink>
-inline auto sink_istream<Sink>::seek(std::streamoff off, seek_dir way) -> bool
+template <Source T>
+inline auto source_istream<T>::seek(std::streamoff off, seek_dir way) -> bool
 {
-    return get_sink()->seek(off, way);
+    return get_source()->seek(off, way);
 }
 
 ////////////////////////////////////////////////////////////
@@ -168,27 +168,24 @@ inline auto operator<<(ostream& os, T const& m) -> ostream&
 
 ////////////////////////////////////////////////////////////
 
-template <OSink Sink>
-inline sink_ostream<Sink>::sink_ostream() = default;
+template <Sink T>
+inline sink_ostream<T>::sink_ostream() = default;
 
-template <OSink Sink>
-inline auto sink_ostream<Sink>::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
+template <Sink T>
+inline auto sink_ostream<T>::write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize
 {
-    if (sizeInBytes == 0) {
-        return 0;
-    }
-
+    if (sizeInBytes == 0) { return 0; }
     return get_sink()->write_bytes(s, sizeInBytes);
 }
 
-template <OSink Sink>
-inline auto sink_ostream<Sink>::tell() const -> std::streamoff
+template <Sink T>
+inline auto sink_ostream<T>::tell() const -> std::streamoff
 {
     return get_sink()->tell();
 }
 
-template <OSink Sink>
-inline auto sink_ostream<Sink>::seek(std::streamoff off, seek_dir way) -> bool
+template <Sink T>
+inline auto sink_ostream<T>::seek(std::streamoff off, seek_dir way) -> bool
 {
     return get_sink()->seek(off, way);
 }

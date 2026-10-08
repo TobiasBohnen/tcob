@@ -18,7 +18,7 @@ class TCOB_API file_hasher final {
 public:
     explicit file_hasher(path file);
 
-    auto crc32 [[nodiscard]] () const -> u32;
+    auto crc32 [[nodiscard]]() const -> u32;
 
 private:
     path _path;
@@ -71,9 +71,9 @@ public:
     virtual auto enumerate(path const& folder, pattern const& pattern = {}, bool recursive = true) -> std::unordered_set<string> = 0;
     virtual auto get_sub_folders(path const& folder) -> std::unordered_set<string>                                               = 0;
 
-    virtual auto open_read(path const& path, usize bufferSize) -> std::unique_ptr<file_sink>   = 0;
-    virtual auto open_write(path const& path, usize bufferSize) -> std::unique_ptr<file_sink>  = 0;
-    virtual auto open_append(path const& path, usize bufferSize) -> std::unique_ptr<file_sink> = 0;
+    virtual auto open_read(path const& path, usize bufferSize) -> std::unique_ptr<file_device>   = 0;
+    virtual auto open_write(path const& path, usize bufferSize) -> std::unique_ptr<file_device>  = 0;
+    virtual auto open_append(path const& path, usize bufferSize) -> std::unique_ptr<file_device> = 0;
 
     static inline char const* ServiceName {"io::file_system"};
 };
