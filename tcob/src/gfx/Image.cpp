@@ -165,7 +165,7 @@ void image::fill(rect_i const& rect, color c)
 
     for (i32 y {clipped.top() + 1}; y < clipped.bottom(); ++y) {
         u8* destRow {&_buffer[((y * _info.Size.Width) + clipped.left()) * bpp]};
-        memcpy(destRow, firstRow, rowBytes);
+        std::memcpy(destRow, firstRow, rowBytes);
     }
 }
 
@@ -208,7 +208,7 @@ auto image::crop(rect_i const& bounds) const -> image
     return image::Create(bounds.Size, _info.Format, data(bounds));
 }
 
-auto image::count_colors [[nodiscard]] () const -> isize
+auto image::count_colors [[nodiscard]]() const -> isize
 {
     std::unordered_set<u32> colors;
     bool const              hasAlpha {image::information::HasAlpha(_info.Format)};
@@ -368,12 +368,12 @@ auto animated_image_decoder::stream() -> io::istream&
 
 ////////////////////////////////////////////////////////////
 
-auto save_animation [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> bool
+auto save_animation [[nodiscard]](path const& file, std::span<image_frame const> frames) noexcept -> bool
 {
     return save_animation(std::make_shared<io::ofstream>(file), io::get_extension(file), frames);
 }
 
-auto save_animation [[nodiscard]] (std::shared_ptr<io::ostream> out, string const& ext, std::span<image_frame const> frames) noexcept -> bool
+auto save_animation [[nodiscard]](std::shared_ptr<io::ostream> out, string const& ext, std::span<image_frame const> frames) noexcept -> bool
 {
     auto enc {create_from_factory<gfx::animated_image_encoder>(ext)};
     enc->start(std::move(out));
@@ -381,7 +381,7 @@ auto save_animation [[nodiscard]] (std::shared_ptr<io::ostream> out, string cons
     return enc->finish();
 }
 
-auto save_animation_async [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> std::future<bool>
+auto save_animation_async [[nodiscard]](path const& file, std::span<image_frame const> frames) noexcept -> std::future<bool>
 {
     return locate_service<task_manager>().run_async<bool>([file, frames] { return save_animation(file, frames); });
 }

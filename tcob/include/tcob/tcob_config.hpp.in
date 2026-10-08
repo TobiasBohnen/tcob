@@ -58,8 +58,8 @@ using milliseconds = std::chrono::duration<f64, std::milli>;
 using seconds      = std::chrono::duration<f64>;
 using minutes      = std::chrono::duration<f64, std::ratio<60>>;
 
-using string      = std::string;
-using string_view = std::string_view;
+using string      = std::string;           // NOLINT
+using string_view = std::string_view;      // NOLINT
 
 using utf8_string      = std::string;      // TODO: create real utf-8 string type
 using utf8_string_view = std::string_view; // TODO: create real utf-8 string_view type

@@ -169,13 +169,13 @@ void gl_canvas::render_fill(canvas::paint const& paint, blend_funcs const& blend
         if (path.FillCount > 0) {
             copy.FillOffset = offset;
             copy.FillCount  = path.FillCount;
-            memcpy(&_verts[offset], path.Fill, sizeof(vertex) * path.FillCount);
+            std::memcpy(&_verts[offset], path.Fill, sizeof(vertex) * path.FillCount);
             offset += path.FillCount;
         }
         if (path.StrokeCount > 0) {
             copy.StrokeOffset = offset;
             copy.StrokeCount  = path.StrokeCount;
-            memcpy(&_verts[offset], path.Stroke, sizeof(vertex) * path.StrokeCount);
+            std::memcpy(&_verts[offset], path.Stroke, sizeof(vertex) * path.StrokeCount);
             offset += path.StrokeCount;
         }
     }
@@ -234,7 +234,7 @@ void gl_canvas::render_stroke(canvas::paint const& paint, blend_funcs const& ble
         if (path.StrokeCount > 0) {
             copy.StrokeOffset = offset;
             copy.StrokeCount  = path.StrokeCount;
-            memcpy(_verts.data() + offset, path.Stroke, sizeof(vertex) * path.StrokeCount);
+            std::memcpy(_verts.data() + offset, path.Stroke, sizeof(vertex) * path.StrokeCount);
             offset += path.StrokeCount;
         }
     }
@@ -259,7 +259,7 @@ void gl_canvas::render_triangles(canvas::paint const& paint, blend_funcs const& 
     call.TriangleOffset = alloc_verts(verts.size());
     call.TriangleCount  = verts.size();
 
-    memcpy(&_verts[call.TriangleOffset], verts.data(), verts.size_bytes());
+    std::memcpy(&_verts[call.TriangleOffset], verts.data(), verts.size_bytes());
 
     // Fill shader
     call.UniformOffset = alloc_frag_uniforms(1);
@@ -292,7 +292,7 @@ void gl_canvas::render_clip(canvas::scissor const& scissor, f32 fringe, std::vec
         if (path.FillCount > 0) {
             copy.FillOffset = offset;
             copy.FillCount  = path.FillCount;
-            memcpy(&_verts[offset], path.Fill, sizeof(vertex) * path.FillCount);
+            std::memcpy(&_verts[offset], path.Fill, sizeof(vertex) * path.FillCount);
             offset += path.FillCount;
         }
     }

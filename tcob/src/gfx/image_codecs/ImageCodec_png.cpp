@@ -698,11 +698,11 @@ void png_encoder::write_ihdr(image::information const& info, io::ostream& out) c
 
     // TODO: endianess
     u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::IHDR))};
-    memcpy(header.data(), &type, 4);
+    std::memcpy(header.data(), &type, 4);
     u32 const width {std::byteswap(static_cast<u32>(info.Size.Width))};
-    memcpy(header.data() + 4, &width, 4);
+    std::memcpy(header.data() + 4, &width, 4);
     u32 const height {std::byteswap(static_cast<u32>(info.Size.Height))};
-    memcpy(header.data() + 8, &height, 4);
+    std::memcpy(header.data() + 8, &height, 4);
 
     std::byte bitDepth {0};
     std::byte colorType {0};
@@ -780,9 +780,9 @@ void png_encoder::write_idat(image const& image, io::ostream& out) const
 
     u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::IDAT))}; // TODO: endianess
     while (total > 0) {
-        memcpy(idat.data(), &type, 4);
+        std::memcpy(idat.data(), &type, 4);
         usize const length {std::min(idatLength, total)};
-        memcpy(idat.data() + 4, buf.data() + offset, length);
+        std::memcpy(idat.data() + 4, buf.data() + offset, length);
         write_chunk(out, idat, static_cast<u32>(length + 4));
         offset += length;
         total -= length;
@@ -793,7 +793,7 @@ void png_encoder::write_iend(io::ostream& out) const
 {
     std::array<std::byte, 4> iend {};
     u32 const                type {std::byteswap(static_cast<u32>(png::chunk_type::IEND))}; // TODO: endianess
-    memcpy(iend.data(), &type, 4);
+    std::memcpy(iend.data(), &type, 4);
     write_chunk(out, iend);
 }
 
@@ -931,11 +931,11 @@ void png_anim_encoder::write_actl_placeholder(io::ostream& out) const
 {
     std::array<std::byte, 12> actl {};
     u32 const                 type {std::byteswap(static_cast<u32>(png::chunk_type::acTL))};
-    memcpy(actl.data(), &type, 4);
+    std::memcpy(actl.data(), &type, 4);
     u32 const numFrames {0};
-    memcpy(actl.data() + 4, &numFrames, 4);
+    std::memcpy(actl.data() + 4, &numFrames, 4);
     u32 const numPlays {0};
-    memcpy(actl.data() + 8, &numPlays, 4);
+    std::memcpy(actl.data() + 8, &numPlays, 4);
     _enc.write_chunk(out, actl);
 }
 
@@ -943,11 +943,11 @@ void png_anim_encoder::write_actl(u32 frameCount, io::ostream& out) const
 {
     std::array<std::byte, 12> actl {};
     u32 const                 type {std::byteswap(static_cast<u32>(png::chunk_type::acTL))};
-    memcpy(actl.data(), &type, 4);
+    std::memcpy(actl.data(), &type, 4);
     u32 const numFrames {std::byteswap(frameCount)};
-    memcpy(actl.data() + 4, &numFrames, 4);
+    std::memcpy(actl.data() + 4, &numFrames, 4);
     u32 const numPlays {0};
-    memcpy(actl.data() + 8, &numPlays, 4);
+    std::memcpy(actl.data() + 8, &numPlays, 4);
     _enc.write_chunk(out, actl);
 }
 
@@ -955,21 +955,21 @@ void png_anim_encoder::write_fctl(u32 idx, rect_i const& rect, image_frame const
 {
     std::array<std::byte, 30> fctl {};
     u32 const                 type {std::byteswap(static_cast<u32>(png::chunk_type::fcTL))};
-    memcpy(fctl.data(), &type, 4);
+    std::memcpy(fctl.data(), &type, 4);
     u32 const seq {std::byteswap(idx)};
-    memcpy(fctl.data() + 4, &seq, 4);
+    std::memcpy(fctl.data() + 4, &seq, 4);
     u32 const width {static_cast<u32>(std::byteswap(rect.Size.Width))};
-    memcpy(fctl.data() + 8, &width, 4);
+    std::memcpy(fctl.data() + 8, &width, 4);
     u32 const height {static_cast<u32>(std::byteswap(rect.Size.Height))};
-    memcpy(fctl.data() + 12, &height, 4);
+    std::memcpy(fctl.data() + 12, &height, 4);
     u32 const xoff {static_cast<u32>(std::byteswap(rect.left()))};
-    memcpy(fctl.data() + 16, &xoff, 4);
+    std::memcpy(fctl.data() + 16, &xoff, 4);
     u32 const yoff {static_cast<u32>(std::byteswap(rect.top()))};
-    memcpy(fctl.data() + 20, &yoff, 4);
+    std::memcpy(fctl.data() + 20, &yoff, 4);
     u16 const delayNum {std::byteswap(static_cast<u16>(frame.Duration.count()))};
-    memcpy(fctl.data() + 24, &delayNum, 2);
+    std::memcpy(fctl.data() + 24, &delayNum, 2);
     u16 const delayDen {std::byteswap(u16 {1000})};
-    memcpy(fctl.data() + 26, &delayDen, 2);
+    std::memcpy(fctl.data() + 26, &delayDen, 2);
     fctl[28] = static_cast<std::byte>(png::dispose_op::None);
     fctl[29] = static_cast<std::byte>(png::blend_op::Source);
     _enc.write_chunk(out, fctl);
@@ -992,11 +992,11 @@ void png_anim_encoder::write_fdat(u32& idx, image const& frame, io::ostream& out
     u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::fdAT))}; // TODO: endianess
 
     while (total > 0) {
-        memcpy(fdat.data(), &type, 4);
+        std::memcpy(fdat.data(), &type, 4);
         u32 const seq {std::byteswap(idx++)};
-        memcpy(fdat.data() + 4, &seq, 4);
+        std::memcpy(fdat.data() + 4, &seq, 4);
         usize const length {std::min(fdatLength, total)};
-        memcpy(fdat.data() + 8, buf.data() + offset, length);
+        std::memcpy(fdat.data() + 8, buf.data() + offset, length);
         _enc.write_chunk(out, fdat, static_cast<u32>(length + 8));
         offset += length;
         total -= length;

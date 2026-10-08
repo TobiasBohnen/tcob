@@ -52,13 +52,11 @@ auto memory_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::strea
     if (s == nullptr || sizeInBytes <= 0) { return 0; }
 
     std::streamsize const totalSize {size_in_bytes()};
-    if (_pos > totalSize) { return 0; }
-
     std::streamsize const remaining {totalSize - _pos};
     if (remaining <= 0) { return 0; }
 
     std::streamsize const bytesToRead {std::min(sizeInBytes, remaining)};
-    memcpy(s, _buf.data() + static_cast<usize>(_pos), static_cast<usize>(bytesToRead));
+    std::memcpy(s, _buf.data() + static_cast<usize>(_pos), static_cast<usize>(bytesToRead));
     _pos += bytesToRead;
 
     return bytesToRead;
@@ -72,7 +70,7 @@ auto memory_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std
         _buf.resize(static_cast<usize>(sizeInBytes + _pos));
     }
 
-    memcpy(_buf.data() + static_cast<usize>(_pos), s, static_cast<usize>(sizeInBytes));
+    std::memcpy(_buf.data() + static_cast<usize>(_pos), s, static_cast<usize>(sizeInBytes));
     _pos += sizeInBytes;
 
     return sizeInBytes;

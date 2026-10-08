@@ -77,7 +77,7 @@ inline auto user_object::operator=(T&& value) -> user_object&
         _type = typeid(typename U::element_type);
     } else if constexpr (sizeof(U) <= SBO_SIZE && POD<U>) {
         sbo_buffer data {};
-        memcpy(data.data(), &value, sizeof(U));
+        std::memcpy(data.data(), &value, sizeof(U));
         _data = data;
         _type = typeid(U);
     } else {

@@ -113,7 +113,7 @@ auto gzip_filter::to(std::span<std::byte const> bytes) const -> std::vector<std:
 
     mz_ulong const         bound {mz_compressBound(static_cast<mz_ulong>(bytes.size()))};
     std::vector<std::byte> retValue(HEADER.size() + bound + 8);
-    memcpy(retValue.data(), HEADER.data(), HEADER.size());
+    std::memcpy(retValue.data(), HEADER.data(), HEADER.size());
 
     mz_stream stream {};
     memset(&stream, 0, sizeof(stream));
