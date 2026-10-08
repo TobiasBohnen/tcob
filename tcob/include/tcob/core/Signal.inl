@@ -10,7 +10,7 @@ namespace tcob {
 
 template <typename EvArgs, typename Emitter>
 inline void signal<EvArgs, Emitter>::operator()() const
-    requires(IsVoid)
+    requires IsVoid
 {
     for (isize i {0}; i < std::ssize(_slots); ++i) {
         auto const& [id, func] {_slots[i]};

@@ -263,7 +263,7 @@ inline void object::set(index_type key, Key const& keyOrValue, KeysOrValue&&... 
                 return;
             }
 
-            using last_type = typename std::remove_cvref_t<detail::last_element_t<KeysOrValue...>>;
+            using last_type = std::remove_cvref_t<detail::last_element_t<KeysOrValue...>>;
             if constexpr (!std::is_same_v<last_type, std::nullptr_t>) {
                 // key not found -> add new object
                 add_entry(key, entry {object {}});
@@ -341,7 +341,7 @@ inline array::array(Ts... values)
     : array {}
 {
     reserve(sizeof...(values));
-    ((add(values)), ...);
+    (add(values), ...);
 }
 
 template <ConvertibleTo T>

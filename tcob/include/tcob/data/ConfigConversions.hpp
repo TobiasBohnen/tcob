@@ -363,7 +363,7 @@ struct converter<T> {
 
 template <Set T>
 struct converter<T> {
-    using key_type = typename T::key_type;
+    using key_type = T::key_type;
 
     static auto IsType(cfg_value const& config) -> bool
     {
@@ -419,7 +419,7 @@ struct converter<std::tuple<T...>> {
 
         array const& arr {std::get<array>(config)};
         i32          idx {0};
-        std::apply([&arr, &idx](auto&&... item) { ((from(arr, idx++, item)), ...); },
+        std::apply([&arr, &idx](auto&&... item) { (from(arr, idx++, item), ...); },
                    value);
         return true;
     }
@@ -428,7 +428,7 @@ struct converter<std::tuple<T...>> {
     {
         array arr {};
         i32   idx {0};
-        std::apply([&arr, &idx](auto&&... item) { ((to(arr, idx++, item)), ...); },
+        std::apply([&arr, &idx](auto&&... item) { (to(arr, idx++, item), ...); },
                    value);
         config = arr;
     }
@@ -522,7 +522,7 @@ struct converter<std::array<T, Size>> {
 
 template <Container T>
 struct converter<T> {
-    using value_type = typename T::value_type;
+    using value_type = T::value_type;
 
     static auto IsType(cfg_value const& config) -> bool
     {
@@ -668,7 +668,7 @@ public:
             array const& arr {std::get<array>(config)};
             if (arr.size() != std::tuple_size_v<decltype(Members)>) { return false; }
             auto const assign {[&]<usize... I>(std::index_sequence<I...>) {
-                return ((std::get<I>(Members).from_proxy(arr[I], value)) && ...);
+                return (std::get<I>(Members).from_proxy(arr[I], value) && ...);
             }};
             return assign(std::make_index_sequence<std::tuple_size_v<decltype(Members)>> {});
         }
@@ -679,7 +679,7 @@ public:
     static void To(cfg_value& config, T const& value)
     {
         object obj {};
-        std::apply([&](auto&&... m) { ((m.to_proxy(obj[m.primary_name()], value)), ...); }, Members);
+        std::apply([&](auto&&... m) { (m.to_proxy(obj[m.primary_name()], value), ...); }, Members);
         config = obj;
     }
 

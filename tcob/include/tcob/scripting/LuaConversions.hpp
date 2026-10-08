@@ -187,8 +187,8 @@ private:
 
 template <Map T>
 struct converter<T> {
-    using key_type    = typename T::key_type;
-    using mapped_type = typename T::mapped_type;
+    using key_type    = T::key_type;
+    using mapped_type = T::mapped_type;
 
     static auto IsType(state_view view, i32 idx) -> bool
     {
@@ -259,7 +259,7 @@ private:
 
 template <Set T>
 struct converter<T> {
-    using key_type = typename T::key_type;
+    using key_type = T::key_type;
 
     static auto IsType(state_view view, i32 idx) -> bool
     {
@@ -330,7 +330,7 @@ struct converter<std::tuple<T...>> {
     {
         return std::apply(
             [view, &idx](auto&&... item) {
-                return ((base_converter<decltype(item)>::From(view, idx, item)) && ...);
+                return (base_converter<decltype(item)>::From(view, idx, item) && ...);
             },
             value);
     }
@@ -431,7 +431,7 @@ private:
 
 template <Container T>
 struct converter<T> {
-    using value_type = typename T::value_type;
+    using value_type = T::value_type;
 
     static auto IsType(state_view view, i32 idx) -> bool
     {
@@ -1038,7 +1038,7 @@ public:
 
         if (tab.raw_length() == std::tuple_size_v<decltype(Members)>) {
             auto const assign {[]<usize... I>(auto& members, auto const& arr, auto& object, std::index_sequence<I...>) {
-                return ((std::get<I>(members).from_proxy(arr[I + 1], object)) && ...);
+                return (std::get<I>(members).from_proxy(arr[I + 1], object) && ...);
             }};
             return assign(Members, tab, value, std::make_index_sequence<std::tuple_size_v<decltype(Members)>> {});
         }

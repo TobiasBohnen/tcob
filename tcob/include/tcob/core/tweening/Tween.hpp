@@ -62,7 +62,7 @@ template <tween_funcs::Function Func>
 class tween final : public tween_base {
 public:
     using func_type  = Func;
-    using value_type = typename Func::type;
+    using value_type = Func::type;
 
     tween(milliseconds duration);
     tween(milliseconds duration, func_type&& func);

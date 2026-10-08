@@ -20,9 +20,9 @@ template <RandomEngine E, typename D>
 class prng final {
 public:
     using random_engine_type = E;
-    using state_type         = typename E::state_type;
-    using seed_type          = typename E::seed_type;
-    using result_type        = typename E::result_type;
+    using state_type         = E::state_type;
+    using seed_type          = E::seed_type;
+    using result_type        = E::result_type;
     using distribution_type  = D;
 
     explicit prng(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()), auto&&... distArgs);
@@ -64,8 +64,8 @@ using prng_sfc_64                  = prng<sfc_64, core_uniform_distribution>;
 template <i32 N, RandomEngine E = xoroshiro_128_plus_plus>
 class dice final {
     static_assert(N > 0, "N must be greater than 0");
-    using state_type = typename E::state_type;
-    using seed_type  = typename E::seed_type;
+    using state_type = E::state_type;
+    using seed_type  = E::seed_type;
 
 public:
     explicit dice(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
@@ -90,8 +90,8 @@ private:
 template <RandomEngine E = xoroshiro_128_plus_plus>
 class shuffle final {
 public:
-    using state_type = typename E::state_type;
-    using seed_type  = typename E::seed_type;
+    using state_type = E::state_type;
+    using seed_type  = E::seed_type;
 
     explicit shuffle(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
 

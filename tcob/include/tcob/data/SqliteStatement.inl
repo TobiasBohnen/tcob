@@ -69,7 +69,7 @@ namespace detail {
 
         i32 idx {1};
         stmt.bind_parameter(idx, value);
-        ((stmt.bind_parameter(idx, values)), ...);
+        (stmt.bind_parameter(idx, values), ...);
         return stmt.step() == step_status::Done;
     }
 }
@@ -255,7 +255,7 @@ inline auto select_statement<Values...>::prepare_and_bind(auto&&... params) -> b
     // bind parameters
     i32 idx {1};
     if constexpr (sizeof...(params) > 0) {
-        ((bind_parameter(idx, params)), ...);
+        (bind_parameter(idx, params), ...);
     }
     if (_whereBind) { _whereBind(idx, *this); }
     if (_havingBind) { _havingBind(idx, *this); }
@@ -289,7 +289,7 @@ inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... par
 
 template <typename... Values>
 template <typename T>
-inline auto select_statement<Values...>::exec [[nodiscard]] (auto&&... params) -> std::vector<T>
+inline auto select_statement<Values...>::exec [[nodiscard]](auto&&... params) -> std::vector<T>
 {
     static_assert(sizeof...(Values) > 1);
     using return_type = std::vector<T>;
@@ -317,7 +317,7 @@ inline auto update_statement::operator()(auto&&... values) -> bool
 
     // bind parameters
     i32 idx {1};
-    ((bind_parameter(idx, values)), ...);
+    (bind_parameter(idx, values), ...);
     if (_whereBind) { _whereBind(idx, *this); }
 
     // execute
@@ -357,7 +357,7 @@ inline auto delete_statement::operator()(auto&&... values) -> bool
     // bind parameters
     i32 idx {1};
     if constexpr (sizeof...(values) > 0) {
-        ((bind_parameter(idx, values)), ...);
+        (bind_parameter(idx, values), ...);
     }
     if (_whereBind) { _whereBind(idx, *this); }
 

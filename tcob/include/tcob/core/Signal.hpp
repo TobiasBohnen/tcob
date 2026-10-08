@@ -111,7 +111,7 @@ class signal final : public detail::signal_base {
         using type = std::function<void()>;
     };
 
-    using slot_func = typename slot_func_type<EvArgs, IsVoid>::type;
+    using slot_func = slot_func_type<EvArgs, IsVoid>::type;
     using slots     = std::vector<std::pair<uid, slot_func>>;
 
 public:
@@ -133,7 +133,7 @@ public:
 
 private:
     void operator()() const
-        requires(IsVoid);
+        requires IsVoid;
 
     template <typename S = EvArgs>
     void operator()(S&& args) const

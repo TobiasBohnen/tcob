@@ -96,8 +96,8 @@ namespace detail {
     template <typename T, typename Source>
     class prop final : public non_copyable {
     public:
-        using return_type       = typename Source::return_type;
-        using const_return_type = typename Source::const_return_type;
+        using return_type       = Source::return_type;
+        using const_return_type = Source::const_return_type;
 
         constexpr prop() = default;
         explicit constexpr prop(T val); // HACK: only field_source

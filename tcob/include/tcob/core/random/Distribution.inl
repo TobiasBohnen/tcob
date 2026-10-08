@@ -24,7 +24,7 @@ inline auto core_uniform_distribution::operator()(R& rng, T min, T max) -> T
     assert(min <= max);
     if (min == max) { return min; }
 
-    using result_type = typename R::result_type;
+    using result_type = R::result_type;
     static_assert(std::is_unsigned_v<result_type>);
     static_assert(sizeof(result_type) == 8 || sizeof(result_type) == 4);
     if constexpr (FloatingPoint<T>) {

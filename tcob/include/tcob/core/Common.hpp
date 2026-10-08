@@ -145,11 +145,11 @@ namespace detail {
     };
 
     template <typename... Ts>
-    using first_element_t = typename first_element<Ts...>::type;
+    using first_element_t = first_element<Ts...>::type;
 
     template <typename T, typename... Ts>
     struct last_element {
-        using type = typename last_element<Ts...>::type;
+        using type = last_element<Ts...>::type;
     };
 
     template <typename T>
@@ -158,7 +158,7 @@ namespace detail {
     };
 
     template <typename... Ts>
-    using last_element_t = typename last_element<Ts...>::type;
+    using last_element_t = last_element<Ts...>::type;
 
     ////////////////////////////////////////////////////////////
 

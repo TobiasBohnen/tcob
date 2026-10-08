@@ -23,7 +23,7 @@ inline constexpr no_default_t no_default {};
 template <auto Ptr, auto Default = no_default>
 struct member {
     using pointer_type = decltype(Ptr);
-    using field_type   = typename detail::member_pointer_traits<pointer_type>::field_type;
+    using field_type   = detail::member_pointer_traits<pointer_type>::field_type;
 
     template <typename... Aliases>
     constexpr member(utf8_string_view name, Aliases... aliases)

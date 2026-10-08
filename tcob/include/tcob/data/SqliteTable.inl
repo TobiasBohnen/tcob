@@ -33,7 +33,7 @@ namespace detail {
             return select_statement<Values...> {db, distinct, schema, name, "*"};
         } else {
             std::vector<utf8_string> columnStrings;
-            ((columnStrings.push_back(get_column_string(columns))), ...);
+            (columnStrings.push_back(get_column_string(columns)), ...);
             return select_statement<Values...> {db, distinct, schema, name, helper::join(columnStrings, ", ")};
         }
     }
@@ -52,7 +52,7 @@ inline auto table::create_index(unique_t, utf8_string const& indexName, auto&&..
 inline auto table::create_index(utf8_string const& indexName, bool isUnique, auto&&... columns) -> bool
 {
     std::vector<utf8_string> columnStrings;
-    ((columnStrings.push_back(quote_identifier(utf8_string {columns}))), ...);
+    (columnStrings.push_back(quote_identifier(utf8_string {columns})), ...);
 
     statement  stmt {_db};
     auto const sql {std::format("CREATE {}INDEX IF NOT EXISTS {}.{} ON {} ({});",
@@ -96,7 +96,7 @@ inline auto table::insert_into(insert_statement::mode mode, auto&&... columns) c
     assert(check_columns(columns...));
 
     std::vector<utf8_string> columnStrings;
-    ((columnStrings.push_back(quote_identifier(utf8_string {columns}))), ...);
+    (columnStrings.push_back(quote_identifier(utf8_string {columns})), ...);
     return insert_statement {_db, mode, _schema, _name, helper::join(columnStrings, ", "), sizeof...(columns)};
 }
 
@@ -105,8 +105,8 @@ inline auto table::upsert_into(upsert const& ups, auto&&... columns) const -> up
     assert(check_columns(columns...));
     std::vector<utf8_string> columnStrings;
     std::vector<utf8_string> rawColumnStrings;
-    ((columnStrings.push_back(quote_identifier(utf8_string {columns}))), ...);
-    ((rawColumnStrings.push_back(utf8_string {columns})), ...);
+    (columnStrings.push_back(quote_identifier(utf8_string {columns})), ...);
+    (rawColumnStrings.push_back(utf8_string {columns}), ...);
 
     return upsert_statement {_db, ups.str(rawColumnStrings), _schema, _name, helper::join(columnStrings, ", "), sizeof...(columns)};
 }
@@ -117,7 +117,7 @@ inline auto table::update(auto&&... columns) const -> update_statement
 
     // SET column1 = value1, column2 = value2...., columnN = valueN
     std::vector<utf8_string> setStrings;
-    ((setStrings.push_back(quote_identifier(utf8_string {columns}) + " = ?")), ...);
+    (setStrings.push_back(quote_identifier(utf8_string {columns}) + " = ?"), ...);
     return update_statement {_db, _schema, _name, helper::join(setStrings, ", ")};
 }
 
@@ -141,7 +141,7 @@ inline auto table::check_columns(auto&&... columns) const -> bool
             }
         }};
 
-    return ((check(columns)) && ...);
+    return (check(columns) && ...);
 }
 
 ////////////////////////////////////////////////////////////

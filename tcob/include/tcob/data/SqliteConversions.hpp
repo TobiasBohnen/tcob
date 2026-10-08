@@ -182,7 +182,7 @@ struct converter<std::tuple<T...>> {
 
 template <Container T>
 struct converter<T> {
-    using value_type = typename T::value_type;
+    using value_type = T::value_type;
 
     static auto From(statement_view stmt, i32 col, T& value) -> bool
     {
@@ -205,7 +205,7 @@ struct converter<T> {
 
 template <Set T>
 struct converter<T> {
-    using key_type = typename T::key_type;
+    using key_type = T::key_type;
 
     static auto From(statement_view stmt, i32 col, T& value) -> bool
     {

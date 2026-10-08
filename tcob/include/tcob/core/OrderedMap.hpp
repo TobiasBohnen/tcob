@@ -20,8 +20,8 @@ public:
     using container = std::vector<std::pair<K, V>>;
     using map       = std::unordered_map<K, usize, Hash, Eq>;
 
-    using iterator       = typename container::iterator;
-    using const_iterator = typename container::const_iterator;
+    using iterator       = container::iterator;
+    using const_iterator = container::const_iterator;
 
     auto begin() -> iterator;
     auto begin() const -> const_iterator;
