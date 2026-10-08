@@ -76,6 +76,16 @@ auto memory_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std
     return sizeInBytes;
 }
 
+void memory_sink::reserve(usize capacity)
+{
+    _buf.reserve(capacity);
+}
+
+auto memory_sink::capacity() const -> usize
+{
+    return _buf.capacity();
+}
+
 ////////////////////////////////////////////////////////////
 
 iomstream::iomstream() = default;
@@ -88,6 +98,16 @@ auto iomstream::tell() const -> std::streamoff
 auto iomstream::seek(std::streamoff off, seek_dir way) -> bool
 {
     return _sink.seek(off, way);
+}
+
+void iomstream::reserve(usize capacity)
+{
+    _sink.reserve(capacity);
+}
+
+auto iomstream::capacity() const -> usize
+{
+    return _sink.capacity();
 }
 
 auto iomstream::get_sink() -> memory_sink*

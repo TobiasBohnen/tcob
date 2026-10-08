@@ -26,6 +26,9 @@ public:
     auto read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize;
     auto write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize;
 
+    void reserve(usize capacity);
+    auto capacity() const -> usize;
+
 private:
     std::vector<std::byte> _buf;
     std::streamoff         _pos {0};
@@ -39,6 +42,9 @@ public:
 
     auto tell() const -> std::streamoff override;
     auto seek(std::streamoff off, seek_dir way) -> bool override;
+
+    void reserve(usize capacity);
+    auto capacity() const -> usize;
 
 protected:
     auto get_sink() -> memory_sink* override;
