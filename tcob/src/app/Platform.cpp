@@ -337,7 +337,7 @@ void platform::InitTaskManager(std::optional<isize> workerThreads)
 single_instance::single_instance(string const& name)
 {
 #if defined(_MSC_VER)
-    HANDLE mutex {CreateMutex(nullptr, TRUE, ("Global\\" + name).c_str())};
+    HANDLE mutex {CreateMutexA(nullptr, TRUE, ("Global\\" + name).c_str())};
     if (mutex == nullptr) { return; }
 
     if (GetLastError() == ERROR_ALREADY_EXISTS) {

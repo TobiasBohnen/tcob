@@ -71,8 +71,9 @@ private:
 
 class TCOB_API single_instance {
 public:
-    single_instance(string const& name);
+    explicit single_instance(string const& name);
     ~single_instance();
+
     operator bool() const;
 
 private:
