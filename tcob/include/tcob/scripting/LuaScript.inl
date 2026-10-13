@@ -35,6 +35,7 @@ inline void script::open_libraries(Args... args)
 template <typename R>
 inline auto script::run_file(path const& file) const -> std::expected<R, error_code>
 {
+    if (!io::is_file(file)) { return std::unexpected {error_code::Error}; }
     return run<R>(io::read_as_string(file), file);
 }
 

@@ -49,6 +49,7 @@ void group::mount(path const& folderOrArchive) const
 void group::load()
 {
     auto files {io::enumerate(mount_point(), {.String = "*.assets.*"})};
+    if (files.empty()) { return; }
 
     // script loading stage
     for (auto const& file : files) {

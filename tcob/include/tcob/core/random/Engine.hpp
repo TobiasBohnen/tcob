@@ -15,7 +15,7 @@ namespace tcob::random {
 
 template <typename T>
 concept RandomEngine =
-    requires(T& rnd, typename T::state_type& state, typename T::seed_type seed) {
+    requires(T& rnd, T::state_type& state, T::seed_type seed) {
         typename T::state_type;
         typename T::seed_type;
         typename T::result_type;
