@@ -68,10 +68,8 @@ scoped_connection::~scoped_connection()
 }
 
 scoped_connection::scoped_connection(scoped_connection&& other) noexcept
-    : connection {other._signal, other._id}
+    : connection {std::exchange(other._signal, nullptr), std::exchange(other._id, INVALID_ID)}
 {
-    std::exchange(other._id, INVALID_ID);
-    std::exchange(other._signal, nullptr);
 }
 
 auto scoped_connection::operator=(scoped_connection&& other) noexcept -> scoped_connection&
