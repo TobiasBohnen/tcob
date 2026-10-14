@@ -16,6 +16,9 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/io/MemoryStream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/SpanStream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/Stream.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/procgen/LSystem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Metaball.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/random/Engine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/random/Random.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/spatial/Spatial.cpp
@@ -59,15 +62,18 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/io/SpanStream.hpp
     ${TCOB_INC_DIR}/tcob/core/io/Stream.hpp
     ${TCOB_INC_DIR}/tcob/core/io/Stream.inl
-    ${TCOB_INC_DIR}/tcob/core/spatial/Quadtree.hpp
-    ${TCOB_INC_DIR}/tcob/core/spatial/Quadtree.inl
-    ${TCOB_INC_DIR}/tcob/core/spatial/KDTree.hpp
-    ${TCOB_INC_DIR}/tcob/core/spatial/KDTree.inl
+    ${TCOB_INC_DIR}/tcob/core/procgen/LSystem.hpp
+    ${TCOB_INC_DIR}/tcob/core/procgen/Metaball.hpp
+    ${TCOB_INC_DIR}/tcob/core/procgen/Noise.hpp
     ${TCOB_INC_DIR}/tcob/core/random/Distribution.hpp
     ${TCOB_INC_DIR}/tcob/core/random/Distribution.inl
     ${TCOB_INC_DIR}/tcob/core/random/Engine.hpp
     ${TCOB_INC_DIR}/tcob/core/random/Random.hpp
     ${TCOB_INC_DIR}/tcob/core/random/Random.inl
+    ${TCOB_INC_DIR}/tcob/core/spatial/Quadtree.hpp
+    ${TCOB_INC_DIR}/tcob/core/spatial/Quadtree.inl
+    ${TCOB_INC_DIR}/tcob/core/spatial/KDTree.hpp
+    ${TCOB_INC_DIR}/tcob/core/spatial/KDTree.inl
     ${TCOB_INC_DIR}/tcob/core/AngleUnits.hpp
     ${TCOB_INC_DIR}/tcob/core/AngleUnits.inl
     ${TCOB_INC_DIR}/tcob/core/Color.hpp

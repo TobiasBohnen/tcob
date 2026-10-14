@@ -3,18 +3,13 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/procgen/Metaball.hpp"
+#include "tcob/core/procgen/Metaball.hpp"
 
 #include <algorithm>
 #include <vector>
 
-#include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
-#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
-#include "tcob/core/TaskManager.hpp"
-#include "tcob/gfx/ColorGradient.hpp"
-#include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
@@ -74,48 +69,5 @@ auto metaball::calculate_field(f32 x, f32 y) const -> f32
 
 auto metaball::is_dirty() const -> bool { return _dirty; }
 void metaball::mark_clean() { _dirty = false; }
-
-////////////////////////////////////////////////////////////
-
-metaball_image::metaball_image(size_i gridSize, color_gradient const& gradient)
-    : metaball {gridSize}
-    , _colors {gradient.colors(false)}
-    , _image {image::CreateEmpty(gridSize, image::format::RGBA)}
-{
-}
-
-auto metaball_image::image() -> gfx::image const&
-{
-    if (is_dirty()) { update_image(); }
-    return _image;
-}
-
-void metaball_image::update_image()
-{
-    mark_clean();
-
-    auto const& imgInfo {_image.info()};
-    i32 const   width {imgInfo.Size.Width};
-    i32 const   height {imgInfo.Size.Height};
-
-    _image.clear();
-
-    locate_service<task_manager>().run_parallel(
-        [&](par_task const& ctx) {
-            for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
-                isize const x {pixIdx % width};
-                isize const y {pixIdx / width};
-                f32 const   fieldValue {calculate_field(static_cast<f32>(x), static_cast<f32>(y))};
-
-                if (fieldValue >= 1) {
-                    f32 const   t {std::clamp(1.0f - (1.0f / fieldValue), 0.0f, 1.0f)};
-                    u32 const   gradientIdx {static_cast<u32>(t * (color_gradient::Size - 1))};
-                    color const pixelColor {_colors[gradientIdx]};
-                    _image.set_pixel(pixIdx, pixelColor);
-                }
-            }
-        },
-        width * height);
-}
 
 }

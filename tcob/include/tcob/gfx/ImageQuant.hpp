@@ -13,10 +13,10 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/procgen/Noise.hpp"
 #include "tcob/core/random/Random.hpp"
 #include "tcob/core/spatial/KDTree.hpp"
 #include "tcob/gfx/Image.hpp"
-#include "tcob/gfx/procgen/Noise.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////

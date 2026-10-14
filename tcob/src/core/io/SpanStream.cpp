@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <tcob/core/io/SpanStream.hpp>
+#include "tcob/core/io/SpanStream.hpp"
 
 #include <algorithm>
 #include <cstddef>

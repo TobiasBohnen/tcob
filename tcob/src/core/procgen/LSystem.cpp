@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/procgen/LSystem.hpp"
+#include "tcob/core/procgen/LSystem.hpp"
 
 #include <algorithm>
 

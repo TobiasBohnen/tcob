@@ -54,9 +54,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_tga.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/mesh_formats/MeshFormat_obj.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/mesh_formats/MeshFormat_ply.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/procgen/LSystem.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Metaball.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Chart.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Charting.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Legend.cpp
@@ -148,9 +145,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/drawables/TileMap.hpp
     ${TCOB_INC_DIR}/tcob/gfx/html/HtmlDocument.hpp
     ${TCOB_INC_DIR}/tcob/gfx/html/Markdown.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/procgen/LSystem.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/procgen/Metaball.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/procgen/Noise.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/charting/Chart.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/charting/Charting.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/charting/Charting.inl

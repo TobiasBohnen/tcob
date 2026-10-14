@@ -6,16 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <array>
 #include <vector>
 
-#include "tcob/core/Color.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Size.hpp"
-#include "tcob/gfx/ColorGradient.hpp"
-#include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
@@ -46,21 +42,6 @@ protected:
 private:
     size_i _gridSize;
     bool   _dirty {true};
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API metaball_image : public metaball {
-public:
-    metaball_image(size_i gridSize, color_gradient const& gradient);
-
-    auto image() -> image const&;
-
-private:
-    void update_image();
-
-    std::array<color, 256> _colors;
-    gfx::image             _image;
 };
 
 }
