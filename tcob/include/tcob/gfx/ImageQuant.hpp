@@ -162,7 +162,7 @@ public:
     auto to_indexed(image const& img) const -> std::vector<u32> override;
 
 private:
-    value_noise _noise;
+    procgen::value_noise _noise;
 };
 
 ////////////////////////////////////////////////////////////

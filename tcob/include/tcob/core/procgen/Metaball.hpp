@@ -13,7 +13,7 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Size.hpp"
 
-namespace tcob::gfx {
+namespace tcob::procgen {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API metaball : public updatable {

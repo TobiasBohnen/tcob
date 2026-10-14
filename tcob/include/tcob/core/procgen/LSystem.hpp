@@ -14,7 +14,7 @@
 #include "tcob/core/Serialization.hpp"
 #include "tcob/core/random/Random.hpp"
 
-namespace tcob::gfx {
+namespace tcob::procgen {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API l_rule final {

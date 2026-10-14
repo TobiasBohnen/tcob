@@ -11,7 +11,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 
-namespace tcob::gfx {
+namespace tcob::procgen {
 ////////////////////////////////////////////////////////////
 
 metaball::metaball(size_i gridSize)

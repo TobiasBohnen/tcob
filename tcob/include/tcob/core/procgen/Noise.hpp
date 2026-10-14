@@ -12,7 +12,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 
-namespace tcob::gfx {
+namespace tcob::procgen {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API perlin_noise final {

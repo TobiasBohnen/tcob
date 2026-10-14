@@ -9,7 +9,7 @@
 
 #include "tcob/core/random/Random.hpp"
 
-namespace tcob::gfx {
+namespace tcob::procgen {
 
 l_system::l_system()
     : _rng {}
