@@ -92,9 +92,7 @@ void script::open_addons()
         tab["wrap"]     = +[](f32 v, f32 low, f32 high) {
             f32 const range {high - low};
             f32       result {std::fmod(v - low, range)};
-            if (result < 0.f) {
-                result += range;
-            }
+            if (result < 0.f) { result += range; }
             return low + result;
         };
     });
@@ -110,6 +108,10 @@ void script::open_addons()
     with("table", [](auto&& tab) {
         tab["contains"] = +[](table const& t, std::variant<string, i32> s) { return t.has(s); };
         tab["keys"]     = +[](table const& t) { return t.get_keys<std::variant<i32, string>>(); };
+        tab["merge"]    = +[](table const& source, table& target) -> table& {
+            for (auto const& key : source.get_keys<std::variant<i32, string>>()) { target[key] = source[key]; }
+            return target;
+        };
     });
 }
 
