@@ -6,6 +6,7 @@
 #include "tcob/gfx/Camera.hpp"
 
 #include <algorithm>
+#include <array>
 #include <utility>
 #include <vector>
 
@@ -91,15 +92,15 @@ void camera::rotate_by(degree_f degrees)
 
 void camera::look_at(point_f pos)
 {
-    point_f const half {transformed_viewport().local_center() * point_f {Zoom->Width, Zoom->Height}};
+    auto const    size {size_f {*_parent.Size}};
+    point_f const half {size.Width / 2.0f, size.Height / 2.0f};
     Position = pos - half;
 }
 
 auto camera::get_look_at() const -> point_f
 {
-    return *Position
-        + transformed_viewport().local_center()
-        * point_f {Zoom->Width, Zoom->Height};
+    auto const size {size_f {*_parent.Size}};
+    return *Position + point_f {size.Width / 2.0f, size.Height / 2.0f};
 }
 
 void camera::reset()
@@ -116,11 +117,32 @@ auto camera::convert_world_to_screen(point_f point) const -> point_i
 
 auto camera::convert_world_to_screen(rect_f const& rect) const -> rect_i
 {
-    point_f const tl {convert_world_to_screen(rect.top_left())};
-    point_f const br {convert_world_to_screen(rect.bottom_right())};
-    return rect_i::FromLTRB(
-        static_cast<i32>(tl.X), static_cast<i32>(tl.Y),
-        static_cast<i32>(br.X), static_cast<i32>(br.Y));
+    if (*Rotation == 0.0f) {
+        point_f const tl {convert_world_to_screen(rect.top_left())};
+        point_f const br {convert_world_to_screen(rect.bottom_right())};
+        return rect_i::FromLTRB(static_cast<i32>(tl.X), static_cast<i32>(tl.Y),
+                                static_cast<i32>(br.X), static_cast<i32>(br.Y));
+    }
+
+    auto const    xform {get_transform()};
+    point_f const off {*ViewOffset};
+    point_f const tl {rect.top_left()};
+    point_f const br {rect.bottom_right()};
+
+    std::array<point_f, 4> const c {(xform * tl) + off,
+                                    (xform * point_f {br.X, tl.Y}) + off,
+                                    (xform * point_f {tl.X, br.Y}) + off,
+                                    (xform * br) + off};
+
+    f32 minX {c[0].X}, maxX {c[0].X}, minY {c[0].Y}, maxY {c[0].Y};
+    for (auto const& p : c) {
+        minX = std::min(minX, p.X);
+        maxX = std::max(maxX, p.X);
+        minY = std::min(minY, p.Y);
+        maxY = std::max(maxY, p.Y);
+    }
+    return rect_i::FromLTRB(static_cast<i32>(minX), static_cast<i32>(minY),
+                            static_cast<i32>(maxX), static_cast<i32>(maxY));
 }
 
 auto camera::convert_screen_to_world(point_i point) const -> point_f
@@ -130,9 +152,29 @@ auto camera::convert_screen_to_world(point_i point) const -> point_f
 
 auto camera::convert_screen_to_world(rect_i const& rect) const -> rect_f
 {
-    point_f const tl {convert_screen_to_world(rect.top_left())};
-    point_f const br {convert_screen_to_world(rect.bottom_right())};
-    return rect_f::FromLTRB(tl.X, tl.Y, br.X, br.Y);
+    if (*Rotation == 0.0f) {
+        point_f const tl {convert_screen_to_world(rect.top_left())};
+        point_f const br {convert_screen_to_world(rect.bottom_right())};
+        return rect_f::FromLTRB(tl.X, tl.Y, br.X, br.Y);
+    }
+
+    auto const    inv {get_transform().as_inverted()};
+    point_f const tl {rect.top_left() - *ViewOffset};
+    point_f const br {rect.bottom_right() - *ViewOffset};
+
+    std::array<point_f, 4> const c {inv * tl,
+                                    inv * point_f {br.X, tl.Y},
+                                    inv * point_f {tl.X, br.Y},
+                                    inv * br};
+
+    f32 minX {c[0].X}, maxX {c[0].X}, minY {c[0].Y}, maxY {c[0].Y};
+    for (auto const& p : c) {
+        minX = std::min(minX, p.X);
+        maxX = std::max(maxX, p.X);
+        minY = std::min(minY, p.Y);
+        maxY = std::max(maxY, p.Y);
+    }
+    return rect_f::FromLTRB(minX, minY, maxX, maxY);
 }
 
 void camera::push_state()
@@ -155,7 +197,7 @@ void camera::pop_state()
 
 camera_controller::camera_controller(camera& cam)
     : _camera {cam}
-    , _origin {.Position = cam.get_look_at(), .Zoom = cam.Zoom, .Rotation = cam.Rotation}
+    , _origin {.Position = cam.get_look_at(), .Zoom = *cam.Zoom, .Rotation = *cam.Rotation}
     , _rng {}
 {
 }
@@ -174,12 +216,10 @@ void camera_controller::pan(std::vector<waypoint> path)
     _origin.Position = _camera.get_look_at();
     _origin.Zoom     = *_camera.Zoom;
     _origin.Rotation = *_camera.Rotation;
-    _panOrigin       = {
-        .Position = _origin.Position,
-        .Zoom     = _origin.Zoom,
-        .Rotation = _origin.Rotation,
-    };
-    _panning = true;
+    _panOrigin       = {.Position = _origin.Position,
+                        .Zoom     = _origin.Zoom,
+                        .Rotation = _origin.Rotation};
+    _panning         = true;
 }
 
 void camera_controller::zoom_by(size_f factor)
@@ -197,23 +237,28 @@ void camera_controller::move_by(point_f offset)
     _origin.Position += offset;
 }
 
+void camera_controller::rotate_by(degree_f degrees)
+{
+    _origin.Rotation += degrees;
+}
+
 void camera_controller::update(milliseconds deltaTime)
 {
     if (_panning) {
         auto const& wp {_panPath[_panIndex]};
         _panElapsed += deltaTime;
-        f32 const factor {static_cast<f32>(std::clamp(_panElapsed.count() / wp.TimeToArrive.count(), 0.0, 1.0))};
+        f32 const factor {wp.TimeToArrive.count() == 0
+                              ? 1
+                              : static_cast<f32>(std::clamp(_panElapsed.count() / wp.TimeToArrive.count(), 0.0, 1.0))};
 
         _origin.Position = point_f::Lerp(_panOrigin.Position, wp.Position, factor);
         _origin.Rotation = degree_f::Lerp(_panOrigin.Rotation, wp.Rotation.value_or(_panOrigin.Rotation), factor);
         _origin.Zoom     = size_f::Lerp(_panOrigin.Zoom, wp.Zoom.value_or(_panOrigin.Zoom), factor);
 
         if (_panElapsed >= wp.TimeToArrive) {
-            _panOrigin = {
-                .Position = wp.Position,
-                .Zoom     = wp.Zoom.value_or(_origin.Zoom),
-                .Rotation = wp.Rotation.value_or(_panOrigin.Rotation),
-            };
+            _panOrigin  = {.Position = wp.Position,
+                           .Zoom     = wp.Zoom.value_or(_origin.Zoom),
+                           .Rotation = wp.Rotation.value_or(_panOrigin.Rotation)};
             _panElapsed = milliseconds {0};
             ++_panIndex;
             if (_panIndex >= _panPath.size()) {
@@ -225,19 +270,16 @@ void camera_controller::update(milliseconds deltaTime)
     if (_trauma > 0.0f) {
         _trauma = std::max(0.0f, _trauma - static_cast<f32>(TraumaDecay * deltaTime.count() / 1000.0));
         f32 const shake {_trauma * _trauma};
-        _shakeOffset = point_f {
-            _rng(-1.0f, 1.0f) * MaxShakePixels * shake,
-            _rng(-1.0f, 1.0f) * MaxShakePixels * shake};
-        _shakeAngle = degree_f {
-            _rng(-1.0f, 1.0f) * MaxShakeDegrees * shake};
+        _shakeOffset = point_f {_rng(-1.0f, 1.0f) * MaxShakePixels * shake, _rng(-1.0f, 1.0f) * MaxShakePixels * shake};
+        _shakeAngle  = degree_f {_rng(-1.0f, 1.0f) * MaxShakeDegrees * shake};
     } else {
         _shakeOffset = point_f::Zero;
         _shakeAngle  = degree_f {0};
     }
 
-    _camera.look_at(_origin.Position);
     _camera.Zoom     = _origin.Zoom;
     _camera.Rotation = (_origin.Rotation + _shakeAngle);
+    _camera.look_at(_origin.Position + _shakeOffset);
 }
 
 }

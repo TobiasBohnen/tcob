@@ -98,6 +98,7 @@ public:
     void zoom_by(size_f factor);
     void zoom_to(size_f target);
     void move_by(point_f offset);
+    void rotate_by(degree_f degrees);
 
 private:
     camera&      _camera;
