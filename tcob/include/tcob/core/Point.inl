@@ -48,15 +48,13 @@ template <Arithmetic T>
 template <Arithmetic U>
 auto constexpr point<T>::cross(point<U> const& p) const -> f64
 {
-    return (static_cast<f64>(X) * static_cast<f64>(p.Y))
-        - (static_cast<f64>(Y) * static_cast<f64>(p.X));
+    return (static_cast<f64>(X) * static_cast<f64>(p.Y)) - (static_cast<f64>(Y) * static_cast<f64>(p.X));
 }
 
 template <Arithmetic T>
 inline auto point<T>::length() const -> f64
 {
-    return std::sqrt((static_cast<f64>(X) * static_cast<f64>(X))
-                     + (static_cast<f64>(Y) * static_cast<f64>(Y)));
+    return std::sqrt((static_cast<f64>(X) * static_cast<f64>(X)) + (static_cast<f64>(Y) * static_cast<f64>(Y)));
 }
 
 template <Arithmetic T>

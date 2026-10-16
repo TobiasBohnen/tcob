@@ -91,8 +91,7 @@ void camera::rotate_by(degree_f degrees)
 
 void camera::look_at(point_f pos)
 {
-    point_f const half {transformed_viewport().local_center()
-                        * point_f {Zoom->Width, Zoom->Height}};
+    point_f const half {transformed_viewport().local_center() * point_f {Zoom->Width, Zoom->Height}};
     Position = pos - half;
 }
 

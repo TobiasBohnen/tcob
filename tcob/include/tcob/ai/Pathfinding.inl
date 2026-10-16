@@ -236,7 +236,7 @@ inline auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExten
     for (auto const& neighbor : detail::neighbors(_allowDiagonal, gridExtent, start)) {
         auto const cost {testGrid.get_cost(start, neighbor)};
         if (cost == IMPASSABLE_COST) { continue; }
-        point_i const dir {neighbor.X - start.X, neighbor.Y - start.Y};
+        point_i const dir {neighbor - start};
         state const   next {.Pos = neighbor, .Dir = dir};
         point_i const nidx {idx(neighbor, dir)};
         if (cost < gScore[nidx]) {
@@ -272,7 +272,7 @@ inline auto astar_minturns::find_path(PathGrid auto&& testGrid, size_i gridExten
             auto const cost {testGrid.get_cost(cur.Pos, neighbor)};
             if (cost == IMPASSABLE_COST) { continue; }
 
-            point_i const dir {neighbor.X - cur.Pos.X, neighbor.Y - cur.Pos.Y};
+            point_i const dir {neighbor - cur.Pos};
             u64 const     turn {dir != cur.Dir ? 1u : 0u};
             u64 const     dg {(turn * area) + cost};
             if (top.G > IMPASSABLE_COST - dg) { continue; }
