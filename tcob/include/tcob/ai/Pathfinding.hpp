@@ -269,6 +269,8 @@ public:
 
     auto path(point_i from) const -> std::vector<point_i>;
 
+    auto cost(point_i p) const -> u64;
+
 private:
     class TCOB_API node {
     public:
@@ -278,7 +280,6 @@ private:
     };
 
     bool    _allowDiagonal;
-    size_i  _gridExtent {};
     point_i _finish {INVALID_POS};
 
     grid<u64>     _cost {};

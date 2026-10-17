@@ -571,10 +571,9 @@ inline void flow_field::build(PathGrid auto&& testGrid, size_i gridExtent, point
     if (finish == INVALID_POS) { return; }
     if (testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return; }
 
-    _gridExtent = gridExtent;
-    _finish     = finish;
-    _cost       = grid<u64> {gridExtent, IMPASSABLE_COST};
-    _flow       = grid<point_i> {gridExtent, INVALID_DIR};
+    _finish = finish;
+    _cost   = grid<u64> {gridExtent, IMPASSABLE_COST};
+    _flow   = grid<point_i> {gridExtent, INVALID_DIR};
 
     std::priority_queue<node, std::vector<node>, std::greater<>> openSet;
 

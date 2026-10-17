@@ -264,6 +264,11 @@ auto flow_field::path(point_i from) const -> std::vector<point_i>
     return retValue;
 }
 
+auto flow_field::cost(point_i p) const -> u64
+{
+    return _flow.size().contains(p) ? _cost[p] : IMPASSABLE_COST;
+}
+
 auto flow_field::node::operator<=>(node const& other) const -> std::strong_ordering
 {
     return Cost <=> other.Cost;
