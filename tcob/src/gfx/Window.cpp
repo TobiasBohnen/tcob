@@ -32,6 +32,7 @@ window::window(std::unique_ptr<render_backend::window_base> windowBase, asset_ow
     , VSync {make_prop_fn<bool,
                           [](window const& w) { return w._impl->get_vsync(); },
                           [](window& w, bool value) { w._impl->set_vsync(value); }>(this)}
+    , RelativeMouseMode {make_prop_fn<bool, &window::get_relative_mouse_mode, &window::set_relative_mouse_mode>(this)}
     , _texture {texture}
     , _impl {std::move(windowBase)}
 {

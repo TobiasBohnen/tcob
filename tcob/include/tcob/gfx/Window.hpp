@@ -53,6 +53,7 @@ public:
     prop_fn<bool>   FullScreen;
     prop_fn<string> Title;
     prop_fn<bool>   VSync;
+    prop_fn<bool>   RelativeMouseMode;
 
     prop<asset_ptr<cursor>> Cursor;
     prop<bool>              SystemCursorEnabled;
@@ -87,6 +88,9 @@ private:
 
     virtual auto get_title() const -> string    = 0;
     virtual void set_title(string const& value) = 0;
+
+    virtual auto get_relative_mouse_mode() const -> bool = 0;
+    virtual void set_relative_mouse_mode(bool enabled)   = 0;
 
     asset_owner_ptr<texture>  _texture;
     asset_owner_ptr<material> _material {};

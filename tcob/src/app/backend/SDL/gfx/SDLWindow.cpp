@@ -167,4 +167,13 @@ void sdl_window::set_title(string const& value)
     SDL_SetWindowTitle(_handle, value.c_str());
 }
 
+auto sdl_window::get_relative_mouse_mode() const -> bool
+{
+    return SDL_GetWindowRelativeMouseMode(_handle);
+}
+
+void sdl_window::set_relative_mouse_mode(bool enabled)
+{
+    SDL_SetWindowRelativeMouseMode(_handle, enabled);
+}
 }

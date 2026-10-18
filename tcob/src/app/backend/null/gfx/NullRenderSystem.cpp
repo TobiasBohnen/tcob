@@ -84,6 +84,9 @@ auto null_window::get_fullscreen() const -> bool { return true; }
 void null_window::set_fullscreen(bool) { }
 auto null_window::get_title() const -> string { return ""; }
 void null_window::set_title(string const&) { }
+auto null_window::get_relative_mouse_mode() const -> bool { return true; }
+
+void null_window::set_relative_mouse_mode(bool) { }
 
 void null_canvas::cancel() { }
 void null_canvas::flush(size_f) { }

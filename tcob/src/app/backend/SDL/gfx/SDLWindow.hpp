@@ -40,6 +40,9 @@ private:
     auto get_title() const -> string override;
     void set_title(string const& value) override;
 
+    auto get_relative_mouse_mode() const -> bool override;
+    void set_relative_mouse_mode(bool enabled) override;
+
     SDL_Window* _handle;
 };
 
