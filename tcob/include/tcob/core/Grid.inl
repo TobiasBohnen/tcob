@@ -292,7 +292,7 @@ template <typename T, usize Width, usize Height>
 inline auto static_grid<T, Width, Height>::get_index(i32 x, i32 y) const -> i32
 {
     assert(x >= 0 && y >= 0);
-    assert(x < Width && y < Height);
+    assert(static_cast<usize>(x) < Width && static_cast<usize>(y) < Height);
     return (y * Width) + x;
 }
 

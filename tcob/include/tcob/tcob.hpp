@@ -5,6 +5,7 @@
 
 #pragma once
 
+// IWYU pragma: begin_exports
 #include <tcob/app/Game.hpp>
 #include <tcob/app/Platform.hpp>
 #include <tcob/app/Scene.hpp>
@@ -50,12 +51,14 @@
 #include <tcob/core/assets/AssetLoader.hpp>
 #include <tcob/core/assets/Assets.hpp>
 #include <tcob/core/input/Input.hpp>
+#include <tcob/core/input/Input_Codes.hpp>
 #include <tcob/core/io/FileStream.hpp>
 #include <tcob/core/io/FileSystem.hpp>
 #include <tcob/core/io/Filter.hpp>
 #include <tcob/core/io/Magic.hpp>
 #include <tcob/core/io/MemoryStream.hpp>
 #include <tcob/core/io/SpanStream.hpp>
+#include <tcob/core/io/Stream.hpp>
 #include <tcob/core/procgen/LSystem.hpp>
 #include <tcob/core/procgen/Metaball.hpp>
 #include <tcob/core/procgen/Noise.hpp>
@@ -182,3 +185,4 @@
 #include <tcob/scripting/LuaTypes.hpp>
 #include <tcob/scripting/LuaWrapper.hpp>
 #include <tcob/scripting/Scripting.hpp>
+// IWYU pragma: end_exports
