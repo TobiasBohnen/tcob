@@ -192,7 +192,7 @@ void animated_texture::toggle_pause()
 void animated_texture::reset_decoder()
 {
     if (_decoder) {
-        _decoder->reset();
+        (*_decoder).reset();
     }
     _elapsedTime = 0ms;
 }

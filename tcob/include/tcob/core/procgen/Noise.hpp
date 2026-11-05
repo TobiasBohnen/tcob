@@ -43,7 +43,6 @@ private:
     void generate_points(u64 seed);
 
     f32                               _scale;
-    i32                               _pointCount;
     i32                               _gridSize;
     std::vector<std::vector<point_f>> _grid;
 };
