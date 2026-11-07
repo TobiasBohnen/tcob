@@ -9,6 +9,7 @@
 #include <cmath>
 #include <limits>
 #include <numbers>
+#include <utility>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
@@ -48,6 +49,12 @@ perlin_noise::perlin_noise(size_i gridSize, f32 scale, u64 seed)
     , _seed {seed}
     , _gridSize {gridSize}
 {
+    _gradients.resize(static_cast<usize>(_gridSize.Width) * static_cast<usize>(_gridSize.Height));
+    for (i32 y {0}; y < _gridSize.Height; ++y) {
+        for (i32 x {0}; x < _gridSize.Width; ++x) {
+            _gradients[static_cast<usize>(x + (y * _gridSize.Width))] = random_gradient({x, y});
+        }
+    }
 }
 
 auto perlin_noise::operator()(point_f p) const -> f32
@@ -57,11 +64,10 @@ auto perlin_noise::operator()(point_f p) const -> f32
     f32 const fx {Fract(ps.X) * _gridSize.Width};
     f32 const fy {Fract(ps.Y) * _gridSize.Height};
 
-    i32 const x0 {static_cast<i32>(fx) % _gridSize.Width};
-    i32 const y0 {static_cast<i32>(fy) % _gridSize.Height};
-
-    i32 const x1 {(x0 + 1) % _gridSize.Width};
-    i32 const y1 {(y0 + 1) % _gridSize.Height};
+    i32 const x0 {std::min(static_cast<i32>(fx), _gridSize.Width - 1)};
+    i32 const x1 {x0 + 1 < _gridSize.Width ? x0 + 1 : 0};
+    i32 const y0 {std::min(static_cast<i32>(fy), _gridSize.Height - 1)};
+    i32 const y1 {y0 + 1 < _gridSize.Height ? y0 + 1 : 0};
 
     f32 const sx {fx - std::floor(fx)};
     f32 const sy {fy - std::floor(fy)};
@@ -87,7 +93,7 @@ auto perlin_noise::random_gradient(point_i i) const -> point_f
 
 auto perlin_noise::dot_grid_gradient(point_i i, point_f f) const -> f32
 {
-    point_f const grad {random_gradient(i)};
+    point_f const grad {_gradients[static_cast<usize>(i.X + (i.Y * _gridSize.Width))]};
     return (f.X * grad.X) + (f.Y * grad.Y);
 }
 
@@ -97,7 +103,7 @@ cellular_noise::cellular_noise(i32 points, f32 scale, u64 seed)
     : _scale {scale}
     , _gridSize {std::max(1, static_cast<i32>(std::sqrt(static_cast<f32>(std::max(points, 1)))))}
 {
-    _grid.resize(_gridSize * _gridSize);
+    _grid.resize(static_cast<usize>(_gridSize * _gridSize));
     generate_points(seed);
 }
 
@@ -108,30 +114,32 @@ auto cellular_noise::operator()(point_f p) const -> f32
     f32 const x {Fract(ps.X)};
     f32 const y {Fract(ps.Y)};
     f32 const gs {static_cast<f32>(_gridSize)};
-    i32 const cellX {static_cast<i32>(x * gs) % _gridSize};
-    i32 const cellY {static_cast<i32>(y * gs) % _gridSize};
+    i32 const cellX {std::min(static_cast<i32>(x * gs), _gridSize - 1)};
+    i32 const cellY {std::min(static_cast<i32>(y * gs), _gridSize - 1)};
 
-    f32 minDist {std::numeric_limits<f32>::max()};
+    // wrapped neighbour cell and the shift of its point, per axis
+    auto const neighbour {[&](i32 cell, i32 d) -> std::pair<i32, f32> {
+        i32 const n {cell + d};
+        if (n < 0) { return {_gridSize - 1, -1.0f}; }
+        if (n >= _gridSize) { return {0, 1.0f}; }
+        return {n, 0.0f};
+    }};
+
+    f32 minDistSq {std::numeric_limits<f32>::max()};
 
     for (i32 dy {-1}; dy <= 1; ++dy) {
+        auto const [ny, offsetY] {neighbour(cellY, dy)};
         for (i32 dx {-1}; dx <= 1; ++dx) {
-            i32 const nx {(cellX + dx + _gridSize) % _gridSize};
-            i32 const ny {(cellY + dy + _gridSize) % _gridSize};
-            i32 const idx {(ny * _gridSize) + nx};
+            auto const [nx, offsetX] {neighbour(cellX, dx)};
 
-            f32 const offsetX {(cellX + dx < 0) ? -1.0f : ((cellX + dx >= _gridSize) ? 1.0f : 0.0f)};
-            f32 const offsetY {(cellY + dy < 0) ? -1.0f : ((cellY + dy >= _gridSize) ? 1.0f : 0.0f)};
-
-            for (auto const& point : _grid[idx]) {
-                f32 const px {point.X + offsetX};
-                f32 const py {point.Y + offsetY};
-                f32 const dist {std::hypot(x - px, y - py)};
-                minDist = std::min(dist, minDist);
-            }
+            point_f const point {_grid[static_cast<usize>((ny * _gridSize) + nx)]};
+            f32 const     ddx {x - (point.X + offsetX)};
+            f32 const     ddy {y - (point.Y + offsetY)};
+            minDistSq = std::min((ddx * ddx) + (ddy * ddy), minDistSq);
         }
     }
 
-    return std::min(minDist * gs / std::numbers::sqrt2_v<f32>, 1.0f);
+    return std::min(std::sqrt(minDistSq) * gs / std::numbers::sqrt2_v<f32>, 1.0f);
 }
 
 void cellular_noise::generate_points(u64 seed)
@@ -140,9 +148,8 @@ void cellular_noise::generate_points(u64 seed)
     f32 const gs {static_cast<f32>(_gridSize)};
     for (i32 cy {0}; cy < _gridSize; ++cy) {
         for (i32 cx {0}; cx < _gridSize; ++cx) {
-            point_f const p {(static_cast<f32>(cx) + rng(0.0f, 1.0f)) / gs,
-                             (static_cast<f32>(cy) + rng(0.0f, 1.0f)) / gs};
-            _grid[(cy * _gridSize) + cx].push_back(p);
+            _grid[static_cast<usize>((cy * _gridSize) + cx)] = {(static_cast<f32>(cx) + rng(0.0f, 1.0f)) / gs,
+                                                                (static_cast<f32>(cy) + rng(0.0f, 1.0f)) / gs};
         }
     }
 }
@@ -164,10 +171,10 @@ auto value_noise::operator()(point_f p) const -> f32
     f32 const fx {Fract(ps.X) * _gridSize.Width};
     f32 const fy {Fract(ps.Y) * _gridSize.Height};
 
-    i32 const x0 {static_cast<i32>(fx) % _gridSize.Width};
-    i32 const x1 {(x0 + 1) % _gridSize.Width};
-    i32 const y0 {static_cast<i32>(fy) % _gridSize.Height};
-    i32 const y1 {(y0 + 1) % _gridSize.Height};
+    i32 const x0 {std::min(static_cast<i32>(fx), _gridSize.Width - 1)};
+    i32 const x1 {x0 + 1 < _gridSize.Width ? x0 + 1 : 0};
+    i32 const y0 {std::min(static_cast<i32>(fy), _gridSize.Height - 1)};
+    i32 const y1 {y0 + 1 < _gridSize.Height ? y0 + 1 : 0};
 
     f32 const sx {fx - std::floor(fx)};
     f32 const sy {fy - std::floor(fy)};

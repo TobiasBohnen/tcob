@@ -29,6 +29,8 @@ private:
     f32    _scale;
     u64    _seed;
     size_i _gridSize;
+
+    std::vector<point_f> _gradients;
 };
 
 ////////////////////////////////////////////////////////////
@@ -42,9 +44,9 @@ public:
 private:
     void generate_points(u64 seed);
 
-    f32                               _scale;
-    i32                               _gridSize;
-    std::vector<std::vector<point_f>> _grid;
+    f32                  _scale;
+    i32                  _gridSize;
+    std::vector<point_f> _grid;
 };
 
 ////////////////////////////////////////////////////////////
