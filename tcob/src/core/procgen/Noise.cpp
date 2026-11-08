@@ -114,8 +114,8 @@ auto cellular_noise::operator()(point_f p) const -> f32
     f32 const x {Fract(ps.X)};
     f32 const y {Fract(ps.Y)};
     f32 const gs {static_cast<f32>(_gridSize)};
-    i32 const cellX {std::min(static_cast<i32>(x * gs), _gridSize - 1)};
-    i32 const cellY {std::min(static_cast<i32>(y * gs), _gridSize - 1)};
+    i32 const cellX {static_cast<i32>(x * gs)};
+    i32 const cellY {static_cast<i32>(y * gs)};
 
     // wrapped neighbour cell and the shift of its point, per axis
     auto const neighbour {[&](i32 cell, i32 d) -> std::pair<i32, f32> {
@@ -171,9 +171,9 @@ auto value_noise::operator()(point_f p) const -> f32
     f32 const fx {Fract(ps.X) * _gridSize.Width};
     f32 const fy {Fract(ps.Y) * _gridSize.Height};
 
-    i32 const x0 {std::min(static_cast<i32>(fx), _gridSize.Width - 1)};
+    i32 const x0 {static_cast<i32>(fx)};
     i32 const x1 {x0 + 1 < _gridSize.Width ? x0 + 1 : 0};
-    i32 const y0 {std::min(static_cast<i32>(fy), _gridSize.Height - 1)};
+    i32 const y0 {static_cast<i32>(fy)};
     i32 const y1 {y0 + 1 < _gridSize.Height ? y0 + 1 : 0};
 
     f32 const sx {fx - std::floor(fx)};

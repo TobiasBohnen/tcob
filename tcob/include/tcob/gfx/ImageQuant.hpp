@@ -110,7 +110,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API nearest_dither final : public ditherer_base {
+class TCOB_API palette_mapper final : public ditherer_base {
 public:
     using ditherer_base::ditherer_base;
 
